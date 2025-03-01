@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "(function(){\n\n})\nlet object = {\n    foo() {\n        \n    }\n}"
+  ],
+  "mappings": "aAAW,CAAC,AAEZ,CAAC;;IACG,MAAM,KACN,GAAG,GAAG,CAAC,AAEP,CAAC"
+}

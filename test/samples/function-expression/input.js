@@ -1,0 +1,8 @@
+(function(){
+
+})
+let object = {
+    foo() {
+        
+    }
+}
