@@ -501,8 +501,9 @@ function handle_type_annotation(node, state) {
 		case 'TSTypeReference':
 			handle(node.typeName, state);
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-esling/types` have slightly different type definitions
-			if (node.typeParameters) handle_type_annotation(node.typeParameters, state);
+			if (node.typeArguments) {
+				handle_type_annotation(node.typeArguments, state);
+			}
 			break;
 		case 'TSTypeParameterInstantiation':
 		case 'TSTypeParameterDeclaration':
@@ -514,7 +515,7 @@ function handle_type_annotation(node, state) {
 			state.commands.push('>');
 			break;
 		case 'TSTypeParameter':
-			// @ts-expect-error `acorn-typescript` and `@typescript-esling/types` have slightly different type definitions
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			state.commands.push(node.name);
 
 			if (node.constraint) {
@@ -536,14 +537,14 @@ function handle_type_annotation(node, state) {
 		case 'TSFunctionType':
 			if (node.typeParameters) handle_type_annotation(node.typeParameters, state);
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-esling/types` have slightly different type definitions
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			const parameters = node.parameters;
 			state.commands.push('(');
 			sequence(parameters, state, false, handle);
 
 			state.commands.push(') => ');
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-esling/types` have slightly different type definitions
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			handle_type_annotation(node.typeAnnotation.typeAnnotation, state);
 			break;
 		case 'TSIndexSignature':
@@ -552,19 +553,19 @@ function handle_type_annotation(node, state) {
 			sequence(indexParameters, state, false, handle);
 			state.commands.push(']');
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-esling/types` have slightly different type definitions
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			handle_type_annotation(node.typeAnnotation, state);
 			break;
 		case 'TSMethodSignature':
 			handle(node.key, state);
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-esling/types` have slightly different type definitions
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			const parametersSignature = node.parameters;
 			state.commands.push('(');
 			sequence(parametersSignature, state, false, handle);
 			state.commands.push(')');
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-esling/types` have slightly different type definitions
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			handle_type_annotation(node.typeAnnotation, state);
 			break;
 		case 'TSExpressionWithTypeArguments':
@@ -715,8 +716,7 @@ const shared = {
 			state.commands.push('?.');
 		}
 
-		// @ts-expect-error
-		if (node.typeParameters) handle_type_annotation(node.typeParameters, state);
+		if (node.typeArguments) handle_type_annotation(node.typeArguments, state);
 
 		const open = create_sequence();
 		const join = create_sequence();
@@ -852,7 +852,7 @@ const shared = {
 		state.commands.push('...');
 		handle(node.argument, state);
 
-		// @ts-expect-error `acorn-typescript` and `@typescript-esling/types` have slightly different type definitions
+		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		if (node.typeAnnotation) handle_type_annotation(node.typeAnnotation, state);
 	}
 };
