@@ -1,6 +1,6 @@
 // @ts-check
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { NodeWithComments, PrintOptions } from '../src/types' */
+/** @import { PrintOptions } from '../src/types' */
 import fs from 'node:fs';
 import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';

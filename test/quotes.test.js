@@ -1,18 +1,22 @@
+// @ts-check
+
 import { test } from 'vitest';
 import { print } from '../src/index.js';
 import { expect } from 'vitest';
 import { load } from './common.js';
 import { walk } from 'zimmerframe';
-import { TSESTree } from '@typescript-eslint/types';
+
+/** @import { TSESTree } from '@typescript-eslint/types' */
 
 /**
  * Removes the `raw` property from all `Literal` nodes, as the printer is prefering it's
  * value. Only if the `raw` value is not present it will try to add the prefered quoting
- * @param {TSESTree.Program} ast
+ * @param {TSESTree.Node} ast
  */
 function clean(ast) {
 	walk(ast, null, {
 		Literal(node, { next }) {
+			// @ts-expect-error
 			delete node.raw;
 
 			next();

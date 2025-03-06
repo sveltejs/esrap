@@ -1,3 +1,5 @@
+// @ts-check
+
 import { test } from 'vitest';
 import { load } from './common';
 import { print } from '../src';
