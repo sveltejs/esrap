@@ -1518,7 +1518,7 @@ const handlers = {
 
 	TSModuleBlock(node, state) {
 		state.commands.push(' {', indent, newline);
-		sequence(node.body, state, false, handle);
+		handle_body(node.body, state);
 		state.commands.push(dedent, newline, '}');
 	},
 

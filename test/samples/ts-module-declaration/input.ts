@@ -1,6 +1,8 @@
 declare global {
 	namespace App {
-		interface Error {}
+		interface Error {
+			foo: string;
+		}
 	}
 }
 
