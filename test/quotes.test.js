@@ -86,6 +86,42 @@ test('does not escape already-escaped single quotes', () => {
 	expect(code).toMatchInlineSnapshot(`"const str = 'a\\'b';"`);
 });
 
+test('correctly handle double escaped backslashes when theres no raw', () => {
+	// not using load because for some reason acorn parses the value of the literal as `\\` instead of `\\\\`
+	const ast = {
+		type: 'VariableDeclaration',
+		kind: 'var',
+		declarations: [
+			{
+				type: 'VariableDeclarator',
+				id: {
+					type: 'Identifier',
+					name: 'text'
+				},
+				init: {
+					type: 'CallExpression',
+					callee: {
+						type: 'Identifier',
+						name: '$.text'
+					},
+					arguments: [
+						{
+							type: 'Literal',
+							value: '\\\\'
+						}
+					],
+					optional: false
+				}
+			}
+		]
+	};
+
+	clean(ast);
+	const code = print(ast).code;
+
+	expect(code).toMatchInlineSnapshot(`"var text = $.text('\\\\\\\\');"`);
+});
+
 test('does not escape already-escaped double quotes', () => {
 	const ast = load('const str = "a\\"b"');
 	clean(ast);
