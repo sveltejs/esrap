@@ -15,6 +15,9 @@ importers:
       '@changesets/cli':
         specifier: ^2.27.11
         version: 2.27.11
+      '@sveltejs/acorn-typescript':
+        specifier: ^1.0.5
+        version: 1.0.5(acorn@8.12.1)
       '@typescript-eslint/types':
         specifier: ^8.2.0
         version: 8.2.0
@@ -24,9 +27,6 @@ importers:
       acorn:
         specifier: ^8.11.3
         version: 8.12.1
-      acorn-typescript:
-        specifier: ^1.4.13
-        version: 1.4.13(acorn@8.12.1)
       dts-buddy:
         specifier: ^0.5.4
         version: 0.5.4(typescript@5.7.2)
@@ -364,6 +364,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@sveltejs/acorn-typescript@1.0.5':
+    resolution: {integrity: sha512-IwQk4yfwLdibDlrXVE04jTZYlLnwsTT2PIOQQGNLWfjavGifnk1JD1LcZjZaBTRcxZu2FfPfNLOE04DSu9lqtQ==}
+    peerDependencies:
+      acorn: ^8.9.0
+
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
 
@@ -411,11 +416,6 @@ packages:
 
   '@vitest/utils@2.1.1':
     resolution: {integrity: sha512-Y6Q9TsI+qJ2CC0ZKj6VBb+T8UPz593N113nnUykqwANqhgf3QkZeHFlusgKLTqrnVHbj/XDKZcDHol+dxVT+rQ==}
-
-  acorn-typescript@1.4.13:
-    resolution: {integrity: sha512-xsc9Xv0xlVfwp2o7sQ+GCQ1PgbkdcpWdTzrwXxO3xDMTAywVS3oXVOcOHuRjAPkS4P9b+yc/qNF15460v+jp4Q==}
-    peerDependencies:
-      acorn: '>=8.9.0'
 
   acorn@8.12.1:
     resolution: {integrity: sha512-tcpGyI9zbizT9JbV6oYE477V6mTlXvvi0T0G3SNIYE2apm/G5huBa1+K89VGeovbg+jycCrfhl3ADxErOuO6Jg==}
@@ -1289,6 +1289,10 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.20.0':
     optional: true
 
+  '@sveltejs/acorn-typescript@1.0.5(acorn@8.12.1)':
+    dependencies:
+      acorn: 8.12.1
+
   '@types/estree@1.0.5': {}
 
   '@types/node@12.20.55': {}
@@ -1350,10 +1354,6 @@ snapshots:
       '@vitest/pretty-format': 2.1.1
       loupe: 3.1.1
       tinyrainbow: 1.2.0
-
-  acorn-typescript@1.4.13(acorn@8.12.1):
-    dependencies:
-      acorn: 8.12.1
 
   acorn@8.12.1: {}
 

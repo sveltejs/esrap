@@ -9,7 +9,5 @@
 		"moduleResolution": "bundler",
 		"lib": ["esnext", "dom"]
 	},
-	"include": [
-		"src"
-	]
+	"include": ["src"]
 }

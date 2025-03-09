@@ -1,12 +1,18 @@
+// @ts-check
+
 import * as acorn from 'acorn';
-import { tsPlugin } from 'acorn-typescript';
+import { tsPlugin } from '@sveltejs/acorn-typescript';
 import { walk } from 'zimmerframe';
+
+/** @import { TSESTree } from '@typescript-eslint/types' */
+/** @import { NodeWithComments } from '../src/types' */
 
 // @ts-expect-error
 export const acornTs = acorn.Parser.extend(tsPlugin({ allowSatisfies: true }));
 
 /** @param {string} input */
 export function load(input) {
+	/** @type {any[]} */
 	const comments = [];
 
 	const ast = acornTs.parse(input, {
