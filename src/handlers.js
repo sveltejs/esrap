@@ -1538,7 +1538,7 @@ const handlers = {
 	},
 
 	TSInterfaceBody(node, state) {
-		sequence(node.body, state, false, handle_type_annotation, ';');
+		sequence(node.body, state, true, handle_type_annotation, ';');
 	},
 
 	TSInterfaceDeclaration(node, state) {
