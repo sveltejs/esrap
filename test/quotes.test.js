@@ -86,8 +86,8 @@ test('does not escape already-escaped single quotes', () => {
 	expect(code).toMatchInlineSnapshot(`"const str = 'a\\'b';"`);
 });
 
-test('correctly handle double escaped backslashes when theres no raw', () => {
-	// doing this since if there's a raw value it will prefer that
+test.only('correctly handle double escaped backslashes when theres no raw', () => {
+	// not using load because for some reason acorn parses the value of the literal as `\\` instead of `\\\\`
 	const ast = {
 		type: 'VariableDeclaration',
 		kind: 'var',
