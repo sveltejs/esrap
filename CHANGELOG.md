@@ -1,5 +1,12 @@
 # esrap changelog
 
+## 1.4.6
+
+### Patch Changes
+
+- 1caf836: fix: add missing spaces in interfaces
+- 9daf5dd: fix: correct indentation of `TSModuleBlock`
+
 ## 1.4.5
 
 ### Patch Changes
