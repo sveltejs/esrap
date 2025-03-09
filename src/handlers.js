@@ -119,12 +119,12 @@ function quote(string, char) {
 	let escaped = false;
 
 	for (const c of string) {
-		if (escaped) {
+		if (escaped && c !== '\\') {
 			out += c;
 			escaped = false;
 		} else if (c === '\\') {
 			out += '\\\\';
-			escaped = true;
+			escaped = !escaped;
 		} else if (c === char) {
 			out += '\\' + c;
 		} else if (c === '\n') {
