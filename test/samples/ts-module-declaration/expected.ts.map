@@ -7,5 +7,5 @@
   "sourcesContent": [
     "declare global {\n\tnamespace App {\n\t\tinterface Error {\n\t\t\tfoo: string;\n\t\t}\n\t}\n}\n\nexport {};\n"
   ],
-  "mappings": "QAAQ,MAAM;WACH,GAAG;YACF,KAAK,EACd,GAAG;;;;"
+  "mappings": "QAAQ,MAAM;WACH,GAAG;YACF,KAAK,GACd,GAAG;;;;"
 }
