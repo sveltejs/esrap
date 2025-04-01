@@ -1,5 +1,14 @@
 # esrap changelog
 
+## 1.4.6
+
+### Patch Changes
+
+- 1caf836: fix: add missing spaces in interfaces
+- 49d433b: fix: correctly handle parenthesised FunctionExpressions
+- 76eabe8: fix: consistently escape escape characters
+- 9daf5dd: fix: correct indentation of `TSModuleBlock`
+
 ## 1.4.5
 
 ### Patch Changes
