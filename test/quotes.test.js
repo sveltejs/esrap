@@ -82,6 +82,22 @@ test('escapes escape characters', () => {
 	expect(code).toMatchInlineSnapshot(`"const str = 'a\\\\nb';"`);
 });
 
+test('escapes escape characters#2', () => {
+	const ast = load('const str = "a\\\\\\nb"');
+	clean(ast);
+	const code = print(ast).code;
+
+	expect(code).toMatchInlineSnapshot(`"const str = 'a\\\\\\nb';"`);
+});
+
+test('escapes double escaped backslashes', () => {
+	const ast = load("var text = $.text('\\\\\\\\');");
+	clean(ast);
+	const code = print(ast).code;
+
+	expect(code).toMatchInlineSnapshot(`"var text = $.text('\\\\\\\\');"`);
+});
+
 test('does not escape already-escaped single quotes', () => {
 	const ast = load(`const str = 'a\\'b'`);
 	clean(ast);

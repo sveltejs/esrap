@@ -116,15 +116,10 @@ function prepend_comments(comments, state, newlines) {
  */
 function quote(string, char) {
 	let out = char;
-	let escaped = false;
 
 	for (const c of string) {
-		if (escaped) {
-			out += c;
-			escaped = false;
-		} else if (c === '\\') {
+		if (c === '\\') {
 			out += '\\\\';
-			escaped = true;
 		} else if (c === char) {
 			out += '\\' + c;
 		} else if (c === '\n') {
