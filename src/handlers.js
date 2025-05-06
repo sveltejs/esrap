@@ -1165,12 +1165,34 @@ const handlers = {
 
 		state.commands.push(' from ');
 		handle(node.source, state);
+		if (node.attributes) {
+			state.commands.push(' with { ');
+			for (let index = 0; index < node.attributes.length; index++) {
+				const { key, value } = node.attributes[index];
+				handle(key, state);
+				state.commands.push(': ');
+				handle(value, state);
+				if (index + 1 !== node.attributes.length) {
+					state.commands.push(', ');
+				}
+			}
+			state.commands.push(' }');
+		}
 		state.commands.push(';');
 	},
 
 	ImportExpression(node, state) {
 		state.commands.push('import(');
 		handle(node.source, state);
+		//@ts-expect-error for some reason the types haven't been updated
+		if (node.arguments) {
+			//@ts-expect-error
+			for (let index = 0; index < node.arguments.length; index++) {
+				state.commands.push(', ');
+				//@ts-expect-error
+				handle(node.arguments[index], state);
+			}
+		}
 		state.commands.push(')');
 	},
 

@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "import { foo } from 'x' with {type: 'json'};\nimport { bar } from 'y' with { \"blah\": \"true\", baz: \"false\" };\nimport('baz', { with: { stuff: true }}).then(blah);"
+  ],
+  "mappings": "SAAS,GAAG,QAAQ,GAAG,QAAO,IAAI,EAAE,MAAM;SACjC,GAAG,QAAQ,GAAG,QAAQ,MAAM,EAAE,MAAM,EAAE,GAAG,EAAE,OAAO;;OACpD,KAAK,IAAI,IAAI,IAAI,KAAK,EAAE,IAAI,MAAK,IAAI,CAAC,IAAI"
+}
