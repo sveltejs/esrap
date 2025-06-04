@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class Fields {\n\tstatic cuid(): string {\n\t\treturn 'random cuid...'\n\t}\n}\n"
+  ],
+  "mappings": "MAAM,MAAM,CAAC,CAAC;QACN,IAAI,WAAW,CAAC;SACf,gBAAgB;CACxB,CAAC;AACF,CAAC"
+}

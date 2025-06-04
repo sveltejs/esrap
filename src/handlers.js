@@ -475,6 +475,9 @@ function handle_type_annotation(node, state) {
 		case 'TSNeverKeyword':
 			state.commands.push('never');
 			break;
+		case 'TSSymbolKeyword':
+			state.commands.push('symbol');
+			break;
 		case 'TSArrayType':
 			handle_type_annotation(node.elementType, state);
 			state.commands.push('[]');
@@ -1251,7 +1254,11 @@ const handlers = {
 
 		state.commands.push('(');
 		sequence(node.value.params, state, false, handle);
-		state.commands.push(') ');
+		state.commands.push(')');
+
+		if (node.value.returnType) handle_type_annotation(node.value.returnType, state);
+
+		state.commands.push(' ');
 
 		if (node.value.body) handle(node.value.body, state);
 	},
@@ -1330,6 +1337,12 @@ const handlers = {
 	},
 
 	PropertyDefinition(node, state) {
+		if (node.decorators) {
+			for (const decorator of node.decorators) {
+				handle(decorator, state);
+			}
+		}
+
 		if (node.accessibility) {
 			state.commands.push(node.accessibility, ' ');
 		}
