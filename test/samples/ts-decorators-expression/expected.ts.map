@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class Fields {\n\tstatic uuid() {\n\t\treturn function (target: any, propertyKey: string | symbol) {\n\t\t\tObject.defineProperty(target, propertyKey, { value: 'random uuid...', writable: true });\n\t\t};\n\t}\n}\n\nclass User {\n\t@Fields.uuid()\n\tid: string;\n}\n\nconst u = new User();\nconsole.log(u.id); // will print \"random uuid...\"\n"
+  ],
+  "mappings": "MAAM,MAAM,CAAC,CAAC;QACN,IAAI,GAAG,CAAC;mBACG,MAAW,OAAE,WAA4B,mBAAE,CAAC;GAC5D,MAAM,CAAC,cAAc,CAAC,MAAM,EAAE,WAAW,IAAI,KAAK,EAAE,gBAAgB,EAAE,QAAQ,EAAE,IAAI;EACrF,CAAC;CACF,CAAC;AACF,CAAC;;MAEK,IAAI,CAAC,CAAC;EACV,MAAM,CAAC,IAAI;CACZ,EAAE;AACH,CAAC;;MAEK,CAAC,OAAO,IAAI;;AAClB,OAAO,CAAC,GAAG,CAAC,CAAC,CAAC,EAAE"
+}
