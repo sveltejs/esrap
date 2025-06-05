@@ -478,9 +478,9 @@ function handle_type_annotation(node, state) {
 		case 'TSSymbolKeyword':
 			state.commands.push('symbol');
 			break;
-			case 'TSNullKeyword':
-				state.commands.push('null');
-				break;
+		case 'TSNullKeyword':
+			state.commands.push('null');
+			break;
 		case 'TSUndefinedKeyword':
 			state.commands.push('undefined');
 			break;
