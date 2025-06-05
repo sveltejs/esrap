@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 1.4.7
+
+### Patch Changes
+
+- bab0228: fix: support import attributes
+
 ## 1.4.6
 
 ### Patch Changes
