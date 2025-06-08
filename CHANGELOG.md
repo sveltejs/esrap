@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 1.4.8
+
+### Patch Changes
+
+- 61c9902: fix: only push `with` clause if attributes length is gt 0
+
 ## 1.4.7
 
 ### Patch Changes
