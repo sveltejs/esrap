@@ -1,5 +1,12 @@
 # esrap changelog
 
+## 1.4.9
+
+### Patch Changes
+
+- bd045a3: fix: support function return type
+- bd045a3: fix: support decorator expression
+
 ## 1.4.8
 
 ### Patch Changes
