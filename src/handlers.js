@@ -1165,7 +1165,7 @@ const handlers = {
 
 		state.commands.push(' from ');
 		handle(node.source, state);
-		if (node.attributes) {
+		if (node.attributes && node.attributes.length > 0) {
 			state.commands.push(' with { ');
 			for (let index = 0; index < node.attributes.length; index++) {
 				const { key, value } = node.attributes[index];
