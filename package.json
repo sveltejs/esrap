@@ -15,6 +15,15 @@
     ".": {
       "types": "./types/index.d.ts",
       "default": "./src/index.js"
+    },
+    "./modules/jsx": {
+      "default": "./src/modules/jsx.js"
+    },
+    "./modules/ecmascript": {
+      "default": "./src/modules/ecmascript.js"
+    },
+    "./modules/typescript": {
+      "default": "./src/modules/typescript.js"
     }
   },
   "types": "./types/index.d.ts",
