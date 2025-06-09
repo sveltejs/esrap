@@ -2,6 +2,8 @@
 /** @import { Command, PrintOptions, State } from './types' */
 import { handle } from './handlers.js';
 import { encode } from '@jridgewell/sourcemap-codec';
+import ecmascript from './modules/ecmascript.js';
+import typescript from './modules/typescript.js';
 
 /** @type {(str: string) => string} str */
 let btoa = () => {
@@ -38,7 +40,8 @@ export function print(node, opts = {}) {
 		commands: [],
 		comments: [],
 		multiline: false,
-		quote: opts.quotes === 'double' ? '"' : "'"
+		quote: opts.quotes === 'double' ? '"' : "'",
+		handlers: opts.handlers ?? { ...ecmascript, ...typescript }
 	};
 
 	handle(/** @type {TSESTree.Node} */ (node), state);
