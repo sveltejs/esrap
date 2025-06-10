@@ -1074,4 +1074,4 @@ export default {
 			state.commands.push(node.delegate ? `yield*` : `yield`);
 		}
 	}
-}; /** @satisfies {Record<string, (node: any, state: State) => undefined>} */
+}; /** @satisfies {Handlers} */
