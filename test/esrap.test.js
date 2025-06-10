@@ -88,15 +88,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			};
 		}
 
-		opts.handlers = { ...ecmascript };
-
-		if (tsMode) {
-			opts.handlers = {...opts.handlers, ...typescript};
-		}
-
-		if (jsxMode) {
-			opts.handlers = {...opts.handlers, ...jsx};
-		}
+		opts.handlers = { ...ecmascript, ...typescript, ...jsx };
 
 		const { code, map } = print(ast, opts);
 
