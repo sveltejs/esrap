@@ -5,7 +5,7 @@ import { print } from '../src';
 test('custom printers work', () => {
 	/** @type {Handlers} */
 	const funkyStringPrinter = {
-		Literal(node, state) {
+		CustomType(node, state) {
 			if (typeof node.value === 'string') {
 				state.commands.push(`:) - `);
 
@@ -18,7 +18,7 @@ test('custom printers work', () => {
 
 	const { code } = print(
 		{
-			type: 'Literal',
+			type: 'CustomType',
 			value: 'testing 123'
 		},
 		{
