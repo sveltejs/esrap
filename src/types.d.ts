@@ -2,6 +2,10 @@ import { TSESTree } from '@typescript-eslint/types';
 
 type Handler<T> = (node: T, state: State) => undefined;
 
+export type Handlers = {
+	[T in TSESTree.Node['type']]?: Handler<Extract<TSESTree.Node, { type: T }>>;
+};
+
 export type TypeAnnotationNodes =
 	| TSESTree.TypeNode
 	| TSESTree.TypeElement
@@ -14,10 +18,6 @@ export type TypeAnnotationNodes =
 	| TSESTree.TSInterfaceHeritage
 	| TSESTree.TSClassImplements
 	| TSExpressionWithTypeArguments;
-	
-export type Handlers = {
-	[T in TSESTree.Node['type']]?: Handler<Extract<TSESTree.Node, { type: T }>>;
-};
 
 type TSExpressionWithTypeArguments = {
 	type: 'TSExpressionWithTypeArguments';
