@@ -1,7 +1,6 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Handlers, NodeWithComments, Context } from '../types.js' */
 import {
-	sequence,
 	EXPRESSIONS_PRECEDENCE,
 	create_sequence,
 	indent,
