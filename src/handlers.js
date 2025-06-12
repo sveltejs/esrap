@@ -50,24 +50,22 @@ export function handle(node, state) {
 	const handler = state.handlers[node.type];
 
 	if (!handler) {
-		let error = [
-			`Failed to find an implementation for ${node.type}`
-		]
+		let error = [`Failed to find an implementation for ${node.type}`];
 
-		if (node.type.includes("JSX")) {
-			error.push(`hint: perhaps you need to import esrap/modules/jsx`)
+		if (node.type.includes('JSX')) {
+			error.push(`hint: perhaps you need to import esrap/modules/jsx`);
 		}
-		if (node.type.includes("TS")) {
+		if (node.type.includes('TS')) {
 			error.push(`hint: perhaps you need to import esrap/modules/ts`);
 		}
-		if (node.type.includes("TSX")) {
+		if (node.type.includes('TSX')) {
 			error.push(`hint: perhaps you need to import esrap/modules/js`);
 		}
 		if (Object.keys(state.handlers).length < 25) {
 			error.push(`hint: perhaps you added custom handlers, but forgot to use esrap/modules/js`);
 		}
 
-		throw new Error(error.join("\n"));
+		throw new Error(error.join('\n'));
 	}
 
 	if (node_with_comments.leadingComments) {
@@ -464,4 +462,3 @@ export function sequence(nodes, state, spaces, fn, separator = ',') {
 		if (spaces) close.push(' ');
 	}
 }
-

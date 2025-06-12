@@ -7,19 +7,19 @@ export default {
 	JSXElement(node, state) {
 		handle(node.openingElement, state);
 
-        if (node.children.length > 0) {
-    		state.commands.push(indent);
-        }
+		if (node.children.length > 0) {
+			state.commands.push(indent);
+		}
 		for (const child of node.children) {
 			handle(child, state);
-            if (child !== node.children.at(-1)) {
-                state.commands.push(newline)
-            }
+			if (child !== node.children.at(-1)) {
+				state.commands.push(newline);
+			}
 		}
-        if (node.children.length > 0) {
-		    state.commands.push(dedent);
-		    state.commands.push(newline);
-        }
+		if (node.children.length > 0) {
+			state.commands.push(dedent);
+			state.commands.push(newline);
+		}
 
 		if (node.closingElement) {
 			handle(node.closingElement, state);
@@ -75,19 +75,19 @@ export default {
 	JSXFragment(node, state) {
 		handle(node.openingFragment, state);
 
-        if (node.children.length > 0) {
-		    state.commands.push(indent);
-        }
+		if (node.children.length > 0) {
+			state.commands.push(indent);
+		}
 		for (const child of node.children) {
 			handle(child, state);
 
-            if (child !== node.children.at(-1)) {
-                state.commands.push(newline);
-            }
+			if (child !== node.children.at(-1)) {
+				state.commands.push(newline);
+			}
 		}
-        if (node.children.length > 0) {
-		    state.commands.push(dedent);
-        }
+		if (node.children.length > 0) {
+			state.commands.push(dedent);
+		}
 
 		handle(node.closingFragment, state);
 	},

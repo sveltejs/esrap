@@ -8,7 +8,7 @@ import { print } from '../src/index.js';
 import { acornTs, acornTsx, load } from './common.js';
 import ecmascript from '../src/modules/ecmascript.js';
 import typescript from '../src/modules/typescript.js';
-import jsx from "../src/modules/jsx.js";
+import jsx from '../src/modules/jsx.js';
 
 /** @param {TSESTree.Node} ast */
 function clean(ast) {
@@ -58,7 +58,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	if (dir[0] === '.') continue;
 	const tsMode = dir.startsWith('ts-') || dir.startsWith('tsx-');
 	const jsxMode = dir.startsWith('jsx-') || dir.startsWith('tsx-');
-	const fileExtension = (tsMode ? 'ts' : 'js') + (jsxMode ? "x" : "");
+	const fileExtension = (tsMode ? 'ts' : 'js') + (jsxMode ? 'x' : '');
 
 	test(dir, async () => {
 		let input_js = '';
@@ -101,7 +101,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		const parsed = (jsxMode ? acornTsx : acornTs).parse(code, {
 			ecmaVersion: 'latest',
 			sourceType: input_json.length > 0 ? 'script' : 'module',
-			locations: true,
+			locations: true
 		});
 
 		fs.writeFileSync(
