@@ -1,3 +1,5 @@
+/** @import { TSESTree } from '@typescript-eslint/types' */
+/** @import { Handlers, NodeWithComments, State } from '../types' */
 import {
 	sequence,
 	handle,
@@ -13,9 +15,7 @@ import {
 	has_call_expression,
 	l,
 	needs_parens
-} from '../handlers';
-/** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Handlers, NodeWithComments, State } from '../types' */
+} from '../handlers.js';
 
 export const shared = {
 	/**

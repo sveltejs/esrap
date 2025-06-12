@@ -1,3 +1,4 @@
+/** @import { Handlers } from '../types' */
 import {
 	sequence,
 	handle,
@@ -6,8 +7,7 @@ import {
 	newline,
 	indent,
 	handle_body
-} from '../handlers';
-/** @import { Handlers } from '../types' */
+} from '../handlers.js';
 
 /**
  * @type {Handlers}

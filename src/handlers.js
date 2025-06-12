@@ -1,5 +1,5 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, Dedent, Handlers, Location, Indent, Newline, NodeWithComments, State, TypeAnnotationNodes } from './types' */
+/** @import { Command, Dedent, Location, Indent, Newline, NodeWithComments, State } from './types' */
 
 /** @type {Newline} */
 export const newline = { type: 'Newline' };

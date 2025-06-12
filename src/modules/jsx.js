@@ -1,6 +1,5 @@
 /** @import { Handlers } from '../types' */
-
-import { handle, indent, dedent, newline } from '../handlers';
+import { handle, indent, dedent, newline } from '../handlers.js';
 
 /** @type {Handlers} */
 export default {

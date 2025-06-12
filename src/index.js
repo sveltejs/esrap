@@ -1,9 +1,9 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Command, PrintOptions, State } from './types' */
-import { handle } from './handlers.js';
 import { encode } from '@jridgewell/sourcemap-codec';
 import ecmascript from './modules/ecmascript.js';
 import typescript from './modules/typescript.js';
+import { handle } from './handlers.js';
 
 /** @type {(str: string) => string} str */
 let btoa = () => {
