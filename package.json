@@ -16,14 +16,14 @@
       "types": "./types/index.d.ts",
       "default": "./src/index.js"
     },
-    "./modules/jsx": {
-      "default": "./src/modules/jsx.js"
+    "./languages/jsx": {
+      "default": "./src/languages/jsx.js"
     },
-    "./modules/ecmascript": {
-      "default": "./src/modules/ecmascript.js"
+    "./languages/ecmascript": {
+      "default": "./src/languages/ecmascript.js"
     },
-    "./modules/typescript": {
-      "default": "./src/modules/typescript.js"
+    "./languages/typescript": {
+      "default": "./src/languages/typescript.js"
     }
   },
   "types": "./types/index.d.ts",

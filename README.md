@@ -61,11 +61,11 @@ const { code, map } = print(ast, {
 
   // Overrwrite the inbuilt printers
   handlers: {
-    ...ecmascript, // It's best to include our default printers, esrap/modules/ecmascript
-    ...typescript, // The typescript module, if need be, esrap/modules/typescript,
-    ...jsx, // The JSX module, esrap/modules/jsx,
+    ...ecmascript, // It's best to include our default printers, esrap/languages/ecmascript
+    ...typescript, // The typescript module, if need be, esrap/languages/typescript,
+    ...jsx, // The JSX module, esrap/languages/jsx,
     CustomNode(node, state) {
-      state.commands.push('this is custom') // see the source code in the inbuilt modules for examples on how to make your own
+      state.commands.push('this is custom') // see the source code in the inbuilt languages for examples on how to make your own
     }
   }
 });

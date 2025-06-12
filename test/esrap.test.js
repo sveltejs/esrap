@@ -6,9 +6,9 @@ import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
 import { acornTs, acornTsx, load } from './common.js';
-import ecmascript from '../src/modules/ecmascript.js';
-import typescript from '../src/modules/typescript.js';
-import jsx from '../src/modules/jsx.js';
+import ecmascript from '../src/languages/ecmascript.js';
+import typescript from '../src/languages/typescript.js';
+import jsx from '../src/languages/jsx.js';
 
 /** @param {TSESTree.Node} ast */
 function clean(ast) {
