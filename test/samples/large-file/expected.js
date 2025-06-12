@@ -145,6 +145,8 @@
 			toArray() {
 				return slice.call(this);
 			},
+			// Get the Nth element in the matched element set OR
+			// Get the whole matched element set as a clean array
 			get(num) {
 				// Return all the elements in a clean array
 				if (num == null) {
@@ -154,6 +156,8 @@
 				// Return just the one element from the set
 				return num < 0 ? this[num + this.length] : this[num];
 			},
+			// Take an array of elements and push it onto the stack
+			// (returning the new matched element set)
 			pushStack(elems) {
 				// Build a new jQuery matched element set
 				var ret = jQuery.merge(this.constructor(), elems);
@@ -163,6 +167,7 @@
 				// Return the newly-formed element set
 				return ret;
 			},
+			// Execute a callback for every element in the matched set.
 			each(callback) {
 				return jQuery.each(this, callback);
 			},
@@ -315,6 +320,8 @@
 
 				return true;
 			},
+			// Evaluates a script in a provided context; falls back to the global one
+			// if not specified.
 			globalEval(code, options, doc) {
 				DOMEval(code, { nonce: options && options.nonce }, doc);
 			},
@@ -339,6 +346,7 @@
 
 				return obj;
 			},
+			// Retrieve the text value of an array of DOM nodes
 			text(elem) {
 				var node,
 					ret = "",
@@ -368,6 +376,7 @@
 				// Do not include comment or processing instruction nodes
 				return ret;
 			},
+			// results is for internal usage only
 			makeArray(arr, results) {
 				var ret = results || [];
 
@@ -392,6 +401,8 @@
 				// document fragments.
 				return !rhtmlSuffix.test(namespace || docElem && docElem.nodeName || "HTML");
 			},
+			// Support: Android <=4.0 only, PhantomJS 1 only
+			// push.apply(_, arraylike) throws on ancient WebKit
 			merge(first, second) {
 				var len = +second.length,
 					j = 0,
@@ -423,6 +434,7 @@
 
 				return matches;
 			},
+			// arg is for internal usage only
 			map(elems, callback, arg) {
 				var length, value, i = 0, ret = [];
 
@@ -1676,6 +1688,7 @@
 							return false;
 						};
 					}),
+					// Miscellaneous
 					target(elem) {
 						var hash = window.location && window.location.hash;
 
@@ -1707,6 +1720,7 @@
 
 						return elem.selected === true;
 					},
+					// Contents
 					empty(elem) {
 						// https://www.w3.org/TR/selectors/#empty-pseudo
 						// :empty is negated by element (1) or content nodes (text: 3; cdata: 4; entity ref: 5),
@@ -1723,6 +1737,7 @@
 					parent(elem) {
 						return !Expr.pseudos.empty(elem);
 					},
+					// Element/input types
 					header(elem) {
 						return rheader.test(elem.nodeName);
 					},
@@ -2679,6 +2694,7 @@
 
 				return this.pushStack(matched.length > 1 ? jQuery.uniqueSort(matched) : matched);
 			},
+			// Determine the position of an element within the set
 			index(elem) {
 				// No argument, return index in parent
 				if (!elem) {
@@ -2885,6 +2901,7 @@
 				},
 				// Actual Callbacks object
 				self = {
+					// Add a callback or a collection of callbacks to the list
 					add() {
 						if (list) {
 							// If we have memory from a past run, we should fire after adding
@@ -2913,6 +2930,7 @@
 
 						return this;
 					},
+					// Remove a callback from the list
 					remove() {
 						jQuery.each(arguments, function (_, arg) {
 							var index;
@@ -2929,9 +2947,12 @@
 
 						return this;
 					},
+					// Check if a given callback is in the list.
+					// If no argument is given, return whether or not list has callbacks attached.
 					has(fn) {
 						return fn ? jQuery.inArray(fn, list) > -1 : list.length > 0;
 					},
+					// Remove all callbacks from the list
 					empty() {
 						if (list) {
 							list = [];
@@ -2939,6 +2960,9 @@
 
 						return this;
 					},
+					// Disable .fire and .add
+					// Abort any current/pending executions
+					// Clear all callbacks and values
 					disable() {
 						locked = queue = [];
 						list = memory = "";
@@ -2947,6 +2971,9 @@
 					disabled() {
 						return !list;
 					},
+					// Disable .fire
+					// Also disable .add unless we have memory (since it would have no effect)
+					// Abort any pending executions
 					lock() {
 						locked = queue = [];
 
@@ -2959,6 +2986,7 @@
 					locked() {
 						return !!locked;
 					},
+					// Call all callbacks with the given context and arguments
 					fireWith(context, args) {
 						if (!locked) {
 							args = args || [];
@@ -2972,10 +3000,12 @@
 
 						return this;
 					},
+					// Call all the callbacks with the given arguments
 					fire() {
 						self.fireWith(this, arguments);
 						return this;
 					},
+					// To know if the callbacks have already been called at least once
 					fired() {
 						return !!fired;
 					}
@@ -3065,6 +3095,7 @@
 						"catch"(fn) {
 							return promise.then(null, fn);
 						},
+						// Keep pipe for back-compat
 						pipe() /* fnDone, fnFail, fnProgress */ {
 							var fns = arguments;
 
@@ -3206,6 +3237,8 @@
 								tuples[2][3].add(resolve(0, newDefer, isFunction(onRejected) ? onRejected : Thrower));
 							}).promise();
 						},
+						// Get a promise for this deferred
+						// If obj is provided, the promise aspect is added to the object
 						promise(obj) {
 							return obj != null ? jQuery.extend(obj, promise) : promise;
 						}
@@ -3272,6 +3305,7 @@
 				// All done!
 				return deferred;
 			},
+			// Deferred helper
 			when(singleValue) {
 				var // count of uncompleted subordinates
 					remaining = arguments.length,
@@ -3354,6 +3388,7 @@
 			// A counter to track how many items to wait for before
 			// the ready event fires. See trac-6781
 			readyWait: 1,
+			// Handle when the DOM is ready
 			ready(wait) {
 				// Abort if there are pending holds or we're already ready
 				if (wait === true ? --jQuery.readyWait : jQuery.isReady) {
@@ -3689,6 +3724,8 @@
 			removeData(elem, name) {
 				dataUser.remove(elem, name);
 			},
+			// TODO: Now that all calls to _data and _removeData have been replaced
+			// with direct calls to dataPriv methods, these can be deprecated.
 			_data(elem, name, data) {
 				return dataPriv.access(elem, name, data);
 			},
@@ -3844,6 +3881,7 @@
 					hooks.empty.fire();
 				}
 			},
+			// Not public - generate a queueHooks object, or return the current one
 			_queueHooks(elem, type) {
 				var key = type + "queueHooks";
 
@@ -3890,6 +3928,8 @@
 			clearQueue(type) {
 				return this.queue(type || "fx", []);
 			},
+			// Get a promise resolved when queues of a certain type
+			// are emptied (fx is the type by default)
 			promise(type, obj) {
 				var tmp,
 					count = 1,
@@ -4490,6 +4530,7 @@
 					jQuery.event.global[type] = true;
 				}
 			},
+			// Detach an event or set of events from an element
 			remove(
 				elem,
 				types,
@@ -4723,6 +4764,7 @@
 				load: { // Prevent triggered image.load events from bubbling to window.load
 				noBubble: true },
 				click: {
+					// Utilize native event to ensure correct state for checkable inputs
 					setup(data) {
 						// For mutual compressibility with _default, replace `this` access with a local var.
 						// `|| data` is dead code meant only to preserve the variable through minification.
@@ -4750,6 +4792,8 @@
 						// Return non-false to allow normal event-path propagation
 						return true;
 					},
+					// For cross-browser consistency, suppress native .click() on links
+					// Also prevent it if we're currently inside a leveraged native-event stack
 					_default(event) {
 						var target = event.target;
 
@@ -4995,6 +5039,7 @@
 			}
 
 			jQuery.event.special[type] = {
+				// Utilize native event if possible so blur/focus sequence is correct
 				setup() {
 					var attaches;
 
@@ -5043,6 +5088,8 @@
 						return false;
 					}
 				},
+				// Suppress native focus or blur if we're currently inside
+				// a leveraged native-event stack
 				_default(event) {
 					return dataPriv.get(event.target, type);
 				},
@@ -5762,6 +5809,15 @@
 					computeStyleTests();
 					return scrollboxSizeVal;
 				},
+				// Support: IE 9 - 11+, Edge 15 - 18+
+				// IE/Edge misreport `getComputedStyle` of table rows with width/height
+				// set in CSS while `offset*` properties report correct values.
+				// Behavior in IE 9 is more subtle than in newer versions & it passes
+				// some versions of this test; make sure not to make it pass there!
+				//
+				// Support: Firefox 70+
+				// Only Firefox includes border widths
+				// in computed dimensions. (gh-4529)
 				reliableTrDimensions() {
 					var table, tr, trChild, trStyle;
 
@@ -6116,6 +6172,7 @@
 			// Add in properties whose names you wish to fix before
 			// setting or getting the value
 			cssProps: {},
+			// Get and set the style property on a DOM Node
 			style(elem, name, value, extra) {
 				// Don't set styles on text and comment nodes
 				if (!elem || elem.nodeType === 3 || elem.nodeType === 8 || !elem.style) {
@@ -7920,6 +7977,8 @@
 
 				return event.result;
 			},
+			// Piggyback on a donor event to simulate a different one
+			// Used only for `focus(in | out)` events
 			simulate(type, elem, event) {
 				var e = jQuery.extend(new jQuery.Event(), event, { type, isSimulated: true });
 
@@ -8368,6 +8427,9 @@
 				// deep extended (see ajaxExtend)
 				flatOptions: { url: true, context: true }
 			},
+			// Creates a full fledged settings object into target
+			// with both ajaxSettings and settings fields.
+			// If target is omitted, writes into ajaxSettings.
 			ajaxSetup(target, settings) {
 				return settings ? // Building a settings object
 				ajaxExtend(ajaxExtend(target, jQuery.ajaxSettings), settings) : // Extending ajaxSettings
@@ -8375,6 +8437,7 @@
 			},
 			ajaxPrefilter: addToPrefiltersOrTransports(prefilters),
 			ajaxTransport: addToPrefiltersOrTransports(transports),
+			// Main method
 			ajax(url, options) {
 				// If url is an object, simulate pre-1.5 signature
 				if (typeof url === "object") {
@@ -8422,6 +8485,7 @@
 					// Fake xhr
 					jqXHR = {
 						readyState: 0,
+						// Builds headers hashtable if needed
 						getResponseHeader(key) {
 							var match;
 
@@ -8439,9 +8503,11 @@
 
 							return match == null ? null : match.join(", ");
 						},
+						// Raw string
 						getAllResponseHeaders() {
 							return completed ? responseHeadersString : null;
 						},
+						// Caches the header
 						setRequestHeader(name, value) {
 							if (completed == null) {
 								name = requestHeadersNames[name.toLowerCase()] = requestHeadersNames[name.toLowerCase()] || name;
@@ -8450,6 +8516,7 @@
 
 							return this;
 						},
+						// Overrides response content-type header
 						overrideMimeType(type) {
 							if (completed == null) {
 								s.mimeType = type;
@@ -8457,6 +8524,7 @@
 
 							return this;
 						},
+						// Status-dependent callbacks
 						statusCode(map) {
 							var code;
 
@@ -8474,6 +8542,7 @@
 
 							return this;
 						},
+						// Cancel the request
 						abort(statusText) {
 							var finalText = statusText || strAbort;
 
@@ -9358,6 +9427,7 @@
 		};
 
 		jQuery.fn.extend({
+			// offset() relates an element's border box to the document origin
 			offset(options) {
 				// Preserve chaining for setter
 				if (arguments.length) {
@@ -9391,6 +9461,8 @@
 					left: rect.left + win.pageXOffset
 				};
 			},
+			// position() relates an element's margin box to its offset parent's padding box
+			// This corresponds to the behavior of CSS absolute positioning
 			position() {
 				if (!this[0]) {
 					return;
@@ -9431,6 +9503,16 @@
 					left: offset.left - parentOffset.left - jQuery.css(elem, "marginLeft", true)
 				};
 			},
+			// This method will return documentElement in the following cases:
+			// 1) For the element inside the iframe without offsetParent, this method will return
+			//    documentElement of the parent window
+			// 2) For the hidden or detached element
+			// 3) For body or html element, i.e. in case of the html node - it will return itself
+			//
+			// but those exceptions were never presented as a real life use-cases
+			// and might be considered as more preferable results.
+			//
+			// This logic, however, is not guaranteed and can change at any point in the future
 			offsetParent() {
 				return this.map(function () {
 					var offsetParent = this.offsetParent;
