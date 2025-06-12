@@ -6,7 +6,6 @@ import {
 	newline,
 	dedent,
 	handle_var_declaration,
-	quote,
 	handle_body,
 	has_call_expression
 } from '../handlers.js';
@@ -640,8 +639,7 @@ export default {
 		// TODO do we need to handle weird unicode characters somehow?
 		// str.replace(/\\u(\d{4})/g, (m, n) => String.fromCharCode(+n))
 		const value =
-			node.raw ||
-			(typeof node.value === 'string' ? quote(node.value, state.quote) : String(node.value));
+			node.raw || (typeof node.value === 'string' ? state.quote(node.value) : String(node.value));
 
 		state.write(value, node);
 	},

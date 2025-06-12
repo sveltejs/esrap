@@ -35,30 +35,6 @@ export function prepend_comments(comments, context, newlines) {
 	}
 }
 
-/**
- * @param {string} string
- * @param {'\'' | '"'} char
- */
-export function quote(string, char) {
-	let out = char;
-
-	for (const c of string) {
-		if (c === '\\') {
-			out += '\\\\';
-		} else if (c === char) {
-			out += '\\' + c;
-		} else if (c === '\n') {
-			out += '\\n';
-		} else if (c === '\r') {
-			out += '\\r';
-		} else {
-			out += c;
-		}
-	}
-
-	return out + char;
-}
-
 /** @param {TSESTree.Node} node */
 export function has_call_expression(node) {
 	while (node) {

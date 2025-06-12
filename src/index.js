@@ -28,6 +28,7 @@ const dedent = { type: 'Dedent' };
 
 export class Context {
 	#handlers;
+	#quote;
 
 	multiline = false;
 
@@ -40,7 +41,7 @@ export class Context {
 	 */
 	constructor(handlers, quote, commands = [], comments = []) {
 		this.#handlers = handlers;
-		this.quote = quote;
+		this.#quote = quote;
 		this.commands = commands;
 		this.comments = comments;
 	}
@@ -91,6 +92,31 @@ export class Context {
 			line,
 			column
 		});
+	}
+
+	/**
+	 *
+	 * @param {string} string
+	 */
+	quote(string) {
+		const char = this.#quote;
+		let out = char;
+
+		for (const c of string) {
+			if (c === '\\') {
+				out += '\\\\';
+			} else if (c === char) {
+				out += '\\' + c;
+			} else if (c === '\n') {
+				out += '\\n';
+			} else if (c === '\r') {
+				out += '\\r';
+			} else {
+				out += c;
+			}
+		}
+
+		return out + char;
 	}
 
 	/**
@@ -232,7 +258,7 @@ export class Context {
 	}
 
 	child() {
-		return new Context(this.#handlers, this.quote, this.commands, this.comments);
+		return new Context(this.#handlers, this.#quote, this.commands, this.comments);
 	}
 }
 
