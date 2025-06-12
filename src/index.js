@@ -65,6 +65,35 @@ export class Context {
 	}
 
 	/**
+	 *
+	 * @param {string} content
+	 * @param {TSESTree.Node} [node]
+	 */
+	write(content, node) {
+		if (node?.loc) {
+			// TODO make location extraction pluggable too
+			this.location(node.loc.start.line, node.loc.start.column);
+			this.commands.push(content);
+			this.location(node.loc.end.line, node.loc.end.column);
+		} else {
+			this.commands.push(content);
+		}
+	}
+
+	/**
+	 *
+	 * @param {number} line
+	 * @param {number} column
+	 */
+	location(line, column) {
+		this.commands.push({
+			type: 'Location',
+			line,
+			column
+		});
+	}
+
+	/**
 	 * @param {{ type: string }} node
 	 */
 	visit(node) {
@@ -85,7 +114,9 @@ export class Context {
 				error.push(`hint: perhaps you need to use 'esrap/languages/tsx'`);
 			}
 			if (Object.keys(this.#handlers).length < 25) {
-				error.push(`hint: perhaps you added custom handlers, but forgot to use 'esrap/languages/js'`);
+				error.push(
+					`hint: perhaps you added custom handlers, but forgot to use 'esrap/languages/js'`
+				);
 			}
 
 			throw new Error(error.join('\n'));

@@ -2,8 +2,6 @@
 /** @import { Command, Dedent, Location, Indent, Newline, NodeWithComments } from './types' */
 /** @import { Context } from './index.js'; */
 
-import { EXPRESSIONS_PRECEDENCE } from './languages/utils/precedence.js';
-
 /** @type {Newline} */
 export const newline = { type: 'Newline' };
 
@@ -18,57 +16,6 @@ export const dedent = { type: 'Dedent' };
  */
 export function create_sequence() {
 	return [];
-}
-
-/**
- * Rough estimate of the combined width of a group of commands
- * @param {Command[]} commands
- * @param {number} from
- * @param {number} to
- */
-function measure(commands, from, to = commands.length) {
-	let total = 0;
-	for (let i = from; i < to; i += 1) {
-		const command = commands[i];
-		if (typeof command === 'string') {
-			total += command.length;
-		} else if (Array.isArray(command)) {
-			total +=
-				command.length === 0
-					? 2 // assume this is ', '
-					: measure(command, 0);
-		}
-	}
-
-	return total;
-}
-
-/**
- * @param {number} line
- * @param {number} column
- * @returns {Location}
- */
-export function l(line, column) {
-	return {
-		type: 'Location',
-		line,
-		column
-	};
-}
-
-/**
- * @param {string} content
- * @param {TSESTree.Node} node
- * @returns {string | Command[]}
- */
-export function c(content, node) {
-	return node.loc
-		? [
-				l(node.loc.start.line, node.loc.start.column),
-				content,
-				l(node.loc.end.line, node.loc.end.column)
-			]
-		: content;
 }
 
 /**
@@ -110,95 +57,6 @@ export function quote(string, char) {
 	}
 
 	return out + char;
-}
-
-const OPERATOR_PRECEDENCE = {
-	'||': 2,
-	'&&': 3,
-	'??': 4,
-	'|': 5,
-	'^': 6,
-	'&': 7,
-	'==': 8,
-	'!=': 8,
-	'===': 8,
-	'!==': 8,
-	'<': 9,
-	'>': 9,
-	'<=': 9,
-	'>=': 9,
-	in: 9,
-	instanceof: 9,
-	'<<': 10,
-	'>>': 10,
-	'>>>': 10,
-	'+': 11,
-	'-': 11,
-	'*': 12,
-	'%': 12,
-	'/': 12,
-	'**': 13
-};
-
-
-
-/**
- *
- * @param {TSESTree.Expression | TSESTree.PrivateIdentifier} node
- * @param {TSESTree.BinaryExpression | TSESTree.LogicalExpression} parent
- * @param {boolean} is_right
- * @returns
- */
-export function needs_parens(node, parent, is_right) {
-	if (node.type === 'PrivateIdentifier') return false;
-
-	// special case where logical expressions and coalesce expressions cannot be mixed,
-	// either of them need to be wrapped with parentheses
-	if (
-		node.type === 'LogicalExpression' &&
-		parent.type === 'LogicalExpression' &&
-		((parent.operator === '??' && node.operator !== '??') ||
-			(parent.operator !== '??' && node.operator === '??'))
-	) {
-		return true;
-	}
-
-	const precedence = EXPRESSIONS_PRECEDENCE[node.type];
-	const parent_precedence = EXPRESSIONS_PRECEDENCE[parent.type];
-
-	if (precedence !== parent_precedence) {
-		// Different node types
-		return (
-			(!is_right && precedence === 15 && parent_precedence === 14 && parent.operator === '**') ||
-			precedence < parent_precedence
-		);
-	}
-
-	if (precedence !== 13 && precedence !== 14) {
-		// Not a `LogicalExpression` or `BinaryExpression`
-		return false;
-	}
-
-	if (
-		/** @type {TSESTree.BinaryExpression} */ (node).operator === '**' &&
-		parent.operator === '**'
-	) {
-		// Exponentiation operator has right-to-left associativity
-		return !is_right;
-	}
-
-	if (is_right) {
-		// Parenthesis are used if both operators have the same precedence
-		return (
-			OPERATOR_PRECEDENCE[/** @type {TSESTree.BinaryExpression} */ (node).operator] <=
-			OPERATOR_PRECEDENCE[parent.operator]
-		);
-	}
-
-	return (
-		OPERATOR_PRECEDENCE[/** @type {TSESTree.BinaryExpression} */ (node).operator] <
-		OPERATOR_PRECEDENCE[parent.operator]
-	);
 }
 
 /** @param {TSESTree.Node} node */
@@ -304,7 +162,7 @@ export const handle_var_declaration = (node, context) => {
 
 	const multiline =
 		child_context.multiline ||
-		(node.declarations.length > 1 && measure(context.commands, index) > 50);
+		(node.declarations.length > 1 && context.measure(context.commands, index) > 50);
 
 	if (multiline) {
 		context.multiline = true;

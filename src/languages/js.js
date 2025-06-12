@@ -5,15 +5,40 @@ import {
 	indent,
 	newline,
 	dedent,
-	c,
 	handle_var_declaration,
 	quote,
 	handle_body,
-	has_call_expression,
-	l,
-	needs_parens
+	has_call_expression
 } from '../handlers.js';
 import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
+
+const OPERATOR_PRECEDENCE = {
+	'||': 2,
+	'&&': 3,
+	'??': 4,
+	'|': 5,
+	'^': 6,
+	'&': 7,
+	'==': 8,
+	'!=': 8,
+	'===': 8,
+	'!==': 8,
+	'<': 9,
+	'>': 9,
+	'<=': 9,
+	'>=': 9,
+	in: 9,
+	instanceof: 9,
+	'<<': 10,
+	'>>': 10,
+	'>>>': 10,
+	'+': 11,
+	'-': 11,
+	'*': 12,
+	'%': 12,
+	'/': 12,
+	'**': 13
+};
 
 export const shared = {
 	/**
@@ -63,7 +88,9 @@ export const shared = {
 	'BlockStatement|ClassBody': (node, state) => {
 		if (node.loc) {
 			const { line, column } = node.loc.start;
-			state.push(l(line, column), '{', l(line, column + 1));
+			state.location(line, column);
+			state.push('{');
+			state.location(line, column + 1);
 		} else {
 			state.push('{');
 		}
@@ -79,7 +106,10 @@ export const shared = {
 
 		if (node.loc) {
 			const { line, column } = node.loc.end;
-			state.push(l(line, column - 1), '}', l(line, column));
+
+			state.location(line, column - 1);
+			state.push('}');
+			state.location(line, column);
 		} else {
 			state.push('}');
 		}
@@ -366,75 +396,76 @@ export default {
 
 	ContinueStatement(node, state) {
 		if (node.label) {
-			state.push('continue ');
+			state.write('continue ');
 			state.visit(node.label);
-			state.push(';');
+			state.write(';');
 		} else {
-			state.push('continue;');
+			state.write('continue;');
 		}
 	},
 
 	DebuggerStatement(node, state) {
-		state.push(c('debugger', node), ';');
+		state.write('debugger', node);
+		state.write(';');
 	},
 
 	Decorator(node, state) {
-		state.push('@');
+		state.write('@');
 		state.visit(node.expression);
 		state.newline();
 	},
 
 	DoWhileStatement(node, state) {
-		state.push('do ');
+		state.write('do ');
 		state.visit(node.body);
-		state.push(' while (');
+		state.write(' while (');
 		state.visit(node.test);
-		state.push(');');
+		state.write(');');
 	},
 
 	EmptyStatement(node, state) {
-		state.push(';');
+		state.write(';');
 	},
 
 	ExportAllDeclaration(node, state) {
-		state.push('export * ');
+		state.write('export * ');
 		if (node.exported) {
-			state.push('as ');
+			state.write('as ');
 			state.visit(node.exported);
 		}
-		state.push(' from ');
+		state.write(' from ');
 		state.visit(node.source);
-		state.push(';');
+		state.write(';');
 	},
 
 	ExportDefaultDeclaration(node, state) {
-		state.push('export default ');
+		state.write('export default ');
 
 		state.visit(node.declaration);
 
 		if (node.declaration.type !== 'FunctionDeclaration') {
-			state.push(';');
+			state.write(';');
 		}
 	},
 
 	ExportNamedDeclaration(node, state) {
-		state.push('export ');
+		state.write('export ');
 
 		if (node.declaration) {
 			state.visit(node.declaration);
 			return;
 		}
 
-		state.push('{');
+		state.write('{');
 		state.sequence(node.specifiers, true);
-		state.push('}');
+		state.write('}');
 
 		if (node.source) {
-			state.push(' from ');
+			state.write(' from ');
 			state.visit(node.source);
 		}
 
-		state.push(';');
+		state.write(';');
 	},
 
 	ExportSpecifier(node, state) {
@@ -494,7 +525,7 @@ export default {
 
 	Identifier(node, state) {
 		let name = node.name;
-		state.push(c(name, node));
+		state.write(name, node);
 
 		if (node.typeAnnotation) state.visit(node.typeAnnotation);
 	},
@@ -542,12 +573,12 @@ export default {
 		if (node.importKind == 'type') state.push('type ');
 
 		if (default_specifier) {
-			state.push(c(default_specifier.local.name, default_specifier));
+			state.write(default_specifier.local.name, default_specifier);
 			if (namespace_specifier || named_specifiers.length > 0) state.push(', ');
 		}
 
 		if (namespace_specifier) {
-			state.push(c('* as ' + namespace_specifier.local.name, namespace_specifier));
+			state.write('* as ' + namespace_specifier.local.name, namespace_specifier);
 		}
 
 		if (named_specifiers.length > 0) {
@@ -612,7 +643,7 @@ export default {
 			node.raw ||
 			(typeof node.value === 'string' ? quote(node.value, state.quote) : String(node.value));
 
-		state.push(c(value, node));
+		state.write(value, node);
 	},
 
 	LogicalExpression: shared['BinaryExpression|LogicalExpression'],
@@ -706,7 +737,8 @@ export default {
 	},
 
 	PrivateIdentifier(node, state) {
-		state.push('#', c(node.name, node));
+		state.write('#');
+		state.write(node.name, node);
 	},
 
 	Program(node, state) {
@@ -828,7 +860,7 @@ export default {
 	},
 
 	Super(node, state) {
-		state.push(c('super', node));
+		state.write('super', node);
 	},
 
 	SwitchStatement(node, state) {
@@ -895,7 +927,7 @@ export default {
 	},
 
 	ThisExpression(node, state) {
-		state.push(c('this', node));
+		state.write('this', node);
 	},
 
 	ThrowStatement(node, state) {
@@ -988,4 +1020,65 @@ export default {
 			state.push(node.delegate ? `yield*` : `yield`);
 		}
 	}
-}; /** @satisfies {Handlers} */
+};
+
+/** @satisfies {Handlers} */
+
+/**
+ *
+ * @param {TSESTree.Expression | TSESTree.PrivateIdentifier} node
+ * @param {TSESTree.BinaryExpression | TSESTree.LogicalExpression} parent
+ * @param {boolean} is_right
+ * @returns
+ */
+function needs_parens(node, parent, is_right) {
+	if (node.type === 'PrivateIdentifier') return false;
+
+	// special case where logical expressions and coalesce expressions cannot be mixed,
+	// either of them need to be wrapped with parentheses
+	if (
+		node.type === 'LogicalExpression' &&
+		parent.type === 'LogicalExpression' &&
+		((parent.operator === '??' && node.operator !== '??') ||
+			(parent.operator !== '??' && node.operator === '??'))
+	) {
+		return true;
+	}
+
+	const precedence = EXPRESSIONS_PRECEDENCE[node.type];
+	const parent_precedence = EXPRESSIONS_PRECEDENCE[parent.type];
+
+	if (precedence !== parent_precedence) {
+		// Different node types
+		return (
+			(!is_right && precedence === 15 && parent_precedence === 14 && parent.operator === '**') ||
+			precedence < parent_precedence
+		);
+	}
+
+	if (precedence !== 13 && precedence !== 14) {
+		// Not a `LogicalExpression` or `BinaryExpression`
+		return false;
+	}
+
+	if (
+		/** @type {TSESTree.BinaryExpression} */ (node).operator === '**' &&
+		parent.operator === '**'
+	) {
+		// Exponentiation operator has right-to-left associativity
+		return !is_right;
+	}
+
+	if (is_right) {
+		// Parenthesis are used if both operators have the same precedence
+		return (
+			OPERATOR_PRECEDENCE[/** @type {TSESTree.BinaryExpression} */ (node).operator] <=
+			OPERATOR_PRECEDENCE[parent.operator]
+		);
+	}
+
+	return (
+		OPERATOR_PRECEDENCE[/** @type {TSESTree.BinaryExpression} */ (node).operator] <
+		OPERATOR_PRECEDENCE[parent.operator]
+	);
+}
