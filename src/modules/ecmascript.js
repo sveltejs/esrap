@@ -2,7 +2,6 @@
 /** @import { Handlers, NodeWithComments, Context } from '../types' */
 import {
 	sequence,
-	handle,
 	EXPRESSIONS_PRECEDENCE,
 	create_sequence,
 	indent,
@@ -24,7 +23,7 @@ export const shared = {
 	 */
 	'ArrayExpression|ArrayPattern': (node, state) => {
 		state.push('[');
-		sequence(/** @type {TSESTree.Node[]} */ (node.elements), state, false, handle);
+		sequence(/** @type {TSESTree.Node[]} */ (node.elements), state, false);
 		state.push(']');
 	},
 
@@ -189,7 +188,7 @@ export const shared = {
 
 		if (node.implements) {
 			state.push('implements ');
-			sequence(node.implements, state, false, handle);
+			sequence(node.implements, state, false);
 		}
 
 		state.visit(node.body);
@@ -230,7 +229,7 @@ export const shared = {
 		}
 
 		state.push('(');
-		sequence(node.params, state, false, handle);
+		sequence(node.params, state, false);
 		state.push(')');
 
 		if (node.returnType) state.visit(node.returnType);
@@ -263,7 +262,7 @@ export default {
 		if (node.async) state.push('async ');
 
 		state.push('(');
-		sequence(node.params, state, false, handle);
+		sequence(node.params, state, false);
 		state.push(') => ');
 
 		if (
@@ -676,7 +675,7 @@ export default {
 		if (node.computed) state.push(']');
 
 		state.push('(');
-		sequence(node.value.params, state, false, handle);
+		sequence(node.value.params, state, false);
 		state.push(')');
 
 		if (node.value.returnType) state.visit(node.value.returnType);
@@ -696,7 +695,7 @@ export default {
 
 	ObjectPattern(node, state) {
 		state.push('{');
-		sequence(node.properties, state, true, handle);
+		sequence(node.properties, state, true);
 		state.push('}');
 
 		if (node.typeAnnotation) state.visit(node.typeAnnotation);
@@ -739,7 +738,7 @@ export default {
 			state.visit(node.key);
 			if (node.computed) state.push(']');
 			state.push('(');
-			sequence(node.value.params, state, false, handle);
+			sequence(node.value.params, state, false);
 			state.push(')');
 
 			if (node.value.returnType) state.visit(node.value.returnType);
@@ -811,7 +810,7 @@ export default {
 
 	SequenceExpression(node, state) {
 		state.push('(');
-		sequence(node.expressions, state, false, handle);
+		sequence(node.expressions, state, false);
 		state.push(')');
 	},
 
