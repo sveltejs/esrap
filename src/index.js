@@ -104,14 +104,6 @@ export class Context {
 	child() {
 		return new Context(this.#handlers, this.quote, this.commands, this.comments);
 	}
-
-	// /**
-	//  * @param {Context} context
-	//  */
-	// append(context) {
-	// 	this.commands.push(...context.commands);
-	// 	this.multiline ||= context.multiline;
-	// }
 }
 
 /**
