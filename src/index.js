@@ -75,16 +75,16 @@ export class Context {
 			let error = [`Failed to find an implementation for ${node.type}`];
 
 			if (node.type.includes('JSX')) {
-				error.push(`hint: perhaps you need to import esrap/languages/jsx`);
+				error.push(`hint: perhaps you need to use 'esrap/languages/jsx'`);
 			}
 			if (node.type.includes('TS')) {
-				error.push(`hint: perhaps you need to import esrap/languages/ts`);
+				error.push(`hint: perhaps you need to use 'esrap/languages/ts'`);
 			}
 			if (node.type.includes('TSX')) {
-				error.push(`hint: perhaps you need to import esrap/languages/js`);
+				error.push(`hint: perhaps you need to use 'esrap/languages/tsx'`);
 			}
 			if (Object.keys(this.#handlers).length < 25) {
-				error.push(`hint: perhaps you added custom handlers, but forgot to use esrap/languages/js`);
+				error.push(`hint: perhaps you added custom handlers, but forgot to use 'esrap/languages/js'`);
 			}
 
 			throw new Error(error.join('\n'));
