@@ -1,4 +1,4 @@
-/** @import { Handlers } from '../types' */
+/** @import { Handlers } from '../types.js' */
 import { TSESTree } from '@typescript-eslint/types';
 import { sequence, EXPRESSIONS_PRECEDENCE, newline, handle_body } from '../handlers.js';
 
