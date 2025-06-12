@@ -1,6 +1,8 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, Dedent, Location, Indent, Newline, NodeWithComments, State } from './types' */
+/** @import { Command, Dedent, Location, Indent, Newline, NodeWithComments } from './types' */
 /** @import { Context } from './index.js'; */
+
+import { EXPRESSIONS_PRECEDENCE } from './languages/utils/precedence.js';
 
 /** @type {Newline} */
 export const newline = { type: 'Newline' };
@@ -138,45 +140,7 @@ const OPERATOR_PRECEDENCE = {
 	'**': 13
 };
 
-/** @type {Record<TSESTree.Expression['type'] | 'Super' | 'RestElement', number>} */
-export const EXPRESSIONS_PRECEDENCE = {
-	JSXFragment: 20,
-	JSXElement: 20,
-	ArrayPattern: 20,
-	ObjectPattern: 20,
-	ArrayExpression: 20,
-	TaggedTemplateExpression: 20,
-	ThisExpression: 20,
-	Identifier: 20,
-	TemplateLiteral: 20,
-	Super: 20,
-	SequenceExpression: 20,
-	MemberExpression: 19,
-	MetaProperty: 19,
-	CallExpression: 19,
-	ChainExpression: 19,
-	ImportExpression: 19,
-	NewExpression: 19,
-	Literal: 18,
-	TSSatisfiesExpression: 18,
-	TSInstantiationExpression: 18,
-	TSNonNullExpression: 18,
-	TSTypeAssertion: 18,
-	AwaitExpression: 17,
-	ClassExpression: 17,
-	FunctionExpression: 17,
-	ObjectExpression: 17,
-	TSAsExpression: 16,
-	UpdateExpression: 16,
-	UnaryExpression: 15,
-	BinaryExpression: 14,
-	LogicalExpression: 13,
-	ConditionalExpression: 4,
-	ArrowFunctionExpression: 3,
-	AssignmentExpression: 3,
-	YieldExpression: 2,
-	RestElement: 1
-};
+
 
 /**
  *

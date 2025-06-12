@@ -1,7 +1,6 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Handlers, NodeWithComments, Context } from '../types.js' */
 import {
-	EXPRESSIONS_PRECEDENCE,
 	create_sequence,
 	indent,
 	newline,
@@ -14,6 +13,7 @@ import {
 	l,
 	needs_parens
 } from '../handlers.js';
+import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
 
 export const shared = {
 	/**
