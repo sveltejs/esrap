@@ -1,6 +1,5 @@
 /** @import { Command, Dedent, Handlers, Indent, Newline, NodeWithComments, PrintOptions } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
-import js from './languages/js.js';
 import ts from './languages/ts.js';
 import { prepend_comments } from './handlers.js';
 
