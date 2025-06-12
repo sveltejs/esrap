@@ -7,5 +7,5 @@
   "sourcesContent": [
     "console.log(<>\n    <div>\n        <img src=\"cat.png\" alt={\"An image of a flying cat\"} />\n        Time since last cat incident: {\"5 days\"}\n    </div>\n</>)"
   ],
-  "mappings": "AAAA,OAAO,CAAC,GAAG;;;;WAEM,SAAS,MAAM,0BAA0B;;;GACnB,QAAQ;;;;;"
+  "mappings": "AAAA,OAAO,CAAC,GAAG;;iBAEM,SAAS,MAAM,0BAA0B;uCACnB,QAAQ;;"
 }

@@ -1,7 +1,7 @@
 /** @import { Handlers } from '../types' */
-import { newline } from '../handlers.js';
+import { TSESTree } from '@typescript-eslint/types';
 
-/** @type {Handlers} */
+/** @type {Handlers<TSESTree.Node>} */
 export default {
 	JSXElement(node, state) {
 		state.visit(node.openingElement);
@@ -12,14 +12,10 @@ export default {
 
 		for (const child of node.children) {
 			state.visit(child);
-			if (child !== node.children.at(-1)) {
-				state.commands.push(newline);
-			}
 		}
 
 		if (node.children.length > 0) {
 			state.dedent();
-			state.commands.push(newline);
 		}
 
 		if (node.closingElement) {
@@ -82,10 +78,6 @@ export default {
 
 		for (const child of node.children) {
 			state.visit(child);
-
-			if (child !== node.children.at(-1)) {
-				state.commands.push(newline);
-			}
 		}
 
 		if (node.children.length > 0) {
