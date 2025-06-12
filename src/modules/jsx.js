@@ -1,37 +1,39 @@
 /** @import { Handlers } from '../types' */
-import { handle, indent, dedent, newline } from '../handlers.js';
+import { newline } from '../handlers.js';
 
 /** @type {Handlers} */
 export default {
 	JSXElement(node, state) {
-		handle(node.openingElement, state);
+		state.visit(node.openingElement);
 
 		if (node.children.length > 0) {
-			state.commands.push(indent);
+			state.indent();
 		}
+
 		for (const child of node.children) {
-			handle(child, state);
+			state.visit(child);
 			if (child !== node.children.at(-1)) {
 				state.commands.push(newline);
 			}
 		}
+
 		if (node.children.length > 0) {
-			state.commands.push(dedent);
+			state.dedent();
 			state.commands.push(newline);
 		}
 
 		if (node.closingElement) {
-			handle(node.closingElement, state);
+			state.visit(node.closingElement);
 		}
 	},
 	JSXOpeningElement(node, state) {
 		state.commands.push('<');
 
-		handle(node.name, state);
+		state.visit(node.name);
 
 		for (const attribute of node.attributes) {
 			state.commands.push(' ');
-			handle(attribute, state);
+			state.visit(attribute);
 		}
 
 		if (node.selfClosing) {
@@ -43,52 +45,54 @@ export default {
 	JSXClosingElement(node, state) {
 		state.commands.push('</');
 
-		handle(node.name, state);
+		state.visit(node.name);
 
 		state.commands.push('>');
 	},
 	JSXNamespacedName(node, state) {
-		handle(node.namespace, state);
+		state.visit(node.namespace);
 		state.commands.push(':');
-		handle(node.name, state);
+		state.visit(node.name);
 	},
 	JSXIdentifier(node, state) {
 		state.commands.push(node.name);
 	},
 	JSXMemberExpression(node, state) {
-		handle(node.object, state);
+		state.visit(node.object);
 		state.commands.push('.');
-		handle(node.property, state);
+		state.visit(node.property);
 	},
 	JSXText(node, state) {
 		state.commands.push(node.value);
 	},
 	JSXAttribute(node, state) {
-		handle(node.name, state);
+		state.visit(node.name);
 		if (node.value) {
 			state.commands.push('=');
-			handle(node.value, state);
+			state.visit(node.value);
 		}
 	},
 	JSXEmptyExpression(node, state) {},
 	JSXFragment(node, state) {
-		handle(node.openingFragment, state);
+		state.visit(node.openingFragment);
 
 		if (node.children.length > 0) {
-			state.commands.push(indent);
+			state.indent();
 		}
+
 		for (const child of node.children) {
-			handle(child, state);
+			state.visit(child);
 
 			if (child !== node.children.at(-1)) {
 				state.commands.push(newline);
 			}
 		}
+
 		if (node.children.length > 0) {
-			state.commands.push(dedent);
+			state.dedent();
 		}
 
-		handle(node.closingFragment, state);
+		state.visit(node.closingFragment);
 	},
 	JSXOpeningFragment(node, state) {
 		state.commands.push('<>');
@@ -99,21 +103,21 @@ export default {
 	JSXExpressionContainer(node, state) {
 		state.commands.push('{');
 
-		handle(node.expression, state);
+		state.visit(node.expression);
 
 		state.commands.push('}');
 	},
 	JSXSpreadChild(node, state) {
 		state.commands.push('{...');
 
-		handle(node.expression, state);
+		state.visit(node.expression);
 
 		state.commands.push('}');
 	},
 	JSXSpreadAttribute(node, state) {
 		state.commands.push('{...');
 
-		handle(node.argument, state);
+		state.visit(node.argument);
 
 		state.commands.push('}');
 	}

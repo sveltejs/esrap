@@ -1,5 +1,6 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Command, Dedent, Location, Indent, Newline, NodeWithComments, State } from './types' */
+/** @import { Context } from './index.js'; */
 
 /** @type {Newline} */
 export const newline = { type: 'Newline' };
@@ -41,46 +42,6 @@ function measure(commands, from, to = commands.length) {
 }
 
 /**
- * @param {TSESTree.Node} node
- * @param {State} state
- */
-export function handle(node, state) {
-	const node_with_comments = /** @type {NodeWithComments} */ (node);
-
-	const handler = state.handlers[node.type];
-
-	if (!handler) {
-		let error = [`Failed to find an implementation for ${node.type}`];
-
-		if (node.type.includes('JSX')) {
-			error.push(`hint: perhaps you need to import esrap/modules/jsx`);
-		}
-		if (node.type.includes('TS')) {
-			error.push(`hint: perhaps you need to import esrap/modules/ts`);
-		}
-		if (node.type.includes('TSX')) {
-			error.push(`hint: perhaps you need to import esrap/modules/js`);
-		}
-		if (Object.keys(state.handlers).length < 25) {
-			error.push(`hint: perhaps you added custom handlers, but forgot to use esrap/modules/js`);
-		}
-
-		throw new Error(error.join('\n'));
-	}
-
-	if (node_with_comments.leadingComments) {
-		prepend_comments(node_with_comments.leadingComments, state, false);
-	}
-
-	//@ts-expect-error Expression produces a union type that is too complex to represent.
-	handler(node, state);
-
-	if (node_with_comments.trailingComments) {
-		state.comments.push(node_with_comments.trailingComments[0]); // there is only ever one
-	}
-}
-
-/**
  * @param {number} line
  * @param {number} column
  * @returns {Location}
@@ -110,17 +71,17 @@ export function c(content, node) {
 
 /**
  * @param {TSESTree.Comment[]} comments
- * @param {State} state
+ * @param {Context} context
  * @param {boolean} newlines
  */
-function prepend_comments(comments, state, newlines) {
+export function prepend_comments(comments, context, newlines) {
 	for (const comment of comments) {
-		state.commands.push({ type: 'Comment', comment });
+		context.push({ type: 'Comment', comment });
 
 		if (newlines || comment.type === 'Line' || /\n/.test(comment.value)) {
-			state.commands.push(newline);
+			context.newline();
 		} else {
-			state.commands.push(' ');
+			context.push(' ');
 		}
 	}
 }
@@ -298,12 +259,13 @@ const grouped_expression_types = [
 
 /**
  * @param {TSESTree.Node[]} nodes
- * @param {State} state
+ * @param {Context} context
  */
-export const handle_body = (nodes, state) => {
+export const handle_body = (nodes, context) => {
 	let last_statement = /** @type {TSESTree.Node} */ ({
 		type: 'EmptyStatement'
 	});
+
 	let first = true;
 	let needs_margin = false;
 
@@ -312,7 +274,11 @@ export const handle_body = (nodes, state) => {
 
 		const margin = create_sequence();
 
-		if (!first) state.commands.push(margin, newline);
+		if (!first) {
+			context.push(margin);
+			context.newline();
+		}
+
 		first = false;
 
 		const statement_with_comments = /** @type {NodeWithComments} */ (statement);
@@ -320,14 +286,14 @@ export const handle_body = (nodes, state) => {
 		delete statement_with_comments.leadingComments;
 
 		if (leading_comments && leading_comments.length > 0) {
-			prepend_comments(leading_comments, state, true);
+			prepend_comments(leading_comments, context, true);
 		}
 
-		const child_state = { ...state, multiline: false };
-		handle(statement, child_state);
+		const child_context = context.child();
+		child_context.visit(statement);
 
 		if (
-			child_state.multiline ||
+			child_context.multiline ||
 			needs_margin ||
 			((grouped_expression_types.includes(statement.type) ||
 				grouped_expression_types.includes(last_statement.type)) &&
@@ -338,48 +304,49 @@ export const handle_body = (nodes, state) => {
 
 		let add_newline = false;
 
-		while (state.comments.length) {
-			const comment = /** @type {TSESTree.Comment} */ (state.comments.shift());
+		while (context.comments.length) {
+			const comment = /** @type {TSESTree.Comment} */ (context.comments.shift());
 
-			state.commands.push(add_newline ? newline : ' ', { type: 'Comment', comment });
+			context.commands.push(add_newline ? newline : ' ', { type: 'Comment', comment });
 			add_newline = comment.type === 'Line';
 		}
 
-		needs_margin = child_state.multiline;
+		needs_margin = child_context.multiline;
 		last_statement = statement;
 	}
 };
 
 /**
  * @param {TSESTree.VariableDeclaration} node
- * @param {State} state
+ * @param {Context} context
  */
-export const handle_var_declaration = (node, state) => {
-	const index = state.commands.length;
+export const handle_var_declaration = (node, context) => {
+	const index = context.commands.length;
 
 	const open = create_sequence();
 	const join = create_sequence();
-	const child_state = { ...state, multiline: false };
+	const child_context = context.child();
 
-	state.commands.push(`${node.kind} `, open);
+	context.push(`${node.kind} `, open);
 
 	let first = true;
 
 	for (const d of node.declarations) {
-		if (!first) state.commands.push(join);
+		if (!first) context.commands.push(join);
 		first = false;
 
-		handle(d, child_state);
+		child_context.visit(d);
 	}
 
 	const multiline =
-		child_state.multiline || (node.declarations.length > 1 && measure(state.commands, index) > 50);
+		child_context.multiline ||
+		(node.declarations.length > 1 && measure(context.commands, index) > 50);
 
 	if (multiline) {
-		state.multiline = true;
+		context.multiline = true;
 		if (node.declarations.length > 1) open.push(indent);
 		join.push(',', newline);
-		if (node.declarations.length > 1) state.commands.push(dedent);
+		if (node.declarations.length > 1) context.dedent();
 	} else {
 		join.push(', ');
 	}
@@ -388,11 +355,10 @@ export const handle_var_declaration = (node, state) => {
 /**
  * @template {TSESTree.Node} T
  * @param {Array<T | null>} nodes
- * @param {State} state
+ * @param {Context} state
  * @param {boolean} spaces
- * @param {(node: T, state: State) => void} fn
  */
-export function sequence(nodes, state, spaces, fn, separator = ',') {
+export function sequence(nodes, state, spaces, separator = ',') {
 	if (nodes.length === 0) return;
 
 	const index = state.commands.length;
@@ -403,7 +369,7 @@ export function sequence(nodes, state, spaces, fn, separator = ',') {
 
 	state.commands.push(open);
 
-	const child_state = { ...state, multiline: false };
+	const child_state = state.child();
 
 	let prev;
 
@@ -417,7 +383,7 @@ export function sequence(nodes, state, spaces, fn, separator = ',') {
 				state.commands.push(join);
 			}
 
-			fn(node, child_state);
+			child_state.visit(node);
 
 			if (!is_last) {
 				state.commands.push(separator);

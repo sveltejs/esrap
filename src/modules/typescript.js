@@ -1,16 +1,9 @@
 /** @import { Handlers } from '../types' */
-import {
-	sequence,
-	handle,
-	EXPRESSIONS_PRECEDENCE,
-	dedent,
-	newline,
-	indent,
-	handle_body
-} from '../handlers.js';
+import { TSESTree } from '@typescript-eslint/types';
+import { sequence, EXPRESSIONS_PRECEDENCE, newline, handle_body } from '../handlers.js';
 
 /**
- * @type {Handlers}
+ * @type {Handlers<TSESTree.Node>}
  */
 export default {
 	TSNumberKeyword(node, state) {
@@ -44,38 +37,38 @@ export default {
 		state.commands.push('undefined');
 	},
 	TSArrayType(node, state) {
-		handle(node.elementType, state);
+		state.visit(node.elementType);
 		state.commands.push('[]');
 	},
 	TSTypeAnnotation(node, state) {
 		state.commands.push(': ');
-		handle(node.typeAnnotation, state);
+		state.visit(node.typeAnnotation);
 	},
 	TSTypeLiteral(node, state) {
 		state.commands.push('{ ');
-		sequence(node.members, state, false, handle, ';');
+		sequence(node.members, state, false, ';');
 		state.commands.push(' }');
 	},
 	TSPropertySignature(node, state) {
-		handle(node.key, state);
+		state.visit(node.key);
 		if (node.optional) state.commands.push('?');
-		if (node.typeAnnotation) handle(node.typeAnnotation, state);
+		if (node.typeAnnotation) state.visit(node.typeAnnotation);
 	},
 	TSTypeReference(node, state) {
-		handle(node.typeName, state);
+		state.visit(node.typeName);
 
 		if (node.typeArguments) {
-			handle(node.typeArguments, state);
+			state.visit(node.typeArguments);
 		}
 	},
 	//@ts-expect-error I don't know why, but this is relied upon in the tests, but doesn't exist in the TSESTree types
 	TSExpressionWithTypeArguments(node, state) {
-		handle(node.expression, state);
+		state.visit(node.expression);
 	},
 	TSTypeParameterInstantiation(node, state) {
 		state.commands.push('<');
 		for (let i = 0; i < node.params.length; i++) {
-			handle(node.params[i], state);
+			state.visit(node.params[i]);
 			if (i != node.params.length - 1) state.commands.push(', ');
 		}
 		state.commands.push('>');
@@ -83,7 +76,7 @@ export default {
 	TSTypeParameterDeclaration(node, state) {
 		state.commands.push('<');
 		for (let i = 0; i < node.params.length; i++) {
-			handle(node.params[i], state);
+			state.visit(node.params[i]);
 			if (i != node.params.length - 1) state.commands.push(', ');
 		}
 		state.commands.push('>');
@@ -94,96 +87,96 @@ export default {
 
 		if (node.constraint) {
 			state.commands.push(' extends ');
-			handle(node.constraint, state);
+			state.visit(node.constraint);
 		}
 	},
 	TSTypeQuery(node, state) {
 		state.commands.push('typeof ');
-		handle(node.exprName, state);
+		state.visit(node.exprName);
 	},
 	TSEnumMember(node, state) {
-		handle(node.id, state);
+		state.visit(node.id);
 		if (node.initializer) {
 			state.commands.push(' = ');
-			handle(node.initializer, state);
+			state.visit(node.initializer);
 		}
 	},
 	TSFunctionType(node, state) {
-		if (node.typeParameters) handle(node.typeParameters, state);
+		if (node.typeParameters) state.visit(node.typeParameters);
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		const parameters = node.parameters;
 		state.commands.push('(');
-		sequence(parameters, state, false, handle);
+		sequence(parameters, state, false);
 
 		state.commands.push(') => ');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-		handle(node.typeAnnotation.typeAnnotation, state);
+		state.visit(node.typeAnnotation.typeAnnotation);
 	},
 	TSIndexSignature(node, state) {
 		const indexParameters = node.parameters;
 		state.commands.push('[');
-		sequence(indexParameters, state, false, handle);
+		sequence(indexParameters, state, false);
 		state.commands.push(']');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-		handle(node.typeAnnotation, state);
+		state.visit(node.typeAnnotation);
 	},
 	TSMethodSignature(node, state) {
-		handle(node.key, state);
+		state.visit(node.key);
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		const parametersSignature = node.parameters;
 		state.commands.push('(');
-		sequence(parametersSignature, state, false, handle);
+		sequence(parametersSignature, state, false);
 		state.commands.push(')');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-		handle(node.typeAnnotation, state);
+		state.visit(node.typeAnnotation);
 	},
 	TSTupleType(node, state) {
 		state.commands.push('[');
-		sequence(node.elementTypes, state, false, handle);
+		sequence(node.elementTypes, state, false);
 		state.commands.push(']');
 	},
 	TSNamedTupleMember(node, state) {
-		handle(node.label, state);
+		state.visit(node.label);
 		state.commands.push(': ');
-		handle(node.elementType, state);
+		state.visit(node.elementType);
 	},
 	TSUnionType(node, state) {
-		sequence(node.types, state, false, handle, ' |');
+		sequence(node.types, state, false, ' |');
 	},
 	TSIntersectionType(node, state) {
-		sequence(node.types, state, false, handle, ' &');
+		sequence(node.types, state, false, ' &');
 	},
 	TSLiteralType(node, state) {
-		handle(node.literal, state);
+		state.visit(node.literal);
 	},
 	TSConditionalType(node, state) {
-		handle(node.checkType, state);
+		state.visit(node.checkType);
 		state.commands.push(' extends ');
-		handle(node.extendsType, state);
+		state.visit(node.extendsType);
 		state.commands.push(' ? ');
-		handle(node.trueType, state);
+		state.visit(node.trueType);
 		state.commands.push(' : ');
-		handle(node.falseType, state);
+		state.visit(node.falseType);
 	},
 	TSIndexedAccessType(node, state) {
-		handle(node.objectType, state);
+		state.visit(node.objectType);
 		state.commands.push('[');
-		handle(node.indexType, state);
+		state.visit(node.indexType);
 		state.commands.push(']');
 	},
 	TSImportType(node, state) {
 		state.commands.push('import(');
-		handle(node.argument, state);
+		state.visit(node.argument);
 		state.commands.push(')');
 
 		if (node.qualifier) {
 			state.commands.push('.');
-			handle(node.qualifier, state);
+			state.visit(node.qualifier);
 		}
 	},
 
@@ -194,59 +187,65 @@ export default {
 
 			if (needs_parens) {
 				state.commands.push('(');
-				handle(node.expression, state);
+				state.visit(node.expression);
 				state.commands.push(')');
 			} else {
-				handle(node.expression, state);
+				state.visit(node.expression);
 			}
 		}
 		state.commands.push(' as ');
-		handle(node.typeAnnotation, state);
+		state.visit(node.typeAnnotation);
 	},
 
 	TSEnumDeclaration(node, state) {
 		state.commands.push('enum ');
-		handle(node.id, state);
-		state.commands.push(' {', indent, newline);
-		sequence(node.members, state, false, handle);
-		state.commands.push(dedent, newline, '}', newline);
+		state.visit(node.id);
+		state.commands.push(' {');
+		state.indent();
+		state.commands.push(newline);
+		sequence(node.members, state, false);
+		state.dedent();
+		state.commands.push(newline, '}', newline);
 	},
 
 	TSModuleBlock(node, state) {
-		state.commands.push(' {', indent, newline);
+		state.commands.push(' {');
+		state.indent();
+		state.commands.push(newline);
 		handle_body(node.body, state);
-		state.commands.push(dedent, newline, '}');
+		state.dedent();
+		state.commands.push(newline, '}');
 	},
 
 	TSModuleDeclaration(node, state) {
 		if (node.declare) state.commands.push('declare ');
 		else state.commands.push('namespace ');
 
-		handle(node.id, state);
+		state.visit(node.id);
 
 		if (!node.body) return;
-		handle(node.body, state);
+		state.visit(node.body);
 	},
 
 	TSNonNullExpression(node, state) {
-		handle(node.expression, state);
+		state.visit(node.expression);
 		state.commands.push('!');
 	},
 
 	TSInterfaceBody(node, state) {
-		sequence(node.body, state, true, handle, ';');
+		sequence(node.body, state, true, ';');
 	},
 
 	TSInterfaceDeclaration(node, state) {
 		state.commands.push('interface ');
-		handle(node.id, state);
-		if (node.typeParameters) handle(node.typeParameters, state);
+		state.visit(node.id);
+		if (node.typeParameters) state.visit(node.typeParameters);
 		if (node.extends) {
 			state.commands.push(' extends ');
-			sequence(node.extends, state, false, handle);
+			sequence(node.extends, state, false);
 		}
 		state.commands.push(' {');
-		handle(node.body, state);
+		state.visit(node.body);
 		state.commands.push('}');
 	},
 
@@ -257,28 +256,28 @@ export default {
 
 			if (needs_parens) {
 				state.commands.push('(');
-				handle(node.expression, state);
+				state.visit(node.expression);
 				state.commands.push(')');
 			} else {
-				handle(node.expression, state);
+				state.visit(node.expression);
 			}
 		}
 		state.commands.push(' satisfies ');
-		handle(node.typeAnnotation, state);
+		state.visit(node.typeAnnotation);
 	},
 
 	TSTypeAliasDeclaration(node, state) {
 		state.commands.push('type ');
-		handle(node.id, state);
-		if (node.typeParameters) handle(node.typeParameters, state);
+		state.visit(node.id);
+		if (node.typeParameters) state.visit(node.typeParameters);
 		state.commands.push(' = ');
-		handle(node.typeAnnotation, state);
+		state.visit(node.typeAnnotation);
 		state.commands.push(';');
 	},
 
 	TSQualifiedName(node, state) {
-		handle(node.left, state);
+		state.visit(node.left);
 		state.commands.push('.');
-		handle(node.right, state);
+		state.visit(node.right);
 	}
 };

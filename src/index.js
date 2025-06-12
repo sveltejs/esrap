@@ -1,9 +1,8 @@
-/** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, PrintOptions, State } from './types' */
+/** @import { Command, Dedent, Handlers, Indent, Newline, NodeWithComments, PrintOptions } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
 import ecmascript from './modules/ecmascript.js';
 import typescript from './modules/typescript.js';
-import { handle } from './handlers.js';
+import { prepend_comments } from './handlers.js';
 
 /** @type {(str: string) => string} str */
 let btoa = () => {
@@ -16,6 +15,104 @@ if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
 } else if (typeof Buffer === 'function') {
 	// @ts-expect-error
 	btoa = (str) => Buffer.from(str, 'utf-8').toString('base64');
+}
+
+/** @type {Newline} */
+export const newline = { type: 'Newline' };
+
+/** @type {Indent} */
+export const indent = { type: 'Indent' };
+
+/** @type {Dedent} */
+export const dedent = { type: 'Dedent' };
+
+export class Context {
+	#handlers;
+
+	multiline = false;
+
+	/**
+	 *
+	 * @param {Handlers} handlers
+	 * @param {'"' | "'"} quote
+	 * @param {Command[]} commands
+	 * @param {any[]} comments
+	 */
+	constructor(handlers, quote, commands = [], comments = []) {
+		this.#handlers = handlers;
+		this.quote = quote;
+		this.commands = commands;
+		this.comments = comments;
+	}
+
+	indent() {
+		this.commands.push(indent);
+	}
+
+	dedent() {
+		this.commands.push(dedent);
+	}
+
+	newline() {
+		this.commands.push(newline);
+	}
+
+	/**
+	 * @param {Command[]} commands
+	 */
+	push(...commands) {
+		this.commands.push(...commands);
+	}
+
+	/**
+	 * @param {{ type: string }} node
+	 */
+	visit(node) {
+		const node_with_comments = /** @type {NodeWithComments} */ (node);
+
+		const handler = this.#handlers[node.type];
+
+		if (!handler) {
+			let error = [`Failed to find an implementation for ${node.type}`];
+
+			if (node.type.includes('JSX')) {
+				error.push(`hint: perhaps you need to import esrap/modules/jsx`);
+			}
+			if (node.type.includes('TS')) {
+				error.push(`hint: perhaps you need to import esrap/modules/ts`);
+			}
+			if (node.type.includes('TSX')) {
+				error.push(`hint: perhaps you need to import esrap/modules/js`);
+			}
+			if (Object.keys(this.#handlers).length < 25) {
+				error.push(`hint: perhaps you added custom handlers, but forgot to use esrap/modules/js`);
+			}
+
+			throw new Error(error.join('\n'));
+		}
+
+		if (node_with_comments.leadingComments) {
+			prepend_comments(node_with_comments.leadingComments, this, false);
+		}
+
+		handler(node, this);
+
+		if (node_with_comments.trailingComments) {
+			this.comments.push(node_with_comments.trailingComments[0]); // there is only ever one
+		}
+	}
+
+	child() {
+		return new Context(this.#handlers, this.quote, this.commands, this.comments);
+	}
+
+	// /**
+	//  * @param {Context} context
+	//  */
+	// append(context) {
+	// 	this.commands.push(...context.commands);
+	// 	this.multiline ||= context.multiline;
+	// }
 }
 
 /**
@@ -35,16 +132,12 @@ export function print(node, opts = {}) {
 		);
 	}
 
-	/** @type {State} */
-	const state = {
-		commands: [],
-		comments: [],
-		multiline: false,
-		quote: opts.quotes === 'double' ? '"' : "'",
-		handlers: opts.handlers ?? { ...ecmascript, ...typescript }
-	};
+	const context = new Context(
+		opts.handlers ?? /** @type {Handlers} */ ({ ...ecmascript, ...typescript }),
+		opts.quotes === 'double' ? '"' : "'"
+	);
 
-	handle(/** @type {TSESTree.Node} */ (node), state);
+	context.visit(node);
 
 	/** @typedef {[number, number, number, number]} Segment */
 
@@ -122,8 +215,8 @@ export function print(node, opts = {}) {
 		}
 	}
 
-	for (let i = 0; i < state.commands.length; i += 1) {
-		run(state.commands[i]);
+	for (let i = 0; i < context.commands.length; i += 1) {
+		run(context.commands[i]);
 	}
 
 	mappings.push(current_line);

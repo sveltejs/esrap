@@ -1,9 +1,12 @@
 import { TSESTree } from '@typescript-eslint/types';
+import type { Context } from './index.js';
 
-type Handler<T> = (node: T, state: State) => undefined;
+type Handler<T> = (node: T, context: Context) => undefined;
 
-export type Handlers = {
-	[T in TSESTree.Node['type']]?: Handler<Extract<TSESTree.Node, { type: T }>>;
+export { Context };
+
+export type Handlers<T extends { type: string } = { type: string }> = {
+	[Type in T['type']]?: Handler<Extract<T, { type: Type }>>;
 };
 
 export type TypeAnnotationNodes =
@@ -30,14 +33,6 @@ export type NodeWithComments = {
 	leadingComments?: TSESTree.Comment[] | undefined;
 	trailingComments?: TSESTree.Comment[] | undefined;
 } & TSESTree.Node;
-
-export interface State {
-	commands: Command[];
-	comments: TSESTree.Comment[];
-	multiline: boolean;
-	handlers: Handlers;
-	quote: "'" | '"';
-}
 
 export interface Location {
 	type: 'Location';
