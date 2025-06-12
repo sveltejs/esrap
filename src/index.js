@@ -1,7 +1,8 @@
+/** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Command, Dedent, Handlers, Indent, Newline, NodeWithComments, PrintOptions } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
 import ts from './languages/ts.js';
-import { prepend_comments } from './handlers.js';
+import { create_sequence, prepend_comments } from './handlers.js';
 
 /** @type {(str: string) => string} str */
 let btoa = () => {
@@ -99,6 +100,104 @@ export class Context {
 		if (node_with_comments.trailingComments) {
 			this.comments.push(node_with_comments.trailingComments[0]); // there is only ever one
 		}
+	}
+
+	/**
+	 * @param {Array<{ type: string }>} nodes
+	 * @param {boolean} spaces
+	 */
+	sequence(nodes, spaces, separator = ',') {
+		if (nodes.length === 0) return;
+
+		const index = this.commands.length;
+
+		const open = create_sequence();
+		const join = create_sequence();
+		const close = create_sequence();
+
+		this.commands.push(open);
+
+		const child_state = this.child();
+
+		let prev;
+
+		for (let i = 0; i < nodes.length; i += 1) {
+			const node = nodes[i];
+			const is_first = i === 0;
+			const is_last = i === nodes.length - 1;
+
+			if (node) {
+				if (!is_first && !prev) {
+					this.commands.push(join);
+				}
+
+				child_state.visit(node);
+
+				if (!is_last) {
+					this.commands.push(separator);
+				}
+
+				if (this.comments.length > 0) {
+					this.commands.push(' ');
+
+					while (this.comments.length) {
+						const comment = /** @type {TSESTree.Comment} */ (this.comments.shift());
+						this.commands.push({ type: 'Comment', comment });
+						if (!is_last) this.commands.push(join);
+					}
+
+					child_state.multiline = true;
+				} else {
+					if (!is_last) this.commands.push(join);
+				}
+			} else {
+				// This is only used for ArrayPattern and ArrayExpression, but
+				// it makes more sense to have the logic here than there, because
+				// otherwise we'd duplicate a lot more stuff
+				this.commands.push(separator);
+			}
+
+			prev = node;
+		}
+
+		this.commands.push(close);
+
+		const multiline = child_state.multiline || this.measure(this.commands, index) > 50;
+
+		if (multiline) {
+			this.multiline = true;
+
+			open.push(indent, newline);
+			join.push(newline);
+			close.push(dedent, newline);
+		} else {
+			if (spaces) open.push(' ');
+			join.push(' ');
+			if (spaces) close.push(' ');
+		}
+	}
+
+	/**
+	 * @param {Command[]} commands
+	 * @param {number} from
+	 * @param {number} [to]
+	 * @returns
+	 */
+	measure(commands, from, to = commands.length) {
+		let total = 0;
+		for (let i = from; i < to; i += 1) {
+			const command = commands[i];
+			if (typeof command === 'string') {
+				total += command.length;
+			} else if (Array.isArray(command)) {
+				total +=
+					command.length === 0
+						? 2 // assume this is ', '
+						: this.measure(command, 0);
+			}
+		}
+
+		return total;
 	}
 
 	child() {

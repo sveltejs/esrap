@@ -1,6 +1,6 @@
 /** @import { Handlers } from '../types.js' */
 import { TSESTree } from '@typescript-eslint/types';
-import { sequence, EXPRESSIONS_PRECEDENCE, newline, handle_body } from '../handlers.js';
+import { sequence, EXPRESSIONS_PRECEDENCE, handle_body } from '../handlers.js';
 import js from './js.js';
 
 /**
@@ -48,7 +48,7 @@ export default {
 	},
 	TSTypeLiteral(node, state) {
 		state.commands.push('{ ');
-		sequence(node.members, state, false, ';');
+		state.sequence(node.members, false, ';');
 		state.commands.push(' }');
 	},
 	TSPropertySignature(node, state) {
@@ -109,7 +109,7 @@ export default {
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		const parameters = node.parameters;
 		state.commands.push('(');
-		sequence(parameters, state, false);
+		state.sequence(parameters, false);
 
 		state.commands.push(') => ');
 
@@ -119,7 +119,7 @@ export default {
 	TSIndexSignature(node, state) {
 		const indexParameters = node.parameters;
 		state.commands.push('[');
-		sequence(indexParameters, state, false);
+		state.sequence(indexParameters, false);
 		state.commands.push(']');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
@@ -131,7 +131,7 @@ export default {
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		const parametersSignature = node.parameters;
 		state.commands.push('(');
-		sequence(parametersSignature, state, false);
+		state.sequence(parametersSignature, false);
 		state.commands.push(')');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
@@ -139,7 +139,7 @@ export default {
 	},
 	TSTupleType(node, state) {
 		state.commands.push('[');
-		sequence(node.elementTypes, state, false);
+		state.sequence(node.elementTypes, false);
 		state.commands.push(']');
 	},
 	TSNamedTupleMember(node, state) {
@@ -148,10 +148,10 @@ export default {
 		state.visit(node.elementType);
 	},
 	TSUnionType(node, state) {
-		sequence(node.types, state, false, ' |');
+		state.sequence(node.types, false, ' |');
 	},
 	TSIntersectionType(node, state) {
-		sequence(node.types, state, false, ' &');
+		state.sequence(node.types, false, ' &');
 	},
 	TSLiteralType(node, state) {
 		state.visit(node.literal);
@@ -204,19 +204,22 @@ export default {
 		state.visit(node.id);
 		state.commands.push(' {');
 		state.indent();
-		state.commands.push(newline);
-		sequence(node.members, state, false);
+		state.newline();
+		state.sequence(node.members, false);
 		state.dedent();
-		state.commands.push(newline, '}', newline);
+		state.newline();
+		state.push('}');
+		state.newline();
 	},
 
 	TSModuleBlock(node, state) {
 		state.commands.push(' {');
 		state.indent();
-		state.commands.push(newline);
+		state.newline();
 		handle_body(node.body, state);
 		state.dedent();
-		state.commands.push(newline, '}');
+		state.newline();
+		state.push('}');
 	},
 
 	TSModuleDeclaration(node, state) {
@@ -235,7 +238,7 @@ export default {
 	},
 
 	TSInterfaceBody(node, state) {
-		sequence(node.body, state, true, ';');
+		state.sequence(node.body, true, ';');
 	},
 
 	TSInterfaceDeclaration(node, state) {
@@ -244,7 +247,7 @@ export default {
 		if (node.typeParameters) state.visit(node.typeParameters);
 		if (node.extends) {
 			state.commands.push(' extends ');
-			sequence(node.extends, state, false);
+			state.sequence(node.extends, false);
 		}
 		state.commands.push(' {');
 		state.visit(node.body);

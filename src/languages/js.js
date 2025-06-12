@@ -23,7 +23,7 @@ export const shared = {
 	 */
 	'ArrayExpression|ArrayPattern': (node, state) => {
 		state.push('[');
-		sequence(/** @type {TSESTree.Node[]} */ (node.elements), state, false);
+		state.sequence(/** @type {TSESTree.Node[]} */ (node.elements), false);
 		state.push(']');
 	},
 
@@ -72,10 +72,10 @@ export const shared = {
 		if (node.body.length > 0) {
 			state.multiline = true;
 			state.indent();
-			state.push(newline);
+			state.newline();
 			handle_body(node.body, state);
 			state.dedent();
-			state.push(newline);
+			state.newline();
 		}
 
 		if (node.loc) {
@@ -136,7 +136,7 @@ export const shared = {
 
 						if (comment.type === 'Line') {
 							child_state.multiline = true;
-							state.push(newline);
+							state.newline();
 						} else {
 							state.push(' ');
 						}
@@ -188,7 +188,7 @@ export const shared = {
 
 		if (node.implements) {
 			state.push('implements ');
-			sequence(node.implements, state, false);
+			state.sequence(node.implements, false);
 		}
 
 		state.visit(node.body);
@@ -229,7 +229,7 @@ export const shared = {
 		}
 
 		state.push('(');
-		sequence(node.params, state, false);
+		state.sequence(node.params, false);
 		state.push(')');
 
 		if (node.returnType) state.visit(node.returnType);
@@ -262,7 +262,7 @@ export default {
 		if (node.async) state.push('async ');
 
 		state.push('(');
-		sequence(node.params, state, false);
+		state.sequence(node.params, false);
 		state.push(') => ');
 
 		if (
@@ -382,7 +382,7 @@ export default {
 	Decorator(node, state) {
 		state.push('@');
 		state.visit(node.expression);
-		state.push(newline);
+		state.newline();
 	},
 
 	DoWhileStatement(node, state) {
@@ -427,7 +427,7 @@ export default {
 		}
 
 		state.push('{');
-		sequence(node.specifiers, state, true);
+		state.sequence(node.specifiers, true);
 		state.push('}');
 
 		if (node.source) {
@@ -553,7 +553,7 @@ export default {
 
 		if (named_specifiers.length > 0) {
 			state.push('{');
-			sequence(named_specifiers, state, true);
+			state.sequence(named_specifiers, true);
 			state.push('}');
 		}
 
@@ -675,7 +675,7 @@ export default {
 		if (node.computed) state.push(']');
 
 		state.push('(');
-		sequence(node.value.params, state, false);
+		state.sequence(node.value.params, false);
 		state.push(')');
 
 		if (node.value.returnType) state.visit(node.value.returnType);
@@ -689,13 +689,13 @@ export default {
 
 	ObjectExpression(node, state) {
 		state.push('{');
-		sequence(node.properties, state, true);
+		state.sequence(node.properties, true);
 		state.push('}');
 	},
 
 	ObjectPattern(node, state) {
 		state.push('{');
-		sequence(node.properties, state, true);
+		state.sequence(node.properties, true);
 		state.push('}');
 
 		if (node.typeAnnotation) state.visit(node.typeAnnotation);
@@ -738,7 +738,7 @@ export default {
 			state.visit(node.key);
 			if (node.computed) state.push(']');
 			state.push('(');
-			sequence(node.value.params, state, false);
+			state.sequence(node.value.params, false);
 			state.push(')');
 
 			if (node.value.returnType) state.visit(node.value.returnType);
@@ -810,7 +810,7 @@ export default {
 
 	SequenceExpression(node, state) {
 		state.push('(');
-		sequence(node.expressions, state, false);
+		state.sequence(node.expressions, false);
 		state.push(')');
 	},
 
@@ -818,12 +818,14 @@ export default {
 
 	StaticBlock(node, state) {
 		state.indent();
-		state.push('static {', newline);
+		state.push('static {');
+		state.newline();
 
 		handle_body(node.body, state);
 
 		state.dedent();
-		state.push(newline, '}');
+		state.newline();
+		state.push('}');
 	},
 
 	Super(node, state) {
@@ -843,17 +845,19 @@ export default {
 			first = false;
 
 			if (block.test) {
-				state.push(newline, `case `);
+				state.newline();
+				state.push(`case `);
 				state.visit(block.test);
 				state.push(':');
 			} else {
-				state.push(newline, `default:`);
+				state.newline();
+				state.push(`default:`);
 			}
 
 			state.indent();
 
 			for (const statement of block.consequent) {
-				state.push(newline);
+				state.newline();
 				state.visit(statement);
 			}
 
@@ -861,7 +865,8 @@ export default {
 		}
 
 		state.dedent();
-		state.push(newline, `}`);
+		state.newline();
+		state.push(`}`);
 	},
 
 	TaggedTemplateExpression(node, state) {
