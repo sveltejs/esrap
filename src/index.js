@@ -17,13 +17,13 @@ if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
 }
 
 /** @type {Newline} */
-export const newline = { type: 'Newline' };
+const newline = { type: 'Newline' };
 
 /** @type {Indent} */
-export const indent = { type: 'Indent' };
+const indent = { type: 'Indent' };
 
 /** @type {Dedent} */
-export const dedent = { type: 'Dedent' };
+const dedent = { type: 'Dedent' };
 
 export class Context {
 	#handlers;
