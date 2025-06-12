@@ -19,11 +19,11 @@
     "./languages/jsx": {
       "default": "./src/languages/jsx.js"
     },
-    "./languages/ecmascript": {
-      "default": "./src/languages/ecmascript.js"
+    "./languages/js": {
+      "default": "./src/languages/js.js"
     },
-    "./languages/typescript": {
-      "default": "./src/languages/typescript.js"
+    "./languages/ts": {
+      "default": "./src/languages/ts.js"
     }
   },
   "types": "./types/index.d.ts",

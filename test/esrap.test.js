@@ -6,7 +6,7 @@ import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
 import { acornTs, acornTsx, load } from './common.js';
-import ecmascript from '../src/languages/ecmascript.js';
+import js from '../src/languages/js.js';
 import typescript from '../src/languages/typescript.js';
 import jsx from '../src/languages/jsx.js';
 
@@ -88,7 +88,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			};
 		}
 
-		opts.handlers = /** @type {Handlers} */ ({ ...ecmascript, ...typescript, ...jsx });
+		opts.handlers = /** @type {Handlers} */ ({ ...js, ...typescript, ...jsx });
 
 		const { code, map } = print(ast, opts);
 

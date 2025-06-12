@@ -1,6 +1,6 @@
 /** @import { Command, Dedent, Handlers, Indent, Newline, NodeWithComments, PrintOptions } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
-import ecmascript from './languages/ecmascript.js';
+import js from './languages/js.js';
 import typescript from './languages/typescript.js';
 import { prepend_comments } from './handlers.js';
 
@@ -133,7 +133,7 @@ export function print(node, opts = {}) {
 	}
 
 	const context = new Context(
-		opts.handlers ?? /** @type {Handlers} */ ({ ...ecmascript, ...typescript }),
+		opts.handlers ?? /** @type {Handlers} */ ({ ...js, ...typescript }),
 		opts.quotes === 'double' ? '"' : "'"
 	);
 
