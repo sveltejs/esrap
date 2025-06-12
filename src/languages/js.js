@@ -1,14 +1,6 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Handlers, NodeWithComments, Context } from '../types.js' */
-import {
-	create_sequence,
-	indent,
-	newline,
-	dedent,
-	handle_var_declaration,
-	handle_body,
-	has_call_expression
-} from '../handlers.js';
+import { create_sequence, indent, newline, dedent, handle_body } from '../handlers.js';
 import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
 
 const OPERATOR_PRECEDENCE = {
@@ -1079,4 +1071,53 @@ function needs_parens(node, parent, is_right) {
 		OPERATOR_PRECEDENCE[/** @type {TSESTree.BinaryExpression} */ (node).operator] <
 		OPERATOR_PRECEDENCE[parent.operator]
 	);
+}
+
+/** @param {TSESTree.Node} node */
+function has_call_expression(node) {
+	while (node) {
+		if (node.type === 'CallExpression') {
+			return true;
+		} else if (node.type === 'MemberExpression') {
+			node = node.object;
+		} else {
+			return false;
+		}
+	}
+}
+
+/**
+ * @param {TSESTree.VariableDeclaration} node
+ * @param {Context} context
+ */
+function handle_var_declaration(node, context) {
+	const index = context.commands.length;
+
+	const open = create_sequence();
+	const join = create_sequence();
+	const child_context = context.child();
+
+	context.push(`${node.kind} `, open);
+
+	let first = true;
+
+	for (const d of node.declarations) {
+		if (!first) context.commands.push(join);
+		first = false;
+
+		child_context.visit(d);
+	}
+
+	const multiline =
+		child_context.multiline ||
+		(node.declarations.length > 1 && context.measure(context.commands, index) > 50);
+
+	if (multiline) {
+		context.multiline = true;
+		if (node.declarations.length > 1) open.push(indent);
+		join.push(',', newline);
+		if (node.declarations.length > 1) context.dedent();
+	} else {
+		join.push(', ');
+	}
 }

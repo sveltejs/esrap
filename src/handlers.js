@@ -1,5 +1,5 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, Dedent, Location, Indent, Newline, NodeWithComments } from './types' */
+/** @import { Command, Dedent, Indent, Newline, NodeWithComments } from './types' */
 /** @import { Context } from './index.js'; */
 
 /** @type {Newline} */
@@ -31,19 +31,6 @@ export function prepend_comments(comments, context, newlines) {
 			context.newline();
 		} else {
 			context.push(' ');
-		}
-	}
-}
-
-/** @param {TSESTree.Node} node */
-export function has_call_expression(node) {
-	while (node) {
-		if (node.type === 'CallExpression') {
-			return true;
-		} else if (node.type === 'MemberExpression') {
-			node = node.object;
-		} else {
-			return false;
 		}
 	}
 }
@@ -111,41 +98,5 @@ export const handle_body = (nodes, context) => {
 
 		needs_margin = child_context.multiline;
 		last_statement = statement;
-	}
-};
-
-/**
- * @param {TSESTree.VariableDeclaration} node
- * @param {Context} context
- */
-export const handle_var_declaration = (node, context) => {
-	const index = context.commands.length;
-
-	const open = create_sequence();
-	const join = create_sequence();
-	const child_context = context.child();
-
-	context.push(`${node.kind} `, open);
-
-	let first = true;
-
-	for (const d of node.declarations) {
-		if (!first) context.commands.push(join);
-		first = false;
-
-		child_context.visit(d);
-	}
-
-	const multiline =
-		child_context.multiline ||
-		(node.declarations.length > 1 && context.measure(context.commands, index) > 50);
-
-	if (multiline) {
-		context.multiline = true;
-		if (node.declarations.length > 1) open.push(indent);
-		join.push(',', newline);
-		if (node.declarations.length > 1) context.dedent();
-	} else {
-		join.push(', ');
 	}
 };
