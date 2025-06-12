@@ -6,9 +6,7 @@ import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
 import { acornTs, acornTsx, load } from './common.js';
-import js from '../src/languages/js.js';
-import ts from '../src/languages/ts.js';
-import jsx from '../src/languages/jsx.js';
+import tsx from '../src/languages/tsx.js';
 
 /** @param {TSESTree.Node} ast */
 function clean(ast) {
@@ -88,7 +86,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			};
 		}
 
-		opts.handlers = /** @type {Handlers} */ ({ ...js, ...ts, ...jsx });
+		opts.handlers = (tsx);
 
 		const { code, map } = print(ast, opts);
 

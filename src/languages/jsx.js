@@ -1,8 +1,10 @@
 /** @import { Handlers } from '../types' */
 import { TSESTree } from '@typescript-eslint/types';
+import js from './js.js';
 
 /** @type {Handlers<TSESTree.Node>} */
 export default {
+	...js,
 	JSXElement(node, state) {
 		state.visit(node.openingElement);
 

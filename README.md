@@ -61,9 +61,7 @@ const { code, map } = print(ast, {
 
   // Overrwrite the inbuilt printers
   handlers: {
-    ...js, // It's best to include our default printers, esrap/languages/js
-    ...ts, // The typescript module, if need be, esrap/languages/ts,
-    ...jsx, // The JSX module, esrap/languages/jsx,
+    ...ts, // the default, imported from 'esrap/languages/ts'
     CustomNode(node, state) {
       state.commands.push('this is custom') // see the source code in the inbuilt languages for examples on how to make your own
     }

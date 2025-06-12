@@ -1,11 +1,13 @@
 /** @import { Handlers } from '../types.js' */
 import { TSESTree } from '@typescript-eslint/types';
 import { sequence, EXPRESSIONS_PRECEDENCE, newline, handle_body } from '../handlers.js';
+import js from './js.js';
 
 /**
  * @type {Handlers<TSESTree.Node>}
  */
 export default {
+	...js,
 	TSNumberKeyword(node, state) {
 		state.commands.push('number');
 	},

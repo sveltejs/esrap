@@ -133,7 +133,7 @@ export function print(node, opts = {}) {
 	}
 
 	const context = new Context(
-		opts.handlers ?? /** @type {Handlers} */ ({ ...js, ...ts }),
+		opts.handlers ?? /** @type {Handlers} */ (ts),
 		opts.quotes === 'double' ? '"' : "'"
 	);
 

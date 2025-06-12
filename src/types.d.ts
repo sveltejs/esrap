@@ -70,5 +70,5 @@ export interface PrintOptions {
 	sourceMapEncodeMappings?: boolean; // default true
 	indent?: string; // default tab
 	quotes?: 'single' | 'double'; // default single
-	handlers?: Handlers; // default to ...js, ...ts
+	handlers?: Handlers; // default to ts
 }
