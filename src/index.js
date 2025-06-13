@@ -26,6 +26,13 @@ const indent = { type: 'Indent' };
 /** @type {Dedent} */
 const dedent = { type: 'Dedent' };
 
+const grouped_expression_types = [
+	'ImportDeclaration',
+	'VariableDeclaration',
+	'ExportDefaultDeclaration',
+	'ExportNamedDeclaration'
+];
+
 export class Context {
 	#handlers;
 	#quote;
@@ -233,6 +240,66 @@ export class Context {
 			if (pad) open.push(' ');
 			join.push(' ');
 			if (pad) close.push(' ');
+		}
+	}
+
+	/**
+	 * Push a sequence of nodes onto separate lines, separating them with
+	 * an extra newline where appropriate
+	 * @param {Array<{ type: string }>} nodes
+	 */
+	block(nodes) {
+		let last_statement = {
+			type: 'EmptyStatement'
+		};
+
+		let first = true;
+		let needs_margin = false;
+
+		for (const statement of nodes) {
+			if (statement.type === 'EmptyStatement') continue;
+
+			const margin = create_sequence();
+
+			if (!first) {
+				this.push(margin);
+				this.newline();
+			}
+
+			first = false;
+
+			const statement_with_comments = /** @type {NodeWithComments} */ (statement);
+			const leading_comments = statement_with_comments.leadingComments;
+			delete statement_with_comments.leadingComments;
+
+			if (leading_comments && leading_comments.length > 0) {
+				prepend_comments(leading_comments, this, true);
+			}
+
+			const child_context = this.child();
+			child_context.visit(statement);
+
+			if (
+				child_context.multiline ||
+				needs_margin ||
+				((grouped_expression_types.includes(statement.type) ||
+					grouped_expression_types.includes(last_statement.type)) &&
+					last_statement.type !== statement.type)
+			) {
+				margin.push('\n');
+			}
+
+			let add_newline = false;
+
+			while (this.comments.length) {
+				const comment = /** @type {TSESTree.Comment} */ (this.comments.shift());
+
+				this.commands.push(add_newline ? newline : ' ', { type: 'Comment', comment });
+				add_newline = comment.type === 'Line';
+			}
+
+			needs_margin = child_context.multiline;
+			last_statement = statement;
 		}
 	}
 

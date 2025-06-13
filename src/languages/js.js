@@ -1,6 +1,6 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Handlers, NodeWithComments, Context } from '../types.js' */
-import { create_sequence, indent, newline, dedent, handle_body } from '../handlers.js';
+import { create_sequence, indent, newline, dedent } from '../handlers.js';
 import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
 
 const OPERATOR_PRECEDENCE = {
@@ -90,7 +90,7 @@ export const shared = {
 			state.multiline = true;
 			state.indent();
 			state.newline();
-			handle_body(node.body, state);
+			state.block(node.body);
 			state.dedent();
 			state.newline();
 		}
@@ -732,7 +732,7 @@ export default {
 	},
 
 	Program(node, state) {
-		handle_body(node.body, state);
+		state.block(node.body);
 	},
 
 	Property(node, state) {
@@ -842,7 +842,7 @@ export default {
 		state.push('static {');
 		state.newline();
 
-		handle_body(node.body, state);
+		state.block(node.body);
 
 		state.dedent();
 		state.newline();

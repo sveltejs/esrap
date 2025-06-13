@@ -1,6 +1,5 @@
 /** @import { Handlers } from '../types.js' */
 import { TSESTree } from '@typescript-eslint/types';
-import { handle_body } from '../handlers.js';
 import js from './js.js';
 import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
 
@@ -217,7 +216,7 @@ export default {
 		state.commands.push(' {');
 		state.indent();
 		state.newline();
-		handle_body(node.body, state);
+		state.block(node.body);
 		state.dedent();
 		state.newline();
 		state.push('}');
