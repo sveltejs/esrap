@@ -223,10 +223,12 @@ export class Context {
 
 						push_comment(comment, this);
 
-						if (comment.type === 'Line') {
-							this.newline();
-						} else if (!is_last) {
-							this.#commands.push(join.#commands);
+						if (!is_last) {
+							if (comment.type === 'Line') {
+								this.newline();
+							} else {
+								this.#commands.push(join.#commands);
+							}
 						}
 					}
 
@@ -246,10 +248,7 @@ export class Context {
 
 		this.#commands.push(close.#commands);
 
-		const multiline =
-			child_state.multiline || measure(this.#commands, index, this.#commands.length) > 50;
-
-		if (multiline) {
+		if (child_state.multiline || measure(this.#commands, index) > 50) {
 			this.multiline = true;
 
 			open.indent();
@@ -326,7 +325,7 @@ export class Context {
 	}
 
 	measure() {
-		return measure(this.#commands, 0, this.#commands.length);
+		return measure(this.#commands);
 	}
 
 	// TODO get rid of in favour of `new`
@@ -342,10 +341,10 @@ export class Context {
 /**
  *
  * @param {Command[]} commands
- * @param {number} from
- * @param {number} to
+ * @param {number} [from]
+ * @param {number} [to]
  */
-function measure(commands, from, to) {
+function measure(commands, from = 0, to = commands.length) {
 	let total = 0;
 	for (let i = from; i < to; i += 1) {
 		const command = commands[i];
@@ -355,7 +354,7 @@ function measure(commands, from, to) {
 			total +=
 				command.length === 0
 					? 2 // assume this is ', '
-					: measure(command, 0, command.length);
+					: measure(command);
 		}
 	}
 
