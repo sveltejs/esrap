@@ -160,10 +160,12 @@ export class Context {
 	}
 
 	/**
+	 * Push a sequence of nodes, keeping them on one line by default but spreading
+	 * onto multiple lines if necessary
 	 * @param {Array<{ type: string }>} nodes
-	 * @param {boolean} spaces
+	 * @param {boolean} pad
 	 */
-	sequence(nodes, spaces, separator = ',') {
+	inline(nodes, pad, separator = ',') {
 		if (nodes.length === 0) return;
 
 		const index = this.commands.length;
@@ -228,9 +230,9 @@ export class Context {
 			join.push(newline);
 			close.push(dedent, newline);
 		} else {
-			if (spaces) open.push(' ');
+			if (pad) open.push(' ');
 			join.push(' ');
-			if (spaces) close.push(' ');
+			if (pad) close.push(' ');
 		}
 	}
 

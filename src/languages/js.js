@@ -38,7 +38,7 @@ export const shared = {
 	 */
 	'ArrayExpression|ArrayPattern': (node, state) => {
 		state.push('[');
-		state.sequence(/** @type {TSESTree.Node[]} */ (node.elements), false);
+		state.inline(/** @type {TSESTree.Node[]} */ (node.elements), false);
 		state.push(']');
 	},
 
@@ -208,7 +208,7 @@ export const shared = {
 
 		if (node.implements) {
 			state.push('implements ');
-			state.sequence(node.implements, false);
+			state.inline(node.implements, false);
 		}
 
 		state.visit(node.body);
@@ -249,7 +249,7 @@ export const shared = {
 		}
 
 		state.push('(');
-		state.sequence(node.params, false);
+		state.inline(node.params, false);
 		state.push(')');
 
 		if (node.returnType) state.visit(node.returnType);
@@ -282,7 +282,7 @@ export default {
 		if (node.async) state.push('async ');
 
 		state.push('(');
-		state.sequence(node.params, false);
+		state.inline(node.params, false);
 		state.push(') => ');
 
 		if (
@@ -448,7 +448,7 @@ export default {
 		}
 
 		state.write('{');
-		state.sequence(node.specifiers, true);
+		state.inline(node.specifiers, true);
 		state.write('}');
 
 		if (node.source) {
@@ -574,7 +574,7 @@ export default {
 
 		if (named_specifiers.length > 0) {
 			state.push('{');
-			state.sequence(named_specifiers, true);
+			state.inline(named_specifiers, true);
 			state.push('}');
 		}
 
@@ -695,7 +695,7 @@ export default {
 		if (node.computed) state.push(']');
 
 		state.push('(');
-		state.sequence(node.value.params, false);
+		state.inline(node.value.params, false);
 		state.push(')');
 
 		if (node.value.returnType) state.visit(node.value.returnType);
@@ -709,13 +709,13 @@ export default {
 
 	ObjectExpression(node, state) {
 		state.push('{');
-		state.sequence(node.properties, true);
+		state.inline(node.properties, true);
 		state.push('}');
 	},
 
 	ObjectPattern(node, state) {
 		state.push('{');
-		state.sequence(node.properties, true);
+		state.inline(node.properties, true);
 		state.push('}');
 
 		if (node.typeAnnotation) state.visit(node.typeAnnotation);
@@ -759,7 +759,7 @@ export default {
 			state.visit(node.key);
 			if (node.computed) state.push(']');
 			state.push('(');
-			state.sequence(node.value.params, false);
+			state.inline(node.value.params, false);
 			state.push(')');
 
 			if (node.value.returnType) state.visit(node.value.returnType);
@@ -831,7 +831,7 @@ export default {
 
 	SequenceExpression(node, state) {
 		state.push('(');
-		state.sequence(node.expressions, false);
+		state.inline(node.expressions, false);
 		state.push(')');
 	},
 
