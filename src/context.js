@@ -72,11 +72,7 @@ export class Context {
 	 * @param {number} column
 	 */
 	location(line, column) {
-		this.#commands.push({
-			type: 'Location',
-			line,
-			column
-		});
+		this.#commands.push({ type: 'Location', line, column });
 	}
 
 	/**
