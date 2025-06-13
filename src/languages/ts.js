@@ -8,281 +8,281 @@ import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
  */
 export default {
 	...js,
-	TSNumberKeyword(node, state) {
-		state.commands.push('number');
+	TSNumberKeyword(node, context) {
+		context.commands.push('number');
 	},
-	TSStringKeyword(node, state) {
-		state.commands.push('string');
+	TSStringKeyword(node, context) {
+		context.commands.push('string');
 	},
-	TSBooleanKeyword(node, state) {
-		state.commands.push('boolean');
+	TSBooleanKeyword(node, context) {
+		context.commands.push('boolean');
 	},
-	TSAnyKeyword(node, state) {
-		state.commands.push('any');
+	TSAnyKeyword(node, context) {
+		context.commands.push('any');
 	},
-	TSVoidKeyword(node, state) {
-		state.commands.push('void');
+	TSVoidKeyword(node, context) {
+		context.commands.push('void');
 	},
-	TSUnknownKeyword(node, state) {
-		state.commands.push('unknown');
+	TSUnknownKeyword(node, context) {
+		context.commands.push('unknown');
 	},
-	TSNeverKeyword(node, state) {
-		state.commands.push('never');
+	TSNeverKeyword(node, context) {
+		context.commands.push('never');
 	},
-	TSSymbolKeyword(node, state) {
-		state.commands.push('symbol');
+	TSSymbolKeyword(node, context) {
+		context.commands.push('symbol');
 	},
-	TSNullKeyword(node, state) {
-		state.commands.push('null');
+	TSNullKeyword(node, context) {
+		context.commands.push('null');
 	},
-	TSUndefinedKeyword(node, state) {
-		state.commands.push('undefined');
+	TSUndefinedKeyword(node, context) {
+		context.commands.push('undefined');
 	},
-	TSArrayType(node, state) {
-		state.visit(node.elementType);
-		state.commands.push('[]');
+	TSArrayType(node, context) {
+		context.visit(node.elementType);
+		context.commands.push('[]');
 	},
-	TSTypeAnnotation(node, state) {
-		state.commands.push(': ');
-		state.visit(node.typeAnnotation);
+	TSTypeAnnotation(node, context) {
+		context.commands.push(': ');
+		context.visit(node.typeAnnotation);
 	},
-	TSTypeLiteral(node, state) {
-		state.commands.push('{ ');
-		state.inline(node.members, false, ';');
-		state.commands.push(' }');
+	TSTypeLiteral(node, context) {
+		context.commands.push('{ ');
+		context.inline(node.members, false, ';');
+		context.commands.push(' }');
 	},
-	TSPropertySignature(node, state) {
-		state.visit(node.key);
-		if (node.optional) state.commands.push('?');
-		if (node.typeAnnotation) state.visit(node.typeAnnotation);
+	TSPropertySignature(node, context) {
+		context.visit(node.key);
+		if (node.optional) context.commands.push('?');
+		if (node.typeAnnotation) context.visit(node.typeAnnotation);
 	},
-	TSTypeReference(node, state) {
-		state.visit(node.typeName);
+	TSTypeReference(node, context) {
+		context.visit(node.typeName);
 
 		if (node.typeArguments) {
-			state.visit(node.typeArguments);
+			context.visit(node.typeArguments);
 		}
 	},
 	//@ts-expect-error I don't know why, but this is relied upon in the tests, but doesn't exist in the TSESTree types
-	TSExpressionWithTypeArguments(node, state) {
-		state.visit(node.expression);
+	TSExpressionWithTypeArguments(node, context) {
+		context.visit(node.expression);
 	},
-	TSTypeParameterInstantiation(node, state) {
-		state.commands.push('<');
+	TSTypeParameterInstantiation(node, context) {
+		context.commands.push('<');
 		for (let i = 0; i < node.params.length; i++) {
-			state.visit(node.params[i]);
-			if (i != node.params.length - 1) state.commands.push(', ');
+			context.visit(node.params[i]);
+			if (i != node.params.length - 1) context.commands.push(', ');
 		}
-		state.commands.push('>');
+		context.commands.push('>');
 	},
-	TSTypeParameterDeclaration(node, state) {
-		state.commands.push('<');
+	TSTypeParameterDeclaration(node, context) {
+		context.commands.push('<');
 		for (let i = 0; i < node.params.length; i++) {
-			state.visit(node.params[i]);
-			if (i != node.params.length - 1) state.commands.push(', ');
+			context.visit(node.params[i]);
+			if (i != node.params.length - 1) context.commands.push(', ');
 		}
-		state.commands.push('>');
+		context.commands.push('>');
 	},
-	TSTypeParameter(node, state) {
+	TSTypeParameter(node, context) {
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-		state.commands.push(node.name);
+		context.commands.push(node.name);
 
 		if (node.constraint) {
-			state.commands.push(' extends ');
-			state.visit(node.constraint);
+			context.commands.push(' extends ');
+			context.visit(node.constraint);
 		}
 	},
-	TSTypeQuery(node, state) {
-		state.commands.push('typeof ');
-		state.visit(node.exprName);
+	TSTypeQuery(node, context) {
+		context.commands.push('typeof ');
+		context.visit(node.exprName);
 	},
-	TSEnumMember(node, state) {
-		state.visit(node.id);
+	TSEnumMember(node, context) {
+		context.visit(node.id);
 		if (node.initializer) {
-			state.commands.push(' = ');
-			state.visit(node.initializer);
+			context.commands.push(' = ');
+			context.visit(node.initializer);
 		}
 	},
-	TSFunctionType(node, state) {
-		if (node.typeParameters) state.visit(node.typeParameters);
+	TSFunctionType(node, context) {
+		if (node.typeParameters) context.visit(node.typeParameters);
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		const parameters = node.parameters;
-		state.commands.push('(');
-		state.inline(parameters, false);
+		context.commands.push('(');
+		context.inline(parameters, false);
 
-		state.commands.push(') => ');
+		context.commands.push(') => ');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-		state.visit(node.typeAnnotation.typeAnnotation);
+		context.visit(node.typeAnnotation.typeAnnotation);
 	},
-	TSIndexSignature(node, state) {
+	TSIndexSignature(node, context) {
 		const indexParameters = node.parameters;
-		state.commands.push('[');
-		state.inline(indexParameters, false);
-		state.commands.push(']');
+		context.commands.push('[');
+		context.inline(indexParameters, false);
+		context.commands.push(']');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-		state.visit(node.typeAnnotation);
+		context.visit(node.typeAnnotation);
 	},
-	TSMethodSignature(node, state) {
-		state.visit(node.key);
+	TSMethodSignature(node, context) {
+		context.visit(node.key);
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		const parametersSignature = node.parameters;
-		state.commands.push('(');
-		state.inline(parametersSignature, false);
-		state.commands.push(')');
+		context.commands.push('(');
+		context.inline(parametersSignature, false);
+		context.commands.push(')');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-		state.visit(node.typeAnnotation);
+		context.visit(node.typeAnnotation);
 	},
-	TSTupleType(node, state) {
-		state.commands.push('[');
-		state.inline(node.elementTypes, false);
-		state.commands.push(']');
+	TSTupleType(node, context) {
+		context.commands.push('[');
+		context.inline(node.elementTypes, false);
+		context.commands.push(']');
 	},
-	TSNamedTupleMember(node, state) {
-		state.visit(node.label);
-		state.commands.push(': ');
-		state.visit(node.elementType);
+	TSNamedTupleMember(node, context) {
+		context.visit(node.label);
+		context.commands.push(': ');
+		context.visit(node.elementType);
 	},
-	TSUnionType(node, state) {
-		state.inline(node.types, false, ' |');
+	TSUnionType(node, context) {
+		context.inline(node.types, false, ' |');
 	},
-	TSIntersectionType(node, state) {
-		state.inline(node.types, false, ' &');
+	TSIntersectionType(node, context) {
+		context.inline(node.types, false, ' &');
 	},
-	TSLiteralType(node, state) {
-		state.visit(node.literal);
+	TSLiteralType(node, context) {
+		context.visit(node.literal);
 	},
-	TSConditionalType(node, state) {
-		state.visit(node.checkType);
-		state.commands.push(' extends ');
-		state.visit(node.extendsType);
-		state.commands.push(' ? ');
-		state.visit(node.trueType);
-		state.commands.push(' : ');
-		state.visit(node.falseType);
+	TSConditionalType(node, context) {
+		context.visit(node.checkType);
+		context.commands.push(' extends ');
+		context.visit(node.extendsType);
+		context.commands.push(' ? ');
+		context.visit(node.trueType);
+		context.commands.push(' : ');
+		context.visit(node.falseType);
 	},
-	TSIndexedAccessType(node, state) {
-		state.visit(node.objectType);
-		state.commands.push('[');
-		state.visit(node.indexType);
-		state.commands.push(']');
+	TSIndexedAccessType(node, context) {
+		context.visit(node.objectType);
+		context.commands.push('[');
+		context.visit(node.indexType);
+		context.commands.push(']');
 	},
-	TSImportType(node, state) {
-		state.commands.push('import(');
-		state.visit(node.argument);
-		state.commands.push(')');
+	TSImportType(node, context) {
+		context.commands.push('import(');
+		context.visit(node.argument);
+		context.commands.push(')');
 
 		if (node.qualifier) {
-			state.commands.push('.');
-			state.visit(node.qualifier);
+			context.commands.push('.');
+			context.visit(node.qualifier);
 		}
 	},
 
-	TSAsExpression(node, state) {
+	TSAsExpression(node, context) {
 		if (node.expression) {
 			const needs_parens =
 				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSAsExpression;
 
 			if (needs_parens) {
-				state.commands.push('(');
-				state.visit(node.expression);
-				state.commands.push(')');
+				context.commands.push('(');
+				context.visit(node.expression);
+				context.commands.push(')');
 			} else {
-				state.visit(node.expression);
+				context.visit(node.expression);
 			}
 		}
-		state.commands.push(' as ');
-		state.visit(node.typeAnnotation);
+		context.commands.push(' as ');
+		context.visit(node.typeAnnotation);
 	},
 
-	TSEnumDeclaration(node, state) {
-		state.commands.push('enum ');
-		state.visit(node.id);
-		state.commands.push(' {');
-		state.indent();
-		state.newline();
-		state.inline(node.members, false);
-		state.dedent();
-		state.newline();
-		state.push('}');
-		state.newline();
+	TSEnumDeclaration(node, context) {
+		context.commands.push('enum ');
+		context.visit(node.id);
+		context.commands.push(' {');
+		context.indent();
+		context.newline();
+		context.inline(node.members, false);
+		context.dedent();
+		context.newline();
+		context.push('}');
+		context.newline();
 	},
 
-	TSModuleBlock(node, state) {
-		state.commands.push(' {');
-		state.indent();
-		state.newline();
-		state.block(node.body);
-		state.dedent();
-		state.newline();
-		state.push('}');
+	TSModuleBlock(node, context) {
+		context.commands.push(' {');
+		context.indent();
+		context.newline();
+		context.block(node.body);
+		context.dedent();
+		context.newline();
+		context.push('}');
 	},
 
-	TSModuleDeclaration(node, state) {
-		if (node.declare) state.commands.push('declare ');
-		else state.commands.push('namespace ');
+	TSModuleDeclaration(node, context) {
+		if (node.declare) context.commands.push('declare ');
+		else context.commands.push('namespace ');
 
-		state.visit(node.id);
+		context.visit(node.id);
 
 		if (!node.body) return;
-		state.visit(node.body);
+		context.visit(node.body);
 	},
 
-	TSNonNullExpression(node, state) {
-		state.visit(node.expression);
-		state.commands.push('!');
+	TSNonNullExpression(node, context) {
+		context.visit(node.expression);
+		context.commands.push('!');
 	},
 
-	TSInterfaceBody(node, state) {
-		state.inline(node.body, true, ';');
+	TSInterfaceBody(node, context) {
+		context.inline(node.body, true, ';');
 	},
 
-	TSInterfaceDeclaration(node, state) {
-		state.commands.push('interface ');
-		state.visit(node.id);
-		if (node.typeParameters) state.visit(node.typeParameters);
+	TSInterfaceDeclaration(node, context) {
+		context.commands.push('interface ');
+		context.visit(node.id);
+		if (node.typeParameters) context.visit(node.typeParameters);
 		if (node.extends) {
-			state.commands.push(' extends ');
-			state.inline(node.extends, false);
+			context.commands.push(' extends ');
+			context.inline(node.extends, false);
 		}
-		state.commands.push(' {');
-		state.visit(node.body);
-		state.commands.push('}');
+		context.commands.push(' {');
+		context.visit(node.body);
+		context.commands.push('}');
 	},
 
-	TSSatisfiesExpression(node, state) {
+	TSSatisfiesExpression(node, context) {
 		if (node.expression) {
 			const needs_parens =
 				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSSatisfiesExpression;
 
 			if (needs_parens) {
-				state.commands.push('(');
-				state.visit(node.expression);
-				state.commands.push(')');
+				context.commands.push('(');
+				context.visit(node.expression);
+				context.commands.push(')');
 			} else {
-				state.visit(node.expression);
+				context.visit(node.expression);
 			}
 		}
-		state.commands.push(' satisfies ');
-		state.visit(node.typeAnnotation);
+		context.commands.push(' satisfies ');
+		context.visit(node.typeAnnotation);
 	},
 
-	TSTypeAliasDeclaration(node, state) {
-		state.commands.push('type ');
-		state.visit(node.id);
-		if (node.typeParameters) state.visit(node.typeParameters);
-		state.commands.push(' = ');
-		state.visit(node.typeAnnotation);
-		state.commands.push(';');
+	TSTypeAliasDeclaration(node, context) {
+		context.commands.push('type ');
+		context.visit(node.id);
+		if (node.typeParameters) context.visit(node.typeParameters);
+		context.commands.push(' = ');
+		context.visit(node.typeAnnotation);
+		context.commands.push(';');
 	},
 
-	TSQualifiedName(node, state) {
-		state.visit(node.left);
-		state.commands.push('.');
-		state.visit(node.right);
+	TSQualifiedName(node, context) {
+		context.visit(node.left);
+		context.commands.push('.');
+		context.visit(node.right);
 	}
 };

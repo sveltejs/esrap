@@ -5,114 +5,114 @@ import js from './js.js';
 /** @type {Handlers<TSESTree.Node>} */
 export default {
 	...js,
-	JSXElement(node, state) {
-		state.visit(node.openingElement);
+	JSXElement(node, context) {
+		context.visit(node.openingElement);
 
 		if (node.children.length > 0) {
-			state.indent();
+			context.indent();
 		}
 
 		for (const child of node.children) {
-			state.visit(child);
+			context.visit(child);
 		}
 
 		if (node.children.length > 0) {
-			state.dedent();
+			context.dedent();
 		}
 
 		if (node.closingElement) {
-			state.visit(node.closingElement);
+			context.visit(node.closingElement);
 		}
 	},
-	JSXOpeningElement(node, state) {
-		state.commands.push('<');
+	JSXOpeningElement(node, context) {
+		context.commands.push('<');
 
-		state.visit(node.name);
+		context.visit(node.name);
 
 		for (const attribute of node.attributes) {
-			state.commands.push(' ');
-			state.visit(attribute);
+			context.commands.push(' ');
+			context.visit(attribute);
 		}
 
 		if (node.selfClosing) {
-			state.commands.push(' /');
+			context.commands.push(' /');
 		}
 
-		state.commands.push('>');
+		context.commands.push('>');
 	},
-	JSXClosingElement(node, state) {
-		state.commands.push('</');
+	JSXClosingElement(node, context) {
+		context.commands.push('</');
 
-		state.visit(node.name);
+		context.visit(node.name);
 
-		state.commands.push('>');
+		context.commands.push('>');
 	},
-	JSXNamespacedName(node, state) {
-		state.visit(node.namespace);
-		state.commands.push(':');
-		state.visit(node.name);
+	JSXNamespacedName(node, context) {
+		context.visit(node.namespace);
+		context.commands.push(':');
+		context.visit(node.name);
 	},
-	JSXIdentifier(node, state) {
-		state.commands.push(node.name);
+	JSXIdentifier(node, context) {
+		context.commands.push(node.name);
 	},
-	JSXMemberExpression(node, state) {
-		state.visit(node.object);
-		state.commands.push('.');
-		state.visit(node.property);
+	JSXMemberExpression(node, context) {
+		context.visit(node.object);
+		context.commands.push('.');
+		context.visit(node.property);
 	},
-	JSXText(node, state) {
-		state.commands.push(node.value);
+	JSXText(node, context) {
+		context.commands.push(node.value);
 	},
-	JSXAttribute(node, state) {
-		state.visit(node.name);
+	JSXAttribute(node, context) {
+		context.visit(node.name);
 		if (node.value) {
-			state.commands.push('=');
-			state.visit(node.value);
+			context.commands.push('=');
+			context.visit(node.value);
 		}
 	},
-	JSXEmptyExpression(node, state) {},
-	JSXFragment(node, state) {
-		state.visit(node.openingFragment);
+	JSXEmptyExpression(node, context) {},
+	JSXFragment(node, context) {
+		context.visit(node.openingFragment);
 
 		if (node.children.length > 0) {
-			state.indent();
+			context.indent();
 		}
 
 		for (const child of node.children) {
-			state.visit(child);
+			context.visit(child);
 		}
 
 		if (node.children.length > 0) {
-			state.dedent();
+			context.dedent();
 		}
 
-		state.visit(node.closingFragment);
+		context.visit(node.closingFragment);
 	},
-	JSXOpeningFragment(node, state) {
-		state.commands.push('<>');
+	JSXOpeningFragment(node, context) {
+		context.commands.push('<>');
 	},
-	JSXClosingFragment(node, state) {
-		state.commands.push('</>');
+	JSXClosingFragment(node, context) {
+		context.commands.push('</>');
 	},
-	JSXExpressionContainer(node, state) {
-		state.commands.push('{');
+	JSXExpressionContainer(node, context) {
+		context.commands.push('{');
 
-		state.visit(node.expression);
+		context.visit(node.expression);
 
-		state.commands.push('}');
+		context.commands.push('}');
 	},
-	JSXSpreadChild(node, state) {
-		state.commands.push('{...');
+	JSXSpreadChild(node, context) {
+		context.commands.push('{...');
 
-		state.visit(node.expression);
+		context.visit(node.expression);
 
-		state.commands.push('}');
+		context.commands.push('}');
 	},
-	JSXSpreadAttribute(node, state) {
-		state.commands.push('{...');
+	JSXSpreadAttribute(node, context) {
+		context.commands.push('{...');
 
-		state.visit(node.argument);
+		context.visit(node.argument);
 
-		state.commands.push('}');
+		context.commands.push('}');
 	}
 };

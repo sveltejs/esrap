@@ -52,19 +52,19 @@ function add_margin(a, b) {
 export const shared = {
 	/**
 	 * @param {TSESTree.ArrayExpression | TSESTree.ArrayPattern} node
-	 * @param {Context} state
+	 * @param {Context} context
 	 */
-	'ArrayExpression|ArrayPattern': (node, state) => {
-		state.push('[');
-		state.inline(/** @type {TSESTree.Node[]} */ (node.elements), false);
-		state.push(']');
+	'ArrayExpression|ArrayPattern': (node, context) => {
+		context.push('[');
+		context.inline(/** @type {TSESTree.Node[]} */ (node.elements), false);
+		context.push(']');
 	},
 
 	/**
 	 * @param {TSESTree.BinaryExpression | TSESTree.LogicalExpression} node
-	 * @param {Context} state
+	 * @param {Context} context
 	 */
-	'BinaryExpression|LogicalExpression': (node, state) => {
+	'BinaryExpression|LogicalExpression': (node, context) => {
 		// TODO
 		// const is_in = node.operator === 'in';
 		// if (is_in) {
@@ -72,65 +72,65 @@ export const shared = {
 		// 	chunks.push(c('('));
 		// }
 		if (needs_parens(node.left, node, false)) {
-			state.push('(');
-			state.visit(node.left);
-			state.push(')');
+			context.push('(');
+			context.visit(node.left);
+			context.push(')');
 		} else {
-			state.visit(node.left);
+			context.visit(node.left);
 		}
 
-		state.push(` ${node.operator} `);
+		context.push(` ${node.operator} `);
 
 		if (needs_parens(node.right, node, true)) {
-			state.push('(');
-			state.visit(node.right);
-			state.push(')');
+			context.push('(');
+			context.visit(node.right);
+			context.push(')');
 		} else {
-			state.visit(node.right);
+			context.visit(node.right);
 		}
 	},
 
 	/**
 	 * @param {TSESTree.BlockStatement | TSESTree.ClassBody} node
-	 * @param {Context} state
+	 * @param {Context} context
 	 */
-	'BlockStatement|ClassBody': (node, state) => {
+	'BlockStatement|ClassBody': (node, context) => {
 		if (node.loc) {
 			const { line, column } = node.loc.start;
-			state.location(line, column);
-			state.push('{');
-			state.location(line, column + 1);
+			context.location(line, column);
+			context.push('{');
+			context.location(line, column + 1);
 		} else {
-			state.push('{');
+			context.push('{');
 		}
 
 		if (node.body.length > 0) {
-			state.multiline = true;
-			state.indent();
-			state.newline();
-			state.block(node.body, add_margin);
-			state.dedent();
-			state.newline();
+			context.multiline = true;
+			context.indent();
+			context.newline();
+			context.block(node.body, add_margin);
+			context.dedent();
+			context.newline();
 		}
 
 		if (node.loc) {
 			const { line, column } = node.loc.end;
 
-			state.location(line, column - 1);
-			state.push('}');
-			state.location(line, column);
+			context.location(line, column - 1);
+			context.push('}');
+			context.location(line, column);
 		} else {
-			state.push('}');
+			context.push('}');
 		}
 	},
 
 	/**
 	 * @param {TSESTree.CallExpression | TSESTree.NewExpression} node
-	 * @param {Context} state
+	 * @param {Context} context
 	 */
-	'CallExpression|NewExpression': (node, state) => {
+	'CallExpression|NewExpression': (node, context) => {
 		if (node.type === 'NewExpression') {
-			state.push('new ');
+			context.push('new ');
 		}
 
 		const needs_parens =
@@ -138,49 +138,49 @@ export const shared = {
 			(node.type === 'NewExpression' && has_call_expression(node.callee));
 
 		if (needs_parens) {
-			state.push('(');
-			state.visit(node.callee);
-			state.push(')');
+			context.push('(');
+			context.visit(node.callee);
+			context.push(')');
 		} else {
-			state.visit(node.callee);
+			context.visit(node.callee);
 		}
 
 		if (/** @type {TSESTree.CallExpression} */ (node).optional) {
-			state.push('?.');
+			context.push('?.');
 		}
 
-		if (node.typeArguments) state.visit(node.typeArguments);
+		if (node.typeArguments) context.visit(node.typeArguments);
 
-		const open = state.new();
-		const join = state.new();
-		const close = state.new();
+		const open = context.new();
+		const join = context.new();
+		const close = context.new();
 
-		state.push('(', open.commands);
+		context.push('(', open.commands);
 
 		// if the final argument is multiline, it doesn't need to force all the
 		// other arguments to also be multiline
-		const child_state = state.child();
-		const final_state = state.child();
+		const child_state = context.child();
+		const final_state = context.child();
 
 		for (let i = 0; i < node.arguments.length; i += 1) {
 			if (i > 0) {
-				if (state.comments.length > 0) {
-					state.push(', ');
+				if (context.comments.length > 0) {
+					context.push(', ');
 
-					while (state.comments.length) {
-						const comment = /** @type {TSESTree.Comment} */ (state.comments.shift());
+					while (context.comments.length) {
+						const comment = /** @type {TSESTree.Comment} */ (context.comments.shift());
 
-						state.push({ type: 'Comment', comment });
+						context.push({ type: 'Comment', comment });
 
 						if (comment.type === 'Line') {
 							child_state.multiline = true;
-							state.newline();
+							context.newline();
 						} else {
-							state.push(' ');
+							context.push(' ');
 						}
 					}
 				} else {
-					state.push(join.commands);
+					context.push(join.commands);
 				}
 			}
 
@@ -189,12 +189,12 @@ export const shared = {
 			(i === node.arguments.length - 1 ? final_state : child_state).visit(p);
 		}
 
-		state.push(close.commands, ')');
+		context.push(close.commands, ')');
 
 		const multiline = child_state.multiline;
 
 		if (multiline || final_state.multiline) {
-			state.multiline = true;
+			context.multiline = true;
 		}
 
 		if (multiline) {
@@ -211,85 +211,85 @@ export const shared = {
 
 	/**
 	 * @param {TSESTree.ClassDeclaration | TSESTree.ClassExpression} node
-	 * @param {Context} state
+	 * @param {Context} context
 	 */
-	'ClassDeclaration|ClassExpression': (node, state) => {
-		state.push('class ');
+	'ClassDeclaration|ClassExpression': (node, context) => {
+		context.push('class ');
 
 		if (node.id) {
-			state.visit(node.id);
-			state.push(' ');
+			context.visit(node.id);
+			context.push(' ');
 		}
 
 		if (node.superClass) {
-			state.push('extends ');
-			state.visit(node.superClass);
-			state.push(' ');
+			context.push('extends ');
+			context.visit(node.superClass);
+			context.push(' ');
 		}
 
 		if (node.implements) {
-			state.push('implements ');
-			state.inline(node.implements, false);
+			context.push('implements ');
+			context.inline(node.implements, false);
 		}
 
-		state.visit(node.body);
+		context.visit(node.body);
 	},
 
 	/**
 	 * @param {TSESTree.ForInStatement | TSESTree.ForOfStatement} node
-	 * @param {Context} state
+	 * @param {Context} context
 	 */
-	'ForInStatement|ForOfStatement': (node, state) => {
-		state.push('for ');
-		if (node.type === 'ForOfStatement' && node.await) state.push('await ');
-		state.push('(');
+	'ForInStatement|ForOfStatement': (node, context) => {
+		context.push('for ');
+		if (node.type === 'ForOfStatement' && node.await) context.push('await ');
+		context.push('(');
 
 		if (node.left.type === 'VariableDeclaration') {
-			handle_var_declaration(node.left, state);
+			handle_var_declaration(node.left, context);
 		} else {
-			state.visit(node.left);
+			context.visit(node.left);
 		}
 
-		state.push(node.type === 'ForInStatement' ? ` in ` : ` of `);
-		state.visit(node.right);
-		state.push(') ');
-		state.visit(node.body);
+		context.push(node.type === 'ForInStatement' ? ` in ` : ` of `);
+		context.visit(node.right);
+		context.push(') ');
+		context.visit(node.body);
 	},
 
 	/**
 	 * @param {TSESTree.FunctionDeclaration | TSESTree.FunctionExpression} node
-	 * @param {Context} state
+	 * @param {Context} context
 	 */
-	'FunctionDeclaration|FunctionExpression': (node, state) => {
-		if (node.async) state.push('async ');
-		state.push(node.generator ? 'function* ' : 'function ');
-		if (node.id) state.visit(node.id);
+	'FunctionDeclaration|FunctionExpression': (node, context) => {
+		if (node.async) context.push('async ');
+		context.push(node.generator ? 'function* ' : 'function ');
+		if (node.id) context.visit(node.id);
 
 		if (node.typeParameters) {
-			state.visit(node.typeParameters);
+			context.visit(node.typeParameters);
 		}
 
-		state.push('(');
-		state.inline(node.params, false);
-		state.push(')');
+		context.push('(');
+		context.inline(node.params, false);
+		context.push(')');
 
-		if (node.returnType) state.visit(node.returnType);
+		if (node.returnType) context.visit(node.returnType);
 
-		state.push(' ');
+		context.push(' ');
 
-		state.visit(node.body);
+		context.visit(node.body);
 	},
 
 	/**
 	 * @param {TSESTree.RestElement | TSESTree.SpreadElement} node
-	 * @param {Context} state
+	 * @param {Context} context
 	 */
-	'RestElement|SpreadElement': (node, state) => {
-		state.push('...');
-		state.visit(node.argument);
+	'RestElement|SpreadElement': (node, context) => {
+		context.push('...');
+		context.visit(node.argument);
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-		if (node.typeAnnotation) state.visit(node.typeAnnotation);
+		if (node.typeAnnotation) context.visit(node.typeAnnotation);
 	}
 };
 
@@ -299,12 +299,12 @@ export default {
 
 	ArrayPattern: shared['ArrayExpression|ArrayPattern'],
 
-	ArrowFunctionExpression: (node, state) => {
-		if (node.async) state.push('async ');
+	ArrowFunctionExpression: (node, context) => {
+		if (node.async) context.push('async ');
 
-		state.push('(');
-		state.inline(node.params, false);
-		state.push(') => ');
+		context.push('(');
+		context.inline(node.params, false);
+		context.push(') => ');
 
 		if (
 			node.body.type === 'ObjectExpression' ||
@@ -312,40 +312,40 @@ export default {
 			(node.body.type === 'LogicalExpression' && node.body.left.type === 'ObjectExpression') ||
 			(node.body.type === 'ConditionalExpression' && node.body.test.type === 'ObjectExpression')
 		) {
-			state.push('(');
-			state.visit(node.body);
-			state.push(')');
+			context.push('(');
+			context.visit(node.body);
+			context.push(')');
 		} else {
-			state.visit(node.body);
+			context.visit(node.body);
 		}
 	},
 
-	AssignmentExpression(node, state) {
-		state.visit(node.left);
-		state.push(` ${node.operator} `);
-		state.visit(node.right);
+	AssignmentExpression(node, context) {
+		context.visit(node.left);
+		context.push(` ${node.operator} `);
+		context.visit(node.right);
 	},
 
-	AssignmentPattern(node, state) {
-		state.visit(node.left);
-		state.push(' = ');
-		state.visit(node.right);
+	AssignmentPattern(node, context) {
+		context.visit(node.left);
+		context.push(' = ');
+		context.visit(node.right);
 	},
 
-	AwaitExpression(node, state) {
+	AwaitExpression(node, context) {
 		if (node.argument) {
 			const precedence = EXPRESSIONS_PRECEDENCE[node.argument.type];
 
 			if (precedence && precedence < EXPRESSIONS_PRECEDENCE.AwaitExpression) {
-				state.push('await (');
-				state.visit(node.argument);
-				state.push(')');
+				context.push('await (');
+				context.visit(node.argument);
+				context.push(')');
 			} else {
-				state.push('await ');
-				state.visit(node.argument);
+				context.push('await ');
+				context.visit(node.argument);
 			}
 		} else {
-			state.push('await');
+			context.push('await');
 		}
 	},
 
@@ -353,20 +353,20 @@ export default {
 
 	BlockStatement: shared['BlockStatement|ClassBody'],
 
-	BreakStatement(node, state) {
+	BreakStatement(node, context) {
 		if (node.label) {
-			state.push('break ');
-			state.visit(node.label);
-			state.push(';');
+			context.push('break ');
+			context.visit(node.label);
+			context.push(';');
 		} else {
-			state.push('break;');
+			context.push('break;');
 		}
 	},
 
 	CallExpression: shared['CallExpression|NewExpression'],
 
-	ChainExpression(node, state) {
-		state.visit(node.expression);
+	ChainExpression(node, context) {
+		context.visit(node.expression);
 	},
 
 	ClassBody: shared['BlockStatement|ClassBody'],
@@ -375,23 +375,23 @@ export default {
 
 	ClassExpression: shared['ClassDeclaration|ClassExpression'],
 
-	ConditionalExpression(node, state) {
+	ConditionalExpression(node, context) {
 		if (EXPRESSIONS_PRECEDENCE[node.test.type] > EXPRESSIONS_PRECEDENCE.ConditionalExpression) {
-			state.visit(node.test);
+			context.visit(node.test);
 		} else {
-			state.push('(');
-			state.visit(node.test);
-			state.push(')');
+			context.push('(');
+			context.visit(node.test);
+			context.push(')');
 		}
 
-		const if_true = state.new();
-		const if_false = state.new();
+		const if_true = context.new();
+		const if_false = context.new();
 
-		const child_state = state.child();
+		const child_state = context.child();
 
-		state.push(if_true.commands);
+		context.push(if_true.commands);
 		child_state.visit(node.consequent);
-		state.push(if_false.commands);
+		context.push(if_false.commands);
 		child_state.visit(node.alternate);
 
 		const multiline = child_state.multiline;
@@ -402,97 +402,97 @@ export default {
 			if_true.write('? ');
 			if_false.newline();
 			if_false.push(': ');
-			state.dedent();
+			context.dedent();
 		} else {
 			if_true.write(' ? ');
 			if_false.write(' : ');
 		}
 	},
 
-	ContinueStatement(node, state) {
+	ContinueStatement(node, context) {
 		if (node.label) {
-			state.write('continue ');
-			state.visit(node.label);
-			state.write(';');
+			context.write('continue ');
+			context.visit(node.label);
+			context.write(';');
 		} else {
-			state.write('continue;');
+			context.write('continue;');
 		}
 	},
 
-	DebuggerStatement(node, state) {
-		state.write('debugger', node);
-		state.write(';');
+	DebuggerStatement(node, context) {
+		context.write('debugger', node);
+		context.write(';');
 	},
 
-	Decorator(node, state) {
-		state.write('@');
-		state.visit(node.expression);
-		state.newline();
+	Decorator(node, context) {
+		context.write('@');
+		context.visit(node.expression);
+		context.newline();
 	},
 
-	DoWhileStatement(node, state) {
-		state.write('do ');
-		state.visit(node.body);
-		state.write(' while (');
-		state.visit(node.test);
-		state.write(');');
+	DoWhileStatement(node, context) {
+		context.write('do ');
+		context.visit(node.body);
+		context.write(' while (');
+		context.visit(node.test);
+		context.write(');');
 	},
 
-	EmptyStatement(node, state) {
-		state.write(';');
+	EmptyStatement(node, context) {
+		context.write(';');
 	},
 
-	ExportAllDeclaration(node, state) {
-		state.write('export * ');
+	ExportAllDeclaration(node, context) {
+		context.write('export * ');
 		if (node.exported) {
-			state.write('as ');
-			state.visit(node.exported);
+			context.write('as ');
+			context.visit(node.exported);
 		}
-		state.write(' from ');
-		state.visit(node.source);
-		state.write(';');
+		context.write(' from ');
+		context.visit(node.source);
+		context.write(';');
 	},
 
-	ExportDefaultDeclaration(node, state) {
-		state.write('export default ');
+	ExportDefaultDeclaration(node, context) {
+		context.write('export default ');
 
-		state.visit(node.declaration);
+		context.visit(node.declaration);
 
 		if (node.declaration.type !== 'FunctionDeclaration') {
-			state.write(';');
+			context.write(';');
 		}
 	},
 
-	ExportNamedDeclaration(node, state) {
-		state.write('export ');
+	ExportNamedDeclaration(node, context) {
+		context.write('export ');
 
 		if (node.declaration) {
-			state.visit(node.declaration);
+			context.visit(node.declaration);
 			return;
 		}
 
-		state.write('{');
-		state.inline(node.specifiers, true);
-		state.write('}');
+		context.write('{');
+		context.inline(node.specifiers, true);
+		context.write('}');
 
 		if (node.source) {
-			state.write(' from ');
-			state.visit(node.source);
+			context.write(' from ');
+			context.visit(node.source);
 		}
 
-		state.write(';');
+		context.write(';');
 	},
 
-	ExportSpecifier(node, state) {
-		state.visit(node.local);
+	ExportSpecifier(node, context) {
+		context.visit(node.local);
 
 		if (node.local.name !== node.exported.name) {
-			state.push(' as ');
-			state.visit(node.exported);
+			context.push(' as ');
+			context.visit(node.exported);
 		}
 	},
 
-	ExpressionStatement(node, state) {
+	ExpressionStatement(node, context) {
 		if (
 			node.expression.type === 'ObjectExpression' ||
 			(node.expression.type === 'AssignmentExpression' &&
@@ -500,34 +500,34 @@ export default {
 			node.expression.type === 'FunctionExpression'
 		) {
 			// is an AssignmentExpression to an ObjectPattern
-			state.push('(');
-			state.visit(node.expression);
-			state.push(');');
+			context.push('(');
+			context.visit(node.expression);
+			context.push(');');
 			return;
 		}
 
-		state.visit(node.expression);
-		state.push(';');
+		context.visit(node.expression);
+		context.push(';');
 	},
 
-	ForStatement: (node, state) => {
-		state.push('for (');
+	ForStatement: (node, context) => {
+		context.push('for (');
 
 		if (node.init) {
 			if (node.init.type === 'VariableDeclaration') {
-				handle_var_declaration(node.init, state);
+				handle_var_declaration(node.init, context);
 			} else {
-				state.visit(node.init);
+				context.visit(node.init);
 			}
 		}
 
-		state.push('; ');
-		if (node.test) state.visit(node.test);
-		state.push('; ');
-		if (node.update) state.visit(node.update);
+		context.push('; ');
+		if (node.test) context.visit(node.test);
+		context.push('; ');
+		if (node.update) context.visit(node.update);
 
-		state.push(') ');
-		state.visit(node.body);
+		context.push(') ');
+		context.visit(node.body);
 	},
 
 	ForInStatement: shared['ForInStatement|ForOfStatement'],
@@ -538,30 +538,30 @@ export default {
 
 	FunctionExpression: shared['FunctionDeclaration|FunctionExpression'],
 
-	Identifier(node, state) {
+	Identifier(node, context) {
 		let name = node.name;
-		state.write(name, node);
+		context.write(name, node);
 
-		if (node.typeAnnotation) state.visit(node.typeAnnotation);
+		if (node.typeAnnotation) context.visit(node.typeAnnotation);
 	},
 
-	IfStatement(node, state) {
-		state.push('if (');
-		state.visit(node.test);
-		state.push(') ');
-		state.visit(node.consequent);
+	IfStatement(node, context) {
+		context.push('if (');
+		context.visit(node.test);
+		context.push(') ');
+		context.visit(node.consequent);
 
 		if (node.alternate) {
-			state.push(' else ');
-			state.visit(node.alternate);
+			context.push(' else ');
+			context.visit(node.alternate);
 		}
 	},
 
-	ImportDeclaration(node, state) {
+	ImportDeclaration(node, context) {
 		if (node.specifiers.length === 0) {
-			state.push('import ');
-			state.visit(node.source);
-			state.push(';');
+			context.push('import ');
+			context.visit(node.source);
+			context.push(';');
 			return;
 		}
 
@@ -584,182 +584,182 @@ export default {
 			}
 		}
 
-		state.push('import ');
-		if (node.importKind == 'type') state.push('type ');
+		context.push('import ');
+		if (node.importKind == 'type') context.push('type ');
 
 		if (default_specifier) {
-			state.write(default_specifier.local.name, default_specifier);
-			if (namespace_specifier || named_specifiers.length > 0) state.push(', ');
+			context.write(default_specifier.local.name, default_specifier);
+			if (namespace_specifier || named_specifiers.length > 0) context.push(', ');
 		}
 
 		if (namespace_specifier) {
-			state.write('* as ' + namespace_specifier.local.name, namespace_specifier);
+			context.write('* as ' + namespace_specifier.local.name, namespace_specifier);
 		}
 
 		if (named_specifiers.length > 0) {
-			state.push('{');
-			state.inline(named_specifiers, true);
-			state.push('}');
+			context.push('{');
+			context.inline(named_specifiers, true);
+			context.push('}');
 		}
 
-		state.push(' from ');
-		state.visit(node.source);
+		context.push(' from ');
+		context.visit(node.source);
 		if (node.attributes && node.attributes.length > 0) {
-			state.push(' with { ');
+			context.push(' with { ');
 			for (let index = 0; index < node.attributes.length; index++) {
 				const { key, value } = node.attributes[index];
-				state.visit(key);
-				state.push(': ');
-				state.visit(value);
+				context.visit(key);
+				context.push(': ');
+				context.visit(value);
 				if (index + 1 !== node.attributes.length) {
-					state.push(', ');
+					context.push(', ');
 				}
 			}
-			state.push(' }');
+			context.push(' }');
 		}
-		state.push(';');
+		context.push(';');
 	},
 
-	ImportExpression(node, state) {
-		state.push('import(');
-		state.visit(node.source);
+	ImportExpression(node, context) {
+		context.push('import(');
+		context.visit(node.source);
 		//@ts-expect-error for some reason the types haven't been updated
 		if (node.arguments) {
 			//@ts-expect-error
 			for (let index = 0; index < node.arguments.length; index++) {
-				state.push(', ');
+				context.push(', ');
 				//@ts-expect-error
-				state.visit(node.arguments[index]);
+				context.visit(node.arguments[index]);
 			}
 		}
-		state.push(')');
+		context.push(')');
 	},
 
-	ImportSpecifier(node, state) {
+	ImportSpecifier(node, context) {
 		if (node.local.name !== node.imported.name) {
-			state.visit(node.imported);
-			state.push(' as ');
+			context.visit(node.imported);
+			context.push(' as ');
 		}
 
-		if (node.importKind == 'type') state.push('type ');
-		state.visit(node.local);
+		if (node.importKind == 'type') context.push('type ');
+		context.visit(node.local);
 	},
 
-	LabeledStatement(node, state) {
-		state.visit(node.label);
-		state.push(': ');
-		state.visit(node.body);
+	LabeledStatement(node, context) {
+		context.visit(node.label);
+		context.push(': ');
+		context.visit(node.body);
 	},
 
-	Literal(node, state) {
+	Literal(node, context) {
 		// TODO do we need to handle weird unicode characters somehow?
 		// str.replace(/\\u(\d{4})/g, (m, n) => String.fromCharCode(+n))
 		const value =
-			node.raw || (typeof node.value === 'string' ? state.quote(node.value) : String(node.value));
+			node.raw || (typeof node.value === 'string' ? context.quote(node.value) : String(node.value));
 
-		state.write(value, node);
+		context.write(value, node);
 	},
 
 	LogicalExpression: shared['BinaryExpression|LogicalExpression'],
 
-	MemberExpression(node, state) {
+	MemberExpression(node, context) {
 		if (EXPRESSIONS_PRECEDENCE[node.object.type] < EXPRESSIONS_PRECEDENCE.MemberExpression) {
-			state.push('(');
-			state.visit(node.object);
-			state.push(')');
+			context.push('(');
+			context.visit(node.object);
+			context.push(')');
 		} else {
-			state.visit(node.object);
+			context.visit(node.object);
 		}
 
 		if (node.computed) {
 			if (node.optional) {
-				state.push('?.');
+				context.push('?.');
 			}
-			state.push('[');
-			state.visit(node.property);
-			state.push(']');
+			context.push('[');
+			context.visit(node.property);
+			context.push(']');
 		} else {
-			state.push(node.optional ? '?.' : '.');
-			state.visit(node.property);
+			context.push(node.optional ? '?.' : '.');
+			context.visit(node.property);
 		}
 	},
 
-	MetaProperty(node, state) {
-		state.visit(node.meta);
-		state.push('.');
-		state.visit(node.property);
+	MetaProperty(node, context) {
+		context.visit(node.meta);
+		context.push('.');
+		context.visit(node.property);
 	},
 
-	MethodDefinition(node, state) {
+	MethodDefinition(node, context) {
 		if (node.decorators) {
 			for (const decorator of node.decorators) {
-				state.visit(decorator);
+				context.visit(decorator);
 			}
 		}
 
 		if (node.static) {
-			state.push('static ');
+			context.push('static ');
 		}
 
 		if (node.kind === 'get' || node.kind === 'set') {
 			// Getter or setter
-			state.push(node.kind + ' ');
+			context.push(node.kind + ' ');
 		}
 
 		if (node.value.async) {
-			state.push('async ');
+			context.push('async ');
 		}
 
 		if (node.value.generator) {
-			state.push('*');
+			context.push('*');
 		}
 
-		if (node.computed) state.push('[');
-		state.visit(node.key);
-		if (node.computed) state.push(']');
+		if (node.computed) context.push('[');
+		context.visit(node.key);
+		if (node.computed) context.push(']');
 
-		state.push('(');
-		state.inline(node.value.params, false);
-		state.push(')');
+		context.push('(');
+		context.inline(node.value.params, false);
+		context.push(')');
 
-		if (node.value.returnType) state.visit(node.value.returnType);
+		if (node.value.returnType) context.visit(node.value.returnType);
 
-		state.push(' ');
+		context.push(' ');
 
-		if (node.value.body) state.visit(node.value.body);
+		if (node.value.body) context.visit(node.value.body);
 	},
 
 	NewExpression: shared['CallExpression|NewExpression'],
 
-	ObjectExpression(node, state) {
-		state.push('{');
-		state.inline(node.properties, true);
-		state.push('}');
+	ObjectExpression(node, context) {
+		context.push('{');
+		context.inline(node.properties, true);
+		context.push('}');
 	},
 
-	ObjectPattern(node, state) {
-		state.push('{');
-		state.inline(node.properties, true);
-		state.push('}');
+	ObjectPattern(node, context) {
+		context.push('{');
+		context.inline(node.properties, true);
+		context.push('}');
 
-		if (node.typeAnnotation) state.visit(node.typeAnnotation);
+		if (node.typeAnnotation) context.visit(node.typeAnnotation);
 	},
 
 	// @ts-expect-error this isn't a real node type, but Acorn produces it
-	ParenthesizedExpression(node, state) {
-		return state.visit(node.expression);
+	ParenthesizedExpression(node, context) {
+		return context.visit(node.expression);
 	},
 
-	PrivateIdentifier(node, state) {
-		state.write('#');
-		state.write(node.name, node);
+	PrivateIdentifier(node, context) {
+		context.write('#');
+		context.write(node.name, node);
 	},
 
-	Program(node, state) {
-		state.block(node.body, add_margin);
+	Program(node, context) {
+		context.block(node.body, add_margin);
 	},
 
-	Property(node, state) {
+	Property(node, context) {
 		const value = node.value.type === 'AssignmentPattern' ? node.value.left : node.value;
 
 		const shorthand =
@@ -770,268 +770,268 @@ export default {
 			node.key.name === value.name;
 
 		if (shorthand) {
-			state.visit(node.value);
+			context.visit(node.value);
 			return;
 		}
 
 		// shorthand methods
 		if (node.value.type === 'FunctionExpression') {
-			if (node.kind !== 'init') state.push(node.kind + ' ');
-			if (node.value.async) state.push('async ');
-			if (node.value.generator) state.push('*');
-			if (node.computed) state.push('[');
-			state.visit(node.key);
-			if (node.computed) state.push(']');
-			state.push('(');
-			state.inline(node.value.params, false);
-			state.push(')');
+			if (node.kind !== 'init') context.push(node.kind + ' ');
+			if (node.value.async) context.push('async ');
+			if (node.value.generator) context.push('*');
+			if (node.computed) context.push('[');
+			context.visit(node.key);
+			if (node.computed) context.push(']');
+			context.push('(');
+			context.inline(node.value.params, false);
+			context.push(')');
 
-			if (node.value.returnType) state.visit(node.value.returnType);
+			if (node.value.returnType) context.visit(node.value.returnType);
 
-			state.push(' ');
-			state.visit(node.value.body);
+			context.push(' ');
+			context.visit(node.value.body);
 		} else {
-			if (node.computed) state.push('[');
-			if (node.kind === 'get' || node.kind === 'set') state.push(node.kind + ' ');
-			state.visit(node.key);
-			state.push(node.computed ? ']: ' : ': ');
-			state.visit(node.value);
+			if (node.computed) context.push('[');
+			if (node.kind === 'get' || node.kind === 'set') context.push(node.kind + ' ');
+			context.visit(node.key);
+			context.push(node.computed ? ']: ' : ': ');
+			context.visit(node.value);
 		}
 	},
 
-	PropertyDefinition(node, state) {
+	PropertyDefinition(node, context) {
 		if (node.decorators) {
 			for (const decorator of node.decorators) {
-				state.visit(decorator);
+				context.visit(decorator);
 			}
 		}
 
 		if (node.accessibility) {
-			state.push(node.accessibility, ' ');
+			context.push(node.accessibility, ' ');
 		}
 
 		if (node.static) {
-			state.push('static ');
+			context.push('static ');
 		}
 
 		if (node.computed) {
-			state.push('[');
-			state.visit(node.key);
-			state.push(']');
+			context.push('[');
+			context.visit(node.key);
+			context.push(']');
 		} else {
-			state.visit(node.key);
+			context.visit(node.key);
 		}
 
 		if (node.typeAnnotation) {
-			state.push(': ');
-			state.visit(node.typeAnnotation.typeAnnotation);
+			context.push(': ');
+			context.visit(node.typeAnnotation.typeAnnotation);
 		}
 
 		if (node.value) {
-			state.push(' = ');
+			context.push(' = ');
 
-			state.visit(node.value);
+			context.visit(node.value);
 		}
 
-		state.push(';');
+		context.push(';');
 	},
 
 	RestElement: shared['RestElement|SpreadElement'],
 
-	ReturnStatement(node, state) {
+	ReturnStatement(node, context) {
 		if (node.argument) {
 			const argumentWithComment = /** @type {NodeWithComments} */ (node.argument);
 			const contains_comment =
 				argumentWithComment.leadingComments &&
 				argumentWithComment.leadingComments.some((comment) => comment.type === 'Line');
 
-			state.push(contains_comment ? 'return (' : 'return ');
-			state.visit(node.argument);
-			state.push(contains_comment ? ');' : ';');
+			context.push(contains_comment ? 'return (' : 'return ');
+			context.visit(node.argument);
+			context.push(contains_comment ? ');' : ';');
 		} else {
-			state.push('return;');
+			context.push('return;');
 		}
 	},
 
-	SequenceExpression(node, state) {
-		state.push('(');
-		state.inline(node.expressions, false);
-		state.push(')');
+	SequenceExpression(node, context) {
+		context.push('(');
+		context.inline(node.expressions, false);
+		context.push(')');
 	},
 
 	SpreadElement: shared['RestElement|SpreadElement'],
 
-	StaticBlock(node, state) {
-		state.indent();
-		state.push('static {');
-		state.newline();
+	StaticBlock(node, context) {
+		context.indent();
+		context.push('static {');
+		context.newline();
 
-		state.block(node.body, add_margin);
+		context.block(node.body, add_margin);
 
-		state.dedent();
-		state.newline();
-		state.push('}');
+		context.dedent();
+		context.newline();
+		context.push('}');
 	},
 
-	Super(node, state) {
-		state.write('super', node);
+	Super(node, context) {
+		context.write('super', node);
 	},
 
-	SwitchStatement(node, state) {
-		state.push('switch (');
-		state.visit(node.discriminant);
-		state.push(') {');
-		state.indent();
+	SwitchStatement(node, context) {
+		context.push('switch (');
+		context.visit(node.discriminant);
+		context.push(') {');
+		context.indent();
 
 		let first = true;
 
 		for (const block of node.cases) {
-			if (!first) state.push('\n');
+			if (!first) context.push('\n');
 			first = false;
 
 			if (block.test) {
-				state.newline();
-				state.push(`case `);
-				state.visit(block.test);
-				state.push(':');
+				context.newline();
+				context.push(`case `);
+				context.visit(block.test);
+				context.push(':');
 			} else {
-				state.newline();
-				state.push(`default:`);
+				context.newline();
+				context.push(`default:`);
 			}
 
-			state.indent();
+			context.indent();
 
 			for (const statement of block.consequent) {
-				state.newline();
-				state.visit(statement);
+				context.newline();
+				context.visit(statement);
 			}
 
-			state.dedent();
+			context.dedent();
 		}
 
-		state.dedent();
-		state.newline();
-		state.push(`}`);
+		context.dedent();
+		context.newline();
+		context.push(`}`);
 	},
 
-	TaggedTemplateExpression(node, state) {
-		state.visit(node.tag);
-		state.visit(node.quasi);
+	TaggedTemplateExpression(node, context) {
+		context.visit(node.tag);
+		context.visit(node.quasi);
 	},
 
-	TemplateLiteral(node, state) {
-		state.push('`');
+	TemplateLiteral(node, context) {
+		context.push('`');
 
 		const { quasis, expressions } = node;
 
 		for (let i = 0; i < expressions.length; i++) {
 			const raw = quasis[i].value.raw;
 
-			state.push(raw, '${');
-			state.visit(expressions[i]);
-			state.push('}');
+			context.push(raw, '${');
+			context.visit(expressions[i]);
+			context.push('}');
 
-			if (/\n/.test(raw)) state.multiline = true;
+			if (/\n/.test(raw)) context.multiline = true;
 		}
 
 		const raw = quasis[quasis.length - 1].value.raw;
 
-		state.push(raw, '`');
-		if (/\n/.test(raw)) state.multiline = true;
+		context.push(raw, '`');
+		if (/\n/.test(raw)) context.multiline = true;
 	},
 
-	ThisExpression(node, state) {
-		state.write('this', node);
+	ThisExpression(node, context) {
+		context.write('this', node);
 	},
 
-	ThrowStatement(node, state) {
-		state.push('throw ');
-		if (node.argument) state.visit(node.argument);
-		state.push(';');
+	ThrowStatement(node, context) {
+		context.push('throw ');
+		if (node.argument) context.visit(node.argument);
+		context.push(';');
 	},
 
-	TryStatement(node, state) {
-		state.push('try ');
-		state.visit(node.block);
+	TryStatement(node, context) {
+		context.push('try ');
+		context.visit(node.block);
 
 		if (node.handler) {
 			if (node.handler.param) {
-				state.push(' catch(');
-				state.visit(node.handler.param);
-				state.push(') ');
+				context.push(' catch(');
+				context.visit(node.handler.param);
+				context.push(') ');
 			} else {
-				state.push(' catch ');
+				context.push(' catch ');
 			}
 
-			state.visit(node.handler.body);
+			context.visit(node.handler.body);
 		}
 
 		if (node.finalizer) {
-			state.push(' finally ');
-			state.visit(node.finalizer);
+			context.push(' finally ');
+			context.visit(node.finalizer);
 		}
 	},
 
-	UnaryExpression(node, state) {
-		state.push(node.operator);
+	UnaryExpression(node, context) {
+		context.push(node.operator);
 
 		if (node.operator.length > 1) {
-			state.push(' ');
+			context.push(' ');
 		}
 
 		if (EXPRESSIONS_PRECEDENCE[node.argument.type] < EXPRESSIONS_PRECEDENCE.UnaryExpression) {
-			state.push('(');
-			state.visit(node.argument);
-			state.push(')');
+			context.push('(');
+			context.visit(node.argument);
+			context.push(')');
 		} else {
-			state.visit(node.argument);
+			context.visit(node.argument);
 		}
 	},
 
-	UpdateExpression(node, state) {
+	UpdateExpression(node, context) {
 		if (node.prefix) {
-			state.push(node.operator);
-			state.visit(node.argument);
+			context.push(node.operator);
+			context.visit(node.argument);
 		} else {
-			state.visit(node.argument);
-			state.push(node.operator);
+			context.visit(node.argument);
+			context.push(node.operator);
 		}
 	},
 
-	VariableDeclaration(node, state) {
-		handle_var_declaration(node, state);
-		state.push(';');
+	VariableDeclaration(node, context) {
+		handle_var_declaration(node, context);
+		context.push(';');
 	},
 
-	VariableDeclarator(node, state) {
-		state.visit(node.id);
+	VariableDeclarator(node, context) {
+		context.visit(node.id);
 
 		if (node.init) {
-			state.push(' = ');
-			state.visit(node.init);
+			context.push(' = ');
+			context.visit(node.init);
 		}
 	},
 
-	WhileStatement(node, state) {
-		state.push('while (');
-		state.visit(node.test);
-		state.push(') ');
-		state.visit(node.body);
+	WhileStatement(node, context) {
+		context.push('while (');
+		context.visit(node.test);
+		context.push(') ');
+		context.visit(node.body);
 	},
 
-	WithStatement(node, state) {
-		state.push('with (');
-		state.visit(node.object);
-		state.push(') ');
-		state.visit(node.body);
+	WithStatement(node, context) {
+		context.push('with (');
+		context.visit(node.object);
+		context.push(') ');
+		context.visit(node.body);
 	},
 
-	YieldExpression(node, state) {
+	YieldExpression(node, context) {
 		if (node.argument) {
-			state.push(node.delegate ? `yield* ` : `yield `);
-			state.visit(node.argument);
+			context.push(node.delegate ? `yield* ` : `yield `);
+			context.visit(node.argument);
 		} else {
-			state.push(node.delegate ? `yield*` : `yield`);
+			context.push(node.delegate ? `yield*` : `yield`);
 		}
 	}
 };
