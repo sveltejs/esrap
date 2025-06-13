@@ -383,28 +383,34 @@ export default {
 			context.write(')');
 		}
 
-		const if_true = context.new();
-		const if_false = context.new();
+		const consequent = context.new();
+		const alternate = context.new();
 
-		const child_context = context.child();
+		// TODO flush comments here, rather than in visitors
 
-		context.append(if_true);
-		child_context.visit(node.consequent);
-		context.append(if_false);
-		child_context.visit(node.alternate);
+		consequent.visit(node.consequent);
+		alternate.visit(node.alternate);
 
-		const multiline = child_context.multiline;
+		if (
+			consequent.multiline ||
+			alternate.multiline ||
+			consequent.measure() + alternate.measure() > 50
+		) {
+			context.multiline = true;
 
-		if (multiline) {
-			if_true.indent();
-			if_true.newline();
-			if_true.write('? ');
-			if_false.newline();
-			if_false.write(': ');
+			context.indent();
+			context.newline();
+			context.write('? ');
+			context.append(consequent);
+			context.newline();
+			context.write(': ');
+			context.append(alternate);
 			context.dedent();
 		} else {
-			if_true.write(' ? ');
-			if_false.write(' : ');
+			context.write(' ? ');
+			context.append(consequent);
+			context.write(' : ');
+			context.append(alternate);
 		}
 	},
 
