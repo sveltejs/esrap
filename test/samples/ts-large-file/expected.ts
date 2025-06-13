@@ -197,10 +197,7 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 			}
 
 			if (question.type === 'string' || question.type === 'number') {
-				answer = await p.text({
-					message,
-					initialValue: question.default.toString()
-				});
+				answer = await p.text({ message, initialValue: question.default.toString() });
 			}
 
 			if (p.isCancel(answer)) {
@@ -328,10 +325,7 @@ export async function installAdders({ cwd, official = {} }: InstallAdderOptions)
 	return Array.from(filesToFormat);
 }
 
-async function processExternalAdder<Args extends OptionDefinition>(
-	config: ExternalAdderConfig<Args>,
-	cwd: string
-) {
+async function processExternalAdder<Args extends OptionDefinition>(config: ExternalAdderConfig<Args>, cwd: string) {
 	if (!TESTING) p.log.message(`Executing external command ${pc.gray(`(${config.metadata.id})`)}`);
 
 	try {

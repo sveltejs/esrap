@@ -147,15 +147,9 @@ export class Context {
 	inline(nodes, pad, separator = ',') {
 		if (nodes.length === 0) return;
 
-		const index = this.#commands.length;
-
-		const open = this.new();
 		const join = this.new();
-		const close = this.new();
 
-		this.#commands.push(open.#commands);
-
-		const child_context = this.child();
+		const child_context = this.new();
 
 		let prev;
 
@@ -166,63 +160,65 @@ export class Context {
 
 			if (node) {
 				if (!is_first && !prev) {
-					this.#commands.push(join.#commands);
+					child_context.append(join);
 				}
 
 				child_context.visit(node);
 
 				if (!is_last) {
-					this.#commands.push(separator);
+					child_context.write(separator);
 				}
 
 				// TODO handle comments in a callback
 				if (comments.length > 0) {
-					this.#commands.push(' ');
+					child_context.write(' ');
 
 					while (comments.length) {
 						const comment = /** @type {TSESTree.Comment} */ (comments.shift());
 
-						push_comment(comment, this);
+						push_comment(comment, child_context);
 
 						if (!is_last) {
 							if (comment.type === 'Line') {
-								this.newline();
+								child_context.newline();
 							} else {
-								this.#commands.push(join.#commands);
+								child_context.append(join);
 							}
 						}
 					}
 
 					child_context.multiline = true;
 				} else {
-					if (!is_last) this.#commands.push(join.#commands);
+					if (!is_last) child_context.append(join);
 				}
 			} else {
 				// This is only used for ArrayPattern and ArrayExpression, but
 				// it makes more sense to have the logic here than there, because
 				// otherwise we'd duplicate a lot more stuff
-				this.#commands.push(separator);
+				child_context.write(separator);
 			}
 
 			prev = node;
 		}
 
-		this.#commands.push(close.#commands);
-
-		const length = measure(this.#commands, index) + 2 * (nodes.length - 1);
+		const length = child_context.measure();
 
 		if (child_context.multiline || length > 50) {
 			this.multiline = true;
 
-			open.indent();
-			open.newline();
 			join.newline();
-			close.dedent();
-			close.newline();
+
+			this.indent();
+			this.newline();
+			this.append(child_context);
+			this.dedent();
+			this.newline();
 		} else {
-			if (pad) open.write(' ');
 			join.write(' ');
-			if (pad) close.write(' ');
+
+			if (pad) this.write(' ');
+			this.append(child_context);
+			if (pad) this.write(' ');
 		}
 	}
 

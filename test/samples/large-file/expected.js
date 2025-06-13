@@ -77,20 +77,12 @@
 		};
 
 		var document = window.document;
-
-		var preservedScriptAttributes = {
-			type: true,
-			src: true,
-			nonce: true,
-			noModule: true
-		};
+		var preservedScriptAttributes = { type: true, src: true, nonce: true, noModule: true };
 
 		function DOMEval(code, node, doc) {
 			doc = doc || document;
 
-			var i,
-				val,
-				script = doc.createElement("script");
+			var i, val, script = doc.createElement("script");
 
 			script.text = code;
 
@@ -200,8 +192,7 @@
 				}));
 			},
 			eq(i) {
-				var len = this.length,
-					j = +i + (i < 0 ? len : 0);
+				var len = this.length, j = +i + (i < 0 ? len : 0);
 
 				return this.pushStack(j >= 0 && j < len ? [this[j]] : []);
 			},
@@ -408,9 +399,7 @@
 			// Support: Android <=4.0 only, PhantomJS 1 only
 			// push.apply(_, arraylike) throws on ancient WebKit
 			merge(first, second) {
-				var len = +second.length,
-					j = 0,
-					i = first.length;
+				var len = +second.length, j = 0, i = first.length;
 
 				for (; j < len; j++) {
 					first[i++] = second[j];
@@ -2186,9 +2175,7 @@
 
 				for (; i < len; i++) {
 					if (matcher = Expr.relative[tokens[i].type]) {
-						matchers = [
-							addCombinator(elementMatcher(matchers), matcher)
-						];
+						matchers = [addCombinator(elementMatcher(matchers), matcher)];
 					} else {
 						matcher = Expr.filter[tokens[i].type].apply(null, tokens[i].matches);
 
@@ -2876,9 +2863,7 @@
 		jQuery.Callbacks = function (options) {
 			// Convert options from String-formatted to Object-formatted if needed
 			// (we check in cache first)
-			options = typeof options === "string"
-				? createOptions(options)
-				: jQuery.extend({}, options);
+			options = typeof options === "string" ? createOptions(options) : jQuery.extend({}, options);
 
 			var // Flag to know if list is currently firing
 				firing,
@@ -3466,18 +3451,8 @@
 
 		// Multifunctional method to get and set values of a collection
 		// The value/s can optionally be executed if it's a function
-		var access = function (
-			elems,
-			fn,
-			key,
-			value,
-			chainable,
-			emptyGet,
-			raw
-		) {
-			var i = 0,
-				len = elems.length,
-				bulk = key == null;
+		var access = function (elems, fn, key, value, chainable, emptyGet, raw) {
+			var i = 0, len = elems.length, bulk = key == null;
 
 			// Sets many values
 			if (toType(key) === "object") {
@@ -3509,9 +3484,7 @@
 
 				if (fn) {
 					for (; i < len; i++) {
-						fn(elems[i], key, raw
-							? value
-							: value.call(elems[i], i, fn(elems[i], key)));
+						fn(elems[i], key, raw ? value : value.call(elems[i], i, fn(elems[i], key)));
 					}
 				}
 			}
@@ -3529,8 +3502,7 @@
 		};
 
 		// Matches dashed string for camelizing
-		var rmsPrefix = /^-ms-/,
-			rdashAlpha = /-([a-z])/g;
+		var rmsPrefix = /^-ms-/, rdashAlpha = /-([a-z])/g;
 
 		// Used by camelCase as callback to replace()
 		function fcamelCase(_all, letter) {
@@ -4228,17 +4200,9 @@
 			// same way that tag soup parsers do. So we cannot shorten
 			// this by omitting <tbody> or other required elements.
 			thead: [1, "<table>", "</table>"],
-			col: [
-				2,
-				"<table><colgroup>",
-				"</colgroup></table>"
-			],
+			col: [2, "<table><colgroup>", "</colgroup></table>"],
 			tr: [2, "<table><tbody>", "</tbody></table>"],
-			td: [
-				3,
-				"<table><tbody><tr>",
-				"</tr></tbody></table>"
-			],
+			td: [3, "<table><tbody><tr>", "</tr></tbody></table>"],
 			_default: [0, "", ""]
 		};
 
@@ -4247,11 +4211,7 @@
 
 		// Support: IE <=9 only
 		if (!support.option) {
-			wrapMap.optgroup = wrapMap.option = [
-				1,
-				"<select multiple='multiple'>",
-				"</select>"
-			];
+			wrapMap.optgroup = wrapMap.option = [1, "<select multiple='multiple'>", "</select>"];
 		}
 
 		function getAll(context, tag) {
@@ -4285,13 +4245,7 @@
 
 		var rhtml = /<|&#?\w+;/;
 
-		function buildFragment(
-			elems,
-			context,
-			scripts,
-			selection,
-			ignored
-		) {
+		function buildFragment(elems, context, scripts, selection, ignored) {
 			var elem,
 				tmp,
 				tag,
@@ -4573,13 +4527,7 @@
 				}
 			},
 			// Detach an event or set of events from an element
-			remove(
-				elem,
-				types,
-				handler,
-				selector,
-				mappedTypes
-			) {
+			remove(elem, types, handler, selector, mappedTypes) {
 				var j,
 					origCount,
 					tmp,
@@ -4768,10 +4716,7 @@
 				cur = this;
 
 				if (delegateCount < handlers.length) {
-					handlerQueue.push({
-						elem: cur,
-						handlers: handlers.slice(delegateCount)
-					});
+					handlerQueue.push({ elem: cur, handlers: handlers.slice(delegateCount) });
 				}
 
 				return handlerQueue;
@@ -5442,13 +5387,7 @@
 								if (node.src && (node.type || "").toLowerCase() !== "module") {
 									// Optional AJAX dependency, but won't run scripts if not present
 									if (jQuery._evalUrl && !node.noModule) {
-										jQuery._evalUrl(
-											node.src,
-											{
-												nonce: node.nonce || node.getAttribute("nonce")
-											},
-											doc
-										);
+										jQuery._evalUrl(node.src, { nonce: node.nonce || node.getAttribute("nonce") }, doc);
 									}
 								} else {
 									// Unwrap a CDATA section containing script contents. This shouldn't be
@@ -6057,14 +5996,7 @@
 				: value;
 		}
 
-		function boxModelAdjustment(
-			elem,
-			dimension,
-			box,
-			isBorderBox,
-			styles,
-			computedVal
-		) {
+		function boxModelAdjustment(elem, dimension, box, isBorderBox, styles, computedVal) {
 			var i = dimension === "width" ? 1 : 0,
 				extra = 0,
 				delta = 0,
@@ -6471,9 +6403,7 @@
 			cur() {
 				var hooks = Tween.propHooks[this.prop];
 
-				return hooks && hooks.get
-					? hooks.get(this)
-					: Tween.propHooks._default.get(this);
+				return hooks && hooks.get ? hooks.get(this) : Tween.propHooks._default.get(this);
 			},
 			run(percent) {
 				var eased, hooks = Tween.propHooks[this.prop];
@@ -6700,12 +6630,7 @@
 				// Record all 3 overflow attributes because IE does not infer the shorthand
 				// from identically-valued overflowX and overflowY and Edge just mirrors
 				// the overflowX value there.
-				opts.overflow = [
-					style.overflow,
-					style.overflowX,
-					style.overflowY
-				];
-
+				opts.overflow = [style.overflow, style.overflowX, style.overflowY];
 				// Identify a display type, preferring old show/hide data over the CSS cascade
 				restoreDisplay = dataShow && dataShow.display;
 
@@ -6896,14 +6821,7 @@
 				animation = deferred.promise({
 					elem,
 					props: jQuery.extend({}, properties),
-					opts: jQuery.extend(
-						true,
-						{
-							specialEasing: {},
-							easing: jQuery.easing._default
-						},
-						options
-					),
+					opts: jQuery.extend(true, { specialEasing: {}, easing: jQuery.easing._default }, options),
 					originalProperties: properties,
 					originalOptions: options,
 					startTime: fxNow || createFxNow(),
@@ -6966,13 +6884,7 @@
 
 			// Attach callbacks from options
 			animation.progress(animation.opts.progress).done(animation.opts.done, animation.opts.complete).fail(animation.opts.fail).always(animation.opts.always);
-
-			jQuery.fx.timer(jQuery.extend(tick, {
-				elem,
-				anim: animation,
-				queue: animation.opts.queue
-			}));
-
+			jQuery.fx.timer(jQuery.extend(tick, { elem, anim: animation, queue: animation.opts.queue }));
 			return animation;
 		}
 
@@ -7246,12 +7158,8 @@
 			inProgress = null;
 		};
 
-		jQuery.fx.speeds = {
-			slow: 600,
-			fast: 200,
-			// Default speed
-			_default: 400
-		};
+		jQuery.fx.speeds = { slow: 600, fast: 200, // Default speed
+		_default: 400 };
 
 		// Based off of the plugin by Clint Helfers, with permission.
 		jQuery.fn.delay = function (time, type) {
@@ -7287,8 +7195,7 @@
 			support.radioValue = input.value === "t";
 		})();
 
-		var boolHook,
-			attrHandle = jQuery.expr.attrHandle;
+		var boolHook, attrHandle = jQuery.expr.attrHandle;
 
 		jQuery.fn.extend({
 			attr(name, value) {
@@ -8172,17 +8079,11 @@
 
 					if (Array.isArray(val)) {
 						return jQuery.map(val, function (val) {
-							return {
-								name: elem.name,
-								value: val.replace(rCRLF, "\r\n")
-							};
+							return { name: elem.name, value: val.replace(rCRLF, "\r\n") };
 						});
 					}
 
-					return {
-						name: elem.name,
-						value: val.replace(rCRLF, "\r\n")
-					};
+					return { name: elem.name, value: val.replace(rCRLF, "\r\n") };
 				}).get();
 			}
 		});
@@ -8482,11 +8383,7 @@
 					xml: "application/xml, text/xml",
 					json: "application/json, text/javascript"
 				},
-				contents: {
-					xml: /\bxml\b/,
-					html: /\bhtml/,
-					json: /\bjson\b/
-				},
+				contents: { xml: /\bxml\b/, html: /\bhtml/, json: /\bjson\b/ },
 				responseFields: {
 					xml: "responseXML",
 					text: "responseText",
@@ -8811,12 +8708,7 @@
 				}
 
 				// Callback for when everything is done
-				function done(
-					status,
-					nativeStatusText,
-					responses,
-					headers
-				) {
+				function done(status, nativeStatusText, responses, headers) {
 					var isSuccess,
 						success,
 						error,
@@ -9622,44 +9514,38 @@
 		});
 
 		// Create scrollLeft and scrollTop methods
-		jQuery.each(
-			{
-				scrollLeft: "pageXOffset",
-				scrollTop: "pageYOffset"
-			},
-			function (method, prop) {
-				var top = "pageYOffset" === prop;
+		jQuery.each({ scrollLeft: "pageXOffset", scrollTop: "pageYOffset" }, function (method, prop) {
+			var top = "pageYOffset" === prop;
 
-				jQuery.fn[method] = function (val) {
-					return access(
-						this,
-						function (elem, method, val) {
-							// Coalesce documents and windows
-							var win;
+			jQuery.fn[method] = function (val) {
+				return access(
+					this,
+					function (elem, method, val) {
+						// Coalesce documents and windows
+						var win;
 
-							if (isWindow(elem)) {
-								win = elem;
-							} else if (elem.nodeType === 9) {
-								win = elem.defaultView;
-							}
+						if (isWindow(elem)) {
+							win = elem;
+						} else if (elem.nodeType === 9) {
+							win = elem.defaultView;
+						}
 
-							if (val === undefined) {
-								return win ? win[prop] : elem[method];
-							}
+						if (val === undefined) {
+							return win ? win[prop] : elem[method];
+						}
 
-							if (win) {
-								win.scrollTo(!top ? val : win.pageXOffset, top ? val : win.pageYOffset);
-							} else {
-								elem[method] = val;
-							}
-						},
-						method,
-						val,
-						arguments.length
-					);
-				};
-			}
-		);
+						if (win) {
+							win.scrollTo(!top ? val : win.pageXOffset, top ? val : win.pageYOffset);
+						} else {
+							elem[method] = val;
+						}
+					},
+					method,
+					val,
+					arguments.length
+				);
+			};
+		});
 
 		// Support: Safari <=7 - 9.1, Chrome <=37 - 49
 		// Add the top/left cssHooks using jQuery.fn.position
@@ -9766,9 +9652,7 @@
 		jQuery.each(("blur focus focusin focusout resize scroll click dblclick " + "mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave " + "change select submit keydown keypress keyup contextmenu").split(" "), function (_i, name) {
 			// Handle event binding
 			jQuery.fn[name] = function (data, fn) {
-				return arguments.length > 0
-					? this.on(name, null, data, fn)
-					: this.trigger(name);
+				return arguments.length > 0 ? this.on(name, null, data, fn) : this.trigger(name);
 			};
 		});
 
