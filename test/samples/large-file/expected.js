@@ -2129,8 +2129,11 @@
 						}
 					} else {
 						matcherOut = condense(matcherOut === results
-							? matcherOut.splice(preexisting, matcherOut.length)
-							: matcherOut); // Add elements to results, through postFinder if defined
+							? matcherOut.splice(
+								preexisting, // Add elements to results, through postFinder if defined
+								matcherOut.length
+							)
+							: matcherOut);
 
 						if (postFinder) {
 							postFinder(null, results, matcherOut, xml);
