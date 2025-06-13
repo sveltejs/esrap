@@ -30,6 +30,7 @@ function prepend_comments(comments, context, newlines) {
 export class Context {
 	#handlers;
 	#quote;
+	#commands;
 
 	multiline = false;
 
@@ -43,20 +44,21 @@ export class Context {
 	constructor(handlers, quote, commands = [], comments = []) {
 		this.#handlers = handlers;
 		this.#quote = quote;
-		this.commands = commands;
+		this.#commands = commands;
+
 		this.comments = comments;
 	}
 
 	indent() {
-		this.commands.push(indent);
+		this.#commands.push(indent);
 	}
 
 	dedent() {
-		this.commands.push(dedent);
+		this.#commands.push(dedent);
 	}
 
 	newline() {
-		this.commands.push(newline);
+		this.#commands.push(newline);
 	}
 
 	/**
@@ -64,9 +66,9 @@ export class Context {
 	 */
 	push(command) {
 		if (command instanceof Context) {
-			this.commands.push(command.commands);
+			this.#commands.push(command.#commands);
 		} else {
-			this.commands.push(command);
+			this.#commands.push(command);
 		}
 	}
 
@@ -79,10 +81,10 @@ export class Context {
 		if (node?.loc) {
 			// TODO make location extraction pluggable too
 			this.location(node.loc.start.line, node.loc.start.column);
-			this.commands.push(content);
+			this.#commands.push(content);
 			this.location(node.loc.end.line, node.loc.end.column);
 		} else {
-			this.commands.push(content);
+			this.#commands.push(content);
 		}
 	}
 
@@ -92,7 +94,7 @@ export class Context {
 	 * @param {number} column
 	 */
 	location(line, column) {
-		this.commands.push({
+		this.#commands.push({
 			type: 'Location',
 			line,
 			column
@@ -173,13 +175,13 @@ export class Context {
 	inline(nodes, pad, separator = ',') {
 		if (nodes.length === 0) return;
 
-		const index = this.commands.length;
+		const index = this.#commands.length;
 
 		const open = this.new();
 		const join = this.new();
 		const close = this.new();
 
-		this.commands.push(open.commands);
+		this.#commands.push(open.#commands);
 
 		const child_state = this.child();
 
@@ -192,42 +194,42 @@ export class Context {
 
 			if (node) {
 				if (!is_first && !prev) {
-					this.commands.push(join.commands);
+					this.#commands.push(join.#commands);
 				}
 
 				child_state.visit(node);
 
 				if (!is_last) {
-					this.commands.push(separator);
+					this.#commands.push(separator);
 				}
 
 				if (this.comments.length > 0) {
-					this.commands.push(' ');
+					this.#commands.push(' ');
 
 					while (this.comments.length) {
 						const comment = /** @type {TSESTree.Comment} */ (this.comments.shift());
-						this.commands.push({ type: 'Comment', comment });
-						if (!is_last) this.commands.push(join.commands);
+						this.#commands.push({ type: 'Comment', comment });
+						if (!is_last) this.#commands.push(join.#commands);
 					}
 
 					child_state.multiline = true;
 				} else {
-					if (!is_last) this.commands.push(join.commands);
+					if (!is_last) this.#commands.push(join.#commands);
 				}
 			} else {
 				// This is only used for ArrayPattern and ArrayExpression, but
 				// it makes more sense to have the logic here than there, because
 				// otherwise we'd duplicate a lot more stuff
-				this.commands.push(separator);
+				this.#commands.push(separator);
 			}
 
 			prev = node;
 		}
 
-		this.commands.push(close.commands);
+		this.#commands.push(close.#commands);
 
 		const multiline =
-			child_state.multiline || measure(this.commands, index, this.commands.length) > 50;
+			child_state.multiline || measure(this.#commands, index, this.#commands.length) > 50;
 
 		if (multiline) {
 			this.multiline = true;
@@ -291,7 +293,7 @@ export class Context {
 			while (this.comments.length) {
 				const comment = /** @type {TSESTree.Comment} */ (this.comments.shift());
 
-				this.commands.push(add_newline ? newline : ' ', { type: 'Comment', comment });
+				this.#commands.push(add_newline ? newline : ' ', { type: 'Comment', comment });
 				add_newline = comment.type === 'Line';
 			}
 
@@ -301,11 +303,11 @@ export class Context {
 	}
 
 	measure() {
-		return measure(this.commands, 0, this.commands.length);
+		return measure(this.#commands, 0, this.#commands.length);
 	}
 
 	child() {
-		return new Context(this.#handlers, this.#quote, this.commands, this.comments);
+		return new Context(this.#handlers, this.#quote, this.#commands, this.comments);
 	}
 
 	new() {

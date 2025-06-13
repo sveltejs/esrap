@@ -7,11 +7,11 @@ test('custom printers work', () => {
 	const funkyStringPrinter = {
 		CustomType(node, state) {
 			if (typeof node.value === 'string') {
-				state.commands.push(`:) - `);
+				state.write(`:) - `);
 
-				state.commands.push(node.value);
+				state.write(node.value);
 
-				state.commands.push(` - (:`);
+				state.write(` - (:`);
 			}
 		}
 	};
