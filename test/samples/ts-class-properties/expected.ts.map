@@ -7,5 +7,5 @@
   "sourcesContent": [
     "class A {\n\tprivate name: string;\n\tpublic firstName: string;\n\tpublic lastName: string;\n\tpublic static foo: string;\n}\n"
   ],
-  "mappings": "MAAM,CAAC,CAAC,CAAC;SACA,IAAI;QACL,SAAS;QACT,QAAQ;eACD,GAAG;AAClB,CAAC"
+  "mappings": "MAAM,CAAC,CAAC,CAAC;SACA,IAAI,EAAE,MAAM;QACb,SAAS,EAAE,MAAM;QACjB,QAAQ,EAAE,MAAM;eACT,GAAG,EAAE,MAAM;AAC1B,CAAC"
 }

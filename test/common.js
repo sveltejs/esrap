@@ -9,13 +9,17 @@ import { walk } from 'zimmerframe';
 
 // @ts-expect-error
 export const acornTs = acorn.Parser.extend(tsPlugin({ allowSatisfies: true }));
-
-/** @param {string} input */
-export function load(input) {
+export const acornTsx = acorn.Parser.extend(tsPlugin({ allowSatisfies: true, jsx: true }));
+ 
+/** @param {string} input
+ * @param {{ jsx?: boolean }} opts
+ */
+export function load(input, opts = {}) {
+	const jsx = opts.jsx ?? false;
 	/** @type {any[]} */
 	const comments = [];
 
-	const ast = acornTs.parse(input, {
+	const ast = (jsx ? acornTsx : acornTs).parse(input, {
 		ecmaVersion: 'latest',
 		sourceType: 'module',
 		locations: true,

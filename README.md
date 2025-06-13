@@ -57,7 +57,15 @@ const { code, map } = print(ast, {
   // This only applies to string literals with no `raw` value, which generally
   // means the AST node was generated programmatically, rather than parsed
   // from an original source
-  quotes: 'single'
+  quotes: 'single',
+
+  // Overrwrite the inbuilt printers
+  handlers: {
+    ...ts, // the default, imported from 'esrap/languages/ts'
+    CustomNode(node, state) {
+      state.commands.push('this is custom') // see the source code in the inbuilt languages for examples on how to make your own
+    }
+  }
 });
 ```
 

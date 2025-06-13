@@ -1,7 +1,7 @@
-/** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, PrintOptions, State } from './types' */
-import { handle } from './handlers.js';
+/** @import { Command, Visitors, PrintOptions } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
+import { Context } from './context.js';
+import ts from './languages/ts.js';
 
 /** @type {(str: string) => string} str */
 let btoa = () => {
@@ -33,15 +33,16 @@ export function print(node, opts = {}) {
 		);
 	}
 
-	/** @type {State} */
-	const state = {
-		commands: [],
-		comments: [],
-		multiline: false,
-		quote: opts.quotes === 'double' ? '"' : "'"
-	};
+	/** @type {Command[]} */
+	const commands = [];
 
-	handle(/** @type {TSESTree.Node} */ (node), state);
+	const context = new Context(
+		opts.visitors ?? /** @type {Visitors} */ (ts),
+		opts.quotes === 'double' ? '"' : "'",
+		commands
+	);
+
+	context.visit(node);
 
 	/** @typedef {[number, number, number, number]} Segment */
 
@@ -107,20 +108,11 @@ export function print(node, opts = {}) {
 			case 'Dedent':
 				newline = newline.slice(0, -indent.length);
 				break;
-
-			case 'Comment':
-				if (command.comment.type === 'Line') {
-					append(`//${command.comment.value}`);
-				} else {
-					append(`/*${command.comment.value.replace(/\n/g, newline)}*/`);
-				}
-
-				break;
 		}
 	}
 
-	for (let i = 0; i < state.commands.length; i += 1) {
-		run(state.commands[i]);
+	for (let i = 0; i < commands.length; i += 1) {
+		run(commands[i]);
 	}
 
 	mappings.push(current_line);
