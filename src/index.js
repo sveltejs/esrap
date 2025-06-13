@@ -108,15 +108,6 @@ export function print(node, opts = {}) {
 			case 'Dedent':
 				newline = newline.slice(0, -indent.length);
 				break;
-
-			case 'Comment':
-				if (command.comment.type === 'Line') {
-					append(`//${command.comment.value}`);
-				} else {
-					append(`/*${command.comment.value.replace(/\n/g, newline)}*/`);
-				}
-
-				break;
 		}
 	}
 

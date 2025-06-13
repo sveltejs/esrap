@@ -57,12 +57,7 @@ export interface IndentChange {
 	offset: number;
 }
 
-export interface CommentChunk {
-	type: 'Comment';
-	comment: TSESTree.Comment;
-}
-
-export type Command = string | Location | Newline | Indent | Dedent | CommentChunk | Command[];
+export type Command = string | Location | Newline | Indent | Dedent | Command[];
 
 export interface PrintOptions {
 	sourceMapSource?: string;

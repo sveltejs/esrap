@@ -316,7 +316,7 @@ export class Context {
 
 				if (add_newline) this.newline();
 				else this.write(' ');
-				this.#commands.push({ type: 'Comment', comment });
+				push_comment(comment, this);
 				add_newline = comment.type === 'Line';
 			}
 
