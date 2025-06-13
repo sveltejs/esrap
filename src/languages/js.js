@@ -1115,27 +1115,26 @@ function has_call_expression(node) {
  * @param {Context} context
  */
 function handle_var_declaration(node, context) {
-	const index = context.commands.length;
-
 	const open = context.new();
 	const join = context.new();
-	const child_context = context.child();
+	const child_context = context.new();
 
-	context.write(`${node.kind} `);
-	context.push(open);
+	context.push(child_context);
+
+	child_context.write(`${node.kind} `);
+	child_context.push(open);
 
 	let first = true;
 
 	for (const d of node.declarations) {
-		if (!first) context.push(join);
+		if (!first) child_context.push(join);
 		first = false;
 
 		child_context.visit(d);
 	}
 
 	const multiline =
-		child_context.multiline ||
-		(node.declarations.length > 1 && context.measure(context.commands, index) > 50);
+		child_context.multiline || (node.declarations.length > 1 && child_context.measure() > 50);
 
 	if (multiline) {
 		context.multiline = true;

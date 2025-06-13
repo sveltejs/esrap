@@ -226,7 +226,8 @@ export class Context {
 
 		this.commands.push(close.commands);
 
-		const multiline = child_state.multiline || this.measure(this.commands, index) > 50;
+		const multiline =
+			child_state.multiline || measure(this.commands, index, this.commands.length) > 50;
 
 		if (multiline) {
 			this.multiline = true;
@@ -299,27 +300,8 @@ export class Context {
 		}
 	}
 
-	/**
-	 * @param {Command[]} commands
-	 * @param {number} from
-	 * @param {number} [to]
-	 * @returns
-	 */
-	measure(commands, from, to = commands.length) {
-		let total = 0;
-		for (let i = from; i < to; i += 1) {
-			const command = commands[i];
-			if (typeof command === 'string') {
-				total += command.length;
-			} else if (Array.isArray(command)) {
-				total +=
-					command.length === 0
-						? 2 // assume this is ', '
-						: this.measure(command, 0);
-			}
-		}
-
-		return total;
+	measure() {
+		return measure(this.commands, 0, this.commands.length);
 	}
 
 	child() {
@@ -329,4 +311,27 @@ export class Context {
 	new() {
 		return new Context(this.#handlers, this.#quote);
 	}
+}
+
+/**
+ *
+ * @param {Command[]} commands
+ * @param {number} from
+ * @param {number} to
+ */
+function measure(commands, from, to) {
+	let total = 0;
+	for (let i = from; i < to; i += 1) {
+		const command = commands[i];
+		if (typeof command === 'string') {
+			total += command.length;
+		} else if (Array.isArray(command)) {
+			total +=
+				command.length === 0
+					? 2 // assume this is ', '
+					: measure(command, 0, command.length);
+		}
+	}
+
+	return total;
 }
