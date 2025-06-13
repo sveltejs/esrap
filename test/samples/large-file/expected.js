@@ -4761,8 +4761,10 @@
 				return originalEvent[jQuery.expando] ? originalEvent : new jQuery.Event(originalEvent);
 			},
 			special: {
-				load: { // Prevent triggered image.load events from bubbling to window.load
-				noBubble: true },
+				load: {
+					// Prevent triggered image.load events from bubbling to window.load
+					noBubble: true
+				},
 				click: {
 					// Utilize native event to ensure correct state for checkable inputs
 					setup(data) {
@@ -7177,8 +7179,12 @@
 			inProgress = null;
 		};
 
-		jQuery.fx.speeds = { slow: 600, fast: 200, // Default speed
-		_default: 400 };
+		jQuery.fx.speeds = {
+			slow: 600,
+			fast: 200,
+			// Default speed
+			_default: 400
+		};
 
 		// Based off of the plugin by Clint Helfers, with permission.
 		jQuery.fn.delay = function (time, type) {
@@ -8984,10 +8990,13 @@
 			} catch(e) {}
 		};
 
-		var xhrSuccessStatus = { // File protocol always yields status code 0, assume 200
-			0: 200, // Support: IE <=9 only
-			// trac-1450: sometimes IE returns 1223 when it should be 204
-			1223: 204 },
+		var xhrSuccessStatus = {
+				// File protocol always yields status code 0, assume 200
+				0: 200,
+				// Support: IE <=9 only
+				// trac-1450: sometimes IE returns 1223 when it should be 204
+				1223: 204
+			},
 			xhrSupported = jQuery.ajaxSettings.xhr();
 
 		support.cors = !!xhrSupported && "withCredentials" in xhrSupported;
@@ -9757,8 +9766,9 @@
 		}
 
 		var // Map over jQuery in case of overwrite
-		_jQuery = window.jQuery, // Map over the $ in case of overwrite
-		_$ = window.$;
+			_jQuery = window.jQuery,
+			// Map over the $ in case of overwrite
+			_$ = window.$;
 
 		jQuery.noConflict = function (deep) {
 			if (window.$ === jQuery) {

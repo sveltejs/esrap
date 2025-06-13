@@ -11,31 +11,29 @@ const indent = { type: 'Indent' };
 const dedent = { type: 'Dedent' };
 
 /**
- * @param {TSESTree.Comment[]} comments
+ * @param {TSESTree.Comment} comment
  * @param {Context} context
  * @param {boolean} newlines
  */
-function push_comments(comments, context, newlines) {
-	for (const comment of comments) {
-		if (comment.type === 'Line') {
-			context.write(`//${comment.value}`);
+function push_comment(comment, context, newlines) {
+	if (comment.type === 'Line') {
+		context.write(`//${comment.value}`);
+		context.newline();
+	} else {
+		context.write('/*');
+		const lines = comment.value.split('\n');
+
+		for (let i = 0; i < lines.length; i += 1) {
+			if (i > 0) context.newline();
+			context.write(lines[i]);
+		}
+
+		context.write('*/');
+
+		if (newlines || lines.length > 1) {
 			context.newline();
 		} else {
-			context.write('/*');
-			const lines = comment.value.split('\n');
-
-			for (let i = 0; i < lines.length; i += 1) {
-				if (i > 0) context.newline();
-				context.write(lines[i]);
-			}
-
-			context.write('*/');
-
-			if (newlines || lines.length > 1) {
-				context.newline();
-			} else {
-				context.write(' ');
-			}
+			context.write(' ');
 		}
 	}
 }
@@ -169,7 +167,9 @@ export class Context {
 		}
 
 		if (node_with_comments.leadingComments) {
-			push_comments(node_with_comments.leadingComments, this, false);
+			for (const comment of node_with_comments.leadingComments) {
+				push_comment(comment, this, false);
+			}
 		}
 
 		handler(node, this);
@@ -290,8 +290,10 @@ export class Context {
 			const leading_comments = statement_with_comments.leadingComments;
 			delete statement_with_comments.leadingComments;
 
-			if (leading_comments && leading_comments.length > 0) {
-				push_comments(leading_comments, this, true);
+			if (leading_comments) {
+				for (const comment of leading_comments) {
+					push_comment(comment, this, true);
+				}
 			}
 
 			const child_context = this.child();
