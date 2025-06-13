@@ -15,14 +15,27 @@ const dedent = { type: 'Dedent' };
  * @param {Context} context
  * @param {boolean} newlines
  */
-function prepend_comments(comments, context, newlines) {
+function push_comments(comments, context, newlines) {
 	for (const comment of comments) {
-		context.push({ type: 'Comment', comment });
-
-		if (newlines || comment.type === 'Line' || /\n/.test(comment.value)) {
+		if (comment.type === 'Line') {
+			context.write(`//${comment.value}`);
 			context.newline();
 		} else {
-			context.write(' ');
+			context.write('/*');
+			const lines = comment.value.split('\n');
+
+			for (let i = 0; i < lines.length; i += 1) {
+				if (i > 0) context.newline();
+				context.write(lines[i]);
+			}
+
+			context.write('*/');
+
+			if (newlines || lines.length > 1) {
+				context.newline();
+			} else {
+				context.write(' ');
+			}
 		}
 	}
 }
@@ -156,7 +169,7 @@ export class Context {
 		}
 
 		if (node_with_comments.leadingComments) {
-			prepend_comments(node_with_comments.leadingComments, this, false);
+			push_comments(node_with_comments.leadingComments, this, false);
 		}
 
 		handler(node, this);
@@ -278,7 +291,7 @@ export class Context {
 			delete statement_with_comments.leadingComments;
 
 			if (leading_comments && leading_comments.length > 0) {
-				prepend_comments(leading_comments, this, true);
+				push_comments(leading_comments, this, true);
 			}
 
 			const child_context = this.child();
@@ -293,7 +306,9 @@ export class Context {
 			while (this.comments.length) {
 				const comment = /** @type {TSESTree.Comment} */ (this.comments.shift());
 
-				this.#commands.push(add_newline ? newline : ' ', { type: 'Comment', comment });
+				if (add_newline) this.newline();
+				else this.write(' ');
+				this.#commands.push({ type: 'Comment', comment });
 				add_newline = comment.type === 'Line';
 			}
 
@@ -306,6 +321,7 @@ export class Context {
 		return measure(this.#commands, 0, this.#commands.length);
 	}
 
+	// TODO get rid of in favour of `new`
 	child() {
 		return new Context(this.#handlers, this.#quote, this.#commands, this.comments);
 	}
