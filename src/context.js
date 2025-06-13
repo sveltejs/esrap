@@ -195,7 +195,7 @@ export class Context {
 
 		this.#commands.push(open.#commands);
 
-		const child_state = this.child();
+		const child_context = this.child();
 
 		let prev;
 
@@ -209,7 +209,7 @@ export class Context {
 					this.#commands.push(join.#commands);
 				}
 
-				child_state.visit(node);
+				child_context.visit(node);
 
 				if (!is_last) {
 					this.#commands.push(separator);
@@ -232,7 +232,7 @@ export class Context {
 						}
 					}
 
-					child_state.multiline = true;
+					child_context.multiline = true;
 				} else {
 					if (!is_last) this.#commands.push(join.#commands);
 				}
@@ -248,7 +248,7 @@ export class Context {
 
 		this.#commands.push(close.#commands);
 
-		if (child_state.multiline || measure(this.#commands, index) > 50) {
+		if (child_context.multiline || measure(this.#commands, index) > 50) {
 			this.multiline = true;
 
 			open.indent();

@@ -160,7 +160,7 @@ export const shared = {
 
 		// if the final argument is multiline, it doesn't need to force all the
 		// other arguments to also be multiline
-		const child_state = context.child();
+		const child_context = context.child();
 		const final_state = context.child();
 
 		for (let i = 0; i < node.arguments.length; i += 1) {
@@ -172,7 +172,7 @@ export const shared = {
 						const comment = /** @type {TSESTree.Comment} */ (context.comments.shift());
 
 						if (comment.type === 'Line') {
-							child_state.multiline = true;
+							child_context.multiline = true;
 							context.write(`//${comment.value}`);
 							context.newline();
 						} else {
@@ -186,13 +186,13 @@ export const shared = {
 
 			const p = node.arguments[i];
 
-			(i === node.arguments.length - 1 ? final_state : child_state).visit(p);
+			(i === node.arguments.length - 1 ? final_state : child_context).visit(p);
 		}
 
 		context.push(close);
 		context.write(')');
 
-		const multiline = child_state.multiline;
+		const multiline = child_context.multiline;
 
 		if (multiline || final_state.multiline) {
 			context.multiline = true;
@@ -388,14 +388,14 @@ export default {
 		const if_true = context.new();
 		const if_false = context.new();
 
-		const child_state = context.child();
+		const child_context = context.child();
 
 		context.push(if_true);
-		child_state.visit(node.consequent);
+		child_context.visit(node.consequent);
 		context.push(if_false);
-		child_state.visit(node.alternate);
+		child_context.visit(node.alternate);
 
-		const multiline = child_state.multiline;
+		const multiline = child_context.multiline;
 
 		if (multiline) {
 			if_true.indent();
