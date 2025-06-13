@@ -9,51 +9,51 @@ import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
 export default {
 	...js,
 	TSNumberKeyword(node, context) {
-		context.commands.push('number');
+		context.write('number', node);
 	},
 	TSStringKeyword(node, context) {
-		context.commands.push('string');
+		context.write('string', node);
 	},
 	TSBooleanKeyword(node, context) {
-		context.commands.push('boolean');
+		context.write('boolean', node);
 	},
 	TSAnyKeyword(node, context) {
-		context.commands.push('any');
+		context.write('any', node);
 	},
 	TSVoidKeyword(node, context) {
-		context.commands.push('void');
+		context.write('void', node);
 	},
 	TSUnknownKeyword(node, context) {
-		context.commands.push('unknown');
+		context.write('unknown', node);
 	},
 	TSNeverKeyword(node, context) {
-		context.commands.push('never');
+		context.write('never', node);
 	},
 	TSSymbolKeyword(node, context) {
-		context.commands.push('symbol');
+		context.write('symbol', node);
 	},
 	TSNullKeyword(node, context) {
-		context.commands.push('null');
+		context.write('null', node);
 	},
 	TSUndefinedKeyword(node, context) {
-		context.commands.push('undefined');
+		context.write('undefined', node);
 	},
 	TSArrayType(node, context) {
 		context.visit(node.elementType);
-		context.commands.push('[]');
+		context.write('[]');
 	},
 	TSTypeAnnotation(node, context) {
-		context.commands.push(': ');
+		context.write(': ');
 		context.visit(node.typeAnnotation);
 	},
 	TSTypeLiteral(node, context) {
-		context.commands.push('{ ');
+		context.write('{ ');
 		context.inline(node.members, false, ';');
-		context.commands.push(' }');
+		context.write(' }');
 	},
 	TSPropertySignature(node, context) {
 		context.visit(node.key);
-		if (node.optional) context.commands.push('?');
+		if (node.optional) context.write('?');
 		if (node.typeAnnotation) context.visit(node.typeAnnotation);
 	},
 	TSTypeReference(node, context) {
@@ -68,38 +68,38 @@ export default {
 		context.visit(node.expression);
 	},
 	TSTypeParameterInstantiation(node, context) {
-		context.commands.push('<');
+		context.write('<');
 		for (let i = 0; i < node.params.length; i++) {
 			context.visit(node.params[i]);
-			if (i != node.params.length - 1) context.commands.push(', ');
+			if (i != node.params.length - 1) context.write(', ');
 		}
-		context.commands.push('>');
+		context.write('>');
 	},
 	TSTypeParameterDeclaration(node, context) {
-		context.commands.push('<');
+		context.write('<');
 		for (let i = 0; i < node.params.length; i++) {
 			context.visit(node.params[i]);
-			if (i != node.params.length - 1) context.commands.push(', ');
+			if (i != node.params.length - 1) context.write(', ');
 		}
-		context.commands.push('>');
+		context.write('>');
 	},
 	TSTypeParameter(node, context) {
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-		context.commands.push(node.name);
+		context.write(node.name, node);
 
 		if (node.constraint) {
-			context.commands.push(' extends ');
+			context.write(' extends ');
 			context.visit(node.constraint);
 		}
 	},
 	TSTypeQuery(node, context) {
-		context.commands.push('typeof ');
+		context.write('typeof ');
 		context.visit(node.exprName);
 	},
 	TSEnumMember(node, context) {
 		context.visit(node.id);
 		if (node.initializer) {
-			context.commands.push(' = ');
+			context.write(' = ');
 			context.visit(node.initializer);
 		}
 	},
@@ -108,19 +108,19 @@ export default {
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		const parameters = node.parameters;
-		context.commands.push('(');
+		context.write('(');
 		context.inline(parameters, false);
 
-		context.commands.push(') => ');
+		context.write(') => ');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		context.visit(node.typeAnnotation.typeAnnotation);
 	},
 	TSIndexSignature(node, context) {
 		const indexParameters = node.parameters;
-		context.commands.push('[');
+		context.write('[');
 		context.inline(indexParameters, false);
-		context.commands.push(']');
+		context.write(']');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		context.visit(node.typeAnnotation);
@@ -130,21 +130,21 @@ export default {
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		const parametersSignature = node.parameters;
-		context.commands.push('(');
+		context.write('(');
 		context.inline(parametersSignature, false);
-		context.commands.push(')');
+		context.write(')');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		context.visit(node.typeAnnotation);
 	},
 	TSTupleType(node, context) {
-		context.commands.push('[');
+		context.write('[');
 		context.inline(node.elementTypes, false);
-		context.commands.push(']');
+		context.write(']');
 	},
 	TSNamedTupleMember(node, context) {
 		context.visit(node.label);
-		context.commands.push(': ');
+		context.write(': ');
 		context.visit(node.elementType);
 	},
 	TSUnionType(node, context) {
@@ -158,26 +158,26 @@ export default {
 	},
 	TSConditionalType(node, context) {
 		context.visit(node.checkType);
-		context.commands.push(' extends ');
+		context.write(' extends ');
 		context.visit(node.extendsType);
-		context.commands.push(' ? ');
+		context.write(' ? ');
 		context.visit(node.trueType);
-		context.commands.push(' : ');
+		context.write(' : ');
 		context.visit(node.falseType);
 	},
 	TSIndexedAccessType(node, context) {
 		context.visit(node.objectType);
-		context.commands.push('[');
+		context.write('[');
 		context.visit(node.indexType);
-		context.commands.push(']');
+		context.write(']');
 	},
 	TSImportType(node, context) {
-		context.commands.push('import(');
+		context.write('import(');
 		context.visit(node.argument);
-		context.commands.push(')');
+		context.write(')');
 
 		if (node.qualifier) {
-			context.commands.push('.');
+			context.write('.');
 			context.visit(node.qualifier);
 		}
 	},
@@ -188,21 +188,21 @@ export default {
 				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSAsExpression;
 
 			if (needs_parens) {
-				context.commands.push('(');
+				context.write('(');
 				context.visit(node.expression);
-				context.commands.push(')');
+				context.write(')');
 			} else {
 				context.visit(node.expression);
 			}
 		}
-		context.commands.push(' as ');
+		context.write(' as ');
 		context.visit(node.typeAnnotation);
 	},
 
 	TSEnumDeclaration(node, context) {
-		context.commands.push('enum ');
+		context.write('enum ');
 		context.visit(node.id);
-		context.commands.push(' {');
+		context.write(' {');
 		context.indent();
 		context.newline();
 		context.inline(node.members, false);
@@ -213,7 +213,7 @@ export default {
 	},
 
 	TSModuleBlock(node, context) {
-		context.commands.push(' {');
+		context.write(' {');
 		context.indent();
 		context.newline();
 		context.block(node.body);
@@ -223,8 +223,8 @@ export default {
 	},
 
 	TSModuleDeclaration(node, context) {
-		if (node.declare) context.commands.push('declare ');
-		else context.commands.push('namespace ');
+		if (node.declare) context.write('declare ');
+		else context.write('namespace ');
 
 		context.visit(node.id);
 
@@ -234,7 +234,7 @@ export default {
 
 	TSNonNullExpression(node, context) {
 		context.visit(node.expression);
-		context.commands.push('!');
+		context.write('!');
 	},
 
 	TSInterfaceBody(node, context) {
@@ -242,16 +242,16 @@ export default {
 	},
 
 	TSInterfaceDeclaration(node, context) {
-		context.commands.push('interface ');
+		context.write('interface ');
 		context.visit(node.id);
 		if (node.typeParameters) context.visit(node.typeParameters);
 		if (node.extends) {
-			context.commands.push(' extends ');
+			context.write(' extends ');
 			context.inline(node.extends, false);
 		}
-		context.commands.push(' {');
+		context.write(' {');
 		context.visit(node.body);
-		context.commands.push('}');
+		context.write('}');
 	},
 
 	TSSatisfiesExpression(node, context) {
@@ -260,29 +260,29 @@ export default {
 				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSSatisfiesExpression;
 
 			if (needs_parens) {
-				context.commands.push('(');
+				context.write('(');
 				context.visit(node.expression);
-				context.commands.push(')');
+				context.write(')');
 			} else {
 				context.visit(node.expression);
 			}
 		}
-		context.commands.push(' satisfies ');
+		context.write(' satisfies ');
 		context.visit(node.typeAnnotation);
 	},
 
 	TSTypeAliasDeclaration(node, context) {
-		context.commands.push('type ');
+		context.write('type ');
 		context.visit(node.id);
 		if (node.typeParameters) context.visit(node.typeParameters);
-		context.commands.push(' = ');
+		context.write(' = ');
 		context.visit(node.typeAnnotation);
-		context.commands.push(';');
+		context.write(';');
 	},
 
 	TSQualifiedName(node, context) {
 		context.visit(node.left);
-		context.commands.push('.');
+		context.write('.');
 		context.visit(node.right);
 	}
 };
