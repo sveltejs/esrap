@@ -13,12 +13,11 @@ const dedent = { type: 'Dedent' };
 /**
  * @param {TSESTree.Comment} comment
  * @param {Context} context
- * @param {boolean} newlines
  */
-function push_comment(comment, context, newlines) {
+function push_comment(comment, context) {
 	if (comment.type === 'Line') {
 		context.write(`//${comment.value}`);
-		context.newline();
+		// context.newline();
 	} else {
 		context.write('/*');
 		const lines = comment.value.split('\n');
@@ -29,12 +28,6 @@ function push_comment(comment, context, newlines) {
 		}
 
 		context.write('*/');
-
-		if (newlines || lines.length > 1) {
-			context.newline();
-		} else {
-			context.write(' ');
-		}
 	}
 }
 
@@ -168,7 +161,13 @@ export class Context {
 
 		if (node_with_comments.leadingComments) {
 			for (const comment of node_with_comments.leadingComments) {
-				push_comment(comment, this, false);
+				push_comment(comment, this);
+
+				if (comment.type === 'Line' || comment.value.includes('\n')) {
+					this.newline();
+				} else {
+					this.push(' ');
+				}
 			}
 		}
 
@@ -221,8 +220,14 @@ export class Context {
 
 					while (this.comments.length) {
 						const comment = /** @type {TSESTree.Comment} */ (this.comments.shift());
-						this.#commands.push({ type: 'Comment', comment });
-						if (!is_last) this.#commands.push(join.#commands);
+
+						push_comment(comment, this);
+
+						if (comment.type === 'Line') {
+							this.newline();
+						} else if (!is_last) {
+							this.#commands.push(join.#commands);
+						}
 					}
 
 					child_state.multiline = true;
@@ -292,7 +297,8 @@ export class Context {
 
 			if (leading_comments) {
 				for (const comment of leading_comments) {
-					push_comment(comment, this, true);
+					push_comment(comment, this);
+					this.newline();
 				}
 			}
 
