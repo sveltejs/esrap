@@ -260,7 +260,9 @@ export class Context {
 				}
 			}
 
-			const child_context = this.child();
+			const child_context = this.new();
+			this.append(child_context);
+
 			child_context.visit(statement);
 
 			if (child_context.multiline || needs_margin || add_margin(last_statement, statement)) {
@@ -286,11 +288,6 @@ export class Context {
 
 	measure() {
 		return measure(this.#commands);
-	}
-
-	// TODO get rid of in favour of `new`
-	child() {
-		return new Context(this.#visitors, this.#quote, this.#commands);
 	}
 
 	new() {
