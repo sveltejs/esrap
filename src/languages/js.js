@@ -171,13 +171,12 @@ export const shared = {
 					while (context.comments.length) {
 						const comment = /** @type {TSESTree.Comment} */ (context.comments.shift());
 
-						context.push({ type: 'Comment', comment });
-
 						if (comment.type === 'Line') {
 							child_state.multiline = true;
+							context.write(`//${comment.value}`);
 							context.newline();
 						} else {
-							context.write(' ');
+							context.write(`/*${comment.value}*/ `);
 						}
 					}
 				} else {
@@ -809,8 +808,7 @@ export default {
 		}
 
 		if (node.accessibility) {
-			context.push(node.accessibility);
-			context.write(' ');
+			context.write(node.accessibility + ' ');
 		}
 
 		if (node.static) {
@@ -832,7 +830,6 @@ export default {
 
 		if (node.value) {
 			context.write(' = ');
-
 			context.visit(node.value);
 		}
 

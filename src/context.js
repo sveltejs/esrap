@@ -22,7 +22,7 @@ function prepend_comments(comments, context, newlines) {
 		if (newlines || comment.type === 'Line' || /\n/.test(comment.value)) {
 			context.newline();
 		} else {
-			context.push(' ');
+			context.write(' ');
 		}
 	}
 }
@@ -237,9 +237,9 @@ export class Context {
 			close.dedent();
 			close.newline();
 		} else {
-			if (pad) open.push(' ');
-			join.push(' ');
-			if (pad) close.push(' ');
+			if (pad) open.write(' ');
+			join.write(' ');
+			if (pad) close.write(' ');
 		}
 	}
 
