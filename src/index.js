@@ -1,4 +1,4 @@
-/** @import { Command, Handlers, PrintOptions } from './types' */
+/** @import { Command, Visitors, PrintOptions } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
 import { Context } from './context.js';
 import ts from './languages/ts.js';
@@ -37,7 +37,7 @@ export function print(node, opts = {}) {
 	const commands = [];
 
 	const context = new Context(
-		opts.handlers ?? /** @type {Handlers} */ (ts),
+		opts.visitors ?? /** @type {Visitors} */ (ts),
 		opts.quotes === 'double' ? '"' : "'",
 		commands
 	);

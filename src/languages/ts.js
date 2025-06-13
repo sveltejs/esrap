@@ -1,10 +1,10 @@
-/** @import { Handlers } from '../types.js' */
+/** @import { Visitors } from '../types.js' */
 import { TSESTree } from '@typescript-eslint/types';
 import js from './js.js';
 import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
 
 /**
- * @type {Handlers<TSESTree.Node>}
+ * @type {Visitors<TSESTree.Node>}
  */
 export default {
 	...js,

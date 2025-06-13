@@ -1,13 +1,21 @@
 import { TSESTree } from '@typescript-eslint/types';
 import type { Context } from './context.js';
 
-type Handler<T> = (node: T, context: Context) => undefined;
+type BaseNode = { type: string };
+
+type NodeOf<T extends string, X> = X extends { type: T } ? X : never;
+
+type SpecialisedVisitors<T extends BaseNode> = {
+	[K in T['type']]?: Visitor<NodeOf<K, T>>;
+};
+
+export type Visitor<T> = (node: T, context: Context) => void;
+
+export type Visitors<T extends BaseNode = BaseNode> = T['type'] extends '_'
+	? never
+	: SpecialisedVisitors<T> & { _?: (node: T, context: Context, visit: (node: T) => void) => void };
 
 export { Context };
-
-export type Handlers<T extends { type: string } = { type: string }> = {
-	[Type in T['type']]?: Handler<Extract<T, { type: Type }>>;
-};
 
 export type TypeAnnotationNodes =
 	| TSESTree.TypeNode
@@ -65,5 +73,5 @@ export interface PrintOptions {
 	sourceMapEncodeMappings?: boolean; // default true
 	indent?: string; // default tab
 	quotes?: 'single' | 'double'; // default single
-	handlers?: Handlers; // default to ts
+	visitors?: Visitors; // default to ts
 }

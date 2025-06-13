@@ -1,5 +1,5 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Handlers, NodeWithComments, Context } from '../types.js' */
+/** @import { Visitors, NodeWithComments, Context } from '../types.js' */
 import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
 
 const OPERATOR_PRECEDENCE = {
@@ -288,8 +288,12 @@ export const shared = {
 	}
 };
 
-/** @type {Handlers<TSESTree.Node>} */
+/** @type {Visitors<TSESTree.Node>} */
 export default {
+	_(node, context, visit) {
+		visit(node);
+	},
+
 	ArrayExpression: shared['ArrayExpression|ArrayPattern'],
 
 	ArrayPattern: shared['ArrayExpression|ArrayPattern'],
@@ -1036,7 +1040,7 @@ export default {
 	}
 };
 
-/** @satisfies {Handlers} */
+/** @satisfies {Visitors} */
 
 /**
  *

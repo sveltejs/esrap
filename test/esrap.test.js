@@ -86,7 +86,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			};
 		}
 
-		opts.handlers = (tsx);
+		opts.visitors = tsx;
 
 		const { code, map } = print(ast, opts);
 

@@ -1,9 +1,9 @@
 import { expect, test } from 'vitest';
 import { print } from '../src';
 
-/** @import { Handlers } from '../types' */
+/** @import { Visitors } from '../types' */
 test('custom printers work', () => {
-	/** @type {Handlers} */
+	/** @type {Visitors} */
 	const funkyStringPrinter = {
 		CustomType(node, state) {
 			if (typeof node.value === 'string') {
@@ -22,7 +22,7 @@ test('custom printers work', () => {
 			value: 'testing 123'
 		},
 		{
-			handlers: { ...funkyStringPrinter }
+			visitors: { ...funkyStringPrinter }
 		}
 	);
 

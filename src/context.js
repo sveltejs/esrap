@@ -1,5 +1,5 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, Dedent, Handlers, Indent, Newline, NodeWithComments } from './types' */
+/** @import { Command, Dedent, Visitors, Indent, Newline, NodeWithComments } from './types' */
 
 /** @type {Newline} */
 const newline = { type: 'Newline' };
@@ -32,7 +32,7 @@ function push_comment(comment, context) {
 }
 
 export class Context {
-	#handlers;
+	#visitors;
 	#quote;
 	#commands;
 
@@ -40,13 +40,13 @@ export class Context {
 
 	/**
 	 *
-	 * @param {Handlers} handlers
+	 * @param {Visitors} visitors
 	 * @param {'"' | "'"} quote
 	 * @param {Command[]} commands
 	 * @param {any[]} comments
 	 */
-	constructor(handlers, quote, commands = [], comments = []) {
-		this.#handlers = handlers;
+	constructor(visitors, quote, commands = [], comments = []) {
+		this.#visitors = visitors;
 		this.#quote = quote;
 		this.#commands = commands;
 
@@ -132,9 +132,9 @@ export class Context {
 	visit(node) {
 		const node_with_comments = /** @type {NodeWithComments} */ (node);
 
-		const handler = this.#handlers[node.type];
+		const visitor = this.#visitors[node.type];
 
-		if (!handler) {
+		if (!visitor) {
 			let error = [`Failed to find an implementation for ${node.type}`];
 
 			if (node.type.includes('JSX')) {
@@ -146,9 +146,9 @@ export class Context {
 			if (node.type.includes('TSX')) {
 				error.push(`hint: perhaps you need to use 'esrap/languages/tsx'`);
 			}
-			if (Object.keys(this.#handlers).length < 25) {
+			if (Object.keys(this.#visitors).length < 25) {
 				error.push(
-					`hint: perhaps you added custom handlers, but forgot to use 'esrap/languages/js'`
+					`hint: perhaps you added custom visitors, but forgot to use 'esrap/languages/js'`
 				);
 			}
 
@@ -167,7 +167,11 @@ export class Context {
 			}
 		}
 
-		handler(node, this);
+		if (this.#visitors._) {
+			this.#visitors._(node, this, (node) => visitor(node, this));
+		} else {
+			visitor(node, this);
+		}
 
 		if (node_with_comments.trailingComments) {
 			this.comments.push(node_with_comments.trailingComments[0]); // there is only ever one
@@ -326,11 +330,11 @@ export class Context {
 
 	// TODO get rid of in favour of `new`
 	child() {
-		return new Context(this.#handlers, this.#quote, this.#commands, this.comments);
+		return new Context(this.#visitors, this.#quote, this.#commands, this.comments);
 	}
 
 	new() {
-		return new Context(this.#handlers, this.#quote);
+		return new Context(this.#visitors, this.#quote);
 	}
 }
 

@@ -1,8 +1,8 @@
-/** @import { Handlers } from '../types' */
+/** @import { Visitors } from '../types' */
 import { TSESTree } from '@typescript-eslint/types';
 import js from './js.js';
 
-/** @type {Handlers<TSESTree.Node>} */
+/** @type {Visitors<TSESTree.Node>} */
 export default {
 	...js,
 	JSXElement(node, context) {
