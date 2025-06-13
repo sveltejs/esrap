@@ -17,20 +17,3 @@ export const dedent = { type: 'Dedent' };
 export function create_sequence() {
 	return [];
 }
-
-/**
- * @param {TSESTree.Comment[]} comments
- * @param {Context} context
- * @param {boolean} newlines
- */
-export function prepend_comments(comments, context, newlines) {
-	for (const comment of comments) {
-		context.push({ type: 'Comment', comment });
-
-		if (newlines || comment.type === 'Line' || /\n/.test(comment.value)) {
-			context.newline();
-		} else {
-			context.push(' ');
-		}
-	}
-}

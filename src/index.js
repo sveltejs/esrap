@@ -2,7 +2,7 @@
 /** @import { Command, Dedent, Handlers, Indent, Newline, NodeWithComments, PrintOptions } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
 import ts from './languages/ts.js';
-import { create_sequence, prepend_comments } from './handlers.js';
+import { create_sequence } from './handlers.js';
 
 /** @type {(str: string) => string} str */
 let btoa = () => {
@@ -26,12 +26,22 @@ const indent = { type: 'Indent' };
 /** @type {Dedent} */
 const dedent = { type: 'Dedent' };
 
-const grouped_expression_types = [
-	'ImportDeclaration',
-	'VariableDeclaration',
-	'ExportDefaultDeclaration',
-	'ExportNamedDeclaration'
-];
+/**
+ * @param {TSESTree.Comment[]} comments
+ * @param {Context} context
+ * @param {boolean} newlines
+ */
+function prepend_comments(comments, context, newlines) {
+	for (const comment of comments) {
+		context.push({ type: 'Comment', comment });
+
+		if (newlines || comment.type === 'Line' || /\n/.test(comment.value)) {
+			context.newline();
+		} else {
+			context.push(' ');
+		}
+	}
+}
 
 export class Context {
 	#handlers;
@@ -247,8 +257,9 @@ export class Context {
 	 * Push a sequence of nodes onto separate lines, separating them with
 	 * an extra newline where appropriate
 	 * @param {Array<{ type: string }>} nodes
+	 * @param {(a: { type: string }, b: { type: string }) => boolean} add_margin
 	 */
-	block(nodes) {
+	block(nodes, add_margin = () => false) {
 		let last_statement = {
 			type: 'EmptyStatement'
 		};
@@ -279,13 +290,7 @@ export class Context {
 			const child_context = this.child();
 			child_context.visit(statement);
 
-			if (
-				child_context.multiline ||
-				needs_margin ||
-				((grouped_expression_types.includes(statement.type) ||
-					grouped_expression_types.includes(last_statement.type)) &&
-					last_statement.type !== statement.type)
-			) {
+			if (child_context.multiline || needs_margin || add_margin(last_statement, statement)) {
 				margin.push('\n');
 			}
 

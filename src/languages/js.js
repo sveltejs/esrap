@@ -31,6 +31,25 @@ const OPERATOR_PRECEDENCE = {
 	'**': 13
 };
 
+const grouped_expression_types = [
+	'ImportDeclaration',
+	'VariableDeclaration',
+	'ExportDefaultDeclaration',
+	'ExportNamedDeclaration'
+];
+
+/**
+ *
+ * @param {{ type: string }} a
+ * @param {{ type: string }} b
+ */
+function add_margin(a, b) {
+	return (
+		(grouped_expression_types.includes(b.type) || grouped_expression_types.includes(a.type)) &&
+		a.type !== b.type
+	);
+}
+
 export const shared = {
 	/**
 	 * @param {TSESTree.ArrayExpression | TSESTree.ArrayPattern} node
@@ -90,7 +109,7 @@ export const shared = {
 			state.multiline = true;
 			state.indent();
 			state.newline();
-			state.block(node.body);
+			state.block(node.body, add_margin);
 			state.dedent();
 			state.newline();
 		}
@@ -732,7 +751,7 @@ export default {
 	},
 
 	Program(node, state) {
-		state.block(node.body);
+		state.block(node.body, add_margin);
 	},
 
 	Property(node, state) {
@@ -842,7 +861,7 @@ export default {
 		state.push('static {');
 		state.newline();
 
-		state.block(node.body);
+		state.block(node.body, add_margin);
 
 		state.dedent();
 		state.newline();
