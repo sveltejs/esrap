@@ -33,9 +33,13 @@ export function print(node, opts = {}) {
 		);
 	}
 
+	/** @type {Command[]} */
+	const commands = [];
+
 	const context = new Context(
 		opts.handlers ?? /** @type {Handlers} */ (ts),
-		opts.quotes === 'double' ? '"' : "'"
+		opts.quotes === 'double' ? '"' : "'",
+		commands
 	);
 
 	context.visit(node);
@@ -116,8 +120,8 @@ export function print(node, opts = {}) {
 		}
 	}
 
-	for (let i = 0; i < context.commands.length; i += 1) {
-		run(context.commands[i]);
+	for (let i = 0; i < commands.length; i += 1) {
+		run(commands[i]);
 	}
 
 	mappings.push(current_line);
