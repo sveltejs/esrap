@@ -25,48 +25,48 @@ export default {
 		}
 	},
 	JSXOpeningElement(node, context) {
-		context.commands.push('<');
+		context.write('<');
 
 		context.visit(node.name);
 
 		for (const attribute of node.attributes) {
-			context.commands.push(' ');
+			context.write(' ');
 			context.visit(attribute);
 		}
 
 		if (node.selfClosing) {
-			context.commands.push(' /');
+			context.write(' /');
 		}
 
-		context.commands.push('>');
+		context.write('>');
 	},
 	JSXClosingElement(node, context) {
-		context.commands.push('</');
+		context.write('</');
 
 		context.visit(node.name);
 
-		context.commands.push('>');
+		context.write('>');
 	},
 	JSXNamespacedName(node, context) {
 		context.visit(node.namespace);
-		context.commands.push(':');
+		context.write(':');
 		context.visit(node.name);
 	},
 	JSXIdentifier(node, context) {
-		context.commands.push(node.name);
+		context.write(node.name, node);
 	},
 	JSXMemberExpression(node, context) {
 		context.visit(node.object);
-		context.commands.push('.');
+		context.write('.');
 		context.visit(node.property);
 	},
 	JSXText(node, context) {
-		context.commands.push(node.value);
+		context.write(node.value, node);
 	},
 	JSXAttribute(node, context) {
 		context.visit(node.name);
 		if (node.value) {
-			context.commands.push('=');
+			context.write('=');
 			context.visit(node.value);
 		}
 	},
@@ -89,30 +89,30 @@ export default {
 		context.visit(node.closingFragment);
 	},
 	JSXOpeningFragment(node, context) {
-		context.commands.push('<>');
+		context.write('<>');
 	},
 	JSXClosingFragment(node, context) {
-		context.commands.push('</>');
+		context.write('</>');
 	},
 	JSXExpressionContainer(node, context) {
-		context.commands.push('{');
+		context.write('{');
 
 		context.visit(node.expression);
 
-		context.commands.push('}');
+		context.write('}');
 	},
 	JSXSpreadChild(node, context) {
-		context.commands.push('{...');
+		context.write('{...');
 
 		context.visit(node.expression);
 
-		context.commands.push('}');
+		context.write('}');
 	},
 	JSXSpreadAttribute(node, context) {
-		context.commands.push('{...');
+		context.write('{...');
 
 		context.visit(node.argument);
 
-		context.commands.push('}');
+		context.write('}');
 	}
 };
