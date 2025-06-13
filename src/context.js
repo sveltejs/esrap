@@ -1,6 +1,8 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Command, Dedent, Visitors, Indent, Newline, NodeWithComments } from './types' */
 
+import { comments, push_comment } from './languages/js.js';
+
 /** @type {Newline} */
 const newline = { type: 'Newline' };
 
@@ -9,27 +11,6 @@ const indent = { type: 'Indent' };
 
 /** @type {Dedent} */
 const dedent = { type: 'Dedent' };
-
-/**
- * @param {TSESTree.Comment} comment
- * @param {Context} context
- */
-function push_comment(comment, context) {
-	if (comment.type === 'Line') {
-		context.write(`//${comment.value}`);
-		// context.newline();
-	} else {
-		context.write('/*');
-		const lines = comment.value.split('\n');
-
-		for (let i = 0; i < lines.length; i += 1) {
-			if (i > 0) context.newline();
-			context.write(lines[i]);
-		}
-
-		context.write('*/');
-	}
-}
 
 export class Context {
 	#visitors;
@@ -43,14 +24,11 @@ export class Context {
 	 * @param {Visitors} visitors
 	 * @param {'"' | "'"} quote
 	 * @param {Command[]} commands
-	 * @param {any[]} comments
 	 */
-	constructor(visitors, quote, commands = [], comments = []) {
+	constructor(visitors, quote, commands = []) {
 		this.#visitors = visitors;
 		this.#quote = quote;
 		this.#commands = commands;
-
-		this.comments = comments;
 	}
 
 	indent() {
@@ -130,8 +108,6 @@ export class Context {
 	 * @param {{ type: string }} node
 	 */
 	visit(node) {
-		const node_with_comments = /** @type {NodeWithComments} */ (node);
-
 		const visitor = this.#visitors[node.type];
 
 		if (!visitor) {
@@ -155,26 +131,10 @@ export class Context {
 			throw new Error(error.join('\n'));
 		}
 
-		if (node_with_comments.leadingComments) {
-			for (const comment of node_with_comments.leadingComments) {
-				push_comment(comment, this);
-
-				if (comment.type === 'Line' || comment.value.includes('\n')) {
-					this.newline();
-				} else {
-					this.write(' ');
-				}
-			}
-		}
-
 		if (this.#visitors._) {
 			this.#visitors._(node, this, (node) => visitor(node, this));
 		} else {
 			visitor(node, this);
-		}
-
-		if (node_with_comments.trailingComments) {
-			this.comments.push(node_with_comments.trailingComments[0]); // there is only ever one
 		}
 	}
 
@@ -215,11 +175,12 @@ export class Context {
 					this.#commands.push(separator);
 				}
 
-				if (this.comments.length > 0) {
+				// TODO handle comments in a callback
+				if (comments.length > 0) {
 					this.#commands.push(' ');
 
-					while (this.comments.length) {
-						const comment = /** @type {TSESTree.Comment} */ (this.comments.shift());
+					while (comments.length) {
+						const comment = /** @type {TSESTree.Comment} */ (comments.shift());
 
 						push_comment(comment, this);
 
@@ -310,8 +271,9 @@ export class Context {
 
 			let add_newline = false;
 
-			while (this.comments.length) {
-				const comment = /** @type {TSESTree.Comment} */ (this.comments.shift());
+			// TODO handle comments in a callback
+			while (comments.length) {
+				const comment = /** @type {TSESTree.Comment} */ (comments.shift());
 
 				if (add_newline) this.newline();
 				else this.write(' ');
@@ -330,7 +292,7 @@ export class Context {
 
 	// TODO get rid of in favour of `new`
 	child() {
-		return new Context(this.#visitors, this.#quote, this.#commands, this.comments);
+		return new Context(this.#visitors, this.#quote, this.#commands);
 	}
 
 	new() {

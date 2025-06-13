@@ -49,6 +49,32 @@ function add_margin(a, b) {
 	);
 }
 
+// TODO this should not be exported, it is JS/TS specific
+/**
+ * @param {TSESTree.Comment} comment
+ * @param {Context} context
+ */
+export function push_comment(comment, context) {
+	if (comment.type === 'Line') {
+		context.write(`//${comment.value}`);
+		// context.newline();
+	} else {
+		context.write('/*');
+		const lines = comment.value.split('\n');
+
+		for (let i = 0; i < lines.length; i += 1) {
+			if (i > 0) context.newline();
+			context.write(lines[i]);
+		}
+
+		context.write('*/');
+	}
+}
+
+// TODO this should not be exported, it is JS/TS specific
+/** @type {TSESTree.Comment[]} */
+export let comments = [];
+
 export const shared = {
 	/**
 	 * @param {TSESTree.ArrayExpression | TSESTree.ArrayPattern} node
@@ -164,11 +190,11 @@ export const shared = {
 
 		for (let i = 0; i < node.arguments.length; i += 1) {
 			if (i > 0) {
-				if (context.comments.length > 0) {
+				if (comments.length > 0) {
 					context.write(', ');
 
-					while (context.comments.length) {
-						const comment = /** @type {TSESTree.Comment} */ (context.comments.shift());
+					while (comments.length) {
+						const comment = /** @type {TSESTree.Comment} */ (comments.shift());
 
 						if (comment.type === 'Line') {
 							child_context.multiline = true;
@@ -291,7 +317,31 @@ export const shared = {
 /** @type {Visitors<TSESTree.Node>} */
 export default {
 	_(node, context, visit) {
+		const leading_comments = /** @type {TSESTree.Comment[]} */ (
+			/** @type {any} */ (node).leadingComments
+		);
+
+		const trailing_comments = /** @type {TSESTree.Comment[]} */ (
+			/** @type {any} */ (node).trailingComments
+		);
+
+		if (leading_comments) {
+			for (const comment of leading_comments) {
+				push_comment(comment, context);
+
+				if (comment.type === 'Line' || comment.value.includes('\n')) {
+					context.newline();
+				} else {
+					context.write(' ');
+				}
+			}
+		}
+
 		visit(node);
+
+		if (trailing_comments) {
+			comments.push(trailing_comments[0]); // there is only ever one
+		}
 	},
 
 	ArrayExpression: shared['ArrayExpression|ArrayPattern'],
@@ -761,6 +811,7 @@ export default {
 	},
 
 	Program(node, context) {
+		comments.length = 0;
 		context.block(node.body, add_margin);
 	},
 
