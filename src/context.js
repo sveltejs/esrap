@@ -66,14 +66,10 @@ export class Context {
 	}
 
 	/**
-	 * @param {Command | Context} command
+	 * @param {Context} context
 	 */
-	push(command) {
-		if (command instanceof Context) {
-			this.#commands.push(command.#commands);
-		} else {
-			this.#commands.push(command);
-		}
+	append(context) {
+		this.#commands.push(context.#commands);
 	}
 
 	/**
@@ -166,7 +162,7 @@ export class Context {
 				if (comment.type === 'Line' || comment.value.includes('\n')) {
 					this.newline();
 				} else {
-					this.push(' ');
+					this.write(' ');
 				}
 			}
 		}
@@ -284,7 +280,7 @@ export class Context {
 			const margin = [];
 
 			if (!first) {
-				this.push(margin);
+				this.#commands.push(margin);
 				this.newline();
 			}
 

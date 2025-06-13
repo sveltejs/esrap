@@ -153,10 +153,9 @@ export const shared = {
 
 		const open = context.new();
 		const join = context.new();
-		const close = context.new();
 
 		context.write('(');
-		context.push(open);
+		context.append(open);
 
 		// if the final argument is multiline, it doesn't need to force all the
 		// other arguments to also be multiline
@@ -180,7 +179,7 @@ export const shared = {
 						}
 					}
 				} else {
-					context.push(join);
+					context.append(join);
 				}
 			}
 
@@ -188,9 +187,6 @@ export const shared = {
 
 			(i === node.arguments.length - 1 ? final_state : child_context).visit(p);
 		}
-
-		context.push(close);
-		context.write(')');
 
 		const multiline = child_context.multiline;
 
@@ -203,11 +199,13 @@ export const shared = {
 			open.newline();
 			join.write(',');
 			join.newline();
-			close.dedent();
-			close.newline();
+			context.dedent();
+			context.newline();
 		} else {
 			join.write(', ');
 		}
+
+		context.write(')');
 	},
 
 	/**
@@ -390,9 +388,9 @@ export default {
 
 		const child_context = context.child();
 
-		context.push(if_true);
+		context.append(if_true);
 		child_context.visit(node.consequent);
-		context.push(if_false);
+		context.append(if_false);
 		child_context.visit(node.alternate);
 
 		const multiline = child_context.multiline;
@@ -1119,15 +1117,15 @@ function handle_var_declaration(node, context) {
 	const join = context.new();
 	const child_context = context.new();
 
-	context.push(child_context);
+	context.append(child_context);
 
 	child_context.write(`${node.kind} `);
-	child_context.push(open);
+	child_context.append(open);
 
 	let first = true;
 
 	for (const d of node.declarations) {
-		if (!first) child_context.push(join);
+		if (!first) child_context.append(join);
 		first = false;
 
 		child_context.visit(d);
