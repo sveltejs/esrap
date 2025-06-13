@@ -1,6 +1,5 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Handlers, NodeWithComments, Context } from '../types.js' */
-import { create_sequence, indent, newline, dedent } from '../handlers.js';
 import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
 
 const OPERATOR_PRECEDENCE = {
@@ -152,11 +151,11 @@ export const shared = {
 
 		if (node.typeArguments) state.visit(node.typeArguments);
 
-		const open = create_sequence();
-		const join = create_sequence();
-		const close = create_sequence();
+		const open = state.new();
+		const join = state.new();
+		const close = state.new();
 
-		state.push('(', open);
+		state.push('(', open.commands);
 
 		// if the final argument is multiline, it doesn't need to force all the
 		// other arguments to also be multiline
@@ -181,7 +180,7 @@ export const shared = {
 						}
 					}
 				} else {
-					state.push(join);
+					state.push(join.commands);
 				}
 			}
 
@@ -190,7 +189,7 @@ export const shared = {
 			(i === node.arguments.length - 1 ? final_state : child_state).visit(p);
 		}
 
-		state.push(close, ')');
+		state.push(close.commands, ')');
 
 		const multiline = child_state.multiline;
 
@@ -199,9 +198,12 @@ export const shared = {
 		}
 
 		if (multiline) {
-			open.push(indent, newline);
-			join.push(',', newline);
-			close.push(dedent, newline);
+			open.indent();
+			open.newline();
+			join.push(',');
+			join.newline();
+			close.dedent();
+			close.newline();
 		} else {
 			join.push(', ');
 		}
@@ -382,25 +384,28 @@ export default {
 			state.push(')');
 		}
 
-		const if_true = create_sequence();
-		const if_false = create_sequence();
+		const if_true = state.new();
+		const if_false = state.new();
 
 		const child_state = state.child();
 
-		state.push(if_true);
+		state.push(if_true.commands);
 		child_state.visit(node.consequent);
-		state.push(if_false);
+		state.push(if_false.commands);
 		child_state.visit(node.alternate);
 
 		const multiline = child_state.multiline;
 
 		if (multiline) {
-			if_true.push(indent, newline, '? ');
-			if_false.push(newline, ': ');
+			if_true.indent();
+			if_true.newline();
+			if_true.write('? ');
+			if_false.newline();
+			if_false.push(': ');
 			state.dedent();
 		} else {
-			if_true.push(' ? ');
-			if_false.push(' : ');
+			if_true.write(' ? ');
+			if_false.write(' : ');
 		}
 	},
 
@@ -1112,16 +1117,16 @@ function has_call_expression(node) {
 function handle_var_declaration(node, context) {
 	const index = context.commands.length;
 
-	const open = create_sequence();
-	const join = create_sequence();
+	const open = context.new();
+	const join = context.new();
 	const child_context = context.child();
 
-	context.push(`${node.kind} `, open);
+	context.push(`${node.kind} `, open.commands);
 
 	let first = true;
 
 	for (const d of node.declarations) {
-		if (!first) context.commands.push(join);
+		if (!first) context.commands.push(join.commands);
 		first = false;
 
 		child_context.visit(d);
@@ -1133,10 +1138,11 @@ function handle_var_declaration(node, context) {
 
 	if (multiline) {
 		context.multiline = true;
-		if (node.declarations.length > 1) open.push(indent);
-		join.push(',', newline);
+		if (node.declarations.length > 1) open.indent();
+		join.write(',');
+		join.newline();
 		if (node.declarations.length > 1) context.dedent();
 	} else {
-		join.push(', ');
+		join.write(', ');
 	}
 }

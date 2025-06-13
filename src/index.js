@@ -2,7 +2,6 @@
 /** @import { Command, Dedent, Handlers, Indent, Newline, NodeWithComments, PrintOptions } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
 import ts from './languages/ts.js';
-import { create_sequence } from './handlers.js';
 
 /** @type {(str: string) => string} str */
 let btoa = () => {
@@ -187,11 +186,11 @@ export class Context {
 
 		const index = this.commands.length;
 
-		const open = create_sequence();
-		const join = create_sequence();
-		const close = create_sequence();
+		const open = this.new();
+		const join = this.new();
+		const close = this.new();
 
-		this.commands.push(open);
+		this.commands.push(open.commands);
 
 		const child_state = this.child();
 
@@ -204,7 +203,7 @@ export class Context {
 
 			if (node) {
 				if (!is_first && !prev) {
-					this.commands.push(join);
+					this.commands.push(join.commands);
 				}
 
 				child_state.visit(node);
@@ -219,12 +218,12 @@ export class Context {
 					while (this.comments.length) {
 						const comment = /** @type {TSESTree.Comment} */ (this.comments.shift());
 						this.commands.push({ type: 'Comment', comment });
-						if (!is_last) this.commands.push(join);
+						if (!is_last) this.commands.push(join.commands);
 					}
 
 					child_state.multiline = true;
 				} else {
-					if (!is_last) this.commands.push(join);
+					if (!is_last) this.commands.push(join.commands);
 				}
 			} else {
 				// This is only used for ArrayPattern and ArrayExpression, but
@@ -236,16 +235,18 @@ export class Context {
 			prev = node;
 		}
 
-		this.commands.push(close);
+		this.commands.push(close.commands);
 
 		const multiline = child_state.multiline || this.measure(this.commands, index) > 50;
 
 		if (multiline) {
 			this.multiline = true;
 
-			open.push(indent, newline);
-			join.push(newline);
-			close.push(dedent, newline);
+			open.indent();
+			open.newline();
+			join.newline();
+			close.dedent();
+			close.newline();
 		} else {
 			if (pad) open.push(' ');
 			join.push(' ');
@@ -270,7 +271,8 @@ export class Context {
 		for (const statement of nodes) {
 			if (statement.type === 'EmptyStatement') continue;
 
-			const margin = create_sequence();
+			/** @type {string[]} */
+			const margin = [];
 
 			if (!first) {
 				this.push(margin);
@@ -333,6 +335,10 @@ export class Context {
 
 	child() {
 		return new Context(this.#handlers, this.#quote, this.commands, this.comments);
+	}
+
+	new() {
+		return new Context(this.#handlers, this.#quote);
 	}
 }
 
