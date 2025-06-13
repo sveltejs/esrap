@@ -160,7 +160,7 @@ export const shared = {
 		// if the final argument is multiline, it doesn't need to force all the
 		// other arguments to also be multiline
 		const child_context = context.child();
-		const final_state = context.child();
+		const final_context = context.child();
 
 		for (let i = 0; i < node.arguments.length; i += 1) {
 			if (i > 0) {
@@ -185,16 +185,12 @@ export const shared = {
 
 			const p = node.arguments[i];
 
-			(i === node.arguments.length - 1 ? final_state : child_context).visit(p);
+			(i === node.arguments.length - 1 ? final_context : child_context).visit(p);
 		}
 
-		const multiline = child_context.multiline;
+		context.multiline ||= child_context.multiline || final_context.multiline;
 
-		if (multiline || final_state.multiline) {
-			context.multiline = true;
-		}
-
-		if (multiline) {
+		if (child_context.multiline) {
 			open.indent();
 			open.newline();
 			join.write(',');

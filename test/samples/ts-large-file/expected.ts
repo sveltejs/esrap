@@ -294,7 +294,10 @@ export async function installAdders({ cwd, official = {} }: InstallAdderOptions)
 	adderDetails.sort((a, b) => {
 		if (!a.config.runsAfter) return -1;
 		if (!b.config.runsAfter) return 1;
-		return a.config.runsAfter.includes(b.config.metadata.id) ? 1 : b.config.runsAfter.includes(a.config.metadata.id) ? -1 : 0;
+
+		return a.config.runsAfter.includes(b.config.metadata.id)
+			? 1
+			: b.config.runsAfter.includes(a.config.metadata.id) ? -1 : 0;
 	});
 
 	// apply adders
