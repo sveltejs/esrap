@@ -84,7 +84,7 @@ export default {
 		context.write('>');
 	},
 	TSTypeParameter(node, context) {
-		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+		// @ts-expect-error type mismatch TSESTree and acorn-typescript?
 		context.write(node.name, node);
 
 		if (node.constraint) {
@@ -208,7 +208,7 @@ export default {
 		context.inline(node.members, false);
 		context.dedent();
 		context.newline();
-		context.push('}');
+		context.write('}');
 		context.newline();
 	},
 
@@ -219,7 +219,7 @@ export default {
 		context.block(node.body);
 		context.dedent();
 		context.newline();
-		context.push('}');
+		context.write('}');
 	},
 
 	TSModuleDeclaration(node, context) {

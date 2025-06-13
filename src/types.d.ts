@@ -1,5 +1,5 @@
 import { TSESTree } from '@typescript-eslint/types';
-import type { Context } from './index.js';
+import type { Context } from './context.js';
 
 type Handler<T> = (node: T, context: Context) => undefined;
 

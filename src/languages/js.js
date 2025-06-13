@@ -55,9 +55,9 @@ export const shared = {
 	 * @param {Context} context
 	 */
 	'ArrayExpression|ArrayPattern': (node, context) => {
-		context.push('[');
+		context.write('[');
 		context.inline(/** @type {TSESTree.Node[]} */ (node.elements), false);
-		context.push(']');
+		context.write(']');
 	},
 
 	/**
@@ -69,22 +69,22 @@ export const shared = {
 		// const is_in = node.operator === 'in';
 		// if (is_in) {
 		// 	// Avoids confusion in `for` loops initializers
-		// 	chunks.push(c('('));
+		// 	chunks.write('(');
 		// }
 		if (needs_parens(node.left, node, false)) {
-			context.push('(');
+			context.write('(');
 			context.visit(node.left);
-			context.push(')');
+			context.write(')');
 		} else {
 			context.visit(node.left);
 		}
 
-		context.push(` ${node.operator} `);
+		context.write(` ${node.operator} `);
 
 		if (needs_parens(node.right, node, true)) {
-			context.push('(');
+			context.write('(');
 			context.visit(node.right);
-			context.push(')');
+			context.write(')');
 		} else {
 			context.visit(node.right);
 		}
@@ -98,10 +98,10 @@ export const shared = {
 		if (node.loc) {
 			const { line, column } = node.loc.start;
 			context.location(line, column);
-			context.push('{');
+			context.write('{');
 			context.location(line, column + 1);
 		} else {
-			context.push('{');
+			context.write('{');
 		}
 
 		if (node.body.length > 0) {
@@ -117,10 +117,10 @@ export const shared = {
 			const { line, column } = node.loc.end;
 
 			context.location(line, column - 1);
-			context.push('}');
+			context.write('}');
 			context.location(line, column);
 		} else {
-			context.push('}');
+			context.write('}');
 		}
 	},
 
@@ -130,7 +130,7 @@ export const shared = {
 	 */
 	'CallExpression|NewExpression': (node, context) => {
 		if (node.type === 'NewExpression') {
-			context.push('new ');
+			context.write('new ');
 		}
 
 		const needs_parens =
@@ -138,15 +138,15 @@ export const shared = {
 			(node.type === 'NewExpression' && has_call_expression(node.callee));
 
 		if (needs_parens) {
-			context.push('(');
+			context.write('(');
 			context.visit(node.callee);
-			context.push(')');
+			context.write(')');
 		} else {
 			context.visit(node.callee);
 		}
 
 		if (/** @type {TSESTree.CallExpression} */ (node).optional) {
-			context.push('?.');
+			context.write('?.');
 		}
 
 		if (node.typeArguments) context.visit(node.typeArguments);
@@ -155,7 +155,8 @@ export const shared = {
 		const join = context.new();
 		const close = context.new();
 
-		context.push('(', open.commands);
+		context.write('(');
+		context.push(open);
 
 		// if the final argument is multiline, it doesn't need to force all the
 		// other arguments to also be multiline
@@ -165,7 +166,7 @@ export const shared = {
 		for (let i = 0; i < node.arguments.length; i += 1) {
 			if (i > 0) {
 				if (context.comments.length > 0) {
-					context.push(', ');
+					context.write(', ');
 
 					while (context.comments.length) {
 						const comment = /** @type {TSESTree.Comment} */ (context.comments.shift());
@@ -176,11 +177,11 @@ export const shared = {
 							child_state.multiline = true;
 							context.newline();
 						} else {
-							context.push(' ');
+							context.write(' ');
 						}
 					}
 				} else {
-					context.push(join.commands);
+					context.push(join);
 				}
 			}
 
@@ -189,7 +190,8 @@ export const shared = {
 			(i === node.arguments.length - 1 ? final_state : child_state).visit(p);
 		}
 
-		context.push(close.commands, ')');
+		context.push(close);
+		context.write(')');
 
 		const multiline = child_state.multiline;
 
@@ -200,12 +202,12 @@ export const shared = {
 		if (multiline) {
 			open.indent();
 			open.newline();
-			join.push(',');
+			join.write(',');
 			join.newline();
 			close.dedent();
 			close.newline();
 		} else {
-			join.push(', ');
+			join.write(', ');
 		}
 	},
 
@@ -214,21 +216,21 @@ export const shared = {
 	 * @param {Context} context
 	 */
 	'ClassDeclaration|ClassExpression': (node, context) => {
-		context.push('class ');
+		context.write('class ');
 
 		if (node.id) {
 			context.visit(node.id);
-			context.push(' ');
+			context.write(' ');
 		}
 
 		if (node.superClass) {
-			context.push('extends ');
+			context.write('extends ');
 			context.visit(node.superClass);
-			context.push(' ');
+			context.write(' ');
 		}
 
 		if (node.implements) {
-			context.push('implements ');
+			context.write('implements ');
 			context.inline(node.implements, false);
 		}
 
@@ -240,9 +242,9 @@ export const shared = {
 	 * @param {Context} context
 	 */
 	'ForInStatement|ForOfStatement': (node, context) => {
-		context.push('for ');
-		if (node.type === 'ForOfStatement' && node.await) context.push('await ');
-		context.push('(');
+		context.write('for ');
+		if (node.type === 'ForOfStatement' && node.await) context.write('await ');
+		context.write('(');
 
 		if (node.left.type === 'VariableDeclaration') {
 			handle_var_declaration(node.left, context);
@@ -250,9 +252,9 @@ export const shared = {
 			context.visit(node.left);
 		}
 
-		context.push(node.type === 'ForInStatement' ? ` in ` : ` of `);
+		context.write(node.type === 'ForInStatement' ? ' in ' : ' of ');
 		context.visit(node.right);
-		context.push(') ');
+		context.write(') ');
 		context.visit(node.body);
 	},
 
@@ -261,21 +263,21 @@ export const shared = {
 	 * @param {Context} context
 	 */
 	'FunctionDeclaration|FunctionExpression': (node, context) => {
-		if (node.async) context.push('async ');
-		context.push(node.generator ? 'function* ' : 'function ');
+		if (node.async) context.write('async ');
+		context.write(node.generator ? 'function* ' : 'function ');
 		if (node.id) context.visit(node.id);
 
 		if (node.typeParameters) {
 			context.visit(node.typeParameters);
 		}
 
-		context.push('(');
+		context.write('(');
 		context.inline(node.params, false);
-		context.push(')');
+		context.write(')');
 
 		if (node.returnType) context.visit(node.returnType);
 
-		context.push(' ');
+		context.write(' ');
 
 		context.visit(node.body);
 	},
@@ -285,7 +287,7 @@ export const shared = {
 	 * @param {Context} context
 	 */
 	'RestElement|SpreadElement': (node, context) => {
-		context.push('...');
+		context.write('...');
 		context.visit(node.argument);
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
@@ -300,11 +302,11 @@ export default {
 	ArrayPattern: shared['ArrayExpression|ArrayPattern'],
 
 	ArrowFunctionExpression: (node, context) => {
-		if (node.async) context.push('async ');
+		if (node.async) context.write('async ');
 
-		context.push('(');
+		context.write('(');
 		context.inline(node.params, false);
-		context.push(') => ');
+		context.write(') => ');
 
 		if (
 			node.body.type === 'ObjectExpression' ||
@@ -312,9 +314,9 @@ export default {
 			(node.body.type === 'LogicalExpression' && node.body.left.type === 'ObjectExpression') ||
 			(node.body.type === 'ConditionalExpression' && node.body.test.type === 'ObjectExpression')
 		) {
-			context.push('(');
+			context.write('(');
 			context.visit(node.body);
-			context.push(')');
+			context.write(')');
 		} else {
 			context.visit(node.body);
 		}
@@ -322,13 +324,13 @@ export default {
 
 	AssignmentExpression(node, context) {
 		context.visit(node.left);
-		context.push(` ${node.operator} `);
+		context.write(` ${node.operator} `);
 		context.visit(node.right);
 	},
 
 	AssignmentPattern(node, context) {
 		context.visit(node.left);
-		context.push(' = ');
+		context.write(' = ');
 		context.visit(node.right);
 	},
 
@@ -337,15 +339,15 @@ export default {
 			const precedence = EXPRESSIONS_PRECEDENCE[node.argument.type];
 
 			if (precedence && precedence < EXPRESSIONS_PRECEDENCE.AwaitExpression) {
-				context.push('await (');
+				context.write('await (');
 				context.visit(node.argument);
-				context.push(')');
+				context.write(')');
 			} else {
-				context.push('await ');
+				context.write('await ');
 				context.visit(node.argument);
 			}
 		} else {
-			context.push('await');
+			context.write('await');
 		}
 	},
 
@@ -355,11 +357,11 @@ export default {
 
 	BreakStatement(node, context) {
 		if (node.label) {
-			context.push('break ');
+			context.write('break ');
 			context.visit(node.label);
-			context.push(';');
+			context.write(';');
 		} else {
-			context.push('break;');
+			context.write('break;');
 		}
 	},
 
@@ -379,9 +381,9 @@ export default {
 		if (EXPRESSIONS_PRECEDENCE[node.test.type] > EXPRESSIONS_PRECEDENCE.ConditionalExpression) {
 			context.visit(node.test);
 		} else {
-			context.push('(');
+			context.write('(');
 			context.visit(node.test);
-			context.push(')');
+			context.write(')');
 		}
 
 		const if_true = context.new();
@@ -389,9 +391,9 @@ export default {
 
 		const child_state = context.child();
 
-		context.push(if_true.commands);
+		context.push(if_true);
 		child_state.visit(node.consequent);
-		context.push(if_false.commands);
+		context.push(if_false);
 		child_state.visit(node.alternate);
 
 		const multiline = child_state.multiline;
@@ -401,7 +403,7 @@ export default {
 			if_true.newline();
 			if_true.write('? ');
 			if_false.newline();
-			if_false.push(': ');
+			if_false.write(': ');
 			context.dedent();
 		} else {
 			if_true.write(' ? ');
@@ -487,7 +489,7 @@ export default {
 		context.visit(node.local);
 
 		if (node.local.name !== node.exported.name) {
-			context.push(' as ');
+			context.write(' as ');
 			context.visit(node.exported);
 		}
 	},
@@ -500,18 +502,18 @@ export default {
 			node.expression.type === 'FunctionExpression'
 		) {
 			// is an AssignmentExpression to an ObjectPattern
-			context.push('(');
+			context.write('(');
 			context.visit(node.expression);
-			context.push(');');
+			context.write(');');
 			return;
 		}
 
 		context.visit(node.expression);
-		context.push(';');
+		context.write(';');
 	},
 
 	ForStatement: (node, context) => {
-		context.push('for (');
+		context.write('for (');
 
 		if (node.init) {
 			if (node.init.type === 'VariableDeclaration') {
@@ -521,12 +523,12 @@ export default {
 			}
 		}
 
-		context.push('; ');
+		context.write('; ');
 		if (node.test) context.visit(node.test);
-		context.push('; ');
+		context.write('; ');
 		if (node.update) context.visit(node.update);
 
-		context.push(') ');
+		context.write(') ');
 		context.visit(node.body);
 	},
 
@@ -546,22 +548,22 @@ export default {
 	},
 
 	IfStatement(node, context) {
-		context.push('if (');
+		context.write('if (');
 		context.visit(node.test);
-		context.push(') ');
+		context.write(') ');
 		context.visit(node.consequent);
 
 		if (node.alternate) {
-			context.push(' else ');
+			context.write(' else ');
 			context.visit(node.alternate);
 		}
 	},
 
 	ImportDeclaration(node, context) {
 		if (node.specifiers.length === 0) {
-			context.push('import ');
+			context.write('import ');
 			context.visit(node.source);
-			context.push(';');
+			context.write(';');
 			return;
 		}
 
@@ -584,12 +586,12 @@ export default {
 			}
 		}
 
-		context.push('import ');
-		if (node.importKind == 'type') context.push('type ');
+		context.write('import ');
+		if (node.importKind == 'type') context.write('type ');
 
 		if (default_specifier) {
 			context.write(default_specifier.local.name, default_specifier);
-			if (namespace_specifier || named_specifiers.length > 0) context.push(', ');
+			if (namespace_specifier || named_specifiers.length > 0) context.write(', ');
 		}
 
 		if (namespace_specifier) {
@@ -597,57 +599,57 @@ export default {
 		}
 
 		if (named_specifiers.length > 0) {
-			context.push('{');
+			context.write('{');
 			context.inline(named_specifiers, true);
-			context.push('}');
+			context.write('}');
 		}
 
-		context.push(' from ');
+		context.write(' from ');
 		context.visit(node.source);
 		if (node.attributes && node.attributes.length > 0) {
-			context.push(' with { ');
+			context.write(' with { ');
 			for (let index = 0; index < node.attributes.length; index++) {
 				const { key, value } = node.attributes[index];
 				context.visit(key);
-				context.push(': ');
+				context.write(': ');
 				context.visit(value);
 				if (index + 1 !== node.attributes.length) {
-					context.push(', ');
+					context.write(', ');
 				}
 			}
-			context.push(' }');
+			context.write(' }');
 		}
-		context.push(';');
+		context.write(';');
 	},
 
 	ImportExpression(node, context) {
-		context.push('import(');
+		context.write('import(');
 		context.visit(node.source);
 		//@ts-expect-error for some reason the types haven't been updated
 		if (node.arguments) {
 			//@ts-expect-error
 			for (let index = 0; index < node.arguments.length; index++) {
-				context.push(', ');
+				context.write(', ');
 				//@ts-expect-error
 				context.visit(node.arguments[index]);
 			}
 		}
-		context.push(')');
+		context.write(')');
 	},
 
 	ImportSpecifier(node, context) {
 		if (node.local.name !== node.imported.name) {
 			context.visit(node.imported);
-			context.push(' as ');
+			context.write(' as ');
 		}
 
-		if (node.importKind == 'type') context.push('type ');
+		if (node.importKind == 'type') context.write('type ');
 		context.visit(node.local);
 	},
 
 	LabeledStatement(node, context) {
 		context.visit(node.label);
-		context.push(': ');
+		context.write(': ');
 		context.visit(node.body);
 	},
 
@@ -664,29 +666,29 @@ export default {
 
 	MemberExpression(node, context) {
 		if (EXPRESSIONS_PRECEDENCE[node.object.type] < EXPRESSIONS_PRECEDENCE.MemberExpression) {
-			context.push('(');
+			context.write('(');
 			context.visit(node.object);
-			context.push(')');
+			context.write(')');
 		} else {
 			context.visit(node.object);
 		}
 
 		if (node.computed) {
 			if (node.optional) {
-				context.push('?.');
+				context.write('?.');
 			}
-			context.push('[');
+			context.write('[');
 			context.visit(node.property);
-			context.push(']');
+			context.write(']');
 		} else {
-			context.push(node.optional ? '?.' : '.');
+			context.write(node.optional ? '?.' : '.');
 			context.visit(node.property);
 		}
 	},
 
 	MetaProperty(node, context) {
 		context.visit(node.meta);
-		context.push('.');
+		context.write('.');
 		context.visit(node.property);
 	},
 
@@ -698,33 +700,33 @@ export default {
 		}
 
 		if (node.static) {
-			context.push('static ');
+			context.write('static ');
 		}
 
 		if (node.kind === 'get' || node.kind === 'set') {
 			// Getter or setter
-			context.push(node.kind + ' ');
+			context.write(node.kind + ' ');
 		}
 
 		if (node.value.async) {
-			context.push('async ');
+			context.write('async ');
 		}
 
 		if (node.value.generator) {
-			context.push('*');
+			context.write('*');
 		}
 
-		if (node.computed) context.push('[');
+		if (node.computed) context.write('[');
 		context.visit(node.key);
-		if (node.computed) context.push(']');
+		if (node.computed) context.write(']');
 
-		context.push('(');
+		context.write('(');
 		context.inline(node.value.params, false);
-		context.push(')');
+		context.write(')');
 
 		if (node.value.returnType) context.visit(node.value.returnType);
 
-		context.push(' ');
+		context.write(' ');
 
 		if (node.value.body) context.visit(node.value.body);
 	},
@@ -732,15 +734,15 @@ export default {
 	NewExpression: shared['CallExpression|NewExpression'],
 
 	ObjectExpression(node, context) {
-		context.push('{');
+		context.write('{');
 		context.inline(node.properties, true);
-		context.push('}');
+		context.write('}');
 	},
 
 	ObjectPattern(node, context) {
-		context.push('{');
+		context.write('{');
 		context.inline(node.properties, true);
-		context.push('}');
+		context.write('}');
 
 		if (node.typeAnnotation) context.visit(node.typeAnnotation);
 	},
@@ -776,25 +778,25 @@ export default {
 
 		// shorthand methods
 		if (node.value.type === 'FunctionExpression') {
-			if (node.kind !== 'init') context.push(node.kind + ' ');
-			if (node.value.async) context.push('async ');
-			if (node.value.generator) context.push('*');
-			if (node.computed) context.push('[');
+			if (node.kind !== 'init') context.write(node.kind + ' ');
+			if (node.value.async) context.write('async ');
+			if (node.value.generator) context.write('*');
+			if (node.computed) context.write('[');
 			context.visit(node.key);
-			if (node.computed) context.push(']');
-			context.push('(');
+			if (node.computed) context.write(']');
+			context.write('(');
 			context.inline(node.value.params, false);
-			context.push(')');
+			context.write(')');
 
 			if (node.value.returnType) context.visit(node.value.returnType);
 
-			context.push(' ');
+			context.write(' ');
 			context.visit(node.value.body);
 		} else {
-			if (node.computed) context.push('[');
-			if (node.kind === 'get' || node.kind === 'set') context.push(node.kind + ' ');
+			if (node.computed) context.write('[');
+			if (node.kind === 'get' || node.kind === 'set') context.write(node.kind + ' ');
 			context.visit(node.key);
-			context.push(node.computed ? ']: ' : ': ');
+			context.write(node.computed ? ']: ' : ': ');
 			context.visit(node.value);
 		}
 	},
@@ -807,33 +809,34 @@ export default {
 		}
 
 		if (node.accessibility) {
-			context.push(node.accessibility, ' ');
+			context.push(node.accessibility);
+			context.write(' ');
 		}
 
 		if (node.static) {
-			context.push('static ');
+			context.write('static ');
 		}
 
 		if (node.computed) {
-			context.push('[');
+			context.write('[');
 			context.visit(node.key);
-			context.push(']');
+			context.write(']');
 		} else {
 			context.visit(node.key);
 		}
 
 		if (node.typeAnnotation) {
-			context.push(': ');
+			context.write(': ');
 			context.visit(node.typeAnnotation.typeAnnotation);
 		}
 
 		if (node.value) {
-			context.push(' = ');
+			context.write(' = ');
 
 			context.visit(node.value);
 		}
 
-		context.push(';');
+		context.write(';');
 	},
 
 	RestElement: shared['RestElement|SpreadElement'],
@@ -845,32 +848,32 @@ export default {
 				argumentWithComment.leadingComments &&
 				argumentWithComment.leadingComments.some((comment) => comment.type === 'Line');
 
-			context.push(contains_comment ? 'return (' : 'return ');
+			context.write(contains_comment ? 'return (' : 'return ');
 			context.visit(node.argument);
-			context.push(contains_comment ? ');' : ';');
+			context.write(contains_comment ? ');' : ';');
 		} else {
-			context.push('return;');
+			context.write('return;');
 		}
 	},
 
 	SequenceExpression(node, context) {
-		context.push('(');
+		context.write('(');
 		context.inline(node.expressions, false);
-		context.push(')');
+		context.write(')');
 	},
 
 	SpreadElement: shared['RestElement|SpreadElement'],
 
 	StaticBlock(node, context) {
 		context.indent();
-		context.push('static {');
+		context.write('static {');
 		context.newline();
 
 		context.block(node.body, add_margin);
 
 		context.dedent();
 		context.newline();
-		context.push('}');
+		context.write('}');
 	},
 
 	Super(node, context) {
@@ -878,25 +881,25 @@ export default {
 	},
 
 	SwitchStatement(node, context) {
-		context.push('switch (');
+		context.write('switch (');
 		context.visit(node.discriminant);
-		context.push(') {');
+		context.write(') {');
 		context.indent();
 
 		let first = true;
 
 		for (const block of node.cases) {
-			if (!first) context.push('\n');
+			if (!first) context.write('\n');
 			first = false;
 
 			if (block.test) {
 				context.newline();
-				context.push(`case `);
+				context.write('case ');
 				context.visit(block.test);
-				context.push(':');
+				context.write(':');
 			} else {
 				context.newline();
-				context.push(`default:`);
+				context.write('default:');
 			}
 
 			context.indent();
@@ -911,7 +914,7 @@ export default {
 
 		context.dedent();
 		context.newline();
-		context.push(`}`);
+		context.write('}');
 	},
 
 	TaggedTemplateExpression(node, context) {
@@ -920,23 +923,23 @@ export default {
 	},
 
 	TemplateLiteral(node, context) {
-		context.push('`');
+		context.write('`');
 
 		const { quasis, expressions } = node;
 
 		for (let i = 0; i < expressions.length; i++) {
 			const raw = quasis[i].value.raw;
 
-			context.push(raw, '${');
+			context.write(raw + '${');
 			context.visit(expressions[i]);
-			context.push('}');
+			context.write('}');
 
 			if (/\n/.test(raw)) context.multiline = true;
 		}
 
 		const raw = quasis[quasis.length - 1].value.raw;
 
-		context.push(raw, '`');
+		context.write(raw + '`');
 		if (/\n/.test(raw)) context.multiline = true;
 	},
 
@@ -945,44 +948,44 @@ export default {
 	},
 
 	ThrowStatement(node, context) {
-		context.push('throw ');
+		context.write('throw ');
 		if (node.argument) context.visit(node.argument);
-		context.push(';');
+		context.write(';');
 	},
 
 	TryStatement(node, context) {
-		context.push('try ');
+		context.write('try ');
 		context.visit(node.block);
 
 		if (node.handler) {
 			if (node.handler.param) {
-				context.push(' catch(');
+				context.write(' catch(');
 				context.visit(node.handler.param);
-				context.push(') ');
+				context.write(') ');
 			} else {
-				context.push(' catch ');
+				context.write(' catch ');
 			}
 
 			context.visit(node.handler.body);
 		}
 
 		if (node.finalizer) {
-			context.push(' finally ');
+			context.write(' finally ');
 			context.visit(node.finalizer);
 		}
 	},
 
 	UnaryExpression(node, context) {
-		context.push(node.operator);
+		context.write(node.operator);
 
 		if (node.operator.length > 1) {
-			context.push(' ');
+			context.write(' ');
 		}
 
 		if (EXPRESSIONS_PRECEDENCE[node.argument.type] < EXPRESSIONS_PRECEDENCE.UnaryExpression) {
-			context.push('(');
+			context.write('(');
 			context.visit(node.argument);
-			context.push(')');
+			context.write(')');
 		} else {
 			context.visit(node.argument);
 		}
@@ -990,48 +993,48 @@ export default {
 
 	UpdateExpression(node, context) {
 		if (node.prefix) {
-			context.push(node.operator);
+			context.write(node.operator);
 			context.visit(node.argument);
 		} else {
 			context.visit(node.argument);
-			context.push(node.operator);
+			context.write(node.operator);
 		}
 	},
 
 	VariableDeclaration(node, context) {
 		handle_var_declaration(node, context);
-		context.push(';');
+		context.write(';');
 	},
 
 	VariableDeclarator(node, context) {
 		context.visit(node.id);
 
 		if (node.init) {
-			context.push(' = ');
+			context.write(' = ');
 			context.visit(node.init);
 		}
 	},
 
 	WhileStatement(node, context) {
-		context.push('while (');
+		context.write('while (');
 		context.visit(node.test);
-		context.push(') ');
+		context.write(') ');
 		context.visit(node.body);
 	},
 
 	WithStatement(node, context) {
-		context.push('with (');
+		context.write('with (');
 		context.visit(node.object);
-		context.push(') ');
+		context.write(') ');
 		context.visit(node.body);
 	},
 
 	YieldExpression(node, context) {
 		if (node.argument) {
-			context.push(node.delegate ? `yield* ` : `yield `);
+			context.write(node.delegate ? `yield* ` : `yield `);
 			context.visit(node.argument);
 		} else {
-			context.push(node.delegate ? `yield*` : `yield`);
+			context.write(node.delegate ? `yield*` : `yield`);
 		}
 	}
 };
@@ -1121,12 +1124,13 @@ function handle_var_declaration(node, context) {
 	const join = context.new();
 	const child_context = context.child();
 
-	context.push(`${node.kind} `, open.commands);
+	context.write(`${node.kind} `);
+	context.push(open);
 
 	let first = true;
 
 	for (const d of node.declarations) {
-		if (!first) context.commands.push(join.commands);
+		if (!first) context.push(join);
 		first = false;
 
 		child_context.visit(d);

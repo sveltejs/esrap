@@ -60,10 +60,14 @@ export class Context {
 	}
 
 	/**
-	 * @param {Command[]} commands
+	 * @param {Command | Context} command
 	 */
-	push(...commands) {
-		this.commands.push(...commands);
+	push(command) {
+		if (command instanceof Context) {
+			this.commands.push(command.commands);
+		} else {
+			this.commands.push(command);
+		}
 	}
 
 	/**
