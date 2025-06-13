@@ -1,6 +1,4 @@
-/** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, Dedent, Indent, Newline, NodeWithComments } from './types' */
-/** @import { Context } from './index.js'; */
+/** @import { Command, Dedent, Indent, Newline } from './types' */
 
 /** @type {Newline} */
 export const newline = { type: 'Newline' };
