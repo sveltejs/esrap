@@ -209,7 +209,9 @@ export class Context {
 
 		this.#commands.push(close.#commands);
 
-		if (child_context.multiline || measure(this.#commands, index) > 50) {
+		const length = measure(this.#commands, index) + 2 * (nodes.length - 1);
+
+		if (child_context.multiline || length > 50) {
 			this.multiline = true;
 
 			open.indent();
@@ -313,10 +315,7 @@ function measure(commands, from = 0, to = commands.length) {
 		if (typeof command === 'string') {
 			total += command.length;
 		} else if (Array.isArray(command)) {
-			total +=
-				command.length === 0
-					? 2 // assume this is ', '
-					: measure(command);
+			total += measure(command);
 		}
 	}
 

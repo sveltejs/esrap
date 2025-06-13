@@ -185,10 +185,15 @@ export const shared = {
 
 		// if the final argument is multiline, it doesn't need to force all the
 		// other arguments to also be multiline
-		const child_context = context.child();
-		const final_context = context.child();
+		const child_context = context.new();
+		const final_context = context.new();
+
+		context.append(child_context);
+		context.append(final_context);
 
 		for (let i = 0; i < node.arguments.length; i += 1) {
+			const context = i === node.arguments.length - 1 ? final_context : child_context;
+
 			if (i > 0) {
 				if (comments.length > 0) {
 					context.write(', ');
@@ -211,7 +216,7 @@ export const shared = {
 
 			const p = node.arguments[i];
 
-			(i === node.arguments.length - 1 ? final_context : child_context).visit(p);
+			context.visit(p);
 		}
 
 		context.multiline ||= child_context.multiline || final_context.multiline;
@@ -1188,8 +1193,9 @@ function handle_var_declaration(node, context) {
 		child_context.visit(d);
 	}
 
-	const multiline =
-		child_context.multiline || (node.declarations.length > 1 && child_context.measure() > 50);
+	const length = child_context.measure() + 2 * (node.declarations.length - 1);
+
+	const multiline = child_context.multiline || (node.declarations.length > 1 && length > 50);
 
 	if (multiline) {
 		context.multiline = true;
