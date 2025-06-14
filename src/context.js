@@ -154,9 +154,6 @@ export class Context {
 		let multiline = false;
 		let length = -2;
 
-		/** @type {TSESTree.Comment[]} */
-		const trailing_comments = [];
-
 		/** @type {boolean[]} */
 		const multiline_nodes = [];
 
@@ -197,23 +194,7 @@ export class Context {
 		for (let i = 0; i < nodes.length; i += 1) {
 			const child = children[i];
 
-			if (child === null) {
-				// This is only used for ArrayPattern and ArrayExpression, but
-				// it makes more sense to have the logic here than there, because
-				// otherwise we'd duplicate a lot more stuff
-				// this.write(separator);
-				continue;
-			}
-
 			if (prev !== null) {
-				// this.write(separator);
-
-				if (_comments.length > 0) {
-					this.write(' ');
-					push_comment(_comments[0], this);
-					_comments.length = 0;
-				}
-
 				if (multiline_nodes[i - 1] || multiline_nodes[i]) {
 					this.margin();
 				}
@@ -238,59 +219,6 @@ export class Context {
 		} else if (pad) {
 			this.write(' ');
 		}
-
-		// const join = this.new();
-
-		// const child_context = this.new();
-
-		// let prev;
-
-		// for (let i = 0; i < nodes.length; i += 1) {
-		// 	const node = nodes[i];
-		// 	const is_first = i === 0;
-		// 	const is_last = i === nodes.length - 1;
-
-		// 	if (node) {
-		// 		if (!is_first && !prev) {
-		// 			child_context.append(join);
-		// 		}
-
-		// 		child_context.visit(node);
-
-		// 		if (!is_last) child_context.write(separator);
-
-		// 		if (_comments.length > 0) {
-		// 			child_context.write(' ');
-		// 			push_comment(_comments[0], child_context);
-		// 			_comments.length = 0;
-		// 		}
-
-		// 		if (!is_last) child_context.append(join);
-		// 	} else {
-		// 		// This is only used for ArrayPattern and ArrayExpression, but
-		// 		// it makes more sense to have the logic here than there, because
-		// 		// otherwise we'd duplicate a lot more stuff
-		// 		child_context.write(separator);
-		// 	}
-
-		// 	prev = node;
-		// }
-
-		// if (child_context.multiline || length > 50) {
-		// 	join.newline();
-
-		// 	this.indent();
-		// 	this.newline();
-		// 	this.append(child_context);
-		// 	this.dedent();
-		// 	this.newline();
-		// } else {
-		// 	join.write(' ');
-
-		// 	if (pad) this.write(' ');
-		// 	this.append(child_context);
-		// 	if (pad) this.write(' ');
-		// }
 	}
 
 	/**
