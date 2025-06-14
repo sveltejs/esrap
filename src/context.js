@@ -1,16 +1,19 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, Dedent, Visitors, Indent, Newline, NWithComments } from './types' */
+/** @import { Command, Dedent, Visitors, Indent, Newline, Margin } from './types' */
 
 import { _comments, push_comment } from './languages/js.js';
 
+/** @type {Margin} */
+export const margin = { type: 'Margin' };
+
 /** @type {Newline} */
-const newline = { type: 'Newline' };
+export const newline = { type: 'Newline' };
 
 /** @type {Indent} */
-const indent = { type: 'Indent' };
+export const indent = { type: 'Indent' };
 
 /** @type {Dedent} */
-const dedent = { type: 'Dedent' };
+export const dedent = { type: 'Dedent' };
 
 export class Context {
 	#visitors;
@@ -37,6 +40,10 @@ export class Context {
 
 	dedent() {
 		this.#commands.push(dedent);
+	}
+
+	margin() {
+		this.#commands.push(margin);
 	}
 
 	newline() {
@@ -219,15 +226,15 @@ export class Context {
 
 		for (const statement of statements) {
 			if (last !== null) {
-				this.newline();
-
 				if (
 					statement.context.multiline ||
 					last.context.multiline ||
 					statement.node.type !== last.node.type
 				) {
-					this.newline();
+					this.margin();
 				}
+
+				this.newline();
 			}
 
 			this.append(statement.context);

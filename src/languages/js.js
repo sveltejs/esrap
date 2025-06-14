@@ -40,6 +40,7 @@ export function push_comment(comment, context) {
 
 	if (comment.type === 'Line') {
 		context.write(`//${comment.value}`);
+		context.newline();
 	} else {
 		context.write('/*');
 		const lines = comment.value.split('\n');
@@ -312,11 +313,19 @@ export default {
 		for (const comment of comments) {
 			push_comment(comment, context);
 
-			if (comment.type === 'Line' || comment.value.includes('\n')) {
-				context.newline();
-			} else {
-				context.write(' ');
+			if (comment.type === 'Block') {
+				if (comment.value.includes('\n')) {
+					context.newline();
+				} else {
+					context.write(' ');
+				}
 			}
+
+			// if (comment.type === 'Line' || comment.value.includes('\n')) {
+			// 	context.newline();
+			// } else {
+			// 	context.write(' ');
+			// }
 		}
 		// }
 
@@ -953,7 +962,10 @@ export default {
 		let first = true;
 
 		for (const block of node.cases) {
-			if (!first) context.write('\n');
+			if (!first) {
+				context.margin();
+			}
+
 			first = false;
 
 			if (block.test) {

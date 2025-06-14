@@ -1,6 +1,6 @@
-/** @import { Command, Visitors, PrintOptions } from './types' */
+/** @import { Command, Visitors, PrintOptions, Location, Margin, Newline, Indent, Dedent } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
-import { Context } from './context.js';
+import { Context, dedent, indent, margin, newline } from './context.js';
 import ts from './languages/ts.js';
 
 /** @type {(str: string) => string} str */
@@ -72,16 +72,14 @@ export function print(node, opts = {}) {
 		}
 	}
 
-	let newline = '\n';
-	const indent = opts.indent ?? '\t';
+	let current_newline = '\n';
+	const indent_str = opts.indent ?? '\t';
+
+	let needs_newline = false;
+	let needs_margin = false;
 
 	/** @param {Command} command */
 	function run(command) {
-		if (typeof command === 'string') {
-			append(command);
-			return;
-		}
-
 		if (Array.isArray(command)) {
 			for (let i = 0; i < command.length; i += 1) {
 				run(command[i]);
@@ -89,26 +87,44 @@ export function print(node, opts = {}) {
 			return;
 		}
 
-		switch (command.type) {
-			case 'Location':
-				current_line.push([
-					current_column,
-					0, // source index is always zero
-					command.line - 1,
-					command.column
-				]);
+		if (command !== newline && command !== margin && command !== dedent) {
+			if (needs_newline) {
+				append(needs_margin ? '\n' + current_newline : current_newline);
+			}
+
+			needs_margin = needs_newline = false;
+		}
+
+		if (typeof command === 'string') {
+			append(command);
+			return;
+		}
+
+		if (command.type === 'Location') {
+			current_line.push([
+				current_column,
+				0, // source index is always zero
+				command.line - 1,
+				command.column
+			]);
+			return;
+		}
+
+		switch (command) {
+			case newline:
+				needs_newline = true;
 				break;
 
-			case 'Newline':
-				append(newline);
+			case margin:
+				needs_margin = true;
 				break;
 
-			case 'Indent':
-				newline += indent;
+			case indent:
+				current_newline += indent_str;
 				break;
 
-			case 'Dedent':
-				newline = newline.slice(0, -indent.length);
+			case dedent:
+				current_newline = current_newline.slice(0, -indent_str.length);
 				break;
 		}
 	}
