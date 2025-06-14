@@ -151,60 +151,146 @@ export class Context {
 	inline(nodes, pad, separator = ',') {
 		if (nodes.length === 0) return;
 
-		const join = this.new();
+		let multiline = false;
+		let length = -2;
 
-		const child_context = this.new();
+		/** @type {TSESTree.Comment[]} */
+		const trailing_comments = [];
 
-		let prev;
+		/** @type {boolean[]} */
+		const multiline_nodes = [];
+
+		const children = nodes.map((node, i) => {
+			const child = this.new();
+			if (node) child.visit(node);
+
+			multiline_nodes[i] = child.multiline;
+
+			if (i < nodes.length - 1 || !node) {
+				child.write(separator);
+			}
+
+			if (_comments.length) {
+				child.write(' ');
+				push_comment(_comments[0], child);
+				_comments.length = 0;
+			}
+
+			length += child.measure() + 2;
+			multiline ||= child.multiline;
+
+			return child;
+		});
+
+		multiline ||= length > 60;
+
+		if (multiline) {
+			this.indent();
+			this.newline();
+		} else if (pad) {
+			this.write(' ');
+		}
+
+		/** @type {Context | null} */
+		let prev = null;
 
 		for (let i = 0; i < nodes.length; i += 1) {
-			const node = nodes[i];
-			const is_first = i === 0;
-			const is_last = i === nodes.length - 1;
+			const child = children[i];
 
-			if (node) {
-				if (!is_first && !prev) {
-					child_context.append(join);
-				}
-
-				child_context.visit(node);
-
-				if (!is_last) child_context.write(separator);
-
-				if (_comments.length > 0) {
-					child_context.write(' ');
-					push_comment(_comments[0], child_context);
-					_comments.length = 0;
-				}
-
-				if (!is_last) child_context.append(join);
-			} else {
+			if (child === null) {
 				// This is only used for ArrayPattern and ArrayExpression, but
 				// it makes more sense to have the logic here than there, because
 				// otherwise we'd duplicate a lot more stuff
-				child_context.write(separator);
+				// this.write(separator);
+				continue;
 			}
 
-			prev = node;
+			if (prev !== null) {
+				// this.write(separator);
+
+				if (_comments.length > 0) {
+					this.write(' ');
+					push_comment(_comments[0], this);
+					_comments.length = 0;
+				}
+
+				if (multiline_nodes[i - 1] || multiline_nodes[i]) {
+					this.margin();
+				}
+
+				if (nodes[i]) {
+					if (multiline) {
+						this.newline();
+					} else {
+						this.write(' ');
+					}
+				}
+			}
+
+			this.append(child);
+
+			prev = child;
 		}
 
-		const length = child_context.measure();
-
-		if (child_context.multiline || length > 50) {
-			join.newline();
-
-			this.indent();
-			this.newline();
-			this.append(child_context);
+		if (multiline) {
 			this.dedent();
 			this.newline();
-		} else {
-			join.write(' ');
-
-			if (pad) this.write(' ');
-			this.append(child_context);
-			if (pad) this.write(' ');
+		} else if (pad) {
+			this.write(' ');
 		}
+
+		// const join = this.new();
+
+		// const child_context = this.new();
+
+		// let prev;
+
+		// for (let i = 0; i < nodes.length; i += 1) {
+		// 	const node = nodes[i];
+		// 	const is_first = i === 0;
+		// 	const is_last = i === nodes.length - 1;
+
+		// 	if (node) {
+		// 		if (!is_first && !prev) {
+		// 			child_context.append(join);
+		// 		}
+
+		// 		child_context.visit(node);
+
+		// 		if (!is_last) child_context.write(separator);
+
+		// 		if (_comments.length > 0) {
+		// 			child_context.write(' ');
+		// 			push_comment(_comments[0], child_context);
+		// 			_comments.length = 0;
+		// 		}
+
+		// 		if (!is_last) child_context.append(join);
+		// 	} else {
+		// 		// This is only used for ArrayPattern and ArrayExpression, but
+		// 		// it makes more sense to have the logic here than there, because
+		// 		// otherwise we'd duplicate a lot more stuff
+		// 		child_context.write(separator);
+		// 	}
+
+		// 	prev = node;
+		// }
+
+		// if (child_context.multiline || length > 50) {
+		// 	join.newline();
+
+		// 	this.indent();
+		// 	this.newline();
+		// 	this.append(child_context);
+		// 	this.dedent();
+		// 	this.newline();
+		// } else {
+		// 	join.write(' ');
+
+		// 	if (pad) this.write(' ');
+		// 	this.append(child_context);
+		// 	if (pad) this.write(' ');
+		// }
 	}
 
 	/**

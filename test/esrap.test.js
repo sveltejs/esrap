@@ -58,6 +58,8 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	const jsxMode = dir.startsWith('jsx-') || dir.startsWith('tsx-');
 	const fileExtension = (tsMode ? 'ts' : 'js') + (jsxMode ? 'x' : '');
 
+	// if (dir.includes('large-file')) continue;
+
 	test(dir, async () => {
 		let input_js = '';
 		let input_json = '';

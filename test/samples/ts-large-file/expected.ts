@@ -93,10 +93,7 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 
 				if (projectType === 'svelte' && !config.metadata.environments.svelte) return;
 
-				return {
-					label: config.metadata.name,
-					value: config.metadata.id
-				};
+				return { label: config.metadata.name, value: config.metadata.id };
 			}).filter((c) => !!c);
 
 			if (categoryOptions.length > 0) {
