@@ -44,8 +44,10 @@ type Options = v.InferOutput<typeof OptionsSchema>;
 
 const adderDetails = adderIds.map((id) => getAdderDetails(id));
 const aliases = adderDetails.map((c) => c.config.metadata.alias).filter((v) => v !== undefined);
+
 // infers the workspace cwd if a `package.json` resides in a parent directory
 const defaultPkgPath = findUp(process.cwd(), 'package.json');
+
 const defaultCwd = defaultPkgPath ? path.dirname(defaultPkgPath) : undefined;
 
 export const add = new Command('add').description('Applies specified adders into a project').argument('[adder...]', 'adders to install').option('--cwd <path>', 'path to working directory', defaultCwd).option('--no-install', 'skips installing dependencies').option('--no-preconditions', 'skips validating preconditions').option('--default', 'applies default adder options for unspecified options', false).option('--community <adder...>', 'community adders to install', []).action((adderArgs, opts) => {
@@ -88,6 +90,7 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 
 				// we'll only display adders within their respective project types
 				if (projectType === 'kit' && !config.metadata.environments.kit) return;
+
 				if (projectType === 'svelte' && !config.metadata.environments.svelte) return;
 
 				return {
@@ -120,8 +123,10 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 	// run precondition checks
 	if (options.preconditions) {
 		const preconditions = selectedAdders.flatMap((c) => c.checks.preconditions).filter((p) => p !== undefined);
+
 		// add global checks
 		const { kit } = createWorkspace(options.cwd);
+
 		const projectType = kit ? 'kit' : 'svelte';
 		const globalPreconditions = getGlobalPreconditions(options.cwd, projectType, selectedAdders);
 
@@ -238,6 +243,7 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 			formatSpinner.stop('Successfully formatted modified files');
 		} catch(e) {
 			formatSpinner.stop('Failed to format files');
+
 			if (e instanceof Error) p.log.error(e.message);
 		}
 	}
@@ -259,6 +265,7 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 		});
 
 		adderMessage += `- ${adderNextSteps.join('\n- ')}`;
+
 		return adderMessage;
 	}).join('\n\n');
 

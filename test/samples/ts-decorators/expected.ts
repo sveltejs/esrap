@@ -11,6 +11,7 @@ function loggedMethod(headMessage = 'LOG:') {
 			const result = originalMethod.call(this, ...args);
 
 			console.log(`${headMessage} Exiting method '${methodName}'.`);
+
 			return result;
 		}
 

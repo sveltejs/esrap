@@ -204,40 +204,34 @@ export class Context {
 	 * Push a sequence of nodes onto separate lines, separating them with
 	 * an extra newline where appropriate
 	 * @param {Array<{ type: string }>} nodes
-	 * @param {(a: { type: string }, b: { type: string }) => boolean} add_margin
 	 */
-	block(nodes, add_margin = () => false) {
-		let last_statement = {
-			type: 'EmptyStatement'
-		};
+	block(nodes) {
+		const statements = nodes
+			.filter((node) => node.type !== 'EmptyStatement')
+			.map((node) => {
+				const context = this.new();
+				context.visit(node);
+				return { node, context };
+			});
 
-		let first = true;
-		let needs_margin = false;
+		/** @type {typeof statements[number] | null} */
+		let last = null;
 
-		for (const statement of nodes) {
-			if (statement.type === 'EmptyStatement') continue;
-
-			/** @type {string[]} */
-			const margin = [];
-
-			if (!first) {
-				this.#commands.push(margin);
+		for (const statement of statements) {
+			if (last !== null) {
 				this.newline();
+
+				if (
+					statement.context.multiline ||
+					last.context.multiline ||
+					statement.node.type !== last.node.type
+				) {
+					this.newline();
+				}
 			}
 
-			first = false;
-
-			const child_context = this.new();
-			this.append(child_context);
-
-			child_context.visit(statement);
-
-			if (child_context.multiline || needs_margin || add_margin(last_statement, statement)) {
-				margin.push('\n');
-			}
-
-			needs_margin = child_context.multiline;
-			last_statement = statement;
+			this.append(statement.context);
+			last = statement;
 		}
 	}
 

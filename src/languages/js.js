@@ -30,31 +30,14 @@ const OPERATOR_PRECEDENCE = {
 	'**': 13
 };
 
-const grouped_expression_types = [
-	'ImportDeclaration',
-	'VariableDeclaration',
-	'ExportDefaultDeclaration',
-	'ExportNamedDeclaration'
-];
-
-/**
- *
- * @param {{ type: string }} a
- * @param {{ type: string }} b
- */
-function add_margin(a, b) {
-	return (
-		(grouped_expression_types.includes(b.type) || grouped_expression_types.includes(a.type)) &&
-		a.type !== b.type
-	);
-}
-
 // TODO this should not be exported, it is JS/TS specific
 /**
  * @param {TSESTree.Comment} comment
  * @param {Context} context
  */
 export function push_comment(comment, context) {
+	// console.trace();
+
 	if (comment.type === 'Line') {
 		context.write(`//${comment.value}`);
 	} else {
@@ -132,7 +115,7 @@ export const shared = {
 		if (node.body.length > 0) {
 			context.indent();
 			context.newline();
-			context.block(node.body, add_margin);
+			context.block(node.body);
 			context.dedent();
 			context.newline();
 		}
@@ -342,6 +325,7 @@ export default {
 		visit(node);
 
 		if (trailing_comments) {
+			// console.log(node.start, node.type, trailing_comments);
 			if (/(Statement|Declaration)$/.test(node.type)) {
 				for (const comment of trailing_comments) {
 					context.write(' ');
@@ -840,7 +824,7 @@ export default {
 
 	Program(node, context) {
 		comments.length = 0;
-		context.block(node.body, add_margin);
+		context.block(node.body);
 	},
 
 	Property(node, context) {
@@ -949,7 +933,7 @@ export default {
 		context.write('static {');
 		context.newline();
 
-		context.block(node.body, add_margin);
+		context.block(node.body);
 
 		context.dedent();
 		context.newline();

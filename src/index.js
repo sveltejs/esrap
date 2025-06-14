@@ -33,6 +33,8 @@ export function print(node, opts = {}) {
 		);
 	}
 
+	debugger;
+
 	/** @type {Command[]} */
 	const commands = [];
 
