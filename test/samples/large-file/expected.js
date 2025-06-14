@@ -4960,12 +4960,7 @@
 					},
 
 				set(value) {
-					Object.defineProperty(this, name, {
-						enumerable: true,
-						configurable: true,
-						writable: true,
-						value
-					});
+					Object.defineProperty(this, name, { enumerable: true, configurable: true, writable: true, value });
 				}
 			});
 		},
@@ -6276,11 +6271,7 @@
 		// except "table", "table-cell", or "table-caption"
 		// See here for display values: https://developer.mozilla.org/en-US/docs/CSS/display
 		rdisplayswap = /^(none|table(?!-c[ea]).+)/,
-		cssShow = {
-			position: "absolute",
-			visibility: "hidden",
-			display: "block"
-		},
+		cssShow = { position: "absolute", visibility: "hidden", display: "block" },
 		cssNormalTransform = { letterSpacing: "0", fontWeight: "400" };
 
 	function setPositiveNumber(_elem, value, subtract) {
@@ -9247,16 +9238,7 @@
 			}
 
 			// The url can be an options object (which then must have .url)
-			return jQuery.ajax(jQuery.extend(
-				{
-					url,
-					type: method,
-					dataType: type,
-					data,
-					success: callback
-				},
-				jQuery.isPlainObject(url) && url
-			));
+			return jQuery.ajax(jQuery.extend({ url, type: method, dataType: type, data, success: callback }, jQuery.isPlainObject(url) && url));
 		};
 	});
 

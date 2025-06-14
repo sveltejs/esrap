@@ -173,7 +173,7 @@ export class Context {
 				_comments.length = 0;
 			}
 
-			length += child.measure() + 2;
+			length += child.measure() + 1;
 			multiline ||= child.multiline;
 
 			return child;

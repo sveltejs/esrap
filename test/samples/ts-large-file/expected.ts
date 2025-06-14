@@ -273,12 +273,7 @@ type AdderId = string;
 type QuestionValues = OptionValues<any>;
 
 export type AdderOption = Record<AdderId, QuestionValues>;
-
-export type InstallAdderOptions = { 
-	cwd: string;
-	official?: AdderOption;
-	community?: AdderOption
- };
+export type InstallAdderOptions = { cwd: string; official?: AdderOption; community?: AdderOption };
 
 /**
  * Installs adders
