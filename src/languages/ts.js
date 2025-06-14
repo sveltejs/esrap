@@ -209,7 +209,6 @@ export default {
 		context.dedent();
 		context.newline();
 		context.write('}');
-		context.newline();
 	},
 
 	TSModuleBlock(node, context) {

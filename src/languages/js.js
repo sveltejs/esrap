@@ -130,7 +130,6 @@ export const shared = {
 		}
 
 		if (node.body.length > 0) {
-			context.multiline = true;
 			context.indent();
 			context.newline();
 			context.block(node.body, add_margin);
@@ -193,27 +192,20 @@ export const shared = {
 		for (let i = 0; i < node.arguments.length; i += 1) {
 			const context = i === node.arguments.length - 1 ? final_context : child_context;
 
-			if (i > 0) {
-				if (comments.length > 0) {
-					context.write(', ');
+			const p = node.arguments[i];
 
-					while (comments.length) {
-						const comment = /** @type {TSESTree.Comment} */ (comments.shift());
+			if (i > 0) context.write(',');
 
-						if (comment.type === 'Line') {
-							child_context.multiline = true;
-							context.write(`//${comment.value}`);
-							context.newline();
-						} else {
-							context.write(`/*${comment.value}*/ `);
-						}
-					}
-				} else {
-					context.append(join);
+			if (_comments.length > 0) {
+				context.write(' ');
+				push_comment(_comments[0], context);
+				if (_comments[0].type === 'Line') {
+					child_context.multiline = true;
 				}
+				_comments.length = 0;
 			}
 
-			const p = node.arguments[i];
+			if (i > 0) context.append(join);
 
 			context.visit(p);
 		}
@@ -223,12 +215,11 @@ export const shared = {
 		if (child_context.multiline) {
 			open.indent();
 			open.newline();
-			join.write(',');
 			join.newline();
 			context.dedent();
 			context.newline();
 		} else {
-			join.write(', ');
+			join.write(' ');
 		}
 
 		context.write(')');
@@ -318,6 +309,9 @@ export const shared = {
 	}
 };
 
+/** @type {TSESTree.Comment[]} */
+export let _comments = [];
+
 /** @type {Visitors<TSESTree.Node>} */
 export default {
 	_(node, context, visit) {
@@ -329,22 +323,54 @@ export default {
 			/** @type {any} */ (node).trailingComments
 		);
 
-		if (leading_comments) {
-			for (const comment of leading_comments) {
-				push_comment(comment, context);
+		const comments = [..._comments, ...(leading_comments || [])];
 
-				if (comment.type === 'Line' || comment.value.includes('\n')) {
-					context.newline();
-				} else {
-					context.write(' ');
-				}
+		// if (leading_comments) {
+		for (const comment of comments) {
+			push_comment(comment, context);
+
+			if (comment.type === 'Line' || comment.value.includes('\n')) {
+				context.newline();
+			} else {
+				context.write(' ');
 			}
 		}
+		// }
+
+		_comments.length = 0;
 
 		visit(node);
 
 		if (trailing_comments) {
-			comments.push(trailing_comments[0]); // there is only ever one
+			if (/(Statement|Declaration)$/.test(node.type)) {
+				for (const comment of trailing_comments) {
+					context.write(' ');
+					push_comment(comment, context);
+
+					if (comment.type === 'Line' || comment.value.includes('\n')) {
+						// context.newline();
+					} else {
+						// context.write(' ');
+					}
+				}
+			} else {
+				_comments.push(...trailing_comments);
+			}
+
+			// context.write(' ');
+			// // push_comment(trailing_comments[0], context);
+
+			// for (const comment of trailing_comments) {
+			// 	push_comment(comment, context);
+
+			// 	if (comment.type === 'Line' || comment.value.includes('\n')) {
+			// 		context.newline();
+			// 	} else {
+			// 		// context.write(' ');
+			// 	}
+			// }
+
+			// // comments.push(trailing_comments[0]); // there is only ever one
 		}
 	},
 
@@ -450,8 +476,6 @@ export default {
 			alternate.multiline ||
 			consequent.measure() + alternate.measure() > 50
 		) {
-			context.multiline = true;
-
 			context.indent();
 			context.newline();
 			context.write('? ');
@@ -1198,6 +1222,7 @@ function handle_var_declaration(node, context) {
 
 	if (multiline) {
 		context.multiline = true;
+
 		if (node.declarations.length > 1) open.indent();
 		join.write(',');
 		join.newline();

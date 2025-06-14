@@ -1,7 +1,7 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, Dedent, Visitors, Indent, Newline, NodeWithComments } from './types' */
+/** @import { Command, Dedent, Visitors, Indent, Newline, NWithComments } from './types' */
 
-import { comments, push_comment } from './languages/js.js';
+import { _comments, push_comment } from './languages/js.js';
 
 /** @type {Newline} */
 const newline = { type: 'Newline' };
@@ -40,6 +40,7 @@ export class Context {
 	}
 
 	newline() {
+		this.multiline = true;
 		this.#commands.push(newline);
 	}
 
@@ -161,32 +162,15 @@ export class Context {
 
 				child_context.visit(node);
 
-				if (!is_last) {
-					child_context.write(separator);
-				}
+				if (!is_last) child_context.write(separator);
 
-				// TODO handle comments in a callback
-				if (comments.length > 0) {
+				if (_comments.length > 0) {
 					child_context.write(' ');
-
-					while (comments.length) {
-						const comment = /** @type {TSESTree.Comment} */ (comments.shift());
-
-						push_comment(comment, child_context);
-
-						if (!is_last) {
-							if (comment.type === 'Line') {
-								child_context.newline();
-							} else {
-								child_context.append(join);
-							}
-						}
-					}
-
-					child_context.multiline = true;
-				} else {
-					if (!is_last) child_context.append(join);
+					push_comment(_comments[0], child_context);
+					_comments.length = 0;
 				}
+
+				if (!is_last) child_context.append(join);
 			} else {
 				// This is only used for ArrayPattern and ArrayExpression, but
 				// it makes more sense to have the logic here than there, because
@@ -200,8 +184,6 @@ export class Context {
 		const length = child_context.measure();
 
 		if (child_context.multiline || length > 50) {
-			this.multiline = true;
-
 			join.newline();
 
 			this.indent();
@@ -245,17 +227,6 @@ export class Context {
 
 			first = false;
 
-			const statement_with_comments = /** @type {NodeWithComments} */ (statement);
-			const leading_comments = statement_with_comments.leadingComments;
-			delete statement_with_comments.leadingComments;
-
-			if (leading_comments) {
-				for (const comment of leading_comments) {
-					push_comment(comment, this);
-					this.newline();
-				}
-			}
-
 			const child_context = this.new();
 			this.append(child_context);
 
@@ -263,18 +234,6 @@ export class Context {
 
 			if (child_context.multiline || needs_margin || add_margin(last_statement, statement)) {
 				margin.push('\n');
-			}
-
-			let add_newline = false;
-
-			// TODO handle comments in a callback
-			while (comments.length) {
-				const comment = /** @type {TSESTree.Comment} */ (comments.shift());
-
-				if (add_newline) this.newline();
-				else this.write(' ');
-				push_comment(comment, this);
-				add_newline = comment.type === 'Line';
 			}
 
 			needs_margin = child_context.multiline;
