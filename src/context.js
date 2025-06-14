@@ -213,32 +213,28 @@ export class Context {
 	 * @param {Array<{ type: string }>} nodes
 	 */
 	block(nodes) {
-		const statements = nodes
-			.filter((node) => node.type !== 'EmptyStatement')
-			.map((node) => {
-				const context = this.new();
-				context.visit(node);
-				return { node, context };
-			});
+		/** @type {string | null} */
+		let prev_type = null;
+		let prev_multiline = false;
 
-		/** @type {typeof statements[number] | null} */
-		let last = null;
+		for (const node of nodes) {
+			if (node.type === 'EmptyStatement') continue;
 
-		for (const statement of statements) {
-			if (last !== null) {
-				if (
-					statement.context.multiline ||
-					last.context.multiline ||
-					statement.node.type !== last.node.type
-				) {
+			const context = this.new();
+			context.visit(node);
+
+			if (prev_type !== null) {
+				if (context.multiline || prev_multiline || node.type !== prev_type) {
 					this.margin();
 				}
 
 				this.newline();
 			}
 
-			this.append(statement.context);
-			last = statement;
+			this.append(context);
+
+			prev_type = node.type;
+			prev_multiline = context.multiline;
 		}
 	}
 
