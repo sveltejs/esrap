@@ -87,13 +87,29 @@ export function print(node, opts = {}) {
 			return;
 		}
 
-		if (command !== newline && command !== margin && command !== dedent && command !== indent) {
-			if (needs_newline) {
-				append(needs_margin ? '\n' + current_newline : current_newline);
-			}
+		switch (command) {
+			case newline:
+				needs_newline = true;
+				return;
 
-			needs_margin = needs_newline = false;
+			case margin:
+				needs_margin = true;
+				return;
+
+			case indent:
+				current_newline += indent_str;
+				return;
+
+			case dedent:
+				current_newline = current_newline.slice(0, -indent_str.length);
+				return;
 		}
+
+		if (needs_newline) {
+			append(needs_margin ? '\n' + current_newline : current_newline);
+		}
+
+		needs_margin = needs_newline = false;
 
 		if (typeof command === 'string') {
 			append(command);
@@ -107,25 +123,6 @@ export function print(node, opts = {}) {
 				command.line - 1,
 				command.column
 			]);
-			return;
-		}
-
-		switch (command) {
-			case newline:
-				needs_newline = true;
-				break;
-
-			case margin:
-				needs_margin = true;
-				break;
-
-			case indent:
-				current_newline += indent_str;
-				break;
-
-			case dedent:
-				current_newline = current_newline.slice(0, -indent_str.length);
-				break;
 		}
 	}
 
