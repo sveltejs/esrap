@@ -87,7 +87,7 @@ export function print(node, opts = {}) {
 			return;
 		}
 
-		if (command !== newline && command !== margin && command !== dedent) {
+		if (command !== newline && command !== margin && command !== dedent && command !== indent) {
 			if (needs_newline) {
 				append(needs_margin ? '\n' + current_newline : current_newline);
 			}

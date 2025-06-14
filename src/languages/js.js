@@ -938,8 +938,8 @@ export default {
 	SpreadElement: shared['RestElement|SpreadElement'],
 
 	StaticBlock(node, context) {
-		context.indent();
 		context.write('static {');
+		context.indent();
 		context.newline();
 
 		context.block(node.body);
