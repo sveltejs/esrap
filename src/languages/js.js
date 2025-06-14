@@ -57,7 +57,6 @@ function add_margin(a, b) {
 export function push_comment(comment, context) {
 	if (comment.type === 'Line') {
 		context.write(`//${comment.value}`);
-		// context.newline();
 	} else {
 		context.write('/*');
 		const lines = comment.value.split('\n');
