@@ -5,10 +5,11 @@ import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
 import { sequence } from './utils/sequence.js';
 
 /**
+ * @param {Parameters<typeof js>[0]} options
  * @returns {Visitors<TSESTree.Node>}
  */
-export default () => ({
-	...js(),
+export default (options) => ({
+	...js(options),
 	TSNumberKeyword(node, context) {
 		context.write('number', node);
 	},

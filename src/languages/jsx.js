@@ -2,9 +2,12 @@
 import { TSESTree } from '@typescript-eslint/types';
 import js from './js.js';
 
-/** @returns {Visitors<TSESTree.Node>} */
-export default () => ({
-	...js(),
+/**
+ * @param {Parameters<typeof js>[0]} options
+ * @returns {Visitors<TSESTree.Node>}
+ */
+export default (options) => ({
+	...js(options),
 	JSXElement(node, context) {
 		context.visit(node.openingElement);
 

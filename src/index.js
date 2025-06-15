@@ -39,8 +39,7 @@ export function print(node, opts = {}) {
 	const commands = [];
 
 	const context = new Context(
-		opts.visitors ?? /** @type {Visitors} */ (ts()),
-		opts.quotes === 'double' ? '"' : "'",
+		opts.visitors ?? /** @type {Visitors} */ (ts({ quotes: opts.quotes })),
 		commands
 	);
 

@@ -15,7 +15,6 @@ export const dedent = { type: 'Dedent' };
 
 export class Context {
 	#visitors;
-	#quote;
 	#commands;
 
 	multiline = false;
@@ -23,12 +22,10 @@ export class Context {
 	/**
 	 *
 	 * @param {Visitors} visitors
-	 * @param {'"' | "'"} quote
 	 * @param {Command[]} commands
 	 */
-	constructor(visitors, quote, commands = []) {
+	constructor(visitors, commands = []) {
 		this.#visitors = visitors;
-		this.#quote = quote;
 		this.#commands = commands;
 	}
 
@@ -79,31 +76,6 @@ export class Context {
 	 */
 	location(line, column) {
 		this.#commands.push({ type: 'Location', line, column });
-	}
-
-	/**
-	 *
-	 * @param {string} string
-	 */
-	quote(string) {
-		const char = this.#quote;
-		let out = char;
-
-		for (const c of string) {
-			if (c === '\\') {
-				out += '\\\\';
-			} else if (c === char) {
-				out += '\\' + c;
-			} else if (c === '\n') {
-				out += '\\n';
-			} else if (c === '\r') {
-				out += '\\r';
-			} else {
-				out += c;
-			}
-		}
-
-		return out + char;
 	}
 
 	/**
@@ -176,7 +148,7 @@ export class Context {
 	}
 
 	new() {
-		return new Context(this.#visitors, this.#quote);
+		return new Context(this.#visitors);
 	}
 }
 
