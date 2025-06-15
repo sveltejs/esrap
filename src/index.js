@@ -1,4 +1,4 @@
-/** @import { Command, Visitors, PrintOptions, Location, Margin, Newline, Indent, Dedent } from './types' */
+/** @import { BaseNode, Command, Visitors, PrintOptions, Location, Margin, Newline, Indent, Dedent } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
 import { Context, dedent, indent, margin, newline } from './context.js';
 import ts from './languages/ts.js';
@@ -17,8 +17,9 @@ if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
 }
 
 /**
+ * @template {BaseNode} T
  * @param {{ type: string, [key: string]: any }} node
- * @param {PrintOptions} opts
+ * @param {PrintOptions<T>} opts
  * @returns {{ code: string, map: any }} // TODO
  */
 export function print(node, opts = {}) {
@@ -36,10 +37,8 @@ export function print(node, opts = {}) {
 	/** @type {Command[]} */
 	const commands = [];
 
-	const context = new Context(
-		opts.visitors ?? /** @type {Visitors} */ (ts({ quotes: opts.quotes })),
-		commands
-	);
+	// @ts-expect-error some nonsense I don't understand
+	const context = new Context(opts.visitors ?? ts({ quotes: opts.quotes }), commands);
 
 	context.visit(node);
 

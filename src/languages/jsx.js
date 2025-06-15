@@ -3,7 +3,7 @@ import { TSESTree } from '@typescript-eslint/types';
 import js from './js.js';
 
 /**
- * @param {Parameters<typeof js>[0]} options
+ * @param {Parameters<typeof js>[0]} [options]
  * @returns {Visitors<TSESTree.Node>}
  */
 export default (options) => ({

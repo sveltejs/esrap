@@ -71,11 +71,11 @@ export interface IndentChange {
 
 export type Command = string | Location | Margin | Newline | Indent | Dedent | Command[];
 
-export interface PrintOptions {
+export interface PrintOptions<T extends BaseNode = BaseNode> {
 	sourceMapSource?: string;
 	sourceMapContent?: string;
 	sourceMapEncodeMappings?: boolean; // default true
 	indent?: string; // default tab
 	quotes?: 'single' | 'double'; // default single
-	visitors?: Visitors; // default to ts
+	visitors?: Visitors<T>; // default to ts
 }

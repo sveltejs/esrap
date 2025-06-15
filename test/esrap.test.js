@@ -73,7 +73,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		/** @type {TSESTree.Program} */
 		let ast;
 
-		/** @type {PrintOptions} */
+		/** @type {PrintOptions<TSESTree.Node>} */
 		let opts;
 
 		if (input_json.length > 0) {
@@ -88,7 +88,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			};
 		}
 
-		opts.visitors = /** @type {Visitors} */ (tsx());
+		opts.visitors = tsx();
 
 		const { code, map } = print(ast, opts);
 
