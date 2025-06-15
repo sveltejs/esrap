@@ -281,8 +281,8 @@ export default (options = {}) => {
 				/** @type {any} */ (node).leadingComments
 			);
 
-			const trailing_comments = /** @type {TSESTree.Comment[]} */ (
-				/** @type {any} */ (node).trailingComments
+			const trailing_comment = /** @type {TSESTree.Comment | undefined} */ (
+				/** @type {any} */ (node).trailingComments?.[0]
 			);
 
 			const c = [...comments, ...(leading_comments || [])];
@@ -303,14 +303,12 @@ export default (options = {}) => {
 
 			visit(node);
 
-			if (trailing_comments) {
+			if (trailing_comment) {
 				if (/(Statement|Declaration)$/.test(node.type)) {
-					for (const comment of trailing_comments) {
-						context.write(' ');
-						push_comment(comment, context);
-					}
+					context.write(' ');
+					push_comment(trailing_comment, context);
 				} else {
-					comments.push(...trailing_comments);
+					comments.push(trailing_comment);
 				}
 			}
 		},
