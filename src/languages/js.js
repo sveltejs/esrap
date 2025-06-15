@@ -277,6 +277,8 @@ export default (options = {}) => {
 
 	return {
 		_(node, context, visit) {
+			const is_statement = /(Statement|Declaration)$/.test(node.type);
+
 			const leading_comments = /** @type {TSESTree.Comment[]} */ (
 				/** @type {any} */ (node).leadingComments
 			);
@@ -291,7 +293,7 @@ export default (options = {}) => {
 				push_comment(comment, context);
 
 				if (comment.type === 'Block') {
-					if (comment.value.includes('\n')) {
+					if (is_statement || comment.value.includes('\n')) {
 						context.newline();
 					} else {
 						context.write(' ');
@@ -304,7 +306,7 @@ export default (options = {}) => {
 			visit(node);
 
 			if (trailing_comment) {
-				if (/(Statement|Declaration)$/.test(node.type)) {
+				if (is_statement) {
 					context.write(' ');
 					push_comment(trailing_comment, context);
 				} else {

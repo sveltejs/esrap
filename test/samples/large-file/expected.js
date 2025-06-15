@@ -119,7 +119,8 @@
 			: typeof obj;
 	}
 
-	/* global Symbol */ // Defining this global in .eslintrc.json would create a danger of using the global
+	/* global Symbol */
+	// Defining this global in .eslintrc.json would create a danger of using the global
 	// unguarded in another place, it seems safer to define global only for this module
 	var version = "3.7.1",
 		rhtmlSuffix = /HTML$/i,
@@ -3262,7 +3263,8 @@
 					},
 
 					// Keep pipe for back-compat
-					pipe() /* fnDone, fnFail, fnProgress */ {
+					pipe() /* fnDone, fnFail, fnProgress */
+					{
 						var fns = arguments;
 
 						return jQuery.Deferred(function (newDefer) {
@@ -7010,8 +7012,10 @@
 					showHide([elem], true);
 				}
 
-				/* eslint-disable no-loop-func */ anim.done(function () {
-					/* eslint-enable no-loop-func */ // The final step of a "hide" animation is actually hiding the element
+				/* eslint-disable no-loop-func */
+				anim.done(function () {
+					/* eslint-enable no-loop-func */
+					// The final step of a "hide" animation is actually hiding the element
 					if (!hidden) {
 						showHide([elem]);
 					}
@@ -7730,7 +7734,8 @@
 	if (!support.optSelected) {
 		jQuery.propHooks.selected = {
 			get(elem) {
-				/* eslint no-unused-expressions: "off" */ var parent = elem.parentNode;
+				/* eslint no-unused-expressions: "off" */
+				var parent = elem.parentNode;
 
 				if (parent && parent.parentNode) {
 					parent.parentNode.selectedIndex;
@@ -7740,7 +7745,8 @@
 			},
 
 			set(elem) {
-				/* eslint no-unused-expressions: "off" */ var parent = elem.parentNode;
+				/* eslint no-unused-expressions: "off" */
+				var parent = elem.parentNode;
 
 				if (parent) {
 					parent.selectedIndex;
@@ -8090,7 +8096,8 @@
 					while (i--) {
 						option = options[i];
 
-						/* eslint-disable no-cond-assign */ if (option.selected = jQuery.inArray(jQuery.valHooks.option.get(option), values) > -1) {
+						/* eslint-disable no-cond-assign */
+						if (option.selected = jQuery.inArray(jQuery.valHooks.option.get(option), values) > -1) {
 							optionSet = true;
 						}
 					} /* eslint-enable no-cond-assign */
