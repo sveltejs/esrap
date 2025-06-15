@@ -73,22 +73,26 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		/** @type {TSESTree.Program} */
 		let ast;
 
+		/** @type {TSESTree.Comment[]} */
+		let comments;
+
 		/** @type {PrintOptions<TSESTree.Node>} */
 		let opts;
 
 		if (input_json.length > 0) {
 			ast = JSON.parse(input_json);
+			comments = [];
 			opts = {};
 		} else {
-			const content = input_js;
-			ast = load(content, { jsx: true });
+			({ ast, comments } = load(input_js, { jsx: true }));
+
 			opts = {
 				sourceMapSource: 'input.js',
-				sourceMapContent: content
+				sourceMapContent: input_js
 			};
 		}
 
-		opts.visitors = tsx();
+		opts.visitors = tsx({ comments });
 
 		const { code, map } = print(ast, opts);
 

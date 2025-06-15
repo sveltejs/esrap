@@ -69,9 +69,6 @@ const OPERATOR_PRECEDENCE = {
 	'**': 13
 };
 
-/** @type {TSESTree.Comment[]} */
-export let comments = [];
-
 /**
  * @param {TSESTree.Comment} comment
  * @param {Context} context
@@ -79,7 +76,7 @@ export let comments = [];
 function push_comment(comment, context) {
 	if (comment.type === 'Line') {
 		context.write(`//${comment.value}`);
-		context.newline();
+		// context.newline();
 	} else {
 		context.write('/*');
 		const lines = comment.value.split('\n');
@@ -94,378 +91,94 @@ function push_comment(comment, context) {
 }
 
 /**
- * @param {Context} context
- * @param {TSESTree.Node[]} nodes
- * @param {boolean} pad
- */
-function sequence(context, nodes, pad, separator = ',') {
-	if (nodes.length === 0) return;
-
-	let multiline = false;
-	let length = -2;
-
-	/** @type {boolean[]} */
-	const multiline_nodes = [];
-
-	const children = nodes.map((node, i) => {
-		const child = context.new();
-		if (node) child.visit(node);
-
-		multiline_nodes[i] = child.multiline;
-
-		if (i < nodes.length - 1 || !node) {
-			child.write(separator);
-		}
-
-		if (comments.length) {
-			child.write(' ');
-			push_comment(comments[0], child);
-			comments.length = 0;
-		}
-
-		length += child.measure() + 1;
-		multiline ||= child.multiline;
-
-		return child;
-	});
-
-	multiline ||= length > 60;
-
-	if (multiline) {
-		context.indent();
-		context.newline();
-	} else if (pad) {
-		context.write(' ');
-	}
-
-	/** @type {Context | null} */
-	let prev = null;
-
-	for (let i = 0; i < nodes.length; i += 1) {
-		const child = children[i];
-
-		if (prev !== null) {
-			if (multiline_nodes[i - 1] || multiline_nodes[i]) {
-				context.margin();
-			}
-
-			if (nodes[i]) {
-				if (multiline) {
-					context.newline();
-				} else {
-					context.write(' ');
-				}
-			}
-		}
-
-		context.append(child);
-
-		prev = child;
-	}
-
-	if (multiline) {
-		context.dedent();
-		context.newline();
-	} else if (pad) {
-		context.write(' ');
-	}
-}
-
-/**
- * Push a sequence of nodes onto separate lines, separating them with
- * an extra newline where appropriate
- * @param {Context} context
- * @param {TSESTree.Node[]} nodes
- */
-function block(context, nodes) {
-	/** @type {string | null} */
-	let prev_type = null;
-	let prev_multiline = false;
-
-	for (const node of nodes) {
-		if (node.type === 'EmptyStatement') continue;
-
-		const child = context.new();
-		child.visit(node);
-
-		if (prev_type !== null) {
-			if (child.multiline || prev_multiline || node.type !== prev_type) {
-				context.margin();
-			}
-
-			context.newline();
-		}
-
-		context.append(child);
-
-		prev_type = node.type;
-		prev_multiline = child.multiline;
-	}
-}
-
-export const shared = {
-	/**
-	 * @param {TSESTree.ArrayExpression | TSESTree.ArrayPattern} node
-	 * @param {Context} context
-	 */
-	'ArrayExpression|ArrayPattern': (node, context) => {
-		context.write('[');
-		sequence(context, /** @type {TSESTree.Node[]} */ (node.elements), false);
-		context.write(']');
-	},
-
-	/**
-	 * @param {TSESTree.BinaryExpression | TSESTree.LogicalExpression} node
-	 * @param {Context} context
-	 */
-	'BinaryExpression|LogicalExpression': (node, context) => {
-		// TODO
-		// const is_in = node.operator === 'in';
-		// if (is_in) {
-		// 	// Avoids confusion in `for` loops initializers
-		// 	chunks.write('(');
-		// }
-		if (needs_parens(node.left, node, false)) {
-			context.write('(');
-			context.visit(node.left);
-			context.write(')');
-		} else {
-			context.visit(node.left);
-		}
-
-		context.write(` ${node.operator} `);
-
-		if (needs_parens(node.right, node, true)) {
-			context.write('(');
-			context.visit(node.right);
-			context.write(')');
-		} else {
-			context.visit(node.right);
-		}
-	},
-
-	/**
-	 * @param {TSESTree.BlockStatement | TSESTree.ClassBody} node
-	 * @param {Context} context
-	 */
-	'BlockStatement|ClassBody': (node, context) => {
-		if (node.loc) {
-			const { line, column } = node.loc.start;
-			context.location(line, column);
-			context.write('{');
-			context.location(line, column + 1);
-		} else {
-			context.write('{');
-		}
-
-		if (node.body.length > 0) {
-			context.indent();
-			context.newline();
-			block(context, node.body);
-			context.dedent();
-			context.newline();
-		}
-
-		if (node.loc) {
-			const { line, column } = node.loc.end;
-
-			context.location(line, column - 1);
-			context.write('}');
-			context.location(line, column);
-		} else {
-			context.write('}');
-		}
-	},
-
-	/**
-	 * @param {TSESTree.CallExpression | TSESTree.NewExpression} node
-	 * @param {Context} context
-	 */
-	'CallExpression|NewExpression': (node, context) => {
-		if (node.type === 'NewExpression') {
-			context.write('new ');
-		}
-
-		const needs_parens =
-			EXPRESSIONS_PRECEDENCE[node.callee.type] < EXPRESSIONS_PRECEDENCE.CallExpression ||
-			(node.type === 'NewExpression' && has_call_expression(node.callee));
-
-		if (needs_parens) {
-			context.write('(');
-			context.visit(node.callee);
-			context.write(')');
-		} else {
-			context.visit(node.callee);
-		}
-
-		if (/** @type {TSESTree.CallExpression} */ (node).optional) {
-			context.write('?.');
-		}
-
-		if (node.typeArguments) context.visit(node.typeArguments);
-
-		const open = context.new();
-		const join = context.new();
-
-		context.write('(');
-		context.append(open);
-
-		// if the final argument is multiline, it doesn't need to force all the
-		// other arguments to also be multiline
-		const child_context = context.new();
-		const final_context = context.new();
-
-		context.append(child_context);
-		context.append(final_context);
-
-		for (let i = 0; i < node.arguments.length; i += 1) {
-			const context = i === node.arguments.length - 1 ? final_context : child_context;
-
-			const p = node.arguments[i];
-
-			if (i > 0) context.write(',');
-
-			if (comments.length > 0) {
-				context.write(' ');
-				push_comment(comments[0], context);
-				if (comments[0].type === 'Line') {
-					child_context.multiline = true;
-				}
-				comments.length = 0;
-			}
-
-			if (i > 0) context.append(join);
-
-			context.visit(p);
-		}
-
-		context.multiline ||= child_context.multiline || final_context.multiline;
-
-		if (child_context.multiline) {
-			open.indent();
-			open.newline();
-			join.newline();
-			context.dedent();
-			context.newline();
-		} else {
-			join.write(' ');
-		}
-
-		context.write(')');
-	},
-
-	/**
-	 * @param {TSESTree.ClassDeclaration | TSESTree.ClassExpression} node
-	 * @param {Context} context
-	 */
-	'ClassDeclaration|ClassExpression': (node, context) => {
-		context.write('class ');
-
-		if (node.id) {
-			context.visit(node.id);
-			context.write(' ');
-		}
-
-		if (node.superClass) {
-			context.write('extends ');
-			context.visit(node.superClass);
-			context.write(' ');
-		}
-
-		if (node.implements) {
-			context.write('implements ');
-			sequence(context, node.implements, false);
-		}
-
-		context.visit(node.body);
-	},
-
-	/**
-	 * @param {TSESTree.ForInStatement | TSESTree.ForOfStatement} node
-	 * @param {Context} context
-	 */
-	'ForInStatement|ForOfStatement': (node, context) => {
-		context.write('for ');
-		if (node.type === 'ForOfStatement' && node.await) context.write('await ');
-		context.write('(');
-
-		if (node.left.type === 'VariableDeclaration') {
-			handle_var_declaration(node.left, context);
-		} else {
-			context.visit(node.left);
-		}
-
-		context.write(node.type === 'ForInStatement' ? ' in ' : ' of ');
-		context.visit(node.right);
-		context.write(') ');
-		context.visit(node.body);
-	},
-
-	/**
-	 * @param {TSESTree.FunctionDeclaration | TSESTree.FunctionExpression} node
-	 * @param {Context} context
-	 */
-	'FunctionDeclaration|FunctionExpression': (node, context) => {
-		if (node.async) context.write('async ');
-		context.write(node.generator ? 'function* ' : 'function ');
-		if (node.id) context.visit(node.id);
-
-		if (node.typeParameters) {
-			context.visit(node.typeParameters);
-		}
-
-		context.write('(');
-		sequence(context, node.params, false);
-		context.write(')');
-
-		if (node.returnType) context.visit(node.returnType);
-
-		context.write(' ');
-
-		context.visit(node.body);
-	},
-
-	/**
-	 * @param {TSESTree.RestElement | TSESTree.SpreadElement} node
-	 * @param {Context} context
-	 */
-	'RestElement|SpreadElement': (node, context) => {
-		context.write('...');
-		context.visit(node.argument);
-
-		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-		if (node.typeAnnotation) context.visit(node.typeAnnotation);
-	}
-};
-
-/**
  * @param {{
- *   quotes?: 'double' | 'single'
+ *   quotes?: 'double' | 'single';
+ *   comments?: TSESTree.Comment[];
  * }} [options]
  * @returns {Visitors<TSESTree.Node>}
  */
 export default (options = {}) => {
 	const quote_char = options.quotes === 'double' ? '"' : "'";
 
-	return {
-		_(node, context, visit) {
-			const is_statement = /(Statement|Declaration)$/.test(node.type);
+	const comments = options.comments ?? [];
 
-			const leading_comments = /** @type {TSESTree.Comment[]} */ (
-				/** @type {any} */ (node).leadingComments
-			);
+	let comment_index = 0;
 
-			const trailing_comment = /** @type {TSESTree.Comment | undefined} */ (
-				/** @type {any} */ (node).trailingComments?.[0]
-			);
+	/**
+	 * @param {Context} context
+	 * @param {TSESTree.Node[]} nodes
+	 * @param {boolean} pad
+	 */
+	function sequence(context, nodes, pad, separator = ',') {
+		if (nodes.length === 0) return;
 
-			const c = [...comments, ...(leading_comments || [])];
+		let multiline = false;
+		let length = -2;
 
-			for (const comment of c) {
-				push_comment(comment, context);
+		/** @type {boolean[]} */
+		const multiline_nodes = [];
 
-				if (comment.type === 'Block') {
-					if (is_statement || comment.value.includes('\n')) {
+		const children = nodes.map((node, i) => {
+			const child = context.new();
+			if (node) child.visit(node);
+
+			multiline_nodes[i] = child.multiline;
+
+			if (i < nodes.length - 1 || !node) {
+				child.write(separator);
+			}
+
+			while (comment_index < comments.length) {
+				const comment = comments[comment_index];
+
+				if (comment && comment.loc.start.line === node.loc.start.line) {
+					child.write(' ');
+					push_comment(comment, child);
+
+					if (comment.type === 'Line') {
+						child.newline();
+					}
+
+					comment_index += 1;
+				} else {
+					break;
+				}
+			}
+
+			// if (comments.length) {
+			// 	child.write(' ');
+			// 	push_comment(comments[0], child);
+			// 	comments.length = 0;
+			// }
+
+			length += child.measure() + 1;
+			multiline ||= child.multiline;
+
+			return child;
+		});
+
+		multiline ||= length > 60;
+
+		if (multiline) {
+			context.indent();
+			context.newline();
+		} else if (pad) {
+			context.write(' ');
+		}
+
+		/** @type {Context | null} */
+		let prev = null;
+
+		for (let i = 0; i < nodes.length; i += 1) {
+			const child = children[i];
+
+			if (prev !== null) {
+				if (multiline_nodes[i - 1] || multiline_nodes[i]) {
+					context.margin();
+				}
+
+				if (nodes[i]) {
+					if (multiline) {
 						context.newline();
 					} else {
 						context.write(' ');
@@ -473,16 +186,355 @@ export default (options = {}) => {
 				}
 			}
 
-			comments.length = 0;
+			context.append(child);
+
+			prev = child;
+		}
+
+		if (multiline) {
+			context.dedent();
+			context.newline();
+		} else if (pad) {
+			context.write(' ');
+		}
+	}
+
+	/**
+	 * Push a sequence of nodes onto separate lines, separating them with
+	 * an extra newline where appropriate
+	 * @param {Context} context
+	 * @param {TSESTree.Node[]} nodes
+	 */
+	function block(context, nodes) {
+		/** @type {string | null} */
+		let prev_type = null;
+		let prev_multiline = false;
+
+		for (const node of nodes) {
+			if (node.type === 'EmptyStatement') continue;
+
+			const child = context.new();
+			child.visit(node);
+
+			if (prev_type !== null) {
+				if (child.multiline || prev_multiline || node.type !== prev_type) {
+					context.margin();
+				}
+
+				context.newline();
+			}
+
+			context.append(child);
+
+			prev_type = node.type;
+			prev_multiline = child.multiline;
+		}
+	}
+
+	const shared = {
+		/**
+		 * @param {TSESTree.ArrayExpression | TSESTree.ArrayPattern} node
+		 * @param {Context} context
+		 */
+		'ArrayExpression|ArrayPattern': (node, context) => {
+			context.write('[');
+			sequence(context, /** @type {TSESTree.Node[]} */ (node.elements), false);
+			context.write(']');
+		},
+
+		/**
+		 * @param {TSESTree.BinaryExpression | TSESTree.LogicalExpression} node
+		 * @param {Context} context
+		 */
+		'BinaryExpression|LogicalExpression': (node, context) => {
+			// TODO
+			// const is_in = node.operator === 'in';
+			// if (is_in) {
+			// 	// Avoids confusion in `for` loops initializers
+			// 	chunks.write('(');
+			// }
+			if (needs_parens(node.left, node, false)) {
+				context.write('(');
+				context.visit(node.left);
+				context.write(')');
+			} else {
+				context.visit(node.left);
+			}
+
+			context.write(` ${node.operator} `);
+
+			if (needs_parens(node.right, node, true)) {
+				context.write('(');
+				context.visit(node.right);
+				context.write(')');
+			} else {
+				context.visit(node.right);
+			}
+		},
+
+		/**
+		 * @param {TSESTree.BlockStatement | TSESTree.ClassBody} node
+		 * @param {Context} context
+		 */
+		'BlockStatement|ClassBody': (node, context) => {
+			if (node.loc) {
+				const { line, column } = node.loc.start;
+				context.location(line, column);
+				context.write('{');
+				context.location(line, column + 1);
+			} else {
+				context.write('{');
+			}
+
+			const comment = comments[comment_index];
+
+			let has_content = node.body.length > 0;
+			let has_comment =
+				comment &&
+				before(node.loc.start, comment.loc.start) &&
+				before(comment.loc.end, node.loc.end);
+
+			if (has_content || has_comment) {
+				context.indent();
+				context.newline();
+				block(context, node.body);
+
+				while (comment_index < comments.length) {
+					context.newline();
+
+					const comment = comments[comment_index];
+
+					if (before(comment.loc.end, node.loc.end)) {
+						push_comment(comment, context);
+
+						comment_index += 1;
+					} else {
+						break;
+					}
+				}
+
+				context.dedent();
+				context.newline();
+			}
+
+			if (node.loc) {
+				const { line, column } = node.loc.end;
+
+				context.location(line, column - 1);
+				context.write('}');
+				context.location(line, column);
+			} else {
+				context.write('}');
+			}
+		},
+
+		/**
+		 * @param {TSESTree.CallExpression | TSESTree.NewExpression} node
+		 * @param {Context} context
+		 */
+		'CallExpression|NewExpression': (node, context) => {
+			if (node.type === 'NewExpression') {
+				context.write('new ');
+			}
+
+			const needs_parens =
+				EXPRESSIONS_PRECEDENCE[node.callee.type] < EXPRESSIONS_PRECEDENCE.CallExpression ||
+				(node.type === 'NewExpression' && has_call_expression(node.callee));
+
+			if (needs_parens) {
+				context.write('(');
+				context.visit(node.callee);
+				context.write(')');
+			} else {
+				context.visit(node.callee);
+			}
+
+			if (/** @type {TSESTree.CallExpression} */ (node).optional) {
+				context.write('?.');
+			}
+
+			if (node.typeArguments) context.visit(node.typeArguments);
+
+			const open = context.new();
+			const join = context.new();
+
+			context.write('(');
+			context.append(open);
+
+			// if the final argument is multiline, it doesn't need to force all the
+			// other arguments to also be multiline
+			const child_context = context.new();
+			const final_context = context.new();
+
+			context.append(child_context);
+			context.append(final_context);
+
+			for (let i = 0; i < node.arguments.length; i += 1) {
+				const is_last = i === node.arguments.length - 1;
+				const context = is_last ? final_context : child_context;
+
+				context.visit(node.arguments[i]);
+
+				if (!is_last) context.write(',');
+
+				const next = is_last ? node.loc.end : node.arguments[i + 1].loc.start;
+
+				while (comment_index < comments.length) {
+					const comment = comments[comment_index];
+
+					if (before(comment.loc.start, next)) {
+						context.write(' ');
+						push_comment(comment, context);
+
+						if (comment.type === 'Line' || comment.value.includes('\n')) {
+							context.newline();
+							child_context.multiline = true;
+						}
+
+						comment_index += 1;
+					} else {
+						break;
+					}
+				}
+
+				if (!is_last) context.append(join);
+			}
+
+			context.multiline ||= child_context.multiline || final_context.multiline;
+
+			if (child_context.multiline) {
+				open.indent();
+				open.newline();
+				join.newline();
+				context.dedent();
+				context.newline();
+			} else {
+				join.write(' ');
+			}
+
+			context.write(')');
+		},
+
+		/**
+		 * @param {TSESTree.ClassDeclaration | TSESTree.ClassExpression} node
+		 * @param {Context} context
+		 */
+		'ClassDeclaration|ClassExpression': (node, context) => {
+			context.write('class ');
+
+			if (node.id) {
+				context.visit(node.id);
+				context.write(' ');
+			}
+
+			if (node.superClass) {
+				context.write('extends ');
+				context.visit(node.superClass);
+				context.write(' ');
+			}
+
+			if (node.implements) {
+				context.write('implements ');
+				sequence(context, node.implements, false);
+			}
+
+			context.visit(node.body);
+		},
+
+		/**
+		 * @param {TSESTree.ForInStatement | TSESTree.ForOfStatement} node
+		 * @param {Context} context
+		 */
+		'ForInStatement|ForOfStatement': (node, context) => {
+			context.write('for ');
+			if (node.type === 'ForOfStatement' && node.await) context.write('await ');
+			context.write('(');
+
+			if (node.left.type === 'VariableDeclaration') {
+				handle_var_declaration(node.left, context);
+			} else {
+				context.visit(node.left);
+			}
+
+			context.write(node.type === 'ForInStatement' ? ' in ' : ' of ');
+			context.visit(node.right);
+			context.write(') ');
+			context.visit(node.body);
+		},
+
+		/**
+		 * @param {TSESTree.FunctionDeclaration | TSESTree.FunctionExpression} node
+		 * @param {Context} context
+		 */
+		'FunctionDeclaration|FunctionExpression': (node, context) => {
+			if (node.async) context.write('async ');
+			context.write(node.generator ? 'function* ' : 'function ');
+			if (node.id) context.visit(node.id);
+
+			if (node.typeParameters) {
+				context.visit(node.typeParameters);
+			}
+
+			context.write('(');
+			sequence(context, node.params, false);
+			context.write(')');
+
+			if (node.returnType) context.visit(node.returnType);
+
+			context.write(' ');
+
+			context.visit(node.body);
+		},
+
+		/**
+		 * @param {TSESTree.RestElement | TSESTree.SpreadElement} node
+		 * @param {Context} context
+		 */
+		'RestElement|SpreadElement': (node, context) => {
+			context.write('...');
+			context.visit(node.argument);
+
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			if (node.typeAnnotation) context.visit(node.typeAnnotation);
+		}
+	};
+
+	return {
+		_(node, context, visit) {
+			const is_statement = /(Statement|Declaration)$/.test(node.type);
+
+			while (comment_index < comments.length) {
+				const comment = comments[comment_index];
+
+				if (before(comment.loc.start, node.loc.start)) {
+					push_comment(comment, context);
+
+					if (comment.loc.start.line < node.loc.start.line) {
+						context.newline();
+					} else {
+						context.write(' ');
+					}
+
+					comment_index += 1;
+				} else {
+					break;
+				}
+			}
 
 			visit(node);
 
-			if (trailing_comment) {
-				if (is_statement) {
-					context.write(' ');
-					push_comment(trailing_comment, context);
-				} else {
-					comments.push(trailing_comment);
+			if (is_statement) {
+				while (comment_index < comments.length) {
+					const comment = comments[comment_index];
+
+					if (comment && comment.loc.start.line === node.loc.start.line) {
+						context.write(' ');
+						push_comment(comment, context);
+
+						comment_index += 1;
+					} else {
+						break;
+					}
 				}
 			}
 		},
@@ -954,7 +1006,6 @@ export default (options = {}) => {
 		},
 
 		Program(node, context) {
-			comments.length = 0;
 			block(context, node.body);
 		},
 
@@ -1038,10 +1089,9 @@ export default (options = {}) => {
 
 		ReturnStatement(node, context) {
 			if (node.argument) {
-				const argumentWithComment = /** @type {NodeWithComments} */ (node.argument);
 				const contains_comment =
-					argumentWithComment.leadingComments &&
-					argumentWithComment.leadingComments.some((comment) => comment.type === 'Line');
+					comments[comment_index] &&
+					before(comments[comment_index].loc.start, node.argument.loc.start);
 
 				context.write(contains_comment ? 'return (' : 'return ');
 				context.visit(node.argument);
@@ -1682,4 +1732,15 @@ function quote(string, char) {
 	}
 
 	return out + char;
+}
+
+/**
+ *
+ * @param {{ line: number, column: number }} a
+ * @param {{ line: number, column: number }} b
+ */
+function before(a, b) {
+	if (a.line < b.line) return true;
+	if (a.line > b.line) return false;
+	return a.column < b.column;
 }

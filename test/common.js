@@ -10,7 +10,7 @@ import { walk } from 'zimmerframe';
 // @ts-expect-error
 export const acornTs = acorn.Parser.extend(tsPlugin({ allowSatisfies: true }));
 export const acornTsx = acorn.Parser.extend(tsPlugin({ allowSatisfies: true, jsx: true }));
- 
+
 /** @param {string} input
  * @param {{ jsx?: boolean }} opts
  */
@@ -23,7 +23,7 @@ export function load(input, opts = {}) {
 		ecmaVersion: 'latest',
 		sourceType: 'module',
 		locations: true,
-		onComment: (block, value, start, end) => {
+		onComment: (block, value, start, end, startLoc, endLoc) => {
 			if (block && /\n/.test(value)) {
 				let a = start;
 				while (a > 0 && input[a - 1] !== '\n') a -= 1;
@@ -35,31 +35,18 @@ export function load(input, opts = {}) {
 				value = value.replace(new RegExp(`^${indentation}`, 'gm'), '');
 			}
 
-			comments.push({ type: block ? 'Block' : 'Line', value, start, end });
+			comments.push({
+				type: block ? 'Block' : 'Line',
+				value,
+				start,
+				end,
+				loc: { start: startLoc, end: endLoc }
+			});
 		}
 	});
 
-	walk(ast, null, {
-		_(node, { next }) {
-			let comment;
-			const commentNode = /** @type {NodeWithComments} */ (/** @type {any} */ (node));
-
-			while (comments[0] && comments[0].start < node.start) {
-				comment = comments.shift();
-				(commentNode.leadingComments ??= []).push(comment);
-			}
-
-			next();
-
-			if (comments[0]) {
-				const slice = input.slice(node.end, comments[0].start);
-
-				if (/^[,) \t]*$/.test(slice)) {
-					commentNode.trailingComments = [comments.shift()];
-				}
-			}
-		}
-	});
-
-	return /** @type {TSESTree.Program} */ (/** @type {any} */ (ast));
+	return {
+		ast: /** @type {TSESTree.Program} */ (/** @type {any} */ (ast)),
+		comments
+	};
 }

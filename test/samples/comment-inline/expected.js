@@ -10,5 +10,5 @@ const obj = {
 };
 
 function bar() {
-	return /*result*/ foo;
+	return (/*result*/ foo);
 }

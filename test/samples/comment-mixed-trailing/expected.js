@@ -1,4 +1,6 @@
-function foo() {} // hey1
- /*
-hey2
-*/
+function foo() {
+	// hey1
+	/*
+	hey2
+	*/
+}
