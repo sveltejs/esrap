@@ -1,10 +1,21 @@
 import { TSESTree } from '@typescript-eslint/types';
+import type { Context } from './context.js';
 
-type Handler<T> = (node: T, state: State) => undefined;
+type BaseNode = { type: string };
 
-export type Handlers = {
-	[T in TSESTree.Node['type']]: Handler<Extract<TSESTree.Node, { type: T }>>;
+type NodeOf<T extends string, X> = X extends { type: T } ? X : never;
+
+type SpecialisedVisitors<T extends BaseNode> = {
+	[K in T['type']]?: Visitor<NodeOf<K, T>>;
 };
+
+export type Visitor<T> = (node: T, context: Context) => void;
+
+export type Visitors<T extends BaseNode = BaseNode> = T['type'] extends '_'
+	? never
+	: SpecialisedVisitors<T> & { _?: (node: T, context: Context, visit: (node: T) => void) => void };
+
+export { Context };
 
 export type TypeAnnotationNodes =
 	| TSESTree.TypeNode
@@ -31,17 +42,14 @@ export type NodeWithComments = {
 	trailingComments?: TSESTree.Comment[] | undefined;
 } & TSESTree.Node;
 
-export interface State {
-	commands: Command[];
-	comments: TSESTree.Comment[];
-	multiline: boolean;
-	quote: "'" | '"';
-}
-
 export interface Location {
 	type: 'Location';
 	line: number;
 	column: number;
+}
+
+export interface Margin {
+	type: 'Margin';
 }
 
 export interface Newline {
@@ -61,17 +69,13 @@ export interface IndentChange {
 	offset: number;
 }
 
-export interface CommentChunk {
-	type: 'Comment';
-	comment: TSESTree.Comment;
-}
+export type Command = string | Location | Margin | Newline | Indent | Dedent | Command[];
 
-export type Command = string | Location | Newline | Indent | Dedent | CommentChunk | Command[];
-
-export interface PrintOptions {
+export interface PrintOptions<T extends BaseNode = BaseNode> {
 	sourceMapSource?: string;
 	sourceMapContent?: string;
 	sourceMapEncodeMappings?: boolean; // default true
 	indent?: string; // default tab
 	quotes?: 'single' | 'double'; // default single
+	visitors?: Visitors<T>; // default to ts
 }

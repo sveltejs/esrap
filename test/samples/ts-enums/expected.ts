@@ -3,4 +3,5 @@ enum UserResponse {
 }
 
 function respond(recipient: string, message: UserResponse): void {} // ...
+
 respond('Princess Caroline', UserResponse.Yes);

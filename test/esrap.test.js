@@ -1,11 +1,12 @@
 // @ts-check
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { PrintOptions } from '../src/types' */
+/** @import { Visitors, PrintOptions } from '../src/types' */
 import fs from 'node:fs';
 import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
-import { acornTs, load } from './common.js';
+import { acornTs, acornTsx, load } from './common.js';
+import tsx from '../src/languages/tsx.js';
 
 /** @param {TSESTree.Node} ast */
 function clean(ast) {
@@ -53,8 +54,11 @@ function clean(ast) {
 
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	if (dir[0] === '.') continue;
-	const tsMode = dir.startsWith('ts-');
-	const fileExtension = tsMode ? 'ts' : 'js';
+	const tsMode = dir.startsWith('ts-') || dir.startsWith('tsx-');
+	const jsxMode = dir.startsWith('jsx-') || dir.startsWith('tsx-');
+	const fileExtension = (tsMode ? 'ts' : 'js') + (jsxMode ? 'x' : '');
+
+	// if (dir.includes('large-file')) continue;
 
 	test(dir, async () => {
 		let input_js = '';
@@ -69,7 +73,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		/** @type {TSESTree.Program} */
 		let ast;
 
-		/** @type {PrintOptions} */
+		/** @type {PrintOptions<TSESTree.Node>} */
 		let opts;
 
 		if (input_json.length > 0) {
@@ -77,12 +81,14 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			opts = {};
 		} else {
 			const content = input_js;
-			ast = load(content);
+			ast = load(content, { jsx: true });
 			opts = {
 				sourceMapSource: 'input.js',
 				sourceMapContent: content
 			};
 		}
+
+		opts.visitors = tsx();
 
 		const { code, map } = print(ast, opts);
 
@@ -92,7 +98,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			JSON.stringify(map, null, '\t')
 		);
 
-		const parsed = acornTs.parse(code, {
+		const parsed = (jsxMode ? acornTsx : acornTs).parse(code, {
 			ecmaVersion: 'latest',
 			sourceType: input_json.length > 0 ? 'script' : 'module',
 			locations: true

@@ -15,6 +15,12 @@
     ".": {
       "types": "./types/index.d.ts",
       "default": "./src/index.js"
+    },
+    "./languages/ts": {
+      "default": "./src/languages/ts.js"
+    },
+    "./languages/tsx": {
+      "default": "./src/languages/tsx.js"
     }
   },
   "types": "./types/index.d.ts",
