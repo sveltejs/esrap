@@ -1,8 +1,6 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Command, Dedent, Visitors, Indent, Newline, Margin } from './types' */
 
-import { _comments, push_comment } from './languages/js.js';
-
 /** @type {Margin} */
 export const margin = { type: 'Margin' };
 
@@ -139,85 +137,6 @@ export class Context {
 			this.#visitors._(node, this, (node) => visitor(node, this));
 		} else {
 			visitor(node, this);
-		}
-	}
-
-	/**
-	 * Push a sequence of nodes, keeping them on one line by default but spreading
-	 * onto multiple lines if necessary
-	 * @param {Array<{ type: string }>} nodes
-	 * @param {boolean} pad
-	 */
-	inline(nodes, pad, separator = ',') {
-		if (nodes.length === 0) return;
-
-		let multiline = false;
-		let length = -2;
-
-		/** @type {boolean[]} */
-		const multiline_nodes = [];
-
-		const children = nodes.map((node, i) => {
-			const child = this.new();
-			if (node) child.visit(node);
-
-			multiline_nodes[i] = child.multiline;
-
-			if (i < nodes.length - 1 || !node) {
-				child.write(separator);
-			}
-
-			if (_comments.length) {
-				child.write(' ');
-				push_comment(_comments[0], child);
-				_comments.length = 0;
-			}
-
-			length += child.measure() + 1;
-			multiline ||= child.multiline;
-
-			return child;
-		});
-
-		multiline ||= length > 60;
-
-		if (multiline) {
-			this.indent();
-			this.newline();
-		} else if (pad) {
-			this.write(' ');
-		}
-
-		/** @type {Context | null} */
-		let prev = null;
-
-		for (let i = 0; i < nodes.length; i += 1) {
-			const child = children[i];
-
-			if (prev !== null) {
-				if (multiline_nodes[i - 1] || multiline_nodes[i]) {
-					this.margin();
-				}
-
-				if (nodes[i]) {
-					if (multiline) {
-						this.newline();
-					} else {
-						this.write(' ');
-					}
-				}
-			}
-
-			this.append(child);
-
-			prev = child;
-		}
-
-		if (multiline) {
-			this.dedent();
-			this.newline();
-		} else if (pad) {
-			this.write(' ');
 		}
 	}
 

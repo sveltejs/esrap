@@ -1,6 +1,7 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Visitors, NodeWithComments, Context } from '../types.js' */
 import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
+import { comments, push_comment, sequence } from './utils/sequence.js';
 
 const OPERATOR_PRECEDENCE = {
 	'||': 2,
@@ -30,34 +31,6 @@ const OPERATOR_PRECEDENCE = {
 	'**': 13
 };
 
-// TODO this should not be exported, it is JS/TS specific
-/**
- * @param {TSESTree.Comment} comment
- * @param {Context} context
- */
-export function push_comment(comment, context) {
-	// console.trace();
-
-	if (comment.type === 'Line') {
-		context.write(`//${comment.value}`);
-		context.newline();
-	} else {
-		context.write('/*');
-		const lines = comment.value.split('\n');
-
-		for (let i = 0; i < lines.length; i += 1) {
-			if (i > 0) context.newline();
-			context.write(lines[i]);
-		}
-
-		context.write('*/');
-	}
-}
-
-// TODO this should not be exported, it is JS/TS specific
-/** @type {TSESTree.Comment[]} */
-export let comments = [];
-
 export const shared = {
 	/**
 	 * @param {TSESTree.ArrayExpression | TSESTree.ArrayPattern} node
@@ -65,7 +38,7 @@ export const shared = {
 	 */
 	'ArrayExpression|ArrayPattern': (node, context) => {
 		context.write('[');
-		context.inline(/** @type {TSESTree.Node[]} */ (node.elements), false);
+		sequence(context, /** @type {TSESTree.Node[]} */ (node.elements), false);
 		context.write(']');
 	},
 
@@ -180,13 +153,13 @@ export const shared = {
 
 			if (i > 0) context.write(',');
 
-			if (_comments.length > 0) {
+			if (comments.length > 0) {
 				context.write(' ');
-				push_comment(_comments[0], context);
-				if (_comments[0].type === 'Line') {
+				push_comment(comments[0], context);
+				if (comments[0].type === 'Line') {
 					child_context.multiline = true;
 				}
-				_comments.length = 0;
+				comments.length = 0;
 			}
 
 			if (i > 0) context.append(join);
@@ -229,7 +202,7 @@ export const shared = {
 
 		if (node.implements) {
 			context.write('implements ');
-			context.inline(node.implements, false);
+			sequence(context, node.implements, false);
 		}
 
 		context.visit(node.body);
@@ -270,7 +243,7 @@ export const shared = {
 		}
 
 		context.write('(');
-		context.inline(node.params, false);
+		sequence(context, node.params, false);
 		context.write(')');
 
 		if (node.returnType) context.visit(node.returnType);
@@ -293,9 +266,6 @@ export const shared = {
 	}
 };
 
-/** @type {TSESTree.Comment[]} */
-export let _comments = [];
-
 /** @type {Visitors<TSESTree.Node>} */
 export default {
 	_(node, context, visit) {
@@ -307,10 +277,10 @@ export default {
 			/** @type {any} */ (node).trailingComments
 		);
 
-		const comments = [..._comments, ...(leading_comments || [])];
+		const c = [...comments, ...(leading_comments || [])];
 
 		// if (leading_comments) {
-		for (const comment of comments) {
+		for (const comment of c) {
 			push_comment(comment, context);
 
 			if (comment.type === 'Block') {
@@ -329,7 +299,7 @@ export default {
 		}
 		// }
 
-		_comments.length = 0;
+		comments.length = 0;
 
 		visit(node);
 
@@ -347,23 +317,8 @@ export default {
 					}
 				}
 			} else {
-				_comments.push(...trailing_comments);
+				comments.push(...trailing_comments);
 			}
-
-			// context.write(' ');
-			// // push_comment(trailing_comments[0], context);
-
-			// for (const comment of trailing_comments) {
-			// 	push_comment(comment, context);
-
-			// 	if (comment.type === 'Line' || comment.value.includes('\n')) {
-			// 		context.newline();
-			// 	} else {
-			// 		// context.write(' ');
-			// 	}
-			// }
-
-			// // comments.push(trailing_comments[0]); // there is only ever one
 		}
 	},
 
@@ -375,7 +330,7 @@ export default {
 		if (node.async) context.write('async ');
 
 		context.write('(');
-		context.inline(node.params, false);
+		sequence(context, node.params, false);
 		context.write(') => ');
 
 		if (
@@ -548,7 +503,7 @@ export default {
 		}
 
 		context.write('{');
-		context.inline(node.specifiers, true);
+		sequence(context, node.specifiers, true);
 		context.write('}');
 
 		if (node.source) {
@@ -674,7 +629,7 @@ export default {
 
 		if (named_specifiers.length > 0) {
 			context.write('{');
-			context.inline(named_specifiers, true);
+			sequence(context, named_specifiers, true);
 			context.write('}');
 		}
 
@@ -795,7 +750,7 @@ export default {
 		if (node.computed) context.write(']');
 
 		context.write('(');
-		context.inline(node.value.params, false);
+		sequence(context, node.value.params, false);
 		context.write(')');
 
 		if (node.value.returnType) context.visit(node.value.returnType);
@@ -809,13 +764,13 @@ export default {
 
 	ObjectExpression(node, context) {
 		context.write('{');
-		context.inline(node.properties, true);
+		sequence(context, node.properties, true);
 		context.write('}');
 	},
 
 	ObjectPattern(node, context) {
 		context.write('{');
-		context.inline(node.properties, true);
+		sequence(context, node.properties, true);
 		context.write('}');
 
 		if (node.typeAnnotation) context.visit(node.typeAnnotation);
@@ -860,7 +815,7 @@ export default {
 			context.visit(node.key);
 			if (node.computed) context.write(']');
 			context.write('(');
-			context.inline(node.value.params, false);
+			sequence(context, node.value.params, false);
 			context.write(')');
 
 			if (node.value.returnType) context.visit(node.value.returnType);
@@ -931,7 +886,7 @@ export default {
 
 	SequenceExpression(node, context) {
 		context.write('(');
-		context.inline(node.expressions, false);
+		sequence(context, node.expressions, false);
 		context.write(')');
 	},
 

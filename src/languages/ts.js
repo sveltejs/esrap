@@ -2,6 +2,7 @@
 import { TSESTree } from '@typescript-eslint/types';
 import js from './js.js';
 import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
+import { sequence } from './utils/sequence.js';
 
 /**
  * @type {Visitors<TSESTree.Node>}
@@ -48,7 +49,7 @@ export default {
 	},
 	TSTypeLiteral(node, context) {
 		context.write('{ ');
-		context.inline(node.members, false, ';');
+		sequence(context, node.members, false, ';');
 		context.write(' }');
 	},
 	TSPropertySignature(node, context) {
@@ -109,7 +110,7 @@ export default {
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		const parameters = node.parameters;
 		context.write('(');
-		context.inline(parameters, false);
+		sequence(context, parameters, false);
 
 		context.write(') => ');
 
@@ -119,7 +120,7 @@ export default {
 	TSIndexSignature(node, context) {
 		const indexParameters = node.parameters;
 		context.write('[');
-		context.inline(indexParameters, false);
+		sequence(context, indexParameters, false);
 		context.write(']');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
@@ -131,7 +132,7 @@ export default {
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 		const parametersSignature = node.parameters;
 		context.write('(');
-		context.inline(parametersSignature, false);
+		sequence(context, parametersSignature, false);
 		context.write(')');
 
 		// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
@@ -139,7 +140,7 @@ export default {
 	},
 	TSTupleType(node, context) {
 		context.write('[');
-		context.inline(node.elementTypes, false);
+		sequence(context, node.elementTypes, false);
 		context.write(']');
 	},
 	TSNamedTupleMember(node, context) {
@@ -148,10 +149,10 @@ export default {
 		context.visit(node.elementType);
 	},
 	TSUnionType(node, context) {
-		context.inline(node.types, false, ' |');
+		sequence(context, node.types, false, ' |');
 	},
 	TSIntersectionType(node, context) {
-		context.inline(node.types, false, ' &');
+		sequence(context, node.types, false, ' &');
 	},
 	TSLiteralType(node, context) {
 		context.visit(node.literal);
@@ -205,7 +206,7 @@ export default {
 		context.write(' {');
 		context.indent();
 		context.newline();
-		context.inline(node.members, false);
+		sequence(context, node.members, false);
 		context.dedent();
 		context.newline();
 		context.write('}');
@@ -237,7 +238,7 @@ export default {
 	},
 
 	TSInterfaceBody(node, context) {
-		context.inline(node.body, true, ';');
+		sequence(context, node.body, true, ';');
 	},
 
 	TSInterfaceDeclaration(node, context) {
@@ -246,7 +247,7 @@ export default {
 		if (node.typeParameters) context.visit(node.typeParameters);
 		if (node.extends) {
 			context.write(' extends ');
-			context.inline(node.extends, false);
+			sequence(context, node.extends, false);
 		}
 		context.write(' {');
 		context.visit(node.body);
