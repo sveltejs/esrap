@@ -287,7 +287,6 @@ export default (options = {}) => {
 
 			const c = [...comments, ...(leading_comments || [])];
 
-			// if (leading_comments) {
 			for (const comment of c) {
 				push_comment(comment, context);
 
@@ -298,31 +297,17 @@ export default (options = {}) => {
 						context.write(' ');
 					}
 				}
-
-				// if (comment.type === 'Line' || comment.value.includes('\n')) {
-				// 	context.newline();
-				// } else {
-				// 	context.write(' ');
-				// }
 			}
-			// }
 
 			comments.length = 0;
 
 			visit(node);
 
 			if (trailing_comments) {
-				// console.log(node.start, node.type, trailing_comments);
 				if (/(Statement|Declaration)$/.test(node.type)) {
 					for (const comment of trailing_comments) {
 						context.write(' ');
 						push_comment(comment, context);
-
-						if (comment.type === 'Line' || comment.value.includes('\n')) {
-							// context.newline();
-						} else {
-							// context.write(' ');
-						}
 					}
 				} else {
 					comments.push(...trailing_comments);
