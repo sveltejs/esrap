@@ -1007,6 +1007,15 @@ export default (options = {}) => {
 
 		Program(node, context) {
 			block(context, node.body);
+
+			while (comment_index < comments.length) {
+				const comment = comments[comment_index++];
+
+				if (before(comment.loc.start, node.loc.end)) {
+					context.newline();
+					push_comment(comment, context);
+				}
+			}
 		},
 
 		Property(node, context) {
