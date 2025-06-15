@@ -60,7 +60,6 @@ export class Context {
 	 */
 	write(content, node) {
 		if (node?.loc) {
-			// TODO make location extraction pluggable too
 			this.location(node.loc.start.line, node.loc.start.column);
 			this.#commands.push(content);
 			this.location(node.loc.end.line, node.loc.end.column);
