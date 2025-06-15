@@ -111,37 +111,6 @@ export class Context {
 		}
 	}
 
-	/**
-	 * Push a sequence of nodes onto separate lines, separating them with
-	 * an extra newline where appropriate
-	 * @param {Array<{ type: string }>} nodes
-	 */
-	block(nodes) {
-		/** @type {string | null} */
-		let prev_type = null;
-		let prev_multiline = false;
-
-		for (const node of nodes) {
-			if (node.type === 'EmptyStatement') continue;
-
-			const context = this.new();
-			context.visit(node);
-
-			if (prev_type !== null) {
-				if (context.multiline || prev_multiline || node.type !== prev_type) {
-					this.margin();
-				}
-
-				this.newline();
-			}
-
-			this.append(context);
-
-			prev_type = node.type;
-			prev_multiline = context.multiline;
-		}
-	}
-
 	measure() {
 		return measure(this.#commands);
 	}

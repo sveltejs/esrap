@@ -94,7 +94,6 @@ function push_comment(comment, context) {
 }
 
 /**
- *
  * @param {Context} context
  * @param {TSESTree.Node[]} nodes
  * @param {boolean} pad
@@ -172,6 +171,38 @@ function sequence(context, nodes, pad, separator = ',') {
 	}
 }
 
+/**
+ * Push a sequence of nodes onto separate lines, separating them with
+ * an extra newline where appropriate
+ * @param {Context} context
+ * @param {TSESTree.Node[]} nodes
+ */
+function block(context, nodes) {
+	/** @type {string | null} */
+	let prev_type = null;
+	let prev_multiline = false;
+
+	for (const node of nodes) {
+		if (node.type === 'EmptyStatement') continue;
+
+		const child = context.new();
+		child.visit(node);
+
+		if (prev_type !== null) {
+			if (child.multiline || prev_multiline || node.type !== prev_type) {
+				context.margin();
+			}
+
+			context.newline();
+		}
+
+		context.append(child);
+
+		prev_type = node.type;
+		prev_multiline = child.multiline;
+	}
+}
+
 export const shared = {
 	/**
 	 * @param {TSESTree.ArrayExpression | TSESTree.ArrayPattern} node
@@ -230,7 +261,7 @@ export const shared = {
 		if (node.body.length > 0) {
 			context.indent();
 			context.newline();
-			context.block(node.body);
+			block(context, node.body);
 			context.dedent();
 			context.newline();
 		}
@@ -924,7 +955,7 @@ export default (options = {}) => {
 
 		Program(node, context) {
 			comments.length = 0;
-			context.block(node.body);
+			block(context, node.body);
 		},
 
 		Property(node, context) {
@@ -1033,7 +1064,7 @@ export default (options = {}) => {
 			context.indent();
 			context.newline();
 
-			context.block(node.body);
+			block(context, node.body);
 
 			context.dedent();
 			context.newline();
@@ -1443,7 +1474,7 @@ export default (options = {}) => {
 			context.write(' {');
 			context.indent();
 			context.newline();
-			context.block(node.body);
+			block(context, node.body);
 			context.dedent();
 			context.newline();
 			context.write('}');
