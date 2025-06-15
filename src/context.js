@@ -160,8 +160,10 @@ export class Context {
  */
 function measure(commands, from = 0, to = commands.length) {
 	let total = 0;
+
 	for (let i = from; i < to; i += 1) {
 		const command = commands[i];
+
 		if (typeof command === 'string') {
 			total += command.length;
 		} else if (Array.isArray(command)) {
