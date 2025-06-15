@@ -5,10 +5,10 @@ import { EXPRESSIONS_PRECEDENCE } from './utils/precedence.js';
 import { sequence } from './utils/sequence.js';
 
 /**
- * @type {Visitors<TSESTree.Node>}
+ * @returns {Visitors<TSESTree.Node>}
  */
-export default {
-	...js,
+export default () => ({
+	...js(),
 	TSNumberKeyword(node, context) {
 		context.write('number', node);
 	},
@@ -285,4 +285,4 @@ export default {
 		context.write('.');
 		context.visit(node.right);
 	}
-};
+});

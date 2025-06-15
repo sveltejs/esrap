@@ -1,6 +1,6 @@
 // @ts-check
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Handlers, PrintOptions } from '../src/types' */
+/** @import { Visitors, PrintOptions } from '../src/types' */
 import fs from 'node:fs';
 import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';
@@ -88,7 +88,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			};
 		}
 
-		opts.visitors = tsx;
+		opts.visitors = /** @type {Visitors} */ (tsx());
 
 		const { code, map } = print(ast, opts);
 

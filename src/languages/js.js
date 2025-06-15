@@ -266,8 +266,8 @@ export const shared = {
 	}
 };
 
-/** @type {Visitors<TSESTree.Node>} */
-export default {
+/** @returns {Visitors<TSESTree.Node>} */
+export default () => ({
 	_(node, context, visit) {
 		const leading_comments = /** @type {TSESTree.Comment[]} */ (
 			/** @type {any} */ (node).leadingComments
@@ -1068,7 +1068,7 @@ export default {
 			context.write(node.delegate ? `yield*` : `yield`);
 		}
 	}
-};
+});
 
 /** @satisfies {Visitors} */
 

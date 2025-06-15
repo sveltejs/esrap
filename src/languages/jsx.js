@@ -2,9 +2,9 @@
 import { TSESTree } from '@typescript-eslint/types';
 import js from './js.js';
 
-/** @type {Visitors<TSESTree.Node>} */
-export default {
-	...js,
+/** @returns {Visitors<TSESTree.Node>} */
+export default () => ({
+	...js(),
 	JSXElement(node, context) {
 		context.visit(node.openingElement);
 
@@ -115,4 +115,4 @@ export default {
 
 		context.write('}');
 	}
-};
+});
