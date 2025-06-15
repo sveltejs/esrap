@@ -73,10 +73,9 @@ const OPERATOR_PRECEDENCE = {
  * @param {TSESTree.Comment} comment
  * @param {Context} context
  */
-function push_comment(comment, context) {
+function write_comment(comment, context) {
 	if (comment.type === 'Line') {
 		context.write(`//${comment.value}`);
-		// context.newline();
 	} else {
 		context.write('/*');
 		const lines = comment.value.split('\n');
@@ -133,7 +132,7 @@ export default (options = {}) => {
 
 				if (comment && comment.loc.start.line === node.loc.start.line) {
 					child.write(' ');
-					push_comment(comment, child);
+					write_comment(comment, child);
 
 					if (comment.type === 'Line') {
 						child.newline();
@@ -305,7 +304,7 @@ export default (options = {}) => {
 					const comment = comments[comment_index];
 
 					if (before(comment.loc.end, node.loc.end)) {
-						push_comment(comment, context);
+						write_comment(comment, context);
 
 						comment_index += 1;
 					} else {
@@ -384,7 +383,7 @@ export default (options = {}) => {
 
 					if (before(comment.loc.start, next)) {
 						context.write(' ');
-						push_comment(comment, context);
+						write_comment(comment, context);
 
 						if (comment.type === 'Line' || comment.value.includes('\n')) {
 							context.newline();
@@ -507,7 +506,7 @@ export default (options = {}) => {
 				const comment = comments[comment_index];
 
 				if (before(comment.loc.start, node.loc.start)) {
-					push_comment(comment, context);
+					write_comment(comment, context);
 
 					if (comment.loc.start.line < node.loc.start.line) {
 						context.newline();
@@ -529,7 +528,7 @@ export default (options = {}) => {
 
 					if (comment && comment.loc.start.line === node.loc.start.line) {
 						context.write(' ');
-						push_comment(comment, context);
+						write_comment(comment, context);
 
 						comment_index += 1;
 					} else {
@@ -1013,7 +1012,7 @@ export default (options = {}) => {
 
 				if (before(comment.loc.start, node.loc.end)) {
 					context.newline();
-					push_comment(comment, context);
+					write_comment(comment, context);
 				}
 			}
 		},
