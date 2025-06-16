@@ -2286,8 +2286,10 @@
 
 						return setMatcher(
 							i > 1 && elementMatcher(matchers),
-							i > 1 && toSelector(// If the preceding token was a descendant combinator, insert an implicit any-element `*`
-							tokens.slice(0, i - 1).concat({ value: tokens[i - 2].type === " " ? "*" : "" })).replace(rtrimCSS, "$1"),
+							i > 1 && toSelector(
+								// If the preceding token was a descendant combinator, insert an implicit any-element `*`
+								tokens.slice(0, i - 1).concat({ value: tokens[i - 2].type === " " ? "*" : "" })
+							).replace(rtrimCSS, "$1"),
 							matcher,
 							i < j && matcherFromTokens(tokens.slice(i, j)),
 							j < len && matcherFromTokens(tokens = tokens.slice(j)),
@@ -2680,8 +2682,9 @@
 
 		is(selector) {
 			return !!winnow(
-				this, // If this is a positional/relative selector, check membership in the returned set
-				 // so $("p:first").is("p:last") won't return true for a doc with two "p".
+				this,
+				// If this is a positional/relative selector, check membership in the returned set
+				// so $("p:first").is("p:last") won't return true for a doc with two "p".
 				typeof selector === "string" && rneedsContext.test(selector) ? jQuery(selector) : selector || [],
 				false
 			).length;
@@ -2847,7 +2850,8 @@
 
 			// Locate the position of the desired element
 			return indexOf.call(
-				this, // If it receives a jQuery object, the first element is used
+				this,
+				// If it receives a jQuery object, the first element is used
 				elem.jquery ? elem[0] : elem
 			);
 		},
@@ -3440,12 +3444,16 @@
 							// state = "resolved" (i.e., fulfilled)
 							// state = "rejected"
 							state = stateString;
-						}, // rejected_callbacks.disable
-						 // fulfilled_callbacks.disable
-						tuples[3 - i][2].disable, // rejected_handlers.disable
-						 // fulfilled_handlers.disable
-						tuples[3 - i][3].disable, // progress_callbacks.lock
-						tuples[0][2].lock, // progress_handlers.lock
+						},
+						// rejected_callbacks.disable
+						// fulfilled_callbacks.disable
+						tuples[3 - i][2].disable,
+						// rejected_handlers.disable
+						// fulfilled_handlers.disable
+						tuples[3 - i][3].disable,
+						// progress_callbacks.lock
+						tuples[0][2].lock,
+						// progress_handlers.lock
 						tuples[0][3].lock
 					);
 				}
@@ -6336,10 +6344,9 @@
 		if (!isBorderBox && computedVal >= 0) {
 			// offsetWidth/offsetHeight is a rounded sum of content, padding, scroll gutter, and border
 			// Assuming integer scroll gutter, subtract the rest and round down
-			delta += Math.max(0, Math.ceil(
-				elem["offset" + dimension[0].toUpperCase() + dimension.slice(1)] - computedVal - delta - extra - 0.5 // If offsetWidth/offsetHeight is unknown, then we can't determine content-box scroll gutter
-				 // Use an explicit zero to avoid NaN (gh-3964)
-			)) || 0;
+			delta += Math.max(0, Math.ceil(elem["offset" + dimension[0].toUpperCase() + dimension.slice(1)] - computedVal - delta - extra - 0.5)) || // If offsetWidth/offsetHeight is unknown, then we can't determine content-box scroll gutter
+			// Use an explicit zero to avoid NaN (gh-3964)
+			0;
 		}
 
 		return delta + marginDelta;
@@ -6400,7 +6407,8 @@
 			dimension,
 			extra || (isBorderBox ? "border" : "content"),
 			valueIsBorderBox,
-			styles, // Provide the current computed size to request scroll gutter calculation (gh-3589)
+			styles,
+			// Provide the current computed size to request scroll gutter calculation (gh-3589)
 			val
 		) + "px";
 	}
@@ -9443,9 +9451,10 @@
 								} else {
 									complete(
 										xhrSuccessStatus[xhr.status] || xhr.status,
-										xhr.statusText, // Support: IE <=9 only
-										 // IE9 has no XHR2 but throws on binary (trac-11426)
-										 // For XHR2 non-text, let the caller handle it (gh-2498)
+										xhr.statusText,
+										// Support: IE <=9 only
+										// IE9 has no XHR2 but throws on binary (trac-11426)
+										// For XHR2 non-text, let the caller handle it (gh-2498)
 										(xhr.responseType || "text") !== "text" || typeof xhr.responseText !== "string" ? { binary: xhr.response } : { text: xhr.responseText },
 										xhr.getAllResponseHeaders()
 									);

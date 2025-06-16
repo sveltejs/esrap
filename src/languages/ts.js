@@ -397,29 +397,26 @@ export default (options = {}) => {
 			for (let i = 0; i < node.arguments.length; i += 1) {
 				const is_last = i === node.arguments.length - 1;
 				const context = is_last ? final_context : child_context;
+				const arg = node.arguments[i];
 
-				context.visit(node.arguments[i]);
+				// special case — if final argument has a comment above it,
+				// we make the whole sequence multiline
+				if (
+					is_last &&
+					comments[comment_index] &&
+					comments[comment_index].loc.start.line < arg.loc.start.line
+				) {
+					child_context.multiline = true;
+				}
+
+				context.visit(arg);
 
 				if (!is_last) context.write(',');
 
-				const next = is_last ? node.loc.end : node.arguments[i + 1].loc.start;
+				const next = is_last ? node.loc.end : (node.arguments[i + 1]?.loc.start ?? null);
 
-				while (comment_index < comments.length) {
-					const comment = comments[comment_index];
-
-					if (before(comment.loc.start, next)) {
-						context.write(' ');
-						write_comment(comment, context);
-
-						if (comment.type === 'Line' || comment.value.includes('\n')) {
-							context.newline();
-							child_context.multiline = true;
-						}
-
-						comment_index += 1;
-					} else {
-						break;
-					}
+				if (flush_trailing_comments(context, arg.loc.end, next)) {
+					child_context.multiline = true;
 				}
 
 				if (!is_last) context.append(join);
