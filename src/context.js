@@ -111,6 +111,10 @@ export class Context {
 		}
 	}
 
+	empty() {
+		return !this.#commands.some(has_content);
+	}
+
 	measure() {
 		return measure(this.#commands);
 	}
@@ -140,4 +144,19 @@ function measure(commands, from = 0, to = commands.length) {
 	}
 
 	return total;
+}
+
+/**
+ * @param {Command} command
+ */
+function has_content(command) {
+	if (Array.isArray(command)) {
+		return command.some(has_content);
+	}
+
+	if (typeof command === 'string') {
+		return command.length > 0;
+	}
+
+	return false;
 }

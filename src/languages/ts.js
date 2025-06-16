@@ -1,5 +1,6 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Visitors, Context } from '../types.js' */
+/** @import { Visitors } from '../types.js' */
+import { Context } from '../context.js';
 
 /** @type {Record<TSESTree.Expression['type'] | 'Super' | 'RestElement', number>} */
 export const EXPRESSIONS_PRECEDENCE = {
@@ -104,8 +105,39 @@ export default (options = {}) => {
 	let comment_index = 0;
 
 	/**
+	 * Set `comment_index` to be the first comment after `start`.
+	 * Most of the time this is already correct, but if nodes
+	 * have been moved around we may need to search for it
+	 * @param {TSESTree.Node} node
+	 */
+	function reset_comment_index(node) {
+		if (!node.loc) {
+			comment_index = comments.length;
+			return;
+		}
+
+		let previous = comments[comment_index - 1];
+		let comment = comments[comment_index];
+
+		if (
+			comment &&
+			comment.loc &&
+			!before(comment.loc.start, node.loc.start) &&
+			(!previous || (previous.loc && before(previous.loc.start, node.loc.start)))
+		) {
+			return;
+		}
+
+		// TODO use a binary search here, account for synthetic nodes (without `loc`)
+		comment_index = comments.findIndex(
+			(comment) => comment.loc && node.loc && !before(comment.loc.start, node.loc.start)
+		);
+		if (comment_index === -1) comment_index = comments.length;
+	}
+
+	/**
 	 * @param {Context} context
-	 * @param {{ line: number, column: number }} prev
+	 * @param {{ line: number, column: number } | null} prev
 	 * @param {{ line: number, column: number } | null} next
 	 * @returns {boolean} true if final comment is a line comment
 	 */
@@ -115,6 +147,7 @@ export default (options = {}) => {
 
 			if (
 				comment &&
+				prev &&
 				comment.loc.start.line === prev.line &&
 				(next === null || before(comment.loc.end, next))
 			) {
@@ -146,7 +179,7 @@ export default (options = {}) => {
 		while (comment_index < comments.length) {
 			const comment = comments[comment_index];
 
-			if (comment && before(comment.loc.start, to)) {
+			if (comment && comment.loc && to && before(comment.loc.start, to)) {
 				if (first && from !== null && comment.loc.start.line > from.line) {
 					context.margin();
 					context.newline();
@@ -192,8 +225,8 @@ export default (options = {}) => {
 				child_context.write(separator);
 			}
 
-			const next = i === nodes.length - 1 ? until : nodes[i + 1]?.loc.start || null;
-			if (child && flush_trailing_comments(child_context, child.loc.end, next)) {
+			const next = i === nodes.length - 1 ? until : nodes[i + 1]?.loc?.start || null;
+			if (child && flush_trailing_comments(child_context, child.loc?.end || null, next)) {
 				multiline = true;
 			}
 
@@ -237,7 +270,7 @@ export default (options = {}) => {
 			prev = child;
 		}
 
-		flush_comments_until(context, nodes[nodes.length - 1]?.loc.end ?? null, until, false);
+		flush_comments_until(context, nodes[nodes.length - 1]?.loc?.end ?? null, until, false);
 
 		if (multiline) {
 			context.dedent();
@@ -254,6 +287,8 @@ export default (options = {}) => {
 	 * @param {TSESTree.Node & { body: TSESTree.Node[] }} node
 	 */
 	function body(context, node) {
+		reset_comment_index(node);
+
 		/** @type {string | null} */
 		let prev_type = null;
 		let prev_multiline = false;
@@ -282,7 +317,7 @@ export default (options = {}) => {
 			context.newline();
 			flush_comments_until(
 				context,
-				node.body[node.body.length - 1]?.loc.end ?? null,
+				node.body[node.body.length - 1]?.loc?.end ?? null,
 				node.loc.end,
 				false
 			);
@@ -296,7 +331,12 @@ export default (options = {}) => {
 		 */
 		'ArrayExpression|ArrayPattern': (node, context) => {
 			context.write('[');
-			sequence(context, /** @type {TSESTree.Node[]} */ (node.elements), node.loc.end, false);
+			sequence(
+				context,
+				/** @type {TSESTree.Node[]} */ (node.elements),
+				node.loc?.end ?? null,
+				false
+			);
 			context.write(']');
 		},
 
@@ -344,18 +384,13 @@ export default (options = {}) => {
 				context.write('{');
 			}
 
-			const comment = comments[comment_index];
+			const child_context = context.new();
+			body(child_context, node);
 
-			let has_content = node.body.length > 0;
-			let has_comment =
-				comment &&
-				before(node.loc.start, comment.loc.start) &&
-				before(comment.loc.end, node.loc.end);
-
-			if (has_content || has_comment) {
+			if (!child_context.empty()) {
 				context.indent();
 				context.newline();
-				body(context, node);
+				context.append(child_context);
 				context.dedent();
 				context.newline();
 			}
@@ -421,7 +456,9 @@ export default (options = {}) => {
 				// we make the whole sequence multiline
 				if (
 					is_last &&
+					arg.loc &&
 					comments[comment_index] &&
+					comments[comment_index].loc &&
 					comments[comment_index].loc.start.line < arg.loc.start.line
 				) {
 					child_context.multiline = true;
@@ -431,9 +468,11 @@ export default (options = {}) => {
 
 				if (!is_last) context.write(',');
 
-				const next = is_last ? node.loc.end : (node.arguments[i + 1]?.loc.start ?? null);
+				const next = is_last
+					? (node.loc?.end ?? null)
+					: (node.arguments[i + 1]?.loc?.start ?? null);
 
-				if (flush_trailing_comments(context, arg.loc.end, next)) {
+				if (flush_trailing_comments(context, arg.loc?.end ?? null, next)) {
 					child_context.multiline = true;
 				}
 
@@ -475,7 +514,7 @@ export default (options = {}) => {
 
 			if (node.implements) {
 				context.write('implements ');
-				sequence(context, node.implements, node.body.loc.start, false);
+				sequence(context, node.implements, node.body.loc?.start ?? null, false);
 			}
 
 			context.visit(node.body);
@@ -516,7 +555,7 @@ export default (options = {}) => {
 			}
 
 			context.write('(');
-			sequence(context, node.params, (node.returnType ?? node.body).loc.start, false);
+			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
 			context.write(')');
 
 			if (node.returnType) context.visit(node.returnType);
@@ -562,7 +601,7 @@ export default (options = {}) => {
 			if (node.async) context.write('async ');
 
 			context.write('(');
-			sequence(context, node.params, node.body.loc.start, false);
+			sequence(context, node.params, node.body.loc?.start ?? null, false);
 			context.write(') => ');
 
 			if (
@@ -735,7 +774,7 @@ export default (options = {}) => {
 			}
 
 			context.write('{');
-			sequence(context, node.specifiers, node.source?.loc.start ?? node.loc.end, true);
+			sequence(context, node.specifiers, node.source?.loc?.start ?? node.loc?.end ?? null, true);
 			context.write('}');
 
 			if (node.source) {
@@ -861,7 +900,7 @@ export default (options = {}) => {
 
 			if (named_specifiers.length > 0) {
 				context.write('{');
-				sequence(context, named_specifiers, node.source.loc.start, true);
+				sequence(context, named_specifiers, node.source.loc?.start ?? null, true);
 				context.write('}');
 			}
 
@@ -987,7 +1026,7 @@ export default (options = {}) => {
 			sequence(
 				context,
 				node.value.params,
-				(node.value.returnType ?? node.value.body)?.loc.start ?? node.loc.end,
+				(node.value.returnType ?? node.value.body)?.loc?.start ?? node.loc?.end ?? null,
 				false
 			);
 			context.write(')');
@@ -1003,13 +1042,13 @@ export default (options = {}) => {
 
 		ObjectExpression(node, context) {
 			context.write('{');
-			sequence(context, node.properties, node.loc.end, true);
+			sequence(context, node.properties, node.loc?.end ?? null, true);
 			context.write('}');
 		},
 
 		ObjectPattern(node, context) {
 			context.write('{');
-			sequence(context, node.properties, node.loc.end, true);
+			sequence(context, node.properties, node.loc?.end ?? null, true);
 			context.write('}');
 
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
@@ -1056,7 +1095,7 @@ export default (options = {}) => {
 				sequence(
 					context,
 					node.value.params,
-					(node.value.returnType ?? node.value.body).loc.start,
+					(node.value.returnType ?? node.value.body).loc?.start ?? null,
 					false
 				);
 				context.write(')');
@@ -1116,6 +1155,8 @@ export default (options = {}) => {
 			if (node.argument) {
 				const contains_comment =
 					comments[comment_index] &&
+					comments[comment_index].loc &&
+					node.argument.loc &&
 					before(comments[comment_index].loc.start, node.argument.loc.start);
 
 				context.write(contains_comment ? 'return (' : 'return ');
@@ -1128,7 +1169,7 @@ export default (options = {}) => {
 
 		SequenceExpression(node, context) {
 			context.write('(');
-			sequence(context, node.expressions, node.loc.end, false);
+			sequence(context, node.expressions, node.loc?.end ?? null, false);
 			context.write(')');
 		},
 
@@ -1363,7 +1404,7 @@ export default (options = {}) => {
 
 		TSTypeLiteral(node, context) {
 			context.write('{ ');
-			sequence(context, node.members, node.loc.end, false, ';');
+			sequence(context, node.members, node.loc?.end ?? null, false, ';');
 			context.write(' }');
 		},
 
@@ -1433,7 +1474,12 @@ export default (options = {}) => {
 			context.write('(');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			sequence(context, node.parameters, node.typeAnnotation.typeAnnotation.loc.start, false);
+			sequence(
+				context,
+				node.parameters,
+				node.typeAnnotation.typeAnnotation.loc?.start ?? null,
+				false
+			);
 
 			context.write(') => ');
 
@@ -1445,7 +1491,7 @@ export default (options = {}) => {
 			context.write('[');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			sequence(context, node.parameters, node.typeAnnotation?.loc.start, false);
+			sequence(context, node.parameters, node.typeAnnotation?.loc?.start ?? null, false);
 			context.write(']');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
@@ -1458,7 +1504,7 @@ export default (options = {}) => {
 			context.write('(');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			sequence(context, node.parameters, node.typeAnnotation.loc.start, false);
+			sequence(context, node.parameters, node.typeAnnotation.loc?.start ?? null, false);
 			context.write(')');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
@@ -1467,7 +1513,7 @@ export default (options = {}) => {
 
 		TSTupleType(node, context) {
 			context.write('[');
-			sequence(context, node.elementTypes, node.loc.end, false);
+			sequence(context, node.elementTypes, node.loc?.end ?? null, false);
 			context.write(']');
 		},
 
@@ -1478,11 +1524,11 @@ export default (options = {}) => {
 		},
 
 		TSUnionType(node, context) {
-			sequence(context, node.types, node.loc.end, false, ' |');
+			sequence(context, node.types, node.loc?.end ?? null, false, ' |');
 		},
 
 		TSIntersectionType(node, context) {
-			sequence(context, node.types, node.loc.end, false, ' &');
+			sequence(context, node.types, node.loc?.end ?? null, false, ' &');
 		},
 
 		TSLiteralType(node, context) {
@@ -1540,7 +1586,7 @@ export default (options = {}) => {
 			context.write(' {');
 			context.indent();
 			context.newline();
-			sequence(context, node.members, node.loc.end, false);
+			sequence(context, node.members, node.loc?.end ?? null, false);
 			context.dedent();
 			context.newline();
 			context.write('}');
@@ -1572,7 +1618,7 @@ export default (options = {}) => {
 		},
 
 		TSInterfaceBody(node, context) {
-			sequence(context, node.body, node.loc.end, true, ';');
+			sequence(context, node.body, node.loc?.end ?? null, true, ';');
 		},
 
 		TSInterfaceDeclaration(node, context) {
@@ -1581,7 +1627,7 @@ export default (options = {}) => {
 			if (node.typeParameters) context.visit(node.typeParameters);
 			if (node.extends) {
 				context.write(' extends ');
-				sequence(context, node.extends, node.body.loc.start, false);
+				sequence(context, node.extends, node.body.loc?.start ?? null, false);
 			}
 			context.write(' {');
 			context.visit(node.body);
