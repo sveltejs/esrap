@@ -161,24 +161,24 @@ export default (options = {}) => {
 		/** @type {boolean[]} */
 		const multiline_nodes = [];
 
-		const children = nodes.map((node, i) => {
-			const child = context.new();
-			if (node) child.visit(node);
+		const children = nodes.map((child, i) => {
+			const child_context = context.new();
+			if (child) child_context.visit(child);
 
-			multiline_nodes[i] = child.multiline;
+			multiline_nodes[i] = child_context.multiline;
 
-			if (i < nodes.length - 1 || !node) {
-				child.write(separator);
+			if (i < nodes.length - 1 || !child) {
+				child_context.write(separator);
 			}
 
-			if (node && flush_trailing_comments(child, node.loc.end)) {
+			if (child && flush_trailing_comments(child_context, child.loc.end)) {
 				multiline = true;
 			}
 
-			length += child.measure() + 1;
-			multiline ||= child.multiline;
+			length += child_context.measure() + 1;
+			multiline ||= child_context.multiline;
 
-			return child;
+			return child_context;
 		});
 
 		multiline ||= length > 60;
