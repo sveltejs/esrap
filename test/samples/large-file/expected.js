@@ -3271,7 +3271,7 @@
 					},
 
 					// Keep pipe for back-compat
-					pipe(/* fnDone, fnFail, fnProgress */ ) {
+					pipe(/* fnDone, fnFail, fnProgress */) {
 						var fns = arguments;
 
 						return jQuery.Deferred(function (newDefer) {

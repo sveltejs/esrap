@@ -137,8 +137,9 @@ export default (options = {}) => {
 	/**
 	 * @param {Context} context
 	 * @param {{ line: number, column: number }} loc
+	 * @param {boolean} pad
 	 */
-	function flush_comments_until(context, loc) {
+	function flush_comments_until(context, loc, pad) {
 		while (comment_index < comments.length) {
 			const comment = comments[comment_index];
 
@@ -147,7 +148,7 @@ export default (options = {}) => {
 
 				if (comment.loc.end.line < loc.line) {
 					context.newline();
-				} else {
+				} else if (pad) {
 					context.write(' ');
 				}
 
@@ -528,7 +529,7 @@ export default (options = {}) => {
 			const is_statement = /(Statement|Declaration)$/.test(node.type);
 
 			if (node.loc) {
-				flush_comments_until(context, node.loc.start);
+				flush_comments_until(context, node.loc.start, true);
 			}
 
 			visit(node);
