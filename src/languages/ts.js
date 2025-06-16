@@ -149,10 +149,11 @@ export default (options = {}) => {
 
 	/**
 	 * @param {Context} context
+	 * @param {TSESTree.Node} node
 	 * @param {TSESTree.Node[]} nodes
 	 * @param {boolean} pad
 	 */
-	function sequence(context, nodes, pad, separator = ',') {
+	function sequence(context, node, nodes, pad, separator = ',') {
 		if (nodes.length === 0) return;
 
 		let multiline = false;
@@ -266,7 +267,7 @@ export default (options = {}) => {
 		 */
 		'ArrayExpression|ArrayPattern': (node, context) => {
 			context.write('[');
-			sequence(context, /** @type {TSESTree.Node[]} */ (node.elements), false);
+			sequence(context, node, /** @type {TSESTree.Node[]} */ (node.elements), false);
 			context.write(']');
 		},
 
@@ -448,7 +449,7 @@ export default (options = {}) => {
 
 			if (node.implements) {
 				context.write('implements ');
-				sequence(context, node.implements, false);
+				sequence(context, node, node.implements, false);
 			}
 
 			context.visit(node.body);
@@ -489,7 +490,7 @@ export default (options = {}) => {
 			}
 
 			context.write('(');
-			sequence(context, node.params, false);
+			sequence(context, node, node.params, false);
 			context.write(')');
 
 			if (node.returnType) context.visit(node.returnType);
@@ -549,7 +550,7 @@ export default (options = {}) => {
 			if (node.async) context.write('async ');
 
 			context.write('(');
-			sequence(context, node.params, false);
+			sequence(context, node, node.params, false);
 			context.write(') => ');
 
 			if (
@@ -722,7 +723,7 @@ export default (options = {}) => {
 			}
 
 			context.write('{');
-			sequence(context, node.specifiers, true);
+			sequence(context, node, node.specifiers, true);
 			context.write('}');
 
 			if (node.source) {
@@ -848,7 +849,7 @@ export default (options = {}) => {
 
 			if (named_specifiers.length > 0) {
 				context.write('{');
-				sequence(context, named_specifiers, true);
+				sequence(context, node, named_specifiers, true);
 				context.write('}');
 			}
 
@@ -971,7 +972,7 @@ export default (options = {}) => {
 			if (node.computed) context.write(']');
 
 			context.write('(');
-			sequence(context, node.value.params, false);
+			sequence(context, node, node.value.params, false);
 			context.write(')');
 
 			if (node.value.returnType) context.visit(node.value.returnType);
@@ -985,13 +986,13 @@ export default (options = {}) => {
 
 		ObjectExpression(node, context) {
 			context.write('{');
-			sequence(context, node.properties, true);
+			sequence(context, node, node.properties, true);
 			context.write('}');
 		},
 
 		ObjectPattern(node, context) {
 			context.write('{');
-			sequence(context, node.properties, true);
+			sequence(context, node, node.properties, true);
 			context.write('}');
 
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
@@ -1035,7 +1036,7 @@ export default (options = {}) => {
 				context.visit(node.key);
 				if (node.computed) context.write(']');
 				context.write('(');
-				sequence(context, node.value.params, false);
+				sequence(context, node, node.value.params, false);
 				context.write(')');
 
 				if (node.value.returnType) context.visit(node.value.returnType);
@@ -1105,7 +1106,7 @@ export default (options = {}) => {
 
 		SequenceExpression(node, context) {
 			context.write('(');
-			sequence(context, node.expressions, false);
+			sequence(context, node, node.expressions, false);
 			context.write(')');
 		},
 
@@ -1340,7 +1341,7 @@ export default (options = {}) => {
 
 		TSTypeLiteral(node, context) {
 			context.write('{ ');
-			sequence(context, node.members, false, ';');
+			sequence(context, node, node.members, false, ';');
 			context.write(' }');
 		},
 
@@ -1410,7 +1411,7 @@ export default (options = {}) => {
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			const parameters = node.parameters;
 			context.write('(');
-			sequence(context, parameters, false);
+			sequence(context, node, parameters, false);
 
 			context.write(') => ');
 
@@ -1421,7 +1422,7 @@ export default (options = {}) => {
 		TSIndexSignature(node, context) {
 			const indexParameters = node.parameters;
 			context.write('[');
-			sequence(context, indexParameters, false);
+			sequence(context, node, indexParameters, false);
 			context.write(']');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
@@ -1434,7 +1435,7 @@ export default (options = {}) => {
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			const parametersSignature = node.parameters;
 			context.write('(');
-			sequence(context, parametersSignature, false);
+			sequence(context, node, parametersSignature, false);
 			context.write(')');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
@@ -1443,7 +1444,7 @@ export default (options = {}) => {
 
 		TSTupleType(node, context) {
 			context.write('[');
-			sequence(context, node.elementTypes, false);
+			sequence(context, node, node.elementTypes, false);
 			context.write(']');
 		},
 
@@ -1454,11 +1455,11 @@ export default (options = {}) => {
 		},
 
 		TSUnionType(node, context) {
-			sequence(context, node.types, false, ' |');
+			sequence(context, node, node.types, false, ' |');
 		},
 
 		TSIntersectionType(node, context) {
-			sequence(context, node.types, false, ' &');
+			sequence(context, node, node.types, false, ' &');
 		},
 
 		TSLiteralType(node, context) {
@@ -1516,7 +1517,7 @@ export default (options = {}) => {
 			context.write(' {');
 			context.indent();
 			context.newline();
-			sequence(context, node.members, false);
+			sequence(context, node, node.members, false);
 			context.dedent();
 			context.newline();
 			context.write('}');
@@ -1548,7 +1549,7 @@ export default (options = {}) => {
 		},
 
 		TSInterfaceBody(node, context) {
-			sequence(context, node.body, true, ';');
+			sequence(context, node, node.body, true, ';');
 		},
 
 		TSInterfaceDeclaration(node, context) {
@@ -1557,7 +1558,7 @@ export default (options = {}) => {
 			if (node.typeParameters) context.visit(node.typeParameters);
 			if (node.extends) {
 				context.write(' extends ');
-				sequence(context, node.extends, false);
+				sequence(context, node, node.extends, false);
 			}
 			context.write(' {');
 			context.visit(node.body);
