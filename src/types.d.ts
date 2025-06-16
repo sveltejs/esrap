@@ -35,13 +35,6 @@ type TSExpressionWithTypeArguments = {
 	expression: any;
 };
 
-// `@typescript-eslint/types` differs from the official `estree` spec by handling
-// comments differently. This is a node which we can use to ensure type saftey.
-export type NodeWithComments = {
-	leadingComments?: TSESTree.Comment[] | undefined;
-	trailingComments?: TSESTree.Comment[] | undefined;
-} & TSESTree.Node;
-
 export interface Location {
 	type: 'Location';
 	line: number;

@@ -2,10 +2,8 @@
 
 import * as acorn from 'acorn';
 import { tsPlugin } from '@sveltejs/acorn-typescript';
-import { walk } from 'zimmerframe';
 
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { NodeWithComments } from '../src/types' */
 
 // @ts-expect-error
 export const acornTs = acorn.Parser.extend(tsPlugin({ allowSatisfies: true }));

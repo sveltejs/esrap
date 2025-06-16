@@ -1,6 +1,6 @@
 // @ts-check
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Visitors, PrintOptions } from '../src/types' */
+/** @import { PrintOptions } from '../src/types' */
 import fs from 'node:fs';
 import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';
@@ -18,10 +18,6 @@ function clean(ast) {
 			delete node.start;
 			// @ts-expect-error
 			delete node.end;
-			// @ts-expect-error
-			delete node.leadingComments;
-			// @ts-expect-error
-			delete node.trailingComments;
 			context.next();
 		},
 		Program(node, context) {
