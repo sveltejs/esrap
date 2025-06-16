@@ -143,8 +143,14 @@ export default (options = {}) => {
 			const comment = comments[comment_index];
 
 			if (comment && before(comment.loc.start, loc)) {
-				context.newline();
 				write_comment(comment, context);
+
+				if (comment.loc.end.line < loc.line) {
+					context.newline();
+				} else {
+					context.write(' ');
+				}
+
 				comment_index += 1;
 			} else {
 				break;
@@ -260,6 +266,7 @@ export default (options = {}) => {
 		}
 
 		if (node.loc) {
+			context.newline();
 			flush_comments_until(context, node.loc.end);
 		}
 	}
@@ -521,22 +528,8 @@ export default (options = {}) => {
 		_(node, context, visit) {
 			const is_statement = /(Statement|Declaration)$/.test(node.type);
 
-			while (comment_index < comments.length) {
-				const comment = comments[comment_index];
-
-				if (before(comment.loc.start, node.loc.start)) {
-					write_comment(comment, context);
-
-					if (comment.loc.start.line < node.loc.start.line) {
-						context.newline();
-					} else {
-						context.write(' ');
-					}
-
-					comment_index += 1;
-				} else {
-					break;
-				}
+			if (node.loc) {
+				flush_comments_until(context, node.loc.start);
 			}
 
 			visit(node);
