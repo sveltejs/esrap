@@ -1,7 +1,7 @@
 import { TSESTree } from '@typescript-eslint/types';
 import type { Context } from './context.js';
 
-type BaseNode = { type: string };
+export type BaseNode = { type: string };
 
 type NodeOf<T extends string, X> = X extends { type: T } ? X : never;
 
@@ -64,11 +64,9 @@ export interface IndentChange {
 
 export type Command = string | Location | Margin | Newline | Indent | Dedent | Command[];
 
-export interface PrintOptions<T extends BaseNode = BaseNode> {
+export interface PrintOptions {
 	sourceMapSource?: string;
 	sourceMapContent?: string;
 	sourceMapEncodeMappings?: boolean; // default true
 	indent?: string; // default tab
-	quotes?: 'single' | 'double'; // default single
-	visitors?: Visitors<T>; // default to ts
 }

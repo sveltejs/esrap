@@ -5,6 +5,7 @@ import { print } from '../src/index.js';
 import { expect } from 'vitest';
 import { load } from './common.js';
 import { walk } from 'zimmerframe';
+import ts from '../src/languages/ts.js';
 
 /** @import { TSESTree } from '@typescript-eslint/types' */
 
@@ -29,7 +30,7 @@ const test_code = "const foo = 'bar'";
 test('default quote type is single', () => {
 	const { ast } = load(test_code);
 	clean(ast);
-	const code = print(ast).code;
+	const code = print(ast, ts()).code;
 
 	expect(code).toMatchInlineSnapshot(`"const foo = 'bar';"`);
 });
@@ -37,7 +38,7 @@ test('default quote type is single', () => {
 test('single quotes used when single quote type provided', () => {
 	const { ast } = load(test_code);
 	clean(ast);
-	const code = print(ast, { quotes: 'single' }).code;
+	const code = print(ast, ts({ quotes: 'single' })).code;
 
 	expect(code).toMatchInlineSnapshot(`"const foo = 'bar';"`);
 });
@@ -45,7 +46,7 @@ test('single quotes used when single quote type provided', () => {
 test('double quotes used when double quote type provided', () => {
 	const { ast } = load(test_code);
 	clean(ast);
-	const code = print(ast, { quotes: 'double' }).code;
+	const code = print(ast, ts({ quotes: 'double' })).code;
 
 	expect(code).toMatchInlineSnapshot(`"const foo = "bar";"`);
 });
@@ -53,7 +54,7 @@ test('double quotes used when double quote type provided', () => {
 test('escape single quotes if present in string literal', () => {
 	const { ast } = load('const foo = "b\'ar"');
 	clean(ast);
-	const code = print(ast, { quotes: 'single' }).code;
+	const code = print(ast, ts({ quotes: 'single' })).code;
 
 	expect(code).toMatchInlineSnapshot(`"const foo = 'b\\'ar';"`);
 });
@@ -61,7 +62,7 @@ test('escape single quotes if present in string literal', () => {
 test('escape double quotes if present in string literal', () => {
 	const { ast } = load("const foo = 'b\"ar'");
 	clean(ast);
-	const code = print(ast, { quotes: 'double' }).code;
+	const code = print(ast, ts({ quotes: 'double' })).code;
 
 	expect(code).toMatchInlineSnapshot(`"const foo = "b\\"ar";"`);
 });
@@ -69,7 +70,7 @@ test('escape double quotes if present in string literal', () => {
 test('escapes new lines', () => {
 	const { ast } = load('const str = "a\\nb"');
 	clean(ast);
-	const code = print(ast).code;
+	const code = print(ast, ts()).code;
 
 	expect(code).toMatchInlineSnapshot(`"const str = 'a\\nb';"`);
 });
@@ -77,7 +78,7 @@ test('escapes new lines', () => {
 test('escapes escape characters', () => {
 	const { ast } = load('const str = "a\\\\nb"');
 	clean(ast);
-	const code = print(ast).code;
+	const code = print(ast, ts()).code;
 
 	expect(code).toMatchInlineSnapshot(`"const str = 'a\\\\nb';"`);
 });
@@ -85,7 +86,7 @@ test('escapes escape characters', () => {
 test('escapes escape characters#2', () => {
 	const { ast } = load('const str = "a\\\\\\nb"');
 	clean(ast);
-	const code = print(ast).code;
+	const code = print(ast, ts()).code;
 
 	expect(code).toMatchInlineSnapshot(`"const str = 'a\\\\\\nb';"`);
 });
@@ -93,7 +94,7 @@ test('escapes escape characters#2', () => {
 test('escapes double escaped backslashes', () => {
 	const { ast } = load("var text = $.text('\\\\\\\\');");
 	clean(ast);
-	const code = print(ast).code;
+	const code = print(ast, ts()).code;
 
 	expect(code).toMatchInlineSnapshot(`"var text = $.text('\\\\\\\\');"`);
 });
@@ -101,7 +102,7 @@ test('escapes double escaped backslashes', () => {
 test('does not escape already-escaped single quotes', () => {
 	const { ast } = load(`const str = 'a\\'b'`);
 	clean(ast);
-	const code = print(ast).code;
+	const code = print(ast, ts()).code;
 
 	expect(code).toMatchInlineSnapshot(`"const str = 'a\\'b';"`);
 });
@@ -109,7 +110,7 @@ test('does not escape already-escaped single quotes', () => {
 test('does not escape already-escaped double quotes', () => {
 	const { ast } = load('const str = "a\\"b"');
 	clean(ast);
-	const code = print(ast).code;
+	const code = print(ast, ts()).code;
 
 	expect(code).toMatchInlineSnapshot(`"const str = 'a"b';"`);
 });
@@ -117,7 +118,7 @@ test('does not escape already-escaped double quotes', () => {
 test('correctly handle \\n\\r', () => {
 	const { ast } = load('const str = "a\\n\\rb"');
 	clean(ast);
-	const code = print(ast).code;
+	const code = print(ast, ts()).code;
 
 	expect(code).toMatchInlineSnapshot(`"const str = 'a\\n\\rb';"`);
 });

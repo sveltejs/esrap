@@ -3,26 +3,21 @@ import { print } from '../src';
 
 /** @import { Visitors } from '../types' */
 test('custom printers work', () => {
-	/** @type {Visitors} */
-	const funkyStringPrinter = {
-		CustomType(node, state) {
-			if (typeof node.value === 'string') {
-				state.write(`:) - `);
-
-				state.write(node.value);
-
-				state.write(` - (:`);
-			}
-		}
-	};
-
 	const { code } = print(
 		{
 			type: 'CustomType',
 			value: 'testing 123'
 		},
 		{
-			visitors: { ...funkyStringPrinter }
+			CustomType(node, context) {
+				if (typeof node.value === 'string') {
+					context.write(`:) - `);
+
+					context.write(node.value);
+
+					context.write(` - (:`);
+				}
+			}
 		}
 	);
 

@@ -10,7 +10,5 @@ const dir = path.resolve(fileURLToPath(import.meta.url), '..');
 const input_js = fs.readFileSync(`${dir}/_input.ts`);
 const content = input_js.toString();
 const { ast, comments } = load(content);
-const { code } = print(ast, {
-	visitors: ts({ comments })
-});
+const { code } = print(ast, ts({ comments }));
 fs.writeFileSync(`${dir}/_output.ts`, code);

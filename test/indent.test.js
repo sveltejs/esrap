@@ -4,12 +4,13 @@ import { test } from 'vitest';
 import { load } from './common';
 import { print } from '../src';
 import { expect } from 'vitest';
+import ts from '../src/languages/ts.js';
 
 const test_code = "const foo = () => { const bar = 'baz' }";
 
 test('default indent type is tab', () => {
 	const { ast } = load(test_code);
-	const code = print(ast).code;
+	const code = print(ast, ts()).code;
 
 	expect(code).toMatchInlineSnapshot(`
 		"const foo = () => {
@@ -20,7 +21,7 @@ test('default indent type is tab', () => {
 
 test('two space indent', () => {
 	const { ast } = load(test_code);
-	const code = print(ast, { indent: '  ' }).code;
+	const code = print(ast, ts(), { indent: '  ' }).code;
 
 	expect(code).toMatchInlineSnapshot(`
 		"const foo = () => {
@@ -31,7 +32,7 @@ test('two space indent', () => {
 
 test('four space indent', () => {
 	const { ast } = load(test_code);
-	const code = print(ast, { indent: '    ' }).code;
+	const code = print(ast, ts(), { indent: '    ' }).code;
 
 	expect(code).toMatchInlineSnapshot(`
 		"const foo = () => {

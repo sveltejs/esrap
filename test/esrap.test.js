@@ -72,7 +72,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		/** @type {TSESTree.Comment[]} */
 		let comments;
 
-		/** @type {PrintOptions<TSESTree.Node>} */
+		/** @type {PrintOptions} */
 		let opts;
 
 		if (input_json.length > 0) {
@@ -88,9 +88,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			};
 		}
 
-		opts.visitors = tsx({ comments });
-
-		const { code, map } = print(ast, opts);
+		const { code, map } = print(ast, tsx({ comments }), opts);
 
 		fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.${fileExtension}`, code);
 		fs.writeFileSync(
