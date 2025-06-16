@@ -105,6 +105,50 @@ export default (options = {}) => {
 
 	/**
 	 * @param {Context} context
+	 * @param {{ line: number, column: number }} loc
+	 * @returns {boolean} true if final comment is a line comment
+	 */
+	function flush_trailing_comments(context, loc) {
+		while (comment_index < comments.length) {
+			const comment = comments[comment_index];
+
+			if (comment && comment.loc.start.line === loc.line) {
+				context.write(' ');
+				write_comment(comment, context);
+
+				comment_index += 1;
+
+				if (comment.type === 'Line') {
+					return true;
+				}
+			} else {
+				break;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param {Context} context
+	 * @param {{ line: number, column: number }} loc
+	 */
+	function flush_comments_until(context, loc) {
+		while (comment_index < comments.length) {
+			const comment = comments[comment_index];
+
+			if (comment && before(comment.loc.start, loc)) {
+				context.newline();
+				write_comment(comment, context);
+				comment_index += 1;
+			} else {
+				break;
+			}
+		}
+	}
+
+	/**
+	 * @param {Context} context
 	 * @param {TSESTree.Node[]} nodes
 	 * @param {boolean} pad
 	 */
@@ -127,28 +171,9 @@ export default (options = {}) => {
 				child.write(separator);
 			}
 
-			while (comment_index < comments.length) {
-				const comment = comments[comment_index];
-
-				if (comment && comment.loc.start.line === node.loc.start.line) {
-					child.write(' ');
-					write_comment(comment, child);
-
-					if (comment.type === 'Line') {
-						child.newline();
-					}
-
-					comment_index += 1;
-				} else {
-					break;
-				}
+			if (node && flush_trailing_comments(child, node.loc.end)) {
+				multiline = true;
 			}
-
-			// if (comments.length) {
-			// 	child.write(' ');
-			// 	push_comment(comments[0], child);
-			// 	comments.length = 0;
-			// }
 
 			length += child.measure() + 1;
 			multiline ||= child.multiline;
@@ -202,31 +227,35 @@ export default (options = {}) => {
 	 * Push a sequence of nodes onto separate lines, separating them with
 	 * an extra newline where appropriate
 	 * @param {Context} context
-	 * @param {TSESTree.Node[]} nodes
+	 * @param {TSESTree.Node & { body: TSESTree.Node[] }} node
 	 */
-	function block(context, nodes) {
+	function body(context, node) {
 		/** @type {string | null} */
 		let prev_type = null;
 		let prev_multiline = false;
 
-		for (const node of nodes) {
-			if (node.type === 'EmptyStatement') continue;
+		for (const child of node.body) {
+			if (child.type === 'EmptyStatement') continue;
 
-			const child = context.new();
-			child.visit(node);
+			const child_context = context.new();
+			child_context.visit(child);
 
 			if (prev_type !== null) {
-				if (child.multiline || prev_multiline || node.type !== prev_type) {
+				if (child_context.multiline || prev_multiline || child.type !== prev_type) {
 					context.margin();
 				}
 
 				context.newline();
 			}
 
-			context.append(child);
+			context.append(child_context);
 
-			prev_type = node.type;
-			prev_multiline = child.multiline;
+			prev_type = child.type;
+			prev_multiline = child_context.multiline;
+		}
+
+		if (node.loc) {
+			flush_comments_until(context, node.loc.end);
 		}
 	}
 
@@ -296,22 +325,7 @@ export default (options = {}) => {
 			if (has_content || has_comment) {
 				context.indent();
 				context.newline();
-				block(context, node.body);
-
-				while (comment_index < comments.length) {
-					context.newline();
-
-					const comment = comments[comment_index];
-
-					if (before(comment.loc.end, node.loc.end)) {
-						write_comment(comment, context);
-
-						comment_index += 1;
-					} else {
-						break;
-					}
-				}
-
+				body(context, node);
 				context.dedent();
 				context.newline();
 			}
@@ -522,19 +536,8 @@ export default (options = {}) => {
 
 			visit(node);
 
-			if (is_statement) {
-				while (comment_index < comments.length) {
-					const comment = comments[comment_index];
-
-					if (comment && comment.loc.start.line === node.loc.start.line) {
-						context.write(' ');
-						write_comment(comment, context);
-
-						comment_index += 1;
-					} else {
-						break;
-					}
-				}
+			if (is_statement && node.loc) {
+				flush_trailing_comments(context, node.loc.end);
 			}
 		},
 
@@ -1005,16 +1008,7 @@ export default (options = {}) => {
 		},
 
 		Program(node, context) {
-			block(context, node.body);
-
-			while (comment_index < comments.length) {
-				const comment = comments[comment_index++];
-
-				if (before(comment.loc.start, node.loc.end)) {
-					context.newline();
-					write_comment(comment, context);
-				}
-			}
+			body(context, node);
 		},
 
 		Property(node, context) {
@@ -1122,7 +1116,7 @@ export default (options = {}) => {
 			context.indent();
 			context.newline();
 
-			block(context, node.body);
+			body(context, node);
 
 			context.dedent();
 			context.newline();
@@ -1532,7 +1526,7 @@ export default (options = {}) => {
 			context.write(' {');
 			context.indent();
 			context.newline();
-			block(context, node.body);
+			body(context, node);
 			context.dedent();
 			context.newline();
 			context.write('}');
