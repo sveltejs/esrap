@@ -105,14 +105,19 @@ export default (options = {}) => {
 
 	/**
 	 * @param {Context} context
-	 * @param {{ line: number, column: number }} loc
+	 * @param {{ line: number, column: number }} prev
+	 * @param {{ line: number, column: number } | null} next
 	 * @returns {boolean} true if final comment is a line comment
 	 */
-	function flush_trailing_comments(context, loc) {
+	function flush_trailing_comments(context, prev, next) {
 		while (comment_index < comments.length) {
 			const comment = comments[comment_index];
 
-			if (comment && comment.loc.start.line === loc.line) {
+			if (
+				comment &&
+				comment.loc.start.line === prev.line &&
+				(next === null || before(comment.loc.end, next))
+			) {
 				context.write(' ');
 				write_comment(comment, context);
 
@@ -154,10 +159,8 @@ export default (options = {}) => {
 	 * @param {boolean} pad
 	 */
 	function sequence(context, node, nodes, pad, separator = ',') {
-		if (nodes.length === 0) return;
-
 		let multiline = false;
-		let length = -2;
+		let length = -1;
 
 		/** @type {boolean[]} */
 		const multiline_nodes = [];
@@ -172,7 +175,8 @@ export default (options = {}) => {
 				child_context.write(separator);
 			}
 
-			if (child && flush_trailing_comments(child_context, child.loc.end)) {
+			const next = i === nodes.length - 1 ? node.loc.end : nodes[i + 1]?.loc.start || null;
+			if (child && flush_trailing_comments(child_context, child.loc.end, next)) {
 				multiline = true;
 			}
 
@@ -187,7 +191,7 @@ export default (options = {}) => {
 		if (multiline) {
 			context.indent();
 			context.newline();
-		} else if (pad) {
+		} else if (pad && length > 0) {
 			context.write(' ');
 		}
 
@@ -219,7 +223,7 @@ export default (options = {}) => {
 		if (multiline) {
 			context.dedent();
 			context.newline();
-		} else if (pad) {
+		} else if (pad && length > 0) {
 			context.write(' ');
 		}
 	}
@@ -538,7 +542,7 @@ export default (options = {}) => {
 			visit(node);
 
 			if (is_statement && node.loc) {
-				flush_trailing_comments(context, node.loc.end);
+				flush_trailing_comments(context, node.loc.end, null);
 			}
 		},
 
