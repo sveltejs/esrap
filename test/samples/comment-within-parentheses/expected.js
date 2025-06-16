@@ -4,5 +4,6 @@ function foo() {
 }
 
 function bar() {
-	return /* hey */ abc;
+	return (/* hey */
+	abc);
 }

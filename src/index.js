@@ -1,7 +1,6 @@
-/** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, PrintOptions, State } from './types' */
-import { handle } from './handlers.js';
+/** @import { BaseNode, Command, Visitors, PrintOptions } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
+import { Context, dedent, indent, margin, newline } from './context.js';
 
 /** @type {(str: string) => string} str */
 let btoa = () => {
@@ -17,11 +16,13 @@ if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
 }
 
 /**
+ * @template {BaseNode} [T=BaseNode]
  * @param {{ type: string, [key: string]: any }} node
+ * @param {Visitors<T>} visitors
  * @param {PrintOptions} opts
  * @returns {{ code: string, map: any }} // TODO
  */
-export function print(node, opts = {}) {
+export function print(node, visitors, opts = {}) {
 	if (Array.isArray(node)) {
 		return print(
 			{
@@ -29,19 +30,18 @@ export function print(node, opts = {}) {
 				body: node,
 				sourceType: 'module'
 			},
+			visitors,
 			opts
 		);
 	}
 
-	/** @type {State} */
-	const state = {
-		commands: [],
-		comments: [],
-		multiline: false,
-		quote: opts.quotes === 'double' ? '"' : "'"
-	};
+	/** @type {Command[]} */
+	const commands = [];
 
-	handle(/** @type {TSESTree.Node} */ (node), state);
+	// @ts-expect-error some nonsense I don't understand
+	const context = new Context(visitors, commands);
+
+	context.visit(node);
 
 	/** @typedef {[number, number, number, number]} Segment */
 
@@ -69,16 +69,14 @@ export function print(node, opts = {}) {
 		}
 	}
 
-	let newline = '\n';
-	const indent = opts.indent ?? '\t';
+	let current_newline = '\n';
+	const indent_str = opts.indent ?? '\t';
+
+	let needs_newline = false;
+	let needs_margin = false;
 
 	/** @param {Command} command */
 	function run(command) {
-		if (typeof command === 'string') {
-			append(command);
-			return;
-		}
-
 		if (Array.isArray(command)) {
 			for (let i = 0; i < command.length; i += 1) {
 				run(command[i]);
@@ -86,41 +84,47 @@ export function print(node, opts = {}) {
 			return;
 		}
 
-		switch (command.type) {
-			case 'Location':
-				current_line.push([
-					current_column,
-					0, // source index is always zero
-					command.line - 1,
-					command.column
-				]);
-				break;
+		switch (command) {
+			case newline:
+				needs_newline = true;
+				return;
 
-			case 'Newline':
-				append(newline);
-				break;
+			case margin:
+				needs_margin = true;
+				return;
 
-			case 'Indent':
-				newline += indent;
-				break;
+			case indent:
+				current_newline += indent_str;
+				return;
 
-			case 'Dedent':
-				newline = newline.slice(0, -indent.length);
-				break;
+			case dedent:
+				current_newline = current_newline.slice(0, -indent_str.length);
+				return;
+		}
 
-			case 'Comment':
-				if (command.comment.type === 'Line') {
-					append(`//${command.comment.value}`);
-				} else {
-					append(`/*${command.comment.value.replace(/\n/g, newline)}*/`);
-				}
+		if (needs_newline) {
+			append(needs_margin ? '\n' + current_newline : current_newline);
+		}
 
-				break;
+		needs_margin = needs_newline = false;
+
+		if (typeof command === 'string') {
+			append(command);
+			return;
+		}
+
+		if (command.type === 'Location') {
+			current_line.push([
+				current_column,
+				0, // source index is always zero
+				command.line - 1,
+				command.column
+			]);
 		}
 	}
 
-	for (let i = 0; i < state.commands.length; i += 1) {
-		run(state.commands[i]);
+	for (let i = 0; i < commands.length; i += 1) {
+		run(commands[i]);
 	}
 
 	mappings.push(current_line);

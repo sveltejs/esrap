@@ -1,2 +1,2 @@
-export { PrintOptions } from './types';
+export { PrintOptions, Visitors } from './types';
 export * from './index';
