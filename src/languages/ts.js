@@ -136,17 +136,27 @@ export default (options = {}) => {
 
 	/**
 	 * @param {Context} context
-	 * @param {{ line: number, column: number }} loc
+	 * @param {{ line: number, column: number } | null} from
+	 * @param {{ line: number, column: number }} to
 	 * @param {boolean} pad
 	 */
-	function flush_comments_until(context, loc, pad) {
+	function flush_comments_until(context, from, to, pad) {
+		let first = true;
+
 		while (comment_index < comments.length) {
 			const comment = comments[comment_index];
 
-			if (comment && before(comment.loc.start, loc)) {
+			if (comment && before(comment.loc.start, to)) {
+				if (first && from !== null && comment.loc.start.line > from.line) {
+					context.margin();
+					context.newline();
+				}
+
+				first = false;
+
 				write_comment(comment, context);
 
-				if (comment.loc.end.line < loc.line) {
+				if (comment.loc.end.line < to.line) {
 					context.newline();
 				} else if (pad) {
 					context.write(' ');
@@ -227,7 +237,7 @@ export default (options = {}) => {
 			prev = child;
 		}
 
-		flush_comments_until(context, until);
+		flush_comments_until(context, nodes[nodes.length - 1]?.loc.end ?? null, until, false);
 
 		if (multiline) {
 			context.dedent();
@@ -270,7 +280,12 @@ export default (options = {}) => {
 
 		if (node.loc) {
 			context.newline();
-			flush_comments_until(context, node.loc.end);
+			flush_comments_until(
+				context,
+				node.body[node.body.length - 1]?.loc.end ?? null,
+				node.loc.end,
+				false
+			);
 		}
 	}
 
@@ -529,7 +544,7 @@ export default (options = {}) => {
 			const is_statement = /(Statement|Declaration)$/.test(node.type);
 
 			if (node.loc) {
-				flush_comments_until(context, node.loc.start, true);
+				flush_comments_until(context, null, node.loc.start, true);
 			}
 
 			visit(node);

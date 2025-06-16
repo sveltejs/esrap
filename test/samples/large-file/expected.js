@@ -31,6 +31,7 @@
 	} else {
 		factory(global);
 	}
+
 	// Pass this if window is not defined yet
 })(typeof window !== "undefined" ? window : this, function (window, noGlobal) {
 	// Edge <= 12 - 13+, Firefox <=18 - 45+, IE 10 - 11, Safari 5.1 - 9+, iOS 6 - 9.1
@@ -285,6 +286,7 @@
 
 						// Never move original objects, clone them
 						target[name] = jQuery.extend(deep, clone, copy);
+
 						// Don't bring in undefined values
 					} else if (copy !== undefined) {
 						target[name] = copy;
@@ -478,6 +480,7 @@
 						ret.push(value);
 					}
 				}
+
 				// Go through every key on the object,
 			} else {
 				for (i in elems) {
@@ -742,6 +745,7 @@
 								} else {
 									return results;
 								}
+
 								// Element context
 							} else {
 								// Support: IE 9 only
@@ -752,11 +756,13 @@
 									return results;
 								}
 							}
+
 							// Type selector
 						} else if (match[2]) {
 							push.apply(results, context.getElementsByTagName(selector));
 
 							return results;
+
 							// Class selector
 						} else if ((m = match[3]) && context.getElementsByClassName) {
 							push.apply(results, context.getElementsByClassName(m));
@@ -937,6 +943,7 @@
 					}
 
 					return elem.disabled === disabled;
+
 					// Try to winnow out elements that can't be disabled before trusting the disabled property.
 					// Some victims get caught in our net (label, legend, menu, track), but it shouldn't
 					// even exist on them, let alone have a boolean value.
@@ -1133,6 +1140,7 @@
 			Expr.find.TAG = function (tag, context) {
 				if (typeof context.getElementsByTagName !== "undefined") {
 					return context.getElementsByTagName(tag);
+
 					// DocumentFragment nodes don't have gEBTN
 				} else {
 					return context.querySelectorAll(tag);
@@ -1448,6 +1456,7 @@
 							: 2 * (match[3] === "even" || match[3] === "odd"));
 
 						match[5] = +(match[7] + match[8] || match[3] === "odd");
+
 						// other types prohibit arguments
 					} else if (match[3]) {
 						find.error(match[0]);
@@ -1466,6 +1475,7 @@
 					// Accept quoted arguments as-is
 					if (match[3]) {
 						match[2] = match[4] || match[5] || "";
+
 						// Strip excess characters from unquoted arguments
 					} else if (unquoted && rpseudo.test(unquoted) && (// Get excess from tokenize (recursively)
 					excess = tokenize(unquoted, true)) && (// advance to the next closing parenthesis
@@ -2211,6 +2221,7 @@
 							}
 						}
 					}
+
 					// Add elements to results, through postFinder if defined
 				} else {
 					matcherOut = condense(matcherOut === results
@@ -2492,6 +2503,7 @@
 
 					if (!context) {
 						return results;
+
 						// Precompiled matchers will still verify ancestry, so step up a level
 					} else if (compiled) {
 						context = context.parentNode;
@@ -2573,6 +2585,7 @@
 		find.selectors = jQuery.expr;
 		find.support = jQuery.support;
 		find.uniqueSort = jQuery.uniqueSort;
+
 		/* eslint-enable */
 	})();
 
@@ -2736,6 +2749,7 @@
 								// Properties of context are called as methods if possible
 								if (isFunction(this[match])) {
 									this[match](context[match]);
+
 									// ...and otherwise set as attributes
 								} else {
 									this.attr(match, context[match]);
@@ -2744,6 +2758,7 @@
 						}
 
 						return this;
+
 						// HANDLE: $(#id)
 					} else {
 						elem = document.getElementById(match[2]);
@@ -2757,20 +2772,24 @@
 
 						return this;
 					}
+
 					// HANDLE: $(expr, $(...))
 				} else if (!context || context.jquery) {
 					return (context || root).find(selector);
+
 					// HANDLE: $(expr, context)
 					// (which is just equivalent to: $(context).find(expr)
 				} else {
 					return this.constructor(context).find(selector);
 				}
+
 				// HANDLE: $(DOMElement)
 			} else if (selector.nodeType) {
 				this[0] = selector;
 				this.length = 1;
 
 				return this;
+
 				// HANDLE: $(function)
 				// Shortcut for document ready
 			} else if (isFunction(selector)) {
@@ -3055,6 +3074,7 @@
 					// Keep an empty list if we have data for future add calls
 					if (memory) {
 						list = [];
+
 						// Otherwise, this object is spent
 					} else {
 						list = "";
@@ -3203,9 +3223,11 @@
 			// Check for promise aspect first to privilege synchronous behavior
 			if (value && isFunction(method = value.promise)) {
 				method.call(value).done(resolve).fail(reject);
+
 				// Other thenables
 			} else if (value && isFunction(method = value.then)) {
 				method.call(value, resolve, reject);
+
 				// Other non-thenables
 			} else {
 				// Control `resolve` arguments by letting Array#slice cast boolean `noValue` to integer:
@@ -3213,6 +3235,7 @@
 				// * true: [ value ].slice( 1 ) => resolve()
 				resolve.apply(undefined, [value].slice(noValue));
 			}
+
 			// For Promises/A+, convert exceptions into rejections
 			// Since jQuery.when doesn't unwrap thenables, we can skip the extra checks appearing in
 			// Deferred#then to conditionally suppress rejection.
@@ -3336,6 +3359,7 @@
 											// Special processors (notify) just wait for resolution
 											if (special) {
 												then.call(returned, resolve(maxDepth, deferred, Identity, special), resolve(maxDepth, deferred, Thrower, special));
+
 												// Normal processors (resolve) also hook into progress
 											} else {
 												// ...and disregard older resolution values
@@ -3343,6 +3367,7 @@
 
 												then.call(returned, resolve(maxDepth, deferred, Identity, special), resolve(maxDepth, deferred, Thrower, special), resolve(maxDepth, deferred, Identity, deferred.notifyWith));
 											}
+
 											// Handle all other returned values
 										} else {
 											// Only substitute handlers pass on context
@@ -3395,6 +3420,7 @@
 									// since it's otherwise lost when execution goes async
 									if (jQuery.Deferred.getErrorHook) {
 										process.error = jQuery.Deferred.getErrorHook();
+
 										// The deprecated alias of the above. While the name suggests
 										// returning the stack, not an error instance, jQuery just passes
 										// it directly to `console.warn` so both will work; an instance
@@ -3631,6 +3657,7 @@
 			for (i in key) {
 				access(elems, fn, i, key[i], true, emptyGet, raw);
 			}
+
 			// Sets one value
 		} else if (value !== undefined) {
 			chainable = true;
@@ -3644,6 +3671,7 @@
 				if (raw) {
 					fn.call(elems, value);
 					fn = null;
+
 					// ...except when executing function values
 				} else {
 					bulk = fn;
@@ -3721,6 +3749,7 @@
 					// use plain assignment
 					if (owner.nodeType) {
 						owner[this.expando] = value;
+
 						// Otherwise secure it in a non-enumerable property
 						// configurable must be true to allow the property to be
 						// deleted when data is removed
@@ -3740,6 +3769,7 @@
 			// Always use camelCase key (gh-2257)
 			if (typeof data === "string") {
 				cache[camelCase(data)] = value;
+
 				// Handle: [ owner, { properties } ] args
 			} else {
 				// Copy the properties one-by-one to the cache object
@@ -4470,9 +4500,11 @@
 					// Support: Android <=4.0 only, PhantomJS 1 only
 					// push.apply(_, arraylike) throws on ancient WebKit
 					jQuery.merge(nodes, elem.nodeType ? [elem] : elem);
+
 					// Convert non-html into a text node
 				} else if (!rhtml.test(elem)) {
 					nodes.push(context.createTextNode(elem));
+
 					// Convert html into DOM nodes
 				} else {
 					tmp = tmp || fragment.appendChild(context.createElement("div"));
@@ -5083,6 +5115,7 @@
 
 							return result;
 						}
+
 						// If this is an inner synthetic event for an event with a bubbling surrogate
 						// (focus or blur), assume that the surrogate already propagated from triggering
 						// the native event and prevent that from happening again here.
@@ -5092,6 +5125,7 @@
 					} else if ((jQuery.event.special[type] || {}).delegateType) {
 						event.stopPropagation();
 					}
+
 					// If this is a native event triggered above, everything is now in order
 					// Fire an inner synthetic event with the original arguments
 				} else if (saved) {
@@ -5144,6 +5178,7 @@
 
 			this.currentTarget = src.currentTarget;
 			this.relatedTarget = src.relatedTarget;
+
 			// Event type
 		} else {
 			this.type = src;
@@ -5565,6 +5600,7 @@
 		// Fails to persist the checked state of a cloned checkbox or radio button.
 		if (nodeName === "input" && rcheckableType.test(src.type)) {
 			dest.checked = src.checked;
+
 			// Fails to return the selected option to the default selected state when cloning options
 		} else if (nodeName === "input" || nodeName === "textarea") {
 			dest.defaultValue = src.defaultValue;
@@ -5753,6 +5789,7 @@
 							for (type in data.events) {
 								if (special[type]) {
 									jQuery.event.remove(elem, type);
+
 									// This is a shortcut to avoid jQuery.event.remove's overhead
 								} else {
 									jQuery.removeEvent(elem, type, data.handle);
@@ -5889,6 +5926,7 @@
 							}
 
 							elem = 0;
+
 							// If using innerHTML throws an exception, use the fallback method
 						} catch(e) {}
 					}
@@ -5920,6 +5958,7 @@
 							parent.replaceChild(elem, this);
 						}
 					}
+
 					// Force callback invocation
 				},
 				ignored
@@ -6321,10 +6360,12 @@
 				// For "border" or "margin", add border
 				if (box !== "padding") {
 					delta += jQuery.css(elem, "border" + cssExpand[i] + "Width", true, styles);
+
 					// But still keep track of it otherwise
 				} else {
 					extra += jQuery.css(elem, "border" + cssExpand[i] + "Width", true, styles);
 				}
+
 				// If we get here with a border-box (content + padding + border), we're seeking "content" or
 				// "padding" or "margin"
 			} else {
@@ -6925,6 +6966,7 @@
 					// there is still data from a stopped show/hide
 					if (value === "show" && dataShow && dataShow[prop] !== undefined) {
 						hidden = true;
+
 						// Ignore all other no-op show/hide data
 					} else {
 						continue;
@@ -7944,6 +7986,7 @@
 							self.addClass(className);
 						}
 					}
+
 					// Toggle whole class name
 				} else if (value === undefined || type === "boolean") {
 					className = getClass(this);
@@ -8114,6 +8157,7 @@
 						if (option.selected = jQuery.inArray(jQuery.valHooks.option.get(option), values) > -1) {
 							optionSet = true;
 						}
+
 						/* eslint-enable no-cond-assign */
 					}
 
@@ -8510,6 +8554,7 @@
 					if (dataType[0] === "+") {
 						dataType = dataType.slice(1) || "*";
 						(structure[dataType] = structure[dataType] || []).unshift(func);
+
 						// Otherwise append
 					} else {
 						(structure[dataType] = structure[dataType] || []).push(func);
@@ -8674,6 +8719,7 @@
 				// There's only work to do if current dataType is non-auto
 				if (current === "*") {
 					current = prev;
+
 					// Convert response if prev dataType is non-auto and differs from current
 				} else if (prev !== "*" && prev !== current) {
 					// Seek a direct converter
@@ -8693,6 +8739,7 @@
 									// Condense equivalence converters
 									if (conv === true) {
 										conv = converters[conv2];
+
 										// Otherwise, insert the intermediate dataType
 									} else if (converters[conv2] !== true) {
 										current = tmp[0];
@@ -9025,6 +9072,7 @@
 
 				// Put hash and anti-cache on the URL that will be requested (gh-1732)
 				s.url = cacheURL + uncached;
+
 				// Change '%20' to '+' if this is encoded form body content (gh-2658)
 			} else if (s.data && s.processData && (s.contentType || "").indexOf("application/x-www-form-urlencoded") === 0) {
 				s.data = s.data.replace(r20, "+");
@@ -9181,9 +9229,11 @@
 					// if no content
 					if (status === 204 || s.type === "HEAD") {
 						statusText = "nocontent";
+
 						// if not modified
 					} else if (status === 304) {
 						statusText = "notmodified";
+
 						// If we have data, let's convert it
 					} else {
 						statusText = response.state;
@@ -9639,6 +9689,7 @@
 				// If previous value didn't exist - remove it
 				if (overwritten === undefined) {
 					jQuery(window).removeProp(callbackName);
+
 					// Otherwise restore preexisting value
 				} else {
 					window[callbackName] = overwritten;
@@ -9751,6 +9802,7 @@
 			callback = params;
 
 			params = undefined;
+
 			// Otherwise, build a param string
 		} else if (params && typeof params === "object") {
 			type = "POST";
@@ -9778,6 +9830,7 @@
 					jQuery("<div>").append(jQuery.parseHTML(responseText)).find(selector)
 					: // Otherwise use the full result
 					responseText);
+
 				// If the request succeeds, this function gets "data", "status", "jqXHR"
 				// but they are ignored because response was set above.
 				// If it fails, this function gets "jqXHR", "status", "error"
