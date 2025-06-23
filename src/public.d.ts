@@ -1,2 +1,2 @@
-export { PrintOptions, Visitors } from './types';
+export { PrintOptions, Context, Visitors } from './types';
 export * from './index';
