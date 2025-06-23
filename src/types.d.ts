@@ -41,28 +41,12 @@ export interface Location {
 	column: number;
 }
 
-export interface Margin {
-	type: 'Margin';
-}
-
-export interface Newline {
-	type: 'Newline';
-}
-
-export interface Indent {
-	type: 'Indent';
-}
-
-export interface Dedent {
-	type: 'Dedent';
-}
-
 export interface IndentChange {
 	type: 'IndentChange';
 	offset: number;
 }
 
-export type Command = string | Location | Margin | Newline | Indent | Dedent | Command[];
+export type Command = string | number | Location | Command[];
 
 export interface PrintOptions {
 	sourceMapSource?: string;

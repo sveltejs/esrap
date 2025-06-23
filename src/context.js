@@ -1,17 +1,10 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, Dedent, Visitors, Indent, Newline, Margin } from './types' */
+/** @import { Command, Visitors } from './types' */
 
-/** @type {Margin} */
-export const margin = { type: 'Margin' };
-
-/** @type {Newline} */
-export const newline = { type: 'Newline' };
-
-/** @type {Indent} */
-export const indent = { type: 'Indent' };
-
-/** @type {Dedent} */
-export const dedent = { type: 'Dedent' };
+export const margin = 0;
+export const newline = 1;
+export const indent = 2;
+export const dedent = 3;
 
 export class Context {
 	#visitors;

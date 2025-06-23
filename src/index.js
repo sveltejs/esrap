@@ -84,22 +84,18 @@ export function print(node, visitors, opts = {}) {
 			return;
 		}
 
-		switch (command) {
-			case newline:
+		if (typeof command === 'number') {
+			if (command === newline) {
 				needs_newline = true;
-				return;
-
-			case margin:
+			} else if (command === margin) {
 				needs_margin = true;
-				return;
-
-			case indent:
+			} else if (command === indent) {
 				current_newline += indent_str;
-				return;
-
-			case dedent:
+			} else if (command === dedent) {
 				current_newline = current_newline.slice(0, -indent_str.length);
-				return;
+			}
+
+			return;
 		}
 
 		if (needs_newline) {
