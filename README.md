@@ -38,11 +38,11 @@ If the nodes of the input AST have `loc` properties (e.g. the AST was generated 
 
 ## Built-in languages
 
-`esrap` ships with two built-in languages — `ts()` and `tsx()` — which can print ASTs conforming to [`@typescript-eslint/types`](https://www.npmjs.com/package/@typescript-eslint/types) (which extends [ESTree](https://github.com/estree/estree)):
+`esrap` ships with two built-in languages — `ts()` and `tsx()` (considered experimental at present!) — which can print ASTs conforming to [`@typescript-eslint/types`](https://www.npmjs.com/package/@typescript-eslint/types) (which extends [ESTree](https://github.com/estree/estree)):
 
 ```js
 import ts from 'esrap/languages/ts';
-import tsx from 'esrap/languages/tsx';
+import tsx from 'esrap/languages/tsx'; // experimental!
 ```
 
 Both languages accept an options object:

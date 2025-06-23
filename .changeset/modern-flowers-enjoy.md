@@ -2,4 +2,4 @@
 'esrap': minor
 ---
 
-feat: JSX support
+feat: experimental JSX support
