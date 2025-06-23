@@ -1145,6 +1145,12 @@ export default (options = {}) => {
 			}
 
 			context.write(';');
+
+			flush_trailing_comments(
+				context,
+				(node.value ?? node.typeAnnotation ?? node.key).loc.end,
+				null
+			);
 		},
 
 		RestElement: shared['RestElement|SpreadElement'],

@@ -1,5 +1,5 @@
 class Foo {
-	hi;
-	static foo = 1;
-	[KEY] = 2;
+	hi; // a
+	static foo = 1; // b
+	[KEY] = 2; // c
 }
