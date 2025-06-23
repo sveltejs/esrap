@@ -1,5 +1,5 @@
 ---
-'esrap': minor
+'esrap': major
 ---
 
-Add support for custom node printers
+breaking: add support for custom printers
