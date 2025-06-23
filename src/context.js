@@ -84,24 +84,17 @@ export class Context {
 		const visitor = this.#visitors[node.type];
 
 		if (!visitor) {
-			let error = [`Failed to find an implementation for ${node.type}`];
+			let message = `Not implemented: ${node.type}`;
+
+			if (node.type.includes('TS')) {
+				message += ` (consider using 'esrap/languages/ts')`;
+			}
 
 			if (node.type.includes('JSX')) {
-				error.push(`hint: perhaps you need to use 'esrap/languages/jsx'`);
-			}
-			if (node.type.includes('TS')) {
-				error.push(`hint: perhaps you need to use 'esrap/languages/ts'`);
-			}
-			if (node.type.includes('TSX')) {
-				error.push(`hint: perhaps you need to use 'esrap/languages/tsx'`);
-			}
-			if (Object.keys(this.#visitors).length < 25) {
-				error.push(
-					`hint: perhaps you added custom visitors, but forgot to use 'esrap/languages/js'`
-				);
+				message += ` (consider using 'esrap/languages/tsx')`;
 			}
 
-			throw new Error(error.join('\n'));
+			throw new Error(message);
 		}
 
 		if (this.#visitors._) {
