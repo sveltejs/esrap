@@ -16,7 +16,6 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install
-
+      - run: pnpm install
+      - run: pnpm prepublishOnly
       - run: pnpm dlx pkg-pr-new publish --no-template
