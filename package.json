@@ -17,9 +17,11 @@
       "default": "./src/index.js"
     },
     "./languages/ts": {
+      "types": "./types/index.d.ts",
       "default": "./src/languages/ts.js"
     },
     "./languages/tsx": {
+      "types": "./types/index.d.ts",
       "default": "./src/languages/tsx.js"
     }
   },
@@ -40,7 +42,7 @@
     "changeset:version": "changeset version",
     "changeset:publish": "changeset publish",
     "check": "tsc",
-    "prepublishOnly": "pnpm test && dts-buddy -m esrap:./src/public.d.ts",
+    "prepublishOnly": "pnpm test && dts-buddy -m esrap:./src/public.d.ts -m esrap/languages/ts:./src/languages/ts.js -m esrap/languages/tsx:./src/languages/tsx.js",
     "sandbox": "node test/sandbox/index.js",
     "test": "vitest --run",
     "test:ui": "vitest --ui"

@@ -1,9 +1,10 @@
 /** @import { Visitors } from '../types' */
+/** @import { TSOptions } from './types.js' */
 import { TSESTree } from '@typescript-eslint/types';
 import ts from './ts.js';
 
 /**
- * @param {Parameters<typeof ts>[0]} [options]
+ * @param {TSOptions} [options]
  * @returns {Visitors<TSESTree.Node>}
  */
 export default (options) => ({

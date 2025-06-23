@@ -1,5 +1,6 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Visitors } from '../types.js' */
+/** @import { TSOptions } from './types.js' */
 import { Context } from '../context.js';
 
 /** @type {Record<TSESTree.Expression['type'] | 'Super' | 'RestElement', number>} */
@@ -91,10 +92,7 @@ function write_comment(comment, context) {
 }
 
 /**
- * @param {{
- *   quotes?: 'double' | 'single';
- *   comments?: TSESTree.Comment[];
- * }} [options]
+ * @param {TSOptions} [options]
  * @returns {Visitors<TSESTree.Node>}
  */
 export default (options = {}) => {
