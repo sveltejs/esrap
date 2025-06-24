@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "// TODO i think these are currently broken in acorn-typescript?\n// export type X = number;\n// export type * from './elsewhere';\n\ntype Y = number;\ntype Z = number;\nexport type { Y };\nexport { type Z };\n"
+  ],
+  "mappings": ";;;KAIK,CAAC,GAAG,MAAM;;KACV,CAAC,GAAG,MAAM;;cACD,CAAC;cACD,CAAC"
+}

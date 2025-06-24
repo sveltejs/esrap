@@ -747,11 +747,13 @@ export default (options = {}) => {
 		},
 
 		ExportAllDeclaration(node, context) {
-			context.write('export * ');
+			context.write(node.exportKind === 'type' ? 'export type * ' : 'export * ');
+
 			if (node.exported) {
 				context.write('as ');
 				context.visit(node.exported);
 			}
+
 			context.write(' from ');
 			context.visit(node.source);
 			context.write(';');
@@ -769,6 +771,10 @@ export default (options = {}) => {
 
 		ExportNamedDeclaration(node, context) {
 			context.write('export ');
+
+			if (node.exportKind === 'type') {
+				context.write('type ');
+			}
 
 			if (node.declaration) {
 				context.visit(node.declaration);
@@ -788,6 +794,10 @@ export default (options = {}) => {
 		},
 
 		ExportSpecifier(node, context) {
+			if (node.exportKind === 'type') {
+				context.write('type ');
+			}
+
 			context.visit(node.local);
 
 			if (node.local.name !== node.exported.name) {
