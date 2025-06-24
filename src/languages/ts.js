@@ -1148,7 +1148,7 @@ export default (options = {}) => {
 
 			flush_trailing_comments(
 				context,
-				(node.value ?? node.typeAnnotation ?? node.key).loc.end,
+				(node.value ?? node.typeAnnotation ?? node.key).loc?.end,
 				null
 			);
 		},
