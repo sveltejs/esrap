@@ -497,6 +497,10 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'ClassDeclaration|ClassExpression': (node, context) => {
+			if (node.declare) {
+				context.write('declare ');
+			}
+
 			context.write('class ');
 
 			if (node.id) {
@@ -1356,6 +1360,39 @@ export default (options = {}) => {
 			}
 		},
 
+		TSDeclareFunction(node, context) {
+			context.write('declare ');
+
+			if (node.async) {
+				context.write('async ');
+			}
+
+			context.write('function');
+
+			if (node.generator) {
+				context.write('*');
+			}
+
+			if (node.id) {
+				context.write(' ');
+				context.visit(node.id);
+			}
+
+			if (node.typeParameters) {
+				context.visit(node.typeParameters);
+			}
+
+			context.write('(');
+			sequence(context, node.params, node.returnType?.loc?.start ?? node.loc?.end ?? null, false);
+			context.write(')');
+
+			if (node.returnType) {
+				context.visit(node.returnType);
+			}
+
+			context.write(';');
+		},
+
 		TSNumberKeyword(node, context) {
 			context.write('number', node);
 		},
@@ -1757,6 +1794,10 @@ function handle_var_declaration(node, context) {
 	const child_context = context.new();
 
 	context.append(child_context);
+
+	if (node.declare) {
+		child_context.write('declare ');
+	}
 
 	child_context.write(`${node.kind} `);
 	child_context.append(open);

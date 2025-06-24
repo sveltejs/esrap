@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "declare function a(): void;\ndeclare const b: number;\ndeclare class c {}\n\nexport {};\n"
+  ],
+  "mappings": "iBAAiB,CAAC,IAAI,IAAI;;cACZ,CAAS,EAAN,MAAM;;cACT,CAAC,CAAC,CAAC,AAAA,CAAC;;"
+}
