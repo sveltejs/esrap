@@ -5,7 +5,7 @@ import { print } from '../src/index.js';
 import { expect } from 'vitest';
 import { load } from './common.js';
 import { walk } from 'zimmerframe';
-import ts from '../src/languages/ts.js';
+import ts from '../src/languages/ts/index.js';
 
 /** @import { TSESTree } from '@typescript-eslint/types' */
 

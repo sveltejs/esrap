@@ -4,7 +4,7 @@ import { test } from 'vitest';
 import { load } from './common';
 import { print } from '../src';
 import { expect } from 'vitest';
-import ts from '../src/languages/ts.js';
+import ts from '../src/languages/ts/index.js';
 
 const test_code = "const foo = () => { const bar = 'baz' }";
 

@@ -1,5 +1,5 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, Visitors } from './types' */
+/** @import { BaseNode, Command, Visitors } from './types' */
 
 export const margin = 0;
 export const newline = 1;
@@ -49,7 +49,7 @@ export class Context {
 	/**
 	 *
 	 * @param {string} content
-	 * @param {TSESTree.Node} [node]
+	 * @param {BaseNode} [node]
 	 */
 	write(content, node) {
 		if (node?.loc) {
@@ -91,8 +91,10 @@ export class Context {
 		}
 
 		if (this.#visitors._) {
+			// @ts-expect-error
 			this.#visitors._(node, this, (node) => visitor(node, this));
 		} else {
+			// @ts-expect-error
 			visitor(node, this);
 		}
 	}

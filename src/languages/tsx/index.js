@@ -1,7 +1,9 @@
-/** @import { Visitors } from '../types' */
-/** @import { TSOptions } from './types.js' */
-import { TSESTree } from '@typescript-eslint/types';
-import ts from './ts.js';
+/** @import { TSESTree } from '@typescript-eslint/types' */
+/** @import { Visitors } from '../../types.js' */
+/** @import { TSOptions } from '../types.js' */
+import ts from '../ts/index.js';
+
+/** @typedef {TSESTree.Node} Node */
 
 /**
  * @param {TSOptions} [options]

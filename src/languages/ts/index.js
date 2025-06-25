@@ -1,7 +1,9 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Visitors } from '../types.js' */
-/** @import { TSOptions, Comment } from './types.js' */
-import { Context } from '../context.js';
+/** @import { Visitors } from '../../types.js' */
+/** @import { TSOptions, Comment } from '../types.js' */
+import { Context } from 'esrap';
+
+/** @typedef {TSESTree.Node} Node */
 
 /** @type {Record<TSESTree.Expression['type'] | 'Super' | 'RestElement', number>} */
 export const EXPRESSIONS_PRECEDENCE = {

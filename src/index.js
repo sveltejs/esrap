@@ -153,3 +153,8 @@ export function print(node, visitors, opts = {}) {
 		}
 	};
 }
+
+// it sucks that we have to export the class rather than just
+// re-exporting it via public.d.ts, but otherwise TypeScript
+// gets confused about private fields because it is really dumb!
+export { Context };

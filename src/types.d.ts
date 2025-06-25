@@ -1,7 +1,13 @@
 import { TSESTree } from '@typescript-eslint/types';
-import type { Context } from './context.js';
+import { Context } from 'esrap';
 
-export type BaseNode = { type: string };
+export type BaseNode = {
+	type: string;
+	loc?: null | {
+		start: { line: number; column: number };
+		end: { line: number; column: number };
+	};
+};
 
 type NodeOf<T extends string, X> = X extends { type: T } ? X : never;
 
