@@ -15,6 +15,37 @@ if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
 	btoa = (str) => Buffer.from(str, 'utf-8').toString('base64');
 }
 
+class SourceMap {
+	version = 3;
+
+	/** @type {string[]} */
+	names = [];
+
+	/**
+	 * @param {[number, number, number, number][][]} mappings
+	 * @param {PrintOptions} opts
+	 */
+	constructor(mappings, opts) {
+		this.sources = [opts.sourceMapSource || null];
+		this.sourcesContent = [opts.sourceMapContent || null];
+		this.mappings = opts.sourceMapEncodeMappings === false ? mappings : encode(mappings);
+	}
+
+	/**
+	 * Returns a JSON representation suitable for saving as a `*.map` file
+	 */
+	toString() {
+		return JSON.stringify(this);
+	}
+
+	/**
+	 * Returns a base64-encoded JSON representation suitable for inlining at the bottom of a file with `//# sourceMappingURL={...}`
+	 */
+	toUrl() {
+		return 'data:application/json;charset=utf-8;base64,' + btoa(this.toString());
+	}
+}
+
 /**
  * @template {BaseNode} [T=BaseNode]
  * @param {{ type: string, [key: string]: any }} node
@@ -113,35 +144,14 @@ export function print(node, visitors, opts = {}) {
 
 	mappings.push(current_line);
 
-	const map = {
-		version: 3,
-		/** @type {string[]} */
-		names: [],
-		sources: [opts.sourceMapSource || null],
-		sourcesContent: [opts.sourceMapContent || null],
-		mappings:
-			opts.sourceMapEncodeMappings == undefined || opts.sourceMapEncodeMappings
-				? encode(mappings)
-				: mappings
-	};
-
-	Object.defineProperties(map, {
-		toString: {
-			enumerable: false,
-			value: function toString() {
-				return JSON.stringify(this);
-			}
-		},
-		toUrl: {
-			enumerable: false,
-			value: function toUrl() {
-				return 'data:application/json;charset=utf-8;base64,' + btoa(this.toString());
-			}
-		}
-	});
+	/** @type {SourceMap} */
+	let map;
 
 	return {
 		code,
-		map
+		// create sourcemap lazily in case we don't need it
+		get map() {
+			return (map ??= new SourceMap(mappings, opts));
+		}
 	};
 }
