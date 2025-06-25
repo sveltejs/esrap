@@ -42,6 +42,13 @@ function clean(ast) {
 			}
 
 			context.next();
+		},
+		JSXText(node) {
+			return {
+				...node,
+				raw: node.raw.replaceAll('\\r', ''),
+				value: node.value.replaceAll('\\r', '')
+			};
 		}
 	});
 
