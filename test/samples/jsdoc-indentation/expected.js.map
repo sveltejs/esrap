@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class Foo {\n\t/**\n\t * @param {number} a\n\t * @param {number} b\n\t */\n\tadd(a, b) {\n\t\treturn a + b;\n\t}\n}\n"
+  ],
+  "mappings": "MAAM,GAAG,CAAC,CAAC;;;;;CAKV,GAAG,CAAC,CAAC,EAAE,CAAC,EAAE,CAAC;SACH,CAAC,GAAG,CAAC;CACb,CAAC;AACF,CAAC"
+}

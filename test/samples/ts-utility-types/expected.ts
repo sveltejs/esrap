@@ -5,10 +5,7 @@ function updateTodo(todo: Todo, fieldsToUpdate: Partial<Todo>) {
 	return { ...todo, ...fieldsToUpdate };
 }
 
-const todo2: Readonly<Todo> = {
-	title: 'Delete inactive users',
-	description: 'foo'
-};
+const todo2: Readonly<Todo> = { title: 'Delete inactive users', description: 'foo' };
 
 type CatInfo = { age: number; breed: string };
 

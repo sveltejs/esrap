@@ -1,10 +1,27 @@
 import { TSESTree } from '@typescript-eslint/types';
+import { Context } from 'esrap';
 
-type Handler<T> = (node: T, state: State) => undefined;
-
-export type Handlers = {
-	[T in TSESTree.Node['type']]: Handler<Extract<TSESTree.Node, { type: T }>>;
+export type BaseNode = {
+	type: string;
+	loc?: null | {
+		start: { line: number; column: number };
+		end: { line: number; column: number };
+	};
 };
+
+type NodeOf<T extends string, X> = X extends { type: T } ? X : never;
+
+type SpecialisedVisitors<T extends BaseNode> = {
+	[K in T['type']]?: Visitor<NodeOf<K, T>>;
+};
+
+export type Visitor<T> = (node: T, context: Context) => void;
+
+export type Visitors<T extends BaseNode = BaseNode> = T['type'] extends '_'
+	? never
+	: SpecialisedVisitors<T> & { _?: (node: T, context: Context, visit: (node: T) => void) => void };
+
+export { Context };
 
 export type TypeAnnotationNodes =
 	| TSESTree.TypeNode
@@ -24,36 +41,10 @@ type TSExpressionWithTypeArguments = {
 	expression: any;
 };
 
-// `@typescript-eslint/types` differs from the official `estree` spec by handling
-// comments differently. This is a node which we can use to ensure type saftey.
-export type NodeWithComments = {
-	leadingComments?: TSESTree.Comment[] | undefined;
-	trailingComments?: TSESTree.Comment[] | undefined;
-} & TSESTree.Node;
-
-export interface State {
-	commands: Command[];
-	comments: TSESTree.Comment[];
-	multiline: boolean;
-	quote: "'" | '"';
-}
-
 export interface Location {
 	type: 'Location';
 	line: number;
 	column: number;
-}
-
-export interface Newline {
-	type: 'Newline';
-}
-
-export interface Indent {
-	type: 'Indent';
-}
-
-export interface Dedent {
-	type: 'Dedent';
 }
 
 export interface IndentChange {
@@ -61,17 +52,11 @@ export interface IndentChange {
 	offset: number;
 }
 
-export interface CommentChunk {
-	type: 'Comment';
-	comment: TSESTree.Comment;
-}
-
-export type Command = string | Location | Newline | Indent | Dedent | CommentChunk | Command[];
+export type Command = string | number | Location | Command[];
 
 export interface PrintOptions {
 	sourceMapSource?: string;
 	sourceMapContent?: string;
 	sourceMapEncodeMappings?: boolean; // default true
 	indent?: string; // default tab
-	quotes?: 'single' | 'double'; // default single
 }

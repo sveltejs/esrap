@@ -44,8 +44,10 @@ type Options = v.InferOutput<typeof OptionsSchema>;
 
 const adderDetails = adderIds.map((id) => getAdderDetails(id));
 const aliases = adderDetails.map((c) => c.config.metadata.alias).filter((v) => v !== undefined);
+
 // infers the workspace cwd if a `package.json` resides in a parent directory
 const defaultPkgPath = findUp(process.cwd(), 'package.json');
+
 const defaultCwd = defaultPkgPath ? path.dirname(defaultPkgPath) : undefined;
 
 export const add = new Command('add').description('Applies specified adders into a project').argument('[adder...]', 'adders to install').option('--cwd <path>', 'path to working directory', defaultCwd).option('--no-install', 'skips installing dependencies').option('--no-preconditions', 'skips validating preconditions').option('--default', 'applies default adder options for unspecified options', false).option('--community <adder...>', 'community adders to install', []).action((adderArgs, opts) => {
@@ -88,12 +90,10 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 
 				// we'll only display adders within their respective project types
 				if (projectType === 'kit' && !config.metadata.environments.kit) return;
+
 				if (projectType === 'svelte' && !config.metadata.environments.svelte) return;
 
-				return {
-					label: config.metadata.name,
-					value: config.metadata.id
-				};
+				return { label: config.metadata.name, value: config.metadata.id };
 			}).filter((c) => !!c);
 
 			if (categoryOptions.length > 0) {
@@ -120,8 +120,10 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 	// run precondition checks
 	if (options.preconditions) {
 		const preconditions = selectedAdders.flatMap((c) => c.checks.preconditions).filter((p) => p !== undefined);
+
 		// add global checks
 		const { kit } = createWorkspace(options.cwd);
+
 		const projectType = kit ? 'kit' : 'svelte';
 		const globalPreconditions = getGlobalPreconditions(options.cwd, projectType, selectedAdders);
 
@@ -197,10 +199,7 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 			}
 
 			if (question.type === 'string' || question.type === 'number') {
-				answer = await p.text({
-					message,
-					initialValue: question.default.toString()
-				});
+				answer = await p.text({ message, initialValue: question.default.toString() });
 			}
 
 			if (p.isCancel(answer)) {
@@ -241,6 +240,7 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 			formatSpinner.stop('Successfully formatted modified files');
 		} catch(e) {
 			formatSpinner.stop('Failed to format files');
+
 			if (e instanceof Error) p.log.error(e.message);
 		}
 	}
@@ -262,6 +262,7 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 		});
 
 		adderMessage += `- ${adderNextSteps.join('\n- ')}`;
+
 		return adderMessage;
 	}).join('\n\n');
 
@@ -272,12 +273,7 @@ type AdderId = string;
 type QuestionValues = OptionValues<any>;
 
 export type AdderOption = Record<AdderId, QuestionValues>;
-
-export type InstallAdderOptions = { 
-	cwd: string;
-	official?: AdderOption;
-	community?: AdderOption
- };
+export type InstallAdderOptions = { cwd: string; official?: AdderOption; community?: AdderOption };
 
 /**
  * Installs adders
@@ -294,7 +290,10 @@ export async function installAdders({ cwd, official = {} }: InstallAdderOptions)
 	adderDetails.sort((a, b) => {
 		if (!a.config.runsAfter) return -1;
 		if (!b.config.runsAfter) return 1;
-		return a.config.runsAfter.includes(b.config.metadata.id) ? 1 : b.config.runsAfter.includes(a.config.metadata.id) ? -1 : 0;
+
+		return a.config.runsAfter.includes(b.config.metadata.id)
+			? 1
+			: b.config.runsAfter.includes(a.config.metadata.id) ? -1 : 0;
 	});
 
 	// apply adders
@@ -325,10 +324,7 @@ export async function installAdders({ cwd, official = {} }: InstallAdderOptions)
 	return Array.from(filesToFormat);
 }
 
-async function processExternalAdder<Args extends OptionDefinition>(
-	config: ExternalAdderConfig<Args>,
-	cwd: string
-) {
+async function processExternalAdder<Args extends OptionDefinition>(config: ExternalAdderConfig<Args>, cwd: string) {
 	if (!TESTING) p.log.message(`Executing external command ${pc.gray(`(${config.metadata.id})`)}`);
 
 	try {

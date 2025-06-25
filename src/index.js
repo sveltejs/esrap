@@ -1,7 +1,6 @@
-/** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Command, PrintOptions, State } from './types' */
-import { handle } from './handlers.js';
+/** @import { BaseNode, Command, Visitors, PrintOptions } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
+import { Context, dedent, indent, margin, newline } from './context.js';
 
 /** @type {(str: string) => string} str */
 let btoa = () => {
@@ -10,38 +9,56 @@ let btoa = () => {
 
 if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
 	btoa = (str) => window.btoa(unescape(encodeURIComponent(str)));
-	// @ts-expect-error
 } else if (typeof Buffer === 'function') {
-	// @ts-expect-error
 	btoa = (str) => Buffer.from(str, 'utf-8').toString('base64');
 }
 
+class SourceMap {
+	version = 3;
+
+	/** @type {string[]} */
+	names = [];
+
+	/**
+	 * @param {[number, number, number, number][][]} mappings
+	 * @param {PrintOptions} opts
+	 */
+	constructor(mappings, opts) {
+		this.sources = [opts.sourceMapSource || null];
+		this.sourcesContent = [opts.sourceMapContent || null];
+		this.mappings = opts.sourceMapEncodeMappings === false ? mappings : encode(mappings);
+	}
+
+	/**
+	 * Returns a JSON representation suitable for saving as a `*.map` file
+	 */
+	toString() {
+		return JSON.stringify(this);
+	}
+
+	/**
+	 * Returns a base64-encoded JSON representation suitable for inlining at the bottom of a file with `//# sourceMappingURL={...}`
+	 */
+	toUrl() {
+		return 'data:application/json;charset=utf-8;base64,' + btoa(this.toString());
+	}
+}
+
 /**
- * @param {{ type: string, [key: string]: any }} node
+ * @template {BaseNode} [T=BaseNode]
+ * @param {T} node
+ * @param {Visitors<T>} visitors
  * @param {PrintOptions} opts
  * @returns {{ code: string, map: any }} // TODO
  */
-export function print(node, opts = {}) {
-	if (Array.isArray(node)) {
-		return print(
-			{
-				type: 'Program',
-				body: node,
-				sourceType: 'module'
-			},
-			opts
-		);
-	}
+export function print(node, visitors, opts = {}) {
+	/** @type {Command[]} */
+	const commands = [];
 
-	/** @type {State} */
-	const state = {
-		commands: [],
-		comments: [],
-		multiline: false,
-		quote: opts.quotes === 'double' ? '"' : "'"
-	};
+	// @ts-expect-error some nonsense I don't understand
+	const context = new Context(visitors, commands);
 
-	handle(/** @type {TSESTree.Node} */ (node), state);
+	context.visit(node);
 
 	/** @typedef {[number, number, number, number]} Segment */
 
@@ -69,16 +86,14 @@ export function print(node, opts = {}) {
 		}
 	}
 
-	let newline = '\n';
-	const indent = opts.indent ?? '\t';
+	let current_newline = '\n';
+	const indent_str = opts.indent ?? '\t';
+
+	let needs_newline = false;
+	let needs_margin = false;
 
 	/** @param {Command} command */
 	function run(command) {
-		if (typeof command === 'string') {
-			append(command);
-			return;
-		}
-
 		if (Array.isArray(command)) {
 			for (let i = 0; i < command.length; i += 1) {
 				run(command[i]);
@@ -86,74 +101,60 @@ export function print(node, opts = {}) {
 			return;
 		}
 
-		switch (command.type) {
-			case 'Location':
-				current_line.push([
-					current_column,
-					0, // source index is always zero
-					command.line - 1,
-					command.column
-				]);
-				break;
+		if (typeof command === 'number') {
+			if (command === newline) {
+				needs_newline = true;
+			} else if (command === margin) {
+				needs_margin = true;
+			} else if (command === indent) {
+				current_newline += indent_str;
+			} else if (command === dedent) {
+				current_newline = current_newline.slice(0, -indent_str.length);
+			}
 
-			case 'Newline':
-				append(newline);
-				break;
+			return;
+		}
 
-			case 'Indent':
-				newline += indent;
-				break;
+		if (needs_newline) {
+			append(needs_margin ? '\n' + current_newline : current_newline);
+		}
 
-			case 'Dedent':
-				newline = newline.slice(0, -indent.length);
-				break;
+		needs_margin = needs_newline = false;
 
-			case 'Comment':
-				if (command.comment.type === 'Line') {
-					append(`//${command.comment.value}`);
-				} else {
-					append(`/*${command.comment.value.replace(/\n/g, newline)}*/`);
-				}
+		if (typeof command === 'string') {
+			append(command);
+			return;
+		}
 
-				break;
+		if (command.type === 'Location') {
+			current_line.push([
+				current_column,
+				0, // source index is always zero
+				command.line - 1,
+				command.column
+			]);
 		}
 	}
 
-	for (let i = 0; i < state.commands.length; i += 1) {
-		run(state.commands[i]);
+	for (let i = 0; i < commands.length; i += 1) {
+		run(commands[i]);
 	}
 
 	mappings.push(current_line);
 
-	const map = {
-		version: 3,
-		/** @type {string[]} */
-		names: [],
-		sources: [opts.sourceMapSource || null],
-		sourcesContent: [opts.sourceMapContent || null],
-		mappings:
-			opts.sourceMapEncodeMappings == undefined || opts.sourceMapEncodeMappings
-				? encode(mappings)
-				: mappings
-	};
-
-	Object.defineProperties(map, {
-		toString: {
-			enumerable: false,
-			value: function toString() {
-				return JSON.stringify(this);
-			}
-		},
-		toUrl: {
-			enumerable: false,
-			value: function toUrl() {
-				return 'data:application/json;charset=utf-8;base64,' + btoa(this.toString());
-			}
-		}
-	});
+	/** @type {SourceMap} */
+	let map;
 
 	return {
 		code,
-		map
+		// create sourcemap lazily in case we don't need it
+		get map() {
+			return (map ??= new SourceMap(mappings, opts));
+		}
 	};
 }
+
+// it sucks that we have to export the class rather than just
+// re-exporting it via public.d.ts, but otherwise TypeScript
+// gets confused about private fields because it is really dumb!
+export { Context };

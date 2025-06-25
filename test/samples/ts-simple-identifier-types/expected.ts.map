@@ -7,5 +7,5 @@
   "sourcesContent": [
     "const n: number = 1;\nconst s: string = 'foo';\nconst b: boolean = true;\nconst a: any = {};\nconst na: number[] = [];\nconst sa: string[] = [];\nconst ba: boolean[] = [];\nconst aa: any[] = [];\n"
   ],
-  "mappings": "MAAM,CAAS,WAAG,CAAC;MACb,CAAS,WAAG,KAAK;MACjB,CAAU,YAAG,IAAI;MACjB,CAAM;MACN,EAAY;MACZ,EAAY;MACZ,EAAa;MACb,EAAS"
+  "mappings": "MAAM,CAAS,EAAN,MAAM,GAAG,CAAC;MACb,CAAS,EAAN,MAAM,GAAG,KAAK;MACjB,CAAU,EAAP,OAAO,GAAG,IAAI;MACjB,CAAM,EAAH,GAAG;MACN,EAAY,EAAR,MAAM;MACV,EAAY,EAAR,MAAM;MACV,EAAa,EAAT,OAAO;MACX,EAAS,EAAL,GAAG"
 }
