@@ -23,18 +23,6 @@ if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
  * @returns {{ code: string, map: any }} // TODO
  */
 export function print(node, visitors, opts = {}) {
-	if (Array.isArray(node)) {
-		return print(
-			{
-				type: 'Program',
-				body: node,
-				sourceType: 'module'
-			},
-			visitors,
-			opts
-		);
-	}
-
 	/** @type {Command[]} */
 	const commands = [];
 
