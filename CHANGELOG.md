@@ -1,5 +1,16 @@
 # esrap changelog
 
+## 2.0.0
+
+### Major Changes
+
+- a5f91d5: breaking: add support for custom printers
+- 029962b: breaking: `print(...)` only accepts a node, not an array of nodes
+
+### Minor Changes
+
+- 6483d71: feat: experimental JSX support
+
 ## 1.4.9
 
 ### Patch Changes
