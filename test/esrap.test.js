@@ -46,8 +46,8 @@ function clean(ast) {
 		JSXText(node) {
 			return {
 				...node,
-				raw: node.raw.replaceAll('\\r', ''),
-				value: node.value.replaceAll('\\r', '')
+				raw: node.raw.replaceAll('\r', ''),
+				value: node.value.replaceAll('\r', '')
 			};
 		}
 	});
