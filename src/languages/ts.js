@@ -1,6 +1,6 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Visitors } from '../types.js' */
-/** @import { TSOptions } from './types.js' */
+/** @import { TSOptions, Comment } from './types.js' */
 import { Context } from '../context.js';
 
 /** @type {Record<TSESTree.Expression['type'] | 'Super' | 'RestElement', number>} */
@@ -72,7 +72,7 @@ const OPERATOR_PRECEDENCE = {
 };
 
 /**
- * @param {TSESTree.Comment} comment
+ * @param {Comment} comment
  * @param {Context} context
  */
 function write_comment(comment, context) {
