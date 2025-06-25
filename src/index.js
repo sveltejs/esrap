@@ -9,9 +9,7 @@ let btoa = () => {
 
 if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
 	btoa = (str) => window.btoa(unescape(encodeURIComponent(str)));
-	// @ts-expect-error
 } else if (typeof Buffer === 'function') {
-	// @ts-expect-error
 	btoa = (str) => Buffer.from(str, 'utf-8').toString('base64');
 }
 
@@ -48,7 +46,7 @@ class SourceMap {
 
 /**
  * @template {BaseNode} [T=BaseNode]
- * @param {{ type: string, [key: string]: any }} node
+ * @param {T} node
  * @param {Visitors<T>} visitors
  * @param {PrintOptions} opts
  * @returns {{ code: string, map: any }} // TODO

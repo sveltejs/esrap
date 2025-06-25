@@ -5,9 +5,8 @@ import { tsPlugin } from '@sveltejs/acorn-typescript';
 
 /** @import { TSESTree } from '@typescript-eslint/types' */
 
-// @ts-expect-error
-export const acornTs = acorn.Parser.extend(tsPlugin({ allowSatisfies: true }));
-export const acornTsx = acorn.Parser.extend(tsPlugin({ allowSatisfies: true, jsx: true }));
+export const acornTs = acorn.Parser.extend(tsPlugin());
+export const acornTsx = acorn.Parser.extend(tsPlugin({ jsx: true }));
 
 /** @param {string} input
  * @param {{ jsx?: boolean }} opts
