@@ -772,13 +772,13 @@ export default (options = {}) => {
 		ExportNamedDeclaration(node, context) {
 			context.write('export ');
 
-			if (node.exportKind === 'type') {
-				context.write('type ');
-			}
-
 			if (node.declaration) {
 				context.visit(node.declaration);
 				return;
+			}
+
+			if (node.exportKind === 'type') {
+				context.write('type ');
 			}
 
 			context.write('{');

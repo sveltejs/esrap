@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "// TODO i think these are currently broken in acorn-typescript?\n// export type X = number;\n// export type * from './elsewhere';\n\ntype Y = number;\ntype Z = number;\nexport type { Y };\nexport { type Z };\n"
+    "export type X = number;\n\ntype Y = number;\ntype Z = number;\nexport type { Y };\nexport { type Z };\n\n// export type * from './elsewhere';\n"
   ],
-  "mappings": ";;;KAIK,CAAC,GAAG,MAAM;;KACV,CAAC,GAAG,MAAM;;cACD,CAAC;cACD,CAAC"
+  "mappings": "YAAY,CAAC,GAAG,MAAM;;KAEjB,CAAC,GAAG,MAAM;KACV,CAAC,GAAG,MAAM;;cACD,CAAC;cACD,CAAC;;"
 }
