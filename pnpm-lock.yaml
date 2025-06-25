@@ -17,7 +17,7 @@ importers:
         version: 2.27.11
       '@sveltejs/acorn-typescript':
         specifier: ^1.0.5
-        version: 1.0.5(acorn@8.12.1)
+        version: 1.0.5(acorn@8.15.0)
       '@typescript-eslint/types':
         specifier: ^8.2.0
         version: 8.2.0
@@ -25,8 +25,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1(vitest@2.1.1)
       acorn:
-        specifier: ^8.11.3
-        version: 8.12.1
+        specifier: ^8.15.0
+        version: 8.15.0
       dts-buddy:
         specifier: ^0.5.4
         version: 0.5.4(typescript@5.7.2)
@@ -417,8 +417,8 @@ packages:
   '@vitest/utils@2.1.1':
     resolution: {integrity: sha512-Y6Q9TsI+qJ2CC0ZKj6VBb+T8UPz593N113nnUykqwANqhgf3QkZeHFlusgKLTqrnVHbj/XDKZcDHol+dxVT+rQ==}
 
-  acorn@8.12.1:
-    resolution: {integrity: sha512-tcpGyI9zbizT9JbV6oYE477V6mTlXvvi0T0G3SNIYE2apm/G5huBa1+K89VGeovbg+jycCrfhl3ADxErOuO6Jg==}
+  acorn@8.15.0:
+    resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -1289,9 +1289,9 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.20.0':
     optional: true
 
-  '@sveltejs/acorn-typescript@1.0.5(acorn@8.12.1)':
+  '@sveltejs/acorn-typescript@1.0.5(acorn@8.15.0)':
     dependencies:
-      acorn: 8.12.1
+      acorn: 8.15.0
 
   '@types/estree@1.0.5': {}
 
@@ -1355,7 +1355,7 @@ snapshots:
       loupe: 3.1.1
       tinyrainbow: 1.2.0
 
-  acorn@8.12.1: {}
+  acorn@8.15.0: {}
 
   ansi-colors@4.1.3: {}
 

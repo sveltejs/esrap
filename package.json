@@ -31,7 +31,7 @@
     "@sveltejs/acorn-typescript": "^1.0.5",
     "@typescript-eslint/types": "^8.2.0",
     "@vitest/ui": "^2.1.1",
-    "acorn": "^8.11.3",
+    "acorn": "^8.15.0",
     "dts-buddy": "^0.5.4",
     "prettier": "^3.0.3",
     "typescript": "^5.7.2",
