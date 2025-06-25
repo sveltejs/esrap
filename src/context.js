@@ -91,10 +91,10 @@ export class Context {
 		}
 
 		if (this.#visitors._) {
-			// @ts-expect-error
+			// @ts-ignore
 			this.#visitors._(node, this, (node) => visitor(node, this));
 		} else {
-			// @ts-expect-error
+			// @ts-ignore
 			visitor(node, this);
 		}
 	}
