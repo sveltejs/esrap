@@ -516,7 +516,7 @@ export default (options = {}) => {
 				context.write(' ');
 			}
 
-			if (node.implements) {
+			if (node.implements && node.implements.length > 0) {
 				context.write('implements ');
 				sequence(context, node.implements, node.body.loc?.start ?? null, false);
 			}
@@ -1070,7 +1070,9 @@ export default (options = {}) => {
 
 		// @ts-expect-error this isn't a real node type, but Acorn produces it
 		ParenthesizedExpression(node, context) {
-			return context.visit(node.expression);
+			context.write('(');
+			context.visit(node.expression);
+			context.write(')');
 		},
 
 		PrivateIdentifier(node, context) {
@@ -1529,16 +1531,18 @@ export default (options = {}) => {
 			sequence(
 				context,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.parameters,
+				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.typeAnnotation.typeAnnotation.loc?.start ?? null,
+				node.typeAnnotation?.typeAnnotation?.loc?.start ??
+					node.returnType?.typeAnnotation?.loc?.start ??
+					null,
 				false
 			);
 
 			context.write(') => ');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			context.visit(node.typeAnnotation.typeAnnotation);
+			context.visit(node.typeAnnotation?.typeAnnotation ?? node.returnType?.typeAnnotation);
 		},
 
 		TSIndexSignature(node, context) {
