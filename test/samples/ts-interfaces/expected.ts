@@ -13,7 +13,7 @@ class Control {
 
 interface SelectableControl extends Control { select(): void }
 
-class Button extends Control implements SelectableControl{
+class Button extends Control implements SelectableControl {
 	select() {}
 }
 
