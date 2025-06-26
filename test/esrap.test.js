@@ -89,7 +89,10 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			opts = {};
 		} else {
 			// ({ ast, comments } = load(input_js, { jsx: true }));
+
+			// @ts-expect-error
 			({ program: ast, comments } = parseSync('input.ts', input_js, {
+				// @ts-expect-error
 				experimentalRawTransfer: true
 			}));
 
