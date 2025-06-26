@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- 922292a: fix: support `implements` with an empty array and with more than 1
+
 ## 2.0.0
 
 ### Major Changes
