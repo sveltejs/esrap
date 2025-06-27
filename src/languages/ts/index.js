@@ -517,8 +517,8 @@ export default (options = {}) => {
 			}
 
 			if (node.implements && node.implements.length > 0) {
-				context.write('implements ');
-				sequence(context, node.implements, node.body.loc?.start ?? null, false);
+				context.write('implements');
+				sequence(context, node.implements, node.body.loc?.start ?? null, true);
 			}
 
 			context.visit(node.body);
