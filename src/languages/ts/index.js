@@ -570,6 +570,33 @@ export default (options = {}) => {
 		},
 
 		/**
+		 * @param {TSESTree.TSFunctionType | TSESTree.TSConstructorType} node
+		 * @param {Context} context
+		 */
+		'TSFunctionType|TSConstructorType': (node, context) => {
+			if (node.type === 'TSConstructorType') context.write('new ');
+			if (node.typeParameters) context.visit(node.typeParameters);
+
+			context.write('(');
+
+			sequence(
+				context,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				node.parameters ?? node.params,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				node.typeAnnotation?.typeAnnotation?.loc?.start ??
+					node.returnType?.typeAnnotation?.loc?.start ??
+					null,
+				false
+			);
+
+			context.write(') => ');
+
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			context.visit(node.typeAnnotation?.typeAnnotation ?? node.returnType?.typeAnnotation);
+		},
+
+		/**
 		 * @param {TSESTree.RestElement | TSESTree.SpreadElement} node
 		 * @param {Context} context
 		 */
@@ -1538,27 +1565,7 @@ export default (options = {}) => {
 			}
 		},
 
-		TSFunctionType(node, context) {
-			if (node.typeParameters) context.visit(node.typeParameters);
-
-			context.write('(');
-
-			sequence(
-				context,
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.parameters ?? node.params,
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.typeAnnotation?.typeAnnotation?.loc?.start ??
-					node.returnType?.typeAnnotation?.loc?.start ??
-					null,
-				false
-			);
-
-			context.write(') => ');
-
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			context.visit(node.typeAnnotation?.typeAnnotation ?? node.returnType?.typeAnnotation);
-		},
+		TSFunctionType: shared['TSFunctionType|TSConstructorType'],
 
 		TSIndexSignature(node, context) {
 			context.write('[');
@@ -1626,6 +1633,8 @@ export default (options = {}) => {
 			context.write(' : ');
 			context.visit(node.falseType);
 		},
+
+		TSConstructorType: shared['TSFunctionType|TSConstructorType'],
 
 		TSIndexedAccessType(node, context) {
 			context.visit(node.objectType);
