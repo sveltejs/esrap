@@ -11,7 +11,7 @@ class Control {
 	private state: any;
 }
 
-interface SelectableControl extends Control { select(): void }
+interface SelectableControl extends Control { select(): void; bar() }
 
 class Button extends Control implements SelectableControl {
 	select() {}

@@ -1579,7 +1579,10 @@ export default (options = {}) => {
 			context.write(')');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			context.visit(node.typeAnnotation ?? node.returnType);
+			if (node.typeAnnotation || node.returnType) {
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				context.visit(node.typeAnnotation ?? node.returnType);
+			}
 		},
 
 		TSTupleType(node, context) {
