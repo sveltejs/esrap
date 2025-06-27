@@ -1447,6 +1447,14 @@ export default (options = {}) => {
 			context.write('undefined', node);
 		},
 
+		TSObjectKeyword(node, context) {
+			context.write('object', node);
+		},
+
+		TSBigIntKeyword(node, context) {
+			context.write('bigint', node);
+		},
+
 		TSArrayType(node, context) {
 			context.visit(node.elementType);
 			context.write('[]');
