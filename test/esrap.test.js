@@ -75,23 +75,29 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		} catch (error) {}
 
 		/** @type {TSESTree.Program} */
-		let ast;
+		let acorn_ast;
+		/** @type {TSESTree.Program} */
+		let oxc_ast;
 
 		/** @type {TSESTree.Comment[]} */
-		let comments;
+		let acorn_comments;
+		/** @type {TSESTree.Comment[]} */
+		let oxc_comments;
 
 		/** @type {PrintOptions} */
 		let opts;
 
 		if (input_json.length > 0) {
-			ast = JSON.parse(input_json);
-			comments = [];
+			acorn_ast = JSON.parse(input_json);
+			acorn_comments = [];
+			oxc_ast = JSON.parse(input_json);
+			oxc_comments = [];
 			opts = {};
 		} else {
-			// ({ ast, comments } = load(input_js, { jsx: true }));
+			({ ast: acorn_ast, comments: acorn_comments } = load(input_js, { jsx: true }));
 
 			// @ts-expect-error
-			({ program: ast, comments } = parseSync('input.ts', input_js, {
+			({ program: oxc_ast, comments: oxc_comments } = parseSync('input.ts', input_js, {
 				// @ts-expect-error
 				experimentalRawTransfer: true
 			}));
@@ -102,37 +108,50 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			};
 		}
 
-		const { code, map } = print(ast, tsx({ comments }), opts);
+		const { code: acorn_code, map: acorn_map } = print(
+			acorn_ast,
+			tsx({ comments: acorn_comments }),
+			opts
+		);
+		const { code: oxc_code } = print(oxc_ast, tsx({ comments: oxc_comments }), opts);
 
-		fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.${fileExtension}`, code);
+		fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.${fileExtension}`, acorn_code);
 		fs.writeFileSync(
 			`${__dirname}/samples/${dir}/_actual.${fileExtension}.map`,
-			JSON.stringify(map, null, '\t')
+			JSON.stringify(acorn_map, null, '\t')
 		);
 
-		// const parsed = (jsxMode ? acornTsx : acornTs).parse(code, {
-		// 	ecmaVersion: 'latest',
-		// 	sourceType: input_json.length > 0 ? 'script' : 'module',
-		// 	locations: true
-		// });
+		const parsed = (jsxMode ? acornTsx : acornTs).parse(acorn_code, {
+			ecmaVersion: 'latest',
+			sourceType: input_json.length > 0 ? 'script' : 'module',
+			locations: true
+		});
 
-		// fs.writeFileSync(
-		// 	`${__dirname}/samples/${dir}/_actual.json`,
-		// 	JSON.stringify(
-		// 		parsed,
-		// 		(key, value) => (typeof value === 'bigint' ? Number(value) : value),
-		// 		'\t'
-		// 	)
-		// );
-
-		expect(code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
-			`${__dirname}/samples/${dir}/expected.${fileExtension}`
+		fs.writeFileSync(
+			`${__dirname}/samples/${dir}/_actual.json`,
+			JSON.stringify(
+				parsed,
+				(key, value) => (typeof value === 'bigint' ? Number(value) : value),
+				'\t'
+			)
 		);
 
-		// expect(JSON.stringify(map, null, '  ').replaceAll('\\r', '')).toMatchFileSnapshot(
-		// 	`${__dirname}/samples/${dir}/expected.${fileExtension}.map`
-		// );
+		expect(acorn_code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
+			`${__dirname}/samples/${dir}/expected.${fileExtension}`,
+			'acorn'
+		);
 
-		// expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsed)))).toEqual(clean(ast));
+		expect(oxc_code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
+			`${__dirname}/samples/${dir}/expected.${fileExtension}`,
+			'oxc'
+		);
+
+		expect(JSON.stringify(acorn_map, null, '  ').replaceAll('\\r', '')).toMatchFileSnapshot(
+			`${__dirname}/samples/${dir}/expected.${fileExtension}.map`
+		);
+
+		expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsed)))).toEqual(
+			clean(acorn_ast)
+		);
 	});
 }
