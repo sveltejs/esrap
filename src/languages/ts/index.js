@@ -1515,6 +1515,12 @@ export default (options = {}) => {
 			context.visit(node.exprName);
 		},
 
+		TSClassImplements(node, context) {
+			if (node.expression) {
+				context.visit(node.expression);
+			}
+		},
+
 		TSEnumMember(node, context) {
 			context.visit(node.id);
 			if (node.initializer) {
@@ -1561,12 +1567,18 @@ export default (options = {}) => {
 
 			context.write('(');
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			sequence(context, node.parameters, node.typeAnnotation.loc?.start ?? null, false);
+			sequence(
+				context,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				node.parameters ?? node.params,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
+				false
+			);
 			context.write(')');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			context.visit(node.typeAnnotation);
+			context.visit(node.typeAnnotation ?? node.returnType);
 		},
 
 		TSTupleType(node, context) {
@@ -1644,7 +1656,7 @@ export default (options = {}) => {
 			context.write(' {');
 			context.indent();
 			context.newline();
-			sequence(context, node.members, node.loc?.end ?? null, false);
+			sequence(context, node.members ?? node.body.members, node.loc?.end ?? null, false);
 			context.dedent();
 			context.newline();
 			context.write('}');
@@ -1683,13 +1695,19 @@ export default (options = {}) => {
 			context.write('interface ');
 			context.visit(node.id);
 			if (node.typeParameters) context.visit(node.typeParameters);
-			if (node.extends) {
+			if (node.extends && node.extends.length > 0) {
 				context.write(' extends ');
 				sequence(context, node.extends, node.body.loc?.start ?? null, false);
 			}
 			context.write(' {');
 			context.visit(node.body);
 			context.write('}');
+		},
+
+		TSInterfaceHeritage(node, context) {
+			if (node.expression) {
+				context.visit(node.expression);
+			}
 		},
 
 		TSSatisfiesExpression(node, context) {
