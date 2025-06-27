@@ -503,6 +503,8 @@ export default (options = {}) => {
 				context.write('declare ');
 			}
 
+			if (node.abstract) context.write('abstract ');
+
 			context.write('class ');
 
 			if (node.id) {
@@ -570,6 +572,122 @@ export default (options = {}) => {
 		},
 
 		/**
+		 * @param {TSESTree.MethodDefinition | TSESTree.TSAbstractMethodDefinition} node
+		 * @param {Context} context
+		 */
+		'MethodDefinition|TSAbstractMethodDefinition': (node, context) => {
+			if (node.decorators) {
+				for (const decorator of node.decorators) {
+					context.visit(decorator);
+				}
+			}
+
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			if (node.abstract || node.type === 'TSAbstractMethodDefinition') {
+				context.write('abstract ');
+			}
+
+			if (node.static) {
+				context.write('static ');
+			}
+
+			if (node.kind === 'get' || node.kind === 'set') {
+				// Getter or setter
+				context.write(node.kind + ' ');
+			}
+
+			if (node.value.async) {
+				context.write('async ');
+			}
+
+			if (node.value.generator) {
+				context.write('*');
+			}
+
+			if (node.computed) context.write('[');
+			context.visit(node.key);
+			if (node.computed) context.write(']');
+
+			context.write('(');
+			sequence(
+				context,
+				node.value.params,
+				(node.value.returnType ?? node.value.body)?.loc?.start ?? node.loc?.end ?? null,
+				false
+			);
+			context.write(')');
+
+			if (node.value.returnType) context.visit(node.value.returnType);
+
+			context.write(' ');
+
+			if (node.value.body) context.visit(node.value.body);
+		},
+
+		/**
+		 * @param {TSESTree.PropertyDefinition | TSESTree.TSAbstractPropertyDefinition} node
+		 * @param {Context} context
+		 */
+		'PropertyDefinition|TSAbstractPropertyDefinition': (node, context) => {
+			if (node.decorators) {
+				for (const decorator of node.decorators) {
+					context.visit(decorator);
+				}
+			}
+
+			if (node.accessibility) {
+				context.write(node.accessibility + ' ');
+			}
+
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			if (node.abstract || node.type === 'TSAbstractPropertyDefinition') {
+				context.write('abstract ');
+			}
+
+			if (node.static) {
+				context.write('static ');
+			}
+
+			if (node.computed) {
+				context.write('[');
+				context.visit(node.key);
+				context.write(']');
+			} else {
+				context.visit(node.key);
+			}
+
+			if (node.typeAnnotation) {
+				context.write(': ');
+				context.visit(node.typeAnnotation.typeAnnotation);
+			}
+
+			if (node.value) {
+				context.write(' = ');
+				context.visit(node.value);
+			}
+
+			context.write(';');
+
+			flush_trailing_comments(
+				context,
+				(node.value ?? node.typeAnnotation ?? node.key).loc?.end ?? null,
+				null
+			);
+		},
+
+		/**
+		 * @param {TSESTree.RestElement | TSESTree.SpreadElement} node
+		 * @param {Context} context
+		 */
+		'RestElement|SpreadElement': (node, context) => {
+			context.write('...');
+			context.visit(node.argument);
+
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			if (node.typeAnnotation) context.visit(node.typeAnnotation);
+		},
+
+		/**
 		 * @param {TSESTree.TSFunctionType | TSESTree.TSConstructorType} node
 		 * @param {Context} context
 		 */
@@ -594,18 +712,6 @@ export default (options = {}) => {
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			context.visit(node.typeAnnotation?.typeAnnotation ?? node.returnType?.typeAnnotation);
-		},
-
-		/**
-		 * @param {TSESTree.RestElement | TSESTree.SpreadElement} node
-		 * @param {Context} context
-		 */
-		'RestElement|SpreadElement': (node, context) => {
-			context.write('...');
-			context.visit(node.argument);
-
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		}
 	};
 
@@ -1035,49 +1141,7 @@ export default (options = {}) => {
 			context.visit(node.property);
 		},
 
-		MethodDefinition(node, context) {
-			if (node.decorators) {
-				for (const decorator of node.decorators) {
-					context.visit(decorator);
-				}
-			}
-
-			if (node.static) {
-				context.write('static ');
-			}
-
-			if (node.kind === 'get' || node.kind === 'set') {
-				// Getter or setter
-				context.write(node.kind + ' ');
-			}
-
-			if (node.value.async) {
-				context.write('async ');
-			}
-
-			if (node.value.generator) {
-				context.write('*');
-			}
-
-			if (node.computed) context.write('[');
-			context.visit(node.key);
-			if (node.computed) context.write(']');
-
-			context.write('(');
-			sequence(
-				context,
-				node.value.params,
-				(node.value.returnType ?? node.value.body)?.loc?.start ?? node.loc?.end ?? null,
-				false
-			);
-			context.write(')');
-
-			if (node.value.returnType) context.visit(node.value.returnType);
-
-			context.write(' ');
-
-			if (node.value.body) context.visit(node.value.body);
-		},
+		MethodDefinition: shared['MethodDefinition|TSAbstractMethodDefinition'],
 
 		NewExpression: shared['CallExpression|NewExpression'],
 
@@ -1156,47 +1220,7 @@ export default (options = {}) => {
 			}
 		},
 
-		PropertyDefinition(node, context) {
-			if (node.decorators) {
-				for (const decorator of node.decorators) {
-					context.visit(decorator);
-				}
-			}
-
-			if (node.accessibility) {
-				context.write(node.accessibility + ' ');
-			}
-
-			if (node.static) {
-				context.write('static ');
-			}
-
-			if (node.computed) {
-				context.write('[');
-				context.visit(node.key);
-				context.write(']');
-			} else {
-				context.visit(node.key);
-			}
-
-			if (node.typeAnnotation) {
-				context.write(': ');
-				context.visit(node.typeAnnotation.typeAnnotation);
-			}
-
-			if (node.value) {
-				context.write(' = ');
-				context.visit(node.value);
-			}
-
-			context.write(';');
-
-			flush_trailing_comments(
-				context,
-				(node.value ?? node.typeAnnotation ?? node.key).loc?.end ?? null,
-				null
-			);
-		},
+		PropertyDefinition: shared['PropertyDefinition|TSAbstractPropertyDefinition'],
 
 		RestElement: shared['RestElement|SpreadElement'],
 
@@ -1400,6 +1424,10 @@ export default (options = {}) => {
 				context.write(node.delegate ? `yield*` : `yield`);
 			}
 		},
+
+		TSAbstractMethodDefinition: shared['MethodDefinition|TSAbstractMethodDefinition'],
+
+		TSAbstractPropertyDefinition: shared['PropertyDefinition|TSAbstractPropertyDefinition'],
 
 		TSDeclareFunction(node, context) {
 			context.write('declare ');
