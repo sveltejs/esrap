@@ -1501,8 +1501,9 @@ export default (options = {}) => {
 		},
 
 		TSTypeParameter(node, context) {
+			if (node.name && node.name.type) context.visit(node.name);
 			// @ts-expect-error type mismatch TSESTree and acorn-typescript?
-			context.write(node.name, node);
+			else context.write(node.name, node);
 
 			if (node.constraint) {
 				context.write(' extends ');
