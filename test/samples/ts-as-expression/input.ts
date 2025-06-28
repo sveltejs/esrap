@@ -14,3 +14,5 @@ const e: C = {
 } as unknown as D;
 
 const f = (Math.random() > 0.5 ? { firstName: 'name1' } : { firstName: 'name2' }) as unknown as D;
+
+const g = h(e['name']) as (scope: ng.IScope) => b;

@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "abstract class A {\n\tabstract foo: string;\n\tabstract bar: string;\n\n\tabstract get a();\n\tabstract set b(x: string);\n}\n"
+  ],
+  "mappings": "eAAe,CAAC,CAAC,CAAC;UACR,GAAG,EAAE,MAAM;UACX,GAAG,EAAE,MAAM;;cAEP,CAAC;cACD,CAAC,CAAC,CAAS,EAAN,MAAM;AACzB,CAAC"
+}
