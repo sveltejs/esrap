@@ -708,6 +708,36 @@ export default (options = {}) => {
 		},
 
 		/**
+		 * @param {TSESTree.TSConstructSignatureDeclaration | TSESTree.TSCallSignatureDeclaration} node
+		 * @param {Context} context
+		 */
+		'TSConstructSignatureDeclaration|TSCallSignatureDeclaration': (node, context) => {
+			if (node.type === 'TSConstructSignatureDeclaration') context.write('new');
+
+			if (node.typeParameters) {
+				context.visit(node.typeParameters);
+			}
+
+			context.write('(');
+
+			sequence(
+				context,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				node.parameters ?? node.params,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
+				false
+			);
+			context.write(')');
+
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			if (node.typeAnnotation || node.returnType) {
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				context.visit(node.typeAnnotation ?? node.returnType);
+			}
+		},
+
+		/**
 		 * @param {TSESTree.TSFunctionType | TSESTree.TSConstructorType} node
 		 * @param {Context} context
 		 */
@@ -1688,6 +1718,9 @@ export default (options = {}) => {
 			context.visit(node.literal);
 		},
 
+		TSCallSignatureDeclaration:
+			shared['TSConstructSignatureDeclaration|TSCallSignatureDeclaration'],
+
 		TSConditionalType(node, context) {
 			context.visit(node.checkType);
 			context.write(' extends ');
@@ -1698,31 +1731,8 @@ export default (options = {}) => {
 			context.visit(node.falseType);
 		},
 
-		TSConstructSignatureDeclaration(node, context) {
-			context.write('new');
-
-			if (node.typeParameters) {
-				context.visit(node.typeParameters);
-			}
-
-			context.write('(');
-
-			sequence(
-				context,
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.parameters ?? node.params,
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
-				false
-			);
-			context.write(')');
-
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			if (node.typeAnnotation || node.returnType) {
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				context.visit(node.typeAnnotation ?? node.returnType);
-			}
-		},
+		TSConstructSignatureDeclaration:
+			shared['TSConstructSignatureDeclaration|TSCallSignatureDeclaration'],
 
 		TSConstructorType: shared['TSFunctionType|TSConstructorType'],
 
