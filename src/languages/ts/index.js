@@ -625,10 +625,10 @@ export default (options = {}) => {
 		},
 
 		/**
-		 * @param {TSESTree.PropertyDefinition | TSESTree.TSAbstractPropertyDefinition} node
+		 * @param {TSESTree.PropertyDefinition | TSESTree.TSAbstractPropertyDefinition | TSESTree.AccessorProperty | TSESTree.TSAbstractAccessorProperty} node
 		 * @param {Context} context
 		 */
-		'PropertyDefinition|TSAbstractPropertyDefinition': (node, context) => {
+		'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty': (node, context) => {
 			if (node.decorators) {
 				for (const decorator of node.decorators) {
 					context.visit(decorator);
@@ -640,12 +640,17 @@ export default (options = {}) => {
 			}
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			if (node.abstract || node.type === 'TSAbstractPropertyDefinition') {
+			if (node.abstract || node.type === 'TSAbstractPropertyDefinition' || node.type === 'TSAbstractAccessorProperty') {
 				context.write('abstract ');
 			}
 
 			if (node.static) {
 				context.write('static ');
+			}
+
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			if (node.accessor || node.type === 'AccessorProperty' || node.type === 'TSAbstractAccessorProperty') {
+				context.write('accessor ');
 			}
 
 			if (node.computed) {
@@ -657,8 +662,12 @@ export default (options = {}) => {
 			}
 
 			if (node.typeAnnotation) {
-				context.write(': ');
-				context.visit(node.typeAnnotation.typeAnnotation);
+				if (node.type === 'AccessorProperty' || node.type === 'TSAbstractAccessorProperty') {
+					context.visit(node.typeAnnotation);
+				} else {
+					context.write(': ');
+					context.visit(node.typeAnnotation.typeAnnotation);
+				}
 			}
 
 			if (node.value) {
@@ -729,6 +738,8 @@ export default (options = {}) => {
 				flush_trailing_comments(context, node.loc.end, null);
 			}
 		},
+
+		AccessorProperty: shared['PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'],
 
 		ArrayExpression: shared['ArrayExpression|ArrayPattern'],
 
@@ -1220,7 +1231,7 @@ export default (options = {}) => {
 			}
 		},
 
-		PropertyDefinition: shared['PropertyDefinition|TSAbstractPropertyDefinition'],
+		PropertyDefinition: shared['PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'],
 
 		RestElement: shared['RestElement|SpreadElement'],
 
@@ -1427,7 +1438,10 @@ export default (options = {}) => {
 
 		TSAbstractMethodDefinition: shared['MethodDefinition|TSAbstractMethodDefinition'],
 
-		TSAbstractPropertyDefinition: shared['PropertyDefinition|TSAbstractPropertyDefinition'],
+		TSAbstractAccessorProperty: shared['PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'],
+
+		TSAbstractPropertyDefinition:
+			shared['PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'],
 
 		TSDeclareFunction(node, context) {
 			context.write('declare ');
