@@ -628,7 +628,10 @@ export default (options = {}) => {
 		 * @param {TSESTree.PropertyDefinition | TSESTree.TSAbstractPropertyDefinition | TSESTree.AccessorProperty | TSESTree.TSAbstractAccessorProperty} node
 		 * @param {Context} context
 		 */
-		'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty': (node, context) => {
+		'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty': (
+			node,
+			context
+		) => {
 			if (node.decorators) {
 				for (const decorator of node.decorators) {
 					context.visit(decorator);
@@ -639,8 +642,12 @@ export default (options = {}) => {
 				context.write(node.accessibility + ' ');
 			}
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			if (node.abstract || node.type === 'TSAbstractPropertyDefinition' || node.type === 'TSAbstractAccessorProperty') {
+			if (
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				node.abstract ||
+				node.type === 'TSAbstractPropertyDefinition' ||
+				node.type === 'TSAbstractAccessorProperty'
+			) {
 				context.write('abstract ');
 			}
 
@@ -648,8 +655,12 @@ export default (options = {}) => {
 				context.write('static ');
 			}
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			if (node.accessor || node.type === 'AccessorProperty' || node.type === 'TSAbstractAccessorProperty') {
+			if (
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				node.accessor ||
+				node.type === 'AccessorProperty' ||
+				node.type === 'TSAbstractAccessorProperty'
+			) {
 				context.write('accessor ');
 			}
 
@@ -739,7 +750,10 @@ export default (options = {}) => {
 			}
 		},
 
-		AccessorProperty: shared['PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'],
+		AccessorProperty:
+			shared[
+				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+			],
 
 		ArrayExpression: shared['ArrayExpression|ArrayPattern'],
 
@@ -1231,7 +1245,10 @@ export default (options = {}) => {
 			}
 		},
 
-		PropertyDefinition: shared['PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'],
+		PropertyDefinition:
+			shared[
+				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+			],
 
 		RestElement: shared['RestElement|SpreadElement'],
 
@@ -1438,10 +1455,15 @@ export default (options = {}) => {
 
 		TSAbstractMethodDefinition: shared['MethodDefinition|TSAbstractMethodDefinition'],
 
-		TSAbstractAccessorProperty: shared['PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'],
+		TSAbstractAccessorProperty:
+			shared[
+				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+			],
 
 		TSAbstractPropertyDefinition:
-			shared['PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'],
+			shared[
+				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+			],
 
 		TSDeclareFunction(node, context) {
 			context.write('declare ');
@@ -1674,6 +1696,32 @@ export default (options = {}) => {
 			context.visit(node.trueType);
 			context.write(' : ');
 			context.visit(node.falseType);
+		},
+
+		TSConstructSignatureDeclaration(node, context) {
+			context.write('new');
+
+			if (node.typeParameters) {
+				context.visit(node.typeParameters);
+			}
+
+			context.write('(');
+
+			sequence(
+				context,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				node.parameters ?? node.params,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
+				false
+			);
+			context.write(')');
+
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			if (node.typeAnnotation || node.returnType) {
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				context.visit(node.typeAnnotation ?? node.returnType);
+			}
 		},
 
 		TSConstructorType: shared['TSFunctionType|TSConstructorType'],
