@@ -107,6 +107,7 @@ The `context` API has several methods:
 - `context.write(data: string, node?: BaseNode)` — add a string. If `node` is provided and has a standard `loc` property (with `start` and `end` properties each with a `line` and `column`), a sourcemap mapping will be created
 - `context.indent()` — increase the indentation level, typically before adding a newline
 - `context.newline()` — self-explanatory
+- `context.space()` — adds a space character, if it doesn't immediately follow a newline
 - `context.margin()` — causes the next newline to be repeated (consecutive newlines are otherwise merged into one)
 - `context.dedent()` — decrease the indentation level (again, typically before adding a newline)
 - `context.visit(node: BaseNode)` — calls the visitor corresponding to `node.type`

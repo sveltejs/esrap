@@ -593,7 +593,9 @@ export default (options = {}) => {
 			visit(node);
 
 			if (is_statement && node.loc) {
-				flush_trailing_comments(context, node.loc.end, null);
+				if (flush_trailing_comments(context, node.loc.end, null)) {
+					context.newline();
+				}
 			}
 		},
 
@@ -868,7 +870,8 @@ export default (options = {}) => {
 			context.visit(node.consequent);
 
 			if (node.alternate) {
-				context.write(' else ');
+				context.space();
+				context.write('else ');
 				context.visit(node.alternate);
 			}
 		},

@@ -1,6 +1,6 @@
 /** @import { BaseNode, Command, Visitors, PrintOptions } from './types' */
 import { encode } from '@jridgewell/sourcemap-codec';
-import { Context, dedent, indent, margin, newline } from './context.js';
+import { Context, dedent, indent, margin, newline, space } from './context.js';
 
 /** @type {(str: string) => string} str */
 let btoa = () => {
@@ -91,6 +91,7 @@ export function print(node, visitors, opts = {}) {
 
 	let needs_newline = false;
 	let needs_margin = false;
+	let needs_space = false;
 
 	/** @param {Command} command */
 	function run(command) {
@@ -106,6 +107,8 @@ export function print(node, visitors, opts = {}) {
 				needs_newline = true;
 			} else if (command === margin) {
 				needs_margin = true;
+			} else if (command === space) {
+				needs_space = true;
 			} else if (command === indent) {
 				current_newline += indent_str;
 			} else if (command === dedent) {
@@ -117,9 +120,11 @@ export function print(node, visitors, opts = {}) {
 
 		if (needs_newline) {
 			append(needs_margin ? '\n' + current_newline : current_newline);
+		} else if (needs_space) {
+			append(' ');
 		}
 
-		needs_margin = needs_newline = false;
+		needs_margin = needs_newline = needs_space = false;
 
 		if (typeof command === 'string') {
 			append(command);

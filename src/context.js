@@ -5,6 +5,7 @@ export const margin = 0;
 export const newline = 1;
 export const indent = 2;
 export const dedent = 3;
+export const space = 4;
 
 export class Context {
 	#visitors;
@@ -37,6 +38,10 @@ export class Context {
 	newline() {
 		this.multiline = true;
 		this.#commands.push(newline);
+	}
+
+	space() {
+		this.#commands.push(space);
 	}
 
 	/**
