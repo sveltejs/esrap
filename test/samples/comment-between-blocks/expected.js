@@ -1,7 +1,7 @@
 // if true, yep
 if (condition) {
 	console.log('yep');
-} // otherwise nope
-else {
+} else // otherwise nope
+{
 	console.log('nope');
 }

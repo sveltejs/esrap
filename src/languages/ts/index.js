@@ -290,7 +290,8 @@ export default (options = {}) => {
 		let prev_type = null;
 		let prev_multiline = false;
 
-		for (const child of node.body) {
+		for (let i = 0; i < node.body.length; i += 1) {
+			const child = node.body[i];
 			if (child.type === 'EmptyStatement') continue;
 
 			const child_context = context.new();
@@ -305,6 +306,12 @@ export default (options = {}) => {
 			}
 
 			context.append(child_context);
+
+			flush_trailing_comments(
+				context,
+				child.loc?.end || null,
+				node.body[i + 1]?.loc?.end ?? node.loc?.end ?? null
+			);
 
 			prev_type = child.type;
 			prev_multiline = child_context.multiline;
@@ -579,17 +586,11 @@ export default (options = {}) => {
 
 	return {
 		_(node, context, visit) {
-			const is_statement = /(Statement|Declaration)$/.test(node.type);
-
 			if (node.loc) {
 				flush_comments_until(context, null, node.loc.start, true);
 			}
 
 			visit(node);
-
-			if (is_statement && node.loc) {
-				flush_trailing_comments(context, node.loc.end, null);
-			}
 		},
 
 		ArrayExpression: shared['ArrayExpression|ArrayPattern'],
