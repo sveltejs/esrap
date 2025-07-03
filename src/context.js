@@ -10,6 +10,7 @@ export const space = 4;
 export class Context {
 	#visitors;
 	#commands;
+	#has_newline = false;
 
 	multiline = false;
 
@@ -36,7 +37,7 @@ export class Context {
 	}
 
 	newline() {
-		this.multiline = true;
+		this.#has_newline = true;
 		this.#commands.push(newline);
 	}
 
@@ -49,6 +50,10 @@ export class Context {
 	 */
 	append(context) {
 		this.#commands.push(context.#commands);
+
+		if (this.#has_newline) {
+			this.multiline = true;
+		}
 	}
 
 	/**
@@ -63,6 +68,10 @@ export class Context {
 			this.location(node.loc.end.line, node.loc.end.column);
 		} else {
 			this.#commands.push(content);
+		}
+
+		if (this.#has_newline) {
+			this.multiline = true;
 		}
 	}
 
