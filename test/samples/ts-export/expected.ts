@@ -6,4 +6,8 @@ type Z = number;
 export type { Y };
 export { type Z };
 
+// commented because acorn doesn't support export = syntax but oxc does
+// declare module 'hello' {
+//     export = Y;
+// }
 // export type * from './elsewhere';

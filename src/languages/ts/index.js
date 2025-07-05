@@ -1606,6 +1606,12 @@ export default (options = {}) => {
 			}
 		},
 
+		TSExportAssignment(node, context) {
+			context.write('export = ');
+			context.visit(node.expression);
+			context.write(';');
+		},
+
 		//@ts-expect-error I don't know why, but this is relied upon in the tests, but doesn't exist in the TSESTree types
 		TSExpressionWithTypeArguments(node, context) {
 			context.visit(node.expression);
