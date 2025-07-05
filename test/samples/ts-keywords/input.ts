@@ -12,3 +12,6 @@ let v: () => void = () => {};
 let arr: number[] = [1, 2, 3];
 let snu: string | null = null;
 let nun: number | undefined = undefined;
+
+// commented because acorn doesn't support type assertions but oxc does
+// let ta = <boolean>true;

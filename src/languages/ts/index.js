@@ -1655,6 +1655,19 @@ export default (options = {}) => {
 			context.visit(node.expression);
 		},
 
+		TSTypeAssertion(node, context) {
+			context.write('<');
+			context.visit(node.typeAnnotation);
+			context.write('>');
+			if (EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSTypeAssertion) {
+				context.write('(');
+				context.visit(node.expression);
+				context.write(')');
+			} else {
+				context.visit(node.expression);
+			}
+		},
+
 		TSTypeParameterInstantiation(node, context) {
 			context.write('<');
 			for (let i = 0; i < node.params.length; i++) {
