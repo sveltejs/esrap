@@ -1,4 +1,5 @@
 /** @import { BaseNode, Command, Visitors, PrintOptions } from './types' */
+/** @import { TSESTree } from '@typescript-eslint/types' */
 import { encode } from '@jridgewell/sourcemap-codec';
 import { Context, dedent, indent, margin, newline, space } from './context.js';
 
@@ -157,6 +158,53 @@ export function print(node, visitors, opts = {}) {
 			return (map ??= new SourceMap(mappings, opts));
 		}
 	};
+}
+
+/**
+* Get the line and column number from a character index in the source text.
+*
+* @param {number} charIndex
+* @param {string} sourceText
+* @returns {{ line: number, column: number }}
+*/
+function getLineAndColumn(charIndex, sourceText) {
+	const lineZeroBased = sourceText.slice(0, charIndex).split('\n');
+	const columnZeroBased = lineZeroBased[lineZeroBased.length - 1].length;
+	return {
+		line: lineZeroBased.length + 1,
+		column: columnZeroBased
+	};
+}
+
+/**
+ * @param {{
+ * 	base: Visitors<TSESTree.Node>,
+ *  sourceText: string,
+ * }} options
+ * @returns {Visitors<TSESTree.Node>}
+ */
+export function resolveIndexedLocations({ base, sourceText }) {
+	return {
+		...base,
+		_(node, context, visit) {
+			if ("start" in node && typeof node.start === "number") {
+				const { line, column } = getLineAndColumn(node.start, sourceText);
+
+				context.location(line, column)
+			}
+
+			if (base._) {
+				base._(node, context, visit);
+			} else {
+				visit(node);
+			}
+
+			if ("end" in node && typeof node.end === "number") {
+				const { line, column } = getLineAndColumn(node.end, sourceText);
+				context.location(line, column);
+			}
+		}
+	}
 }
 
 // it sucks that we have to export the class rather than just
