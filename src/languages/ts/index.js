@@ -1720,6 +1720,11 @@ export default (options = {}) => {
 			sequence(context, node.types, node.loc?.end ?? null, false, ' &');
 		},
 
+		TSInferType(node, context) {
+			context.write('infer ');
+			context.visit(node.typeParameter);
+		},
+
 		TSLiteralType(node, context) {
 			context.visit(node.literal);
 		},
@@ -1848,6 +1853,13 @@ export default (options = {}) => {
 			if (node.expression) {
 				context.visit(node.expression);
 			}
+		},
+
+		//@ts-expect-error I don't know why, but this is relied upon in the tests, but doesn't exist in the TSESTree types
+		TSParenthesizedType(node, context) {
+			context.write('(');
+			context.visit(node.typeAnnotation);
+			context.write(')');
 		},
 
 		TSSatisfiesExpression(node, context) {
