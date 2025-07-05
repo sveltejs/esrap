@@ -139,7 +139,6 @@ export default (options = {}) => {
 	 * @param {Context} context
 	 * @param {{ line: number, column: number } | null} prev
 	 * @param {{ line: number, column: number } | null} next
-	 * @returns {boolean} true if final comment is a line comment
 	 */
 	function flush_trailing_comments(context, prev, next) {
 		while (comment_index < comments.length) {
@@ -157,14 +156,14 @@ export default (options = {}) => {
 				comment_index += 1;
 
 				if (comment.type === 'Line') {
-					return true;
+					context.newline();
+				} else {
+					continue;
 				}
-			} else {
-				break;
 			}
-		}
 
-		return false;
+			break;
+		}
 	}
 
 	/**
@@ -226,9 +225,7 @@ export default (options = {}) => {
 			}
 
 			const next = i === nodes.length - 1 ? until : nodes[i + 1]?.loc?.start || null;
-			if (child && flush_trailing_comments(child_context, child.loc?.end || null, next)) {
-				multiline = true;
-			}
+			flush_trailing_comments(child_context, child?.loc?.end || null, next);
 
 			length += child_context.measure() + 1;
 			multiline ||= child_context.multiline;
@@ -293,7 +290,8 @@ export default (options = {}) => {
 		let prev_type = null;
 		let prev_multiline = false;
 
-		for (const child of node.body) {
+		for (let i = 0; i < node.body.length; i += 1) {
+			const child = node.body[i];
 			if (child.type === 'EmptyStatement') continue;
 
 			const child_context = context.new();
@@ -308,6 +306,12 @@ export default (options = {}) => {
 			}
 
 			context.append(child_context);
+
+			flush_trailing_comments(
+				context,
+				child.loc?.end || null,
+				node.body[i + 1]?.loc?.end ?? node.loc?.end ?? null
+			);
 
 			prev_type = child.type;
 			prev_multiline = child_context.multiline;
@@ -472,9 +476,7 @@ export default (options = {}) => {
 					? (node.loc?.end ?? null)
 					: (node.arguments[i + 1]?.loc?.start ?? null);
 
-				if (flush_trailing_comments(context, arg.loc?.end ?? null, next)) {
-					child_context.multiline = true;
-				}
+				flush_trailing_comments(context, arg.loc?.end ?? null, next);
 
 				if (!is_last) context.append(join);
 			}
@@ -767,17 +769,11 @@ export default (options = {}) => {
 
 	return {
 		_(node, context, visit) {
-			const is_statement = /(Statement|Declaration)$/.test(node.type);
-
 			if (node.loc) {
 				flush_comments_until(context, null, node.loc.start, true);
 			}
 
 			visit(node);
-
-			if (is_statement && node.loc) {
-				flush_trailing_comments(context, node.loc.end, null);
-			}
 		},
 
 		AccessorProperty:
@@ -1056,7 +1052,8 @@ export default (options = {}) => {
 			context.visit(node.consequent);
 
 			if (node.alternate) {
-				context.write(' else ');
+				context.space();
+				context.write('else ');
 				context.visit(node.alternate);
 			}
 		},

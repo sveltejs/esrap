@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "foo(function bar() {\n\t// logic goes here\n}, true); // trailing comment\n"
+  ],
+  "mappings": "AAAA,GAAG;UAAU,GAAG,GAAG,CAAC;;CAEpB,CAAC;CAAE,IAAI;"
+}

@@ -1,5 +1,15 @@
 # esrap changelog
 
+## 2.1.0
+
+### Minor Changes
+
+- 3c9abb3: feat: add `context.space()` method
+
+### Patch Changes
+
+- 3c9abb3: fix: add newline after line comment following statement
+
 ## 2.0.1
 
 ### Patch Changes
