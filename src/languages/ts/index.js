@@ -1698,7 +1698,7 @@ export default (options = {}) => {
 			else context.write(node.name, node);
 
 			if (node.constraint) {
-				context.write(' in ');
+				context.write(' extends ');
 				context.visit(node.constraint);
 			}
 		},

@@ -7,7 +7,8 @@ type D = C | A | B | 'foobar';
 type E = A & B;
 type F = C & 'foobar';
 
-type G = { [a in C]: string };
+// TODO: commented because acorn doesn't support intrinsic but oxc does
+// type G = { [a in C]: string };
 
 type H = this;
 type I = `Hello, ${keyof C}`;
@@ -27,5 +28,5 @@ type CT = new (tpl: TemplateStringsArray, ...args: Array<unknown>) => (replaceme
 type X = [...number[]];
 type TupleWithRest = [number, ...(1 extends 2 ? string[] : number[])];
 
-// commented because acorn doesn't support intrinsic but oxc does
+// TODO: commented because acorn doesn't support intrinsic but oxc does
 // type Uppercase<S extends string> = intrinsic;

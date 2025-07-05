@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "export type X = number;\n\ntype Y = number;\ntype Z = number;\nexport type { Y };\nexport { type Z };\n\n// commented because acorn doesn't support export = syntax but oxc does\n// declare module 'hello' {\n//     export = Y;\n// }\n\nexport as namespace MyNamespace;\n\n// export type * from './elsewhere';\n"
+    "export type X = number;\n\ntype Y = number;\ntype Z = number;\nexport type { Y };\nexport { type Z };\n\n// TODO: commented because acorn doesn't support export = syntax but oxc does\n// declare module 'hello' {\n//     export = Y;\n// }\n\nexport as namespace MyNamespace;\n\n// export type * from './elsewhere';\n"
   ],
   "mappings": "YAAY,CAAC,GAAG,MAAM;;KAEjB,CAAC,GAAG,MAAM;KACV,CAAC,GAAG,MAAM;;cACD,CAAC;cACD,CAAC;;;;;;oBAOK,WAAW;;"
 }
