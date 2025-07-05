@@ -1576,6 +1576,10 @@ export default (options = {}) => {
 			context.write('bigint', node);
 		},
 
+		TSIntrinsicKeyword(node, context) {
+			context.write('intrinsic', node);
+		},
+
 		TSArrayType(node, context) {
 			context.visit(node.elementType);
 			context.write('[]');
