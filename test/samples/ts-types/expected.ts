@@ -10,6 +10,7 @@ type Wolf = { legs: 4 };
 type Animals = Bird | Dog | Wolf;
 type HasFourLegs<Animal> = Animal extends { legs: 4 } ? Animal : never;
 type FourLegs = HasFourLegs<Animals>;
+type Uppercase<S extends string> = intrinsic;
 
 // TSConstructorType
 type CT = new (tpl: TemplateStringsArray, ...args: Array<unknown>) => (replacements: B) => A;
