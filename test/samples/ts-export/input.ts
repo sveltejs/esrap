@@ -10,4 +10,6 @@ export { type Z };
 //     export = Y;
 // }
 
+export as namespace MyNamespace;
+
 // export type * from './elsewhere';

@@ -1650,6 +1650,12 @@ export default (options = {}) => {
 			context.write(';');
 		},
 
+		TSNamespaceExportDeclaration(node, context) {
+			context.write('export as namespace ');
+			context.visit(node.id);
+			context.write(';');
+		},
+
 		//@ts-expect-error I don't know why, but this is relied upon in the tests, but doesn't exist in the TSESTree types
 		TSExpressionWithTypeArguments(node, context) {
 			context.visit(node.expression);

@@ -10,4 +10,6 @@ export { type Z };
 // declare module 'hello' {
 //     export = Y;
 // }
+export as namespace MyNamespace;
+
 // export type * from './elsewhere';
