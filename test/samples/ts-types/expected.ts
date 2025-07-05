@@ -11,4 +11,8 @@ type Wolf = { legs: 4 };
 type Animals = Bird | Dog | Wolf;
 type HasFourLegs<Animal> = Animal extends { legs: 4 } ? Animal : never;
 type FourLegs = HasFourLegs<Animals>;
+type T = [('a' | 'b')?];
 type CT = new (tpl: TemplateStringsArray, ...args: Array<unknown>) => (replacements: B) => A;
+
+// commented because acorn doesn't support intrinsic but oxc does
+// type Uppercase<S extends string> = intrinsic;
