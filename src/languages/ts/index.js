@@ -1610,6 +1610,28 @@ export default (options = {}) => {
 			}
 		},
 
+		TSTypeOperator(node, context) {
+			context.write(node.operator + ' ');
+			if (node.typeAnnotation) {
+				context.visit(node.typeAnnotation);
+			}
+		},
+
+		TSTemplateLiteralType(node, context) {
+			context.write('`');
+			const { quasis, types } = node;
+			for (let i = 0; i < types.length; i++) {
+				const raw = quasis[i].value.raw;
+
+				context.write(raw + '${');
+				context.visit(types[i]);
+				context.write('}');
+
+				if (/\n/.test(raw)) context.multiline = true;
+			}
+			context.write('`');
+		},
+
 		TSExportAssignment(node, context) {
 			context.write('export = ');
 			context.visit(node.expression);

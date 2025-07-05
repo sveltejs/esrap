@@ -6,9 +6,11 @@ type D = C | A | B | 'foobar';
 
 type E = A & B;
 type F = C & 'foobar';
-type H = this;
 
 type G = { [a in C]: string };
+
+type H = this;
+type I = `Hello, ${keyof C}`;
 
 type Bird = { legs: 2 };
 type Dog = { legs: 4 };
