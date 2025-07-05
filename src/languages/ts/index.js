@@ -1811,6 +1811,10 @@ export default (options = {}) => {
 			context.visit(node.typeAnnotation);
 		},
 
+		TSThisType(node, context) {
+			context.write('this', node);
+		},
+
 		TSAsExpression(node, context) {
 			if (node.expression) {
 				const needs_parens =

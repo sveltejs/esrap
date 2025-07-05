@@ -6,6 +6,7 @@ type D = C | A | B | 'foobar';
 
 type E = A & B;
 type F = C & 'foobar';
+type H = this;
 
 type G = { [a in C]: string };
 
