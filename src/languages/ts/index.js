@@ -1742,11 +1742,24 @@ export default (options = {}) => {
 
 		TSConstructorType: shared['TSFunctionType|TSConstructorType'],
 
+		TSExternalModuleReference(node, context) {
+			context.write('require(');
+			context.visit(node.expression);
+			context.write(');');
+		},
+
 		TSIndexedAccessType(node, context) {
 			context.visit(node.objectType);
 			context.write('[');
 			context.visit(node.indexType);
 			context.write(']');
+		},
+
+		TSImportEqualsDeclaration(node, context) {
+			context.write('import ');
+			context.visit(node.id);
+			context.write(' = ');
+			context.visit(node.moduleReference);
 		},
 
 		TSImportType(node, context) {
