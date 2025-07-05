@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "// basic\nconst foo = bar<T>;\n"
+  ],
+  "mappings": ";MACM,GAAG,GAAG,GAAG,CAAC,CAAC"
+}

@@ -1849,6 +1849,11 @@ export default (options = {}) => {
 			context.write('}');
 		},
 
+		TSInstantiationExpression(node, context) {
+			context.visit(node.expression);
+			context.visit(node.typeArguments);
+		},
+
 		TSInterfaceHeritage(node, context) {
 			if (node.expression) {
 				context.visit(node.expression);
