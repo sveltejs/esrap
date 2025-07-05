@@ -1645,7 +1645,7 @@ export default (options = {}) => {
 			else context.write(node.name, node);
 
 			if (node.constraint) {
-				context.write(' extends ');
+				context.write(' in ');
 				context.visit(node.constraint);
 			}
 		},
@@ -1680,6 +1680,25 @@ export default (options = {}) => {
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			context.visit(node.typeAnnotation);
+		},
+
+		TSMappedType(node, context) {
+			context.write('{[');
+
+			if (node.typeParameter) {
+				context.visit(node.typeParameter);
+			} else {
+				context.visit(node.key);
+				context.write(' in ');
+				context.visit(node.constraint);
+			}
+
+			context.write(']');
+			if (node.typeAnnotation) {
+				context.write(': ');
+				context.visit(node.typeAnnotation);
+			}
+			context.write('}');
 		},
 
 		TSMethodSignature(node, context) {
