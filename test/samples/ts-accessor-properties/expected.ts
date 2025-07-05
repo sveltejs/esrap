@@ -9,3 +9,7 @@ abstract class AbstractExample {
 	abstract accessor abstractCount: number;
 	protected abstract accessor protectedAbstractCount: number;
 }
+
+class MyClass {
+	constructor(protected x: number, private y: string) {}
+}

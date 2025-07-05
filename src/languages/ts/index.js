@@ -1632,6 +1632,18 @@ export default (options = {}) => {
 			context.write('`');
 		},
 
+		TSParameterProperty(node, context) {
+			if (node.accessibility) {
+				context.write(node.accessibility + ' ');
+			}
+
+			if (node.readonly) {
+				context.write('readonly ');
+			}
+
+			context.visit(node.parameter);
+		},
+
 		TSExportAssignment(node, context) {
 			context.write('export = ');
 			context.visit(node.expression);
