@@ -15,6 +15,7 @@ class Control {
 
 interface SelectableControl extends Control {
 	select(): void;
+	bar();
 }
 
 class Button extends Control implements SelectableControl {

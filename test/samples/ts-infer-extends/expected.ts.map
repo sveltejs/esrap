@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "type X3<T> = T extends [infer U extends number] ? MustBeNumber<U> : never;\ntype X4<T> = T extends [infer U extends number, infer U extends number] ? MustBeNumber<U> : never;\ntype X5<T> = T extends [infer U extends number, infer U] ? MustBeNumber<U> : never;\ntype X6<T> = T extends [infer U, infer U extends number] ? MustBeNumber<U> : never;\ntype X7<T> = T extends [infer U extends string, infer U extends number] ? U : never;\ntype X8<U, T> = T extends infer U extends number ? U : T;\ntype X9<U, T> = T extends (infer U extends number ? U : T) ? U : T;\ntype X10<T> = T extends (infer U extends number) | { a: infer U extends number } ? U : never;\ntype X11<T> = T extends (infer U extends number) & { a: infer U extends number } ? U : never;\n"
+  ],
+  "mappings": "KAAK,EAAE,CAAC,CAAC,IAAI,CAAC,gBAAgB,CAAgB,SAAN,MAAM,IAAI,YAAY,CAAC,CAAC,IAAI,KAAK;KACpE,EAAE,CAAC,CAAC,IAAI,CAAC,gBAAgB,CAAgB,SAAN,MAAM,QAAQ,CAAgB,SAAN,MAAM,IAAI,YAAY,CAAC,CAAC,IAAI,KAAK;KAC5F,EAAE,CAAC,CAAC,IAAI,CAAC,gBAAgB,CAAgB,SAAN,MAAM,QAAQ,CAAC,IAAI,YAAY,CAAC,CAAC,IAAI,KAAK;KAC7E,EAAE,CAAC,CAAC,IAAI,CAAC,gBAAgB,CAAC,QAAQ,CAAgB,SAAN,MAAM,IAAI,YAAY,CAAC,CAAC,IAAI,KAAK;KAC7E,EAAE,CAAC,CAAC,IAAI,CAAC,gBAAgB,CAAgB,SAAN,MAAM,QAAQ,CAAgB,SAAN,MAAM,IAAI,CAAC,GAAG,KAAK;KAC9E,EAAE,CAAC,CAAC,EAAE,CAAC,IAAI,CAAC,eAAe,CAAgB,SAAN,MAAM,GAAG,CAAC,GAAG,CAAC;KACnD,EAAE,CAAC,CAAC,EAAE,CAAC,IAAI,CAAC,gBAAgB,CAAC,SAAS,MAAM,GAAG,CAAC,GAAG,CAAC,IAAI,CAAC,GAAG,CAAC;KAC7D,GAAG,CAAC,CAAC,IAAI,CAAC,gBAAgB,CAAgB,SAAN,MAAM,MAAM,CAAC,QAAQ,CAAgB,SAAN,MAAM,KAAK,CAAC,GAAG,KAAK;KACvF,GAAG,CAAC,CAAC,IAAI,CAAC,gBAAgB,CAAgB,SAAN,MAAM,MAAM,CAAC,QAAQ,CAAgB,SAAN,MAAM,KAAK,CAAC,GAAG,KAAK"
+}

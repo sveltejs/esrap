@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "interface Test {\n\tfunc: (a: string) => Promise<void>;\n\tfunc2: () => Promise<void>;\n\ta: number;\n\tb: boolean;\n}\n\ninterface IndexSignature {\n\t[key: string]: string;\n}\n\nclass Control {\n\tprivate state: any;\n}\n\ninterface SelectableControl extends Control {\n\tselect(): void;\n}\n\nclass Button extends Control implements SelectableControl {\n\tselect() {}\n}\n\nclass TextBox extends Control {\n\tselect() {}\n}\n"
+    "interface Test {\n\tfunc: (a: string) => Promise<void>;\n\tfunc2: () => Promise<void>;\n\ta: number;\n\tb: boolean;\n}\n\ninterface IndexSignature {\n\t[key: string]: string;\n}\n\nclass Control {\n\tprivate state: any;\n}\n\ninterface SelectableControl extends Control {\n\tselect(): void;\n\tbar();\n}\n\nclass Button extends Control implements SelectableControl {\n\tselect() {}\n}\n\nclass TextBox extends Control {\n\tselect() {}\n}\n"
   ],
-  "mappings": "UAAU,IAAI;CACb,IAAI,GAAG,CAAS,EAAN,MAAM,KAAK,OAAO,CAAC,IAAI;CACjC,KAAK,QAAQ,OAAO,CAAC,IAAI;CACzB,CAAC,EAAE,MAAM;CACT,CAAC,EAAE,OAAO;;;UAGD,cAAc,IACtB,GAAW,EAAN,MAAM,GAAG,MAAM;;MAGhB,OAAO,CAAC,CAAC;SACN,KAAK,EAAE,GAAG;AACnB,CAAC;;UAES,iBAAiB,SAAS,OAAO,GAC1C,MAAM,IAAI,IAAI;;MAGT,MAAM,SAAS,OAAO,YAAY,iBAAiB,CAAC,CAAC;CAC1D,MAAM,GAAG,CAAC,AAAA,CAAC;AACZ,CAAC;;MAEK,OAAO,SAAS,OAAO,CAAC,CAAC;CAC9B,MAAM,GAAG,CAAC,AAAA,CAAC;AACZ,CAAC"
+  "mappings": "UAAU,IAAI;CACb,IAAI,GAAG,CAAS,EAAN,MAAM,KAAK,OAAO,CAAC,IAAI;CACjC,KAAK,QAAQ,OAAO,CAAC,IAAI;CACzB,CAAC,EAAE,MAAM;CACT,CAAC,EAAE,OAAO;;;UAGD,cAAc,IACtB,GAAW,EAAN,MAAM,GAAG,MAAM;;MAGhB,OAAO,CAAC,CAAC;SACN,KAAK,EAAE,GAAG;AACnB,CAAC;;UAES,iBAAiB,SAAS,OAAO,GAC1C,MAAM,IAAI,IAAI,EACd,GAAG;;MAGE,MAAM,SAAS,OAAO,YAAY,iBAAiB,CAAC,CAAC;CAC1D,MAAM,GAAG,CAAC,AAAA,CAAC;AACZ,CAAC;;MAEK,OAAO,SAAS,OAAO,CAAC,CAAC;CAC9B,MAAM,GAAG,CAAC,AAAA,CAAC;AACZ,CAAC"
 }

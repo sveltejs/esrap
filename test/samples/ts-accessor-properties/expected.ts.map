@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class Example {\n\taccessor count: number = 0;\n\tprivate accessor privateCount: number;\n\tpublic accessor publicCount: number = 5;\n\tprotected accessor protectedCount: number;\n}\n\nabstract class AbstractExample {\n\tabstract accessor abstractCount: number;\n\tprotected abstract accessor protectedAbstractCount: number;\n}\n\nclass MyClass {\n\tconstructor(\n\t\tprotected x: number,\n\t\tprivate y: string\n\t) {}\n}\n"
+  ],
+  "mappings": "MAAM,OAAO,CAAC,CAAC;UACL,KAAK,EAAE,MAAM,GAAG,CAAC;kBACT,YAAY,EAAE,MAAM;iBACrB,WAAW,EAAE,MAAM,GAAG,CAAC;oBACpB,cAAc,EAAE,MAAM;AAC1C,CAAC;;eAEc,eAAe,CAAC,CAAC;mBACb,aAAa,EAAE,MAAM;6BACX,sBAAsB,EAAE,MAAM;AAC3D,CAAC;;MAEK,OAAO,CAAC,CAAC;CACd,WAAW,WACA,CAAS,EAAN,MAAM,UACX,CAAS,EAAN,MAAM,EAChB,CAAC,AAAA,CAAC;AACL,CAAC"
+}
