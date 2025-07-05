@@ -13,6 +13,8 @@ type HasFourLegs<Animal> = Animal extends { legs: 4 } ? Animal : never;
 type FourLegs = HasFourLegs<Animals>;
 type T = [('a' | 'b')?];
 type CT = new (tpl: TemplateStringsArray, ...args: Array<unknown>) => (replacements: B) => A;
+type X = [...number[]];
+type TupleWithRest = [number, ...(1 extends 2 ? string[] : number[])];
 
 // commented because acorn doesn't support intrinsic but oxc does
 // type Uppercase<S extends string> = intrinsic;

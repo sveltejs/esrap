@@ -1806,6 +1806,11 @@ export default (options = {}) => {
 			context.write('?');
 		},
 
+		TSRestType(node, context) {
+			context.write('...');
+			context.visit(node.typeAnnotation);
+		},
+
 		TSAsExpression(node, context) {
 			if (node.expression) {
 				const needs_parens =
