@@ -1697,6 +1697,24 @@ export default (options = {}) => {
 			}
 		},
 
+		TSTypePredicate(node, context) {
+			if (node.parameterName) {
+				context.visit(node.parameterName);
+			} else if (node.typeAnnotation) {
+				context.visit(node.typeAnnotation);
+			}
+
+			if (node.asserts) {
+				context.write(' asserts ');
+			} else {
+				context.write(' is ');
+			}
+
+			if (node.typeAnnotation) {
+				context.visit(node.typeAnnotation.typeAnnotation);
+			}
+		},
+
 		TSTypeQuery(node, context) {
 			context.write('typeof ');
 			context.visit(node.exprName);

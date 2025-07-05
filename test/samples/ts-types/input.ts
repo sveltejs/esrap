@@ -11,6 +11,7 @@ type G = { [a in C]: string };
 
 type H = this;
 type I = `Hello, ${keyof C}`;
+type J = () => this is string;
 
 type Bird = { legs: 2 };
 type Dog = { legs: 4 };
