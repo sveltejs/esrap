@@ -100,10 +100,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			({ ast: acorn_ast, comments: acorn_comments } = load(input_js, { jsx: true }));
 
 			// @ts-expect-error
-			({ program: oxc_ast, comments: oxc_comments } = parseSync('input.ts', input_js, {
-				// @ts-expect-error
-				experimentalRawTransfer: true
-			}));
+			({ program: oxc_ast, comments: oxc_comments } = parseSync('input.ts', input_js));
 
 			opts = {
 				sourceMapSource: 'input.js',
