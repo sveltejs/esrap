@@ -7,5 +7,5 @@
   "sourcesContent": [
     "export type X = number;\n\ntype Y = number;\ntype Z = number;\nexport type { Y };\nexport { type Z };\n\n// export type * from './elsewhere';\n"
   ],
-  "mappings": "YAAY,CAAC,GAAG,MAAM;;KAEjB,CAAC,GAAG,MAAM;KACV,CAAC,GAAG,MAAM;;cACD,CAAC;cACD,CAAC;;"
+  "mappings": "YAAY,CAAC,GAAG,MAAM;;KAEjB,CAAC,GAAG,MAAM;KACV,CAAC,GAAG,MAAM;;cACD,CAAC;cACD,CAAC;;;AAIf"
 }

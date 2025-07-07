@@ -2,4 +2,4 @@
 'esrap': minor
 ---
 
-Introduce `resolveIndexedLocations` helper
+Add automatic handling of indexed locations.

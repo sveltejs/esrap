@@ -7,10 +7,27 @@ export const indent = 2;
 export const dedent = 3;
 export const space = 4;
 
+/**
+* Get the line and column number from a character index in the source text.
+*
+* @param {number} charIndex
+* @param {string} sourceText
+* @returns {{ line: number, column: number }}
+*/
+function getLineAndColumn(charIndex, sourceText) {
+	const lineZeroBased = sourceText.slice(0, charIndex).split('\n');
+	const columnZeroBased = lineZeroBased[lineZeroBased.length - 1].length;
+	return {
+		line: lineZeroBased.length + 1,
+		column: columnZeroBased
+	};
+}
+
 export class Context {
 	#visitors;
 	#commands;
 	#has_newline = false;
+	#sourceText = undefined;
 
 	multiline = false;
 
@@ -19,9 +36,10 @@ export class Context {
 	 * @param {Visitors} visitors
 	 * @param {Command[]} commands
 	 */
-	constructor(visitors, commands = []) {
+	constructor(visitors, commands = [], sourceText = undefined) {
 		this.#visitors = visitors;
 		this.#commands = commands;
+		this.#sourceText = sourceText;
 	}
 
 	indent() {
@@ -85,7 +103,7 @@ export class Context {
 	}
 
 	/**
-	 * @param {{ type: string }} node
+	 * @param {{ type: string, start?: number, end?: number }} node
 	 */
 	visit(node) {
 		const visitor = this.#visitors[node.type];
@@ -104,12 +122,21 @@ export class Context {
 			throw new Error(message);
 		}
 
+		if (node.start && this.#sourceText) {
+			const { line, column } = getLineAndColumn(node.start, this.#sourceText);
+			this.location(line, column);
+		}
+
 		if (this.#visitors._) {
 			// @ts-ignore
 			this.#visitors._(node, this, (node) => visitor(node, this));
 		} else {
 			// @ts-ignore
 			visitor(node, this);
+		}
+		if (node.end && this.#sourceText) {
+			const { line, column } = getLineAndColumn(node.end, this.#sourceText);
+			this.location(line, column);
 		}
 	}
 
