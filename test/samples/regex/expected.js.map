@@ -7,5 +7,5 @@
   "sourcesContent": [
     "/(?:^\\xb1\\X\\u765F)?/;\n"
   ],
-  "mappings": "AAAA,oBAAoB"
+  "mappings": "AAAA,oBAAoB;AAEpB"
 }

@@ -7,5 +7,5 @@
   "sourcesContent": [
     "a ?? (b || c);\n(a ?? b) || c;"
   ],
-  "mappings": "AAAA,CAAC,KAAK,CAAC,IAAI,CAAC;CACX,CAAC,IAAI,CAAC,KAAK,CAAC"
+  "mappings": "AAAA,CAAC,KAAK,CAAC,IAAI,CAAC;CACX,CAAC,IAAI,CAAC,KAAK,CAAC;AACC"
 }

@@ -7,5 +7,5 @@
   "sourcesContent": [
     "import a, { b, c as d } from 'x';"
   ],
-  "mappings": "OAAO,CAAC,IAAI,CAAC,EAAE,CAAC,IAAI,CAAC,QAAQ,GAAG"
+  "mappings": "OAAO,CAAC,IAAI,CAAC,EAAE,CAAC,IAAI,CAAC,QAAQ,GAAG;AACC"
 }

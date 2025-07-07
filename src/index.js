@@ -1,4 +1,5 @@
 /** @import { BaseNode, Command, Visitors, PrintOptions } from './types' */
+/** @import { TSESTree } from '@typescript-eslint/types' */
 import { encode } from '@jridgewell/sourcemap-codec';
 import { Context, dedent, indent, margin, newline, space } from './context.js';
 
@@ -56,7 +57,7 @@ export function print(node, visitors, opts = {}) {
 	const commands = [];
 
 	// @ts-expect-error some nonsense I don't understand
-	const context = new Context(visitors, commands);
+	const context = new Context(visitors, commands, opts.sourceMapContent);
 
 	context.visit(node);
 

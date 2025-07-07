@@ -337,7 +337,7 @@ export default (options = {}) => {
 			context.write('[');
 			sequence(
 				context,
-				/** @type {TSESTree.Node[]} */ (node.elements),
+				/** @type {TSESTree.Node[]} */(node.elements),
 				node.loc?.end ?? null,
 				false
 			);
@@ -1067,7 +1067,9 @@ export default (options = {}) => {
 
 		// @ts-expect-error this isn't a real node type, but Acorn produces it
 		ParenthesizedExpression(node, context) {
-			return context.visit(node.expression);
+			context.write('(');
+			context.visit(node.expression);
+			context.write(')');
 		},
 
 		PrivateIdentifier(node, context) {

@@ -7,5 +7,5 @@
   "sourcesContent": [
     "({ answer = 42 } = life_the_universe_and_everything);\n"
   ],
-  "mappings": "GAAG,MAAM,GAAG,EAAE,KAAK,gCAAgC"
+  "mappings": "GAAG,MAAM,GAAG,EAAE,KAAK,gCAAgC;AAEnD"
 }

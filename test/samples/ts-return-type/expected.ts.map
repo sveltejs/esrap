@@ -7,5 +7,5 @@
   "sourcesContent": [
     "class Fields {\n\tstatic cuid(): string {\n\t\treturn 'random cuid...'\n\t}\n}\n"
   ],
-  "mappings": "MAAM,MAAM,CAAC,CAAC;QACN,IAAI,IAAI,MAAM,CAAC,CAAC;SACf,gBAAgB;CACxB,CAAC;AACF,CAAC"
+  "mappings": "MAAM,MAAM,CAAC,CAAC;QACN,IAAI,IAAI,MAAM,CAAC,CAAC;SACf,gBAAgB;CACxB,CAAC;AACF,CAAC;AAED"
 }
