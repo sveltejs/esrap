@@ -7,5 +7,5 @@
   "sourcesContent": [
     "const foo: import('foo/bar') = 123;\nconst bar: import('foo/bar').baz = 234;\n"
   ],
-  "mappings": "MAAM,GAAsB,SAAV,SAAS,IAAI,GAAG;MAC5B,GAA0B,SAAd,SAAS,EAAE,GAAG,GAAG,GAAG;AAEtC"
+  "mappings": "AACA,MADM,GAAsB,SAAV,SAAS,IAAI,GAAG;MAC5B,GAA0B,SAAd,SAAS,EAAE,GAAG,GAAG,GAAG;AAEtC"
 }

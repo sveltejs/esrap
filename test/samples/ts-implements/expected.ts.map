@@ -7,5 +7,5 @@
   "sourcesContent": [
     "interface SelectableControl {\n\tselect(): void;\n}\n\ninterface Scrollable {\n\tscroll(): void;\n}\n\nclass Button implements SelectableControl, Scrollable {\n\tselect() {}\n}\n"
   ],
-  "mappings": "UAAU,iBAAiB,GAC1B,MAAM,IAAI,IAAI;UAGL,UAAU,GACnB,MAAM,IAAI,IAAI;;MAGT,MAAM,YAAY,iBAAiB,EAAE,UAAU,CAAC,CAAC;CACtD,MAAM,GAAG,CAAC,AAAA,CAAC;AACZ,CAAC;AAED"
+  "mappings": "AACA,UADU,iBAAiB,GAC1B,MAAM,IAAI,IAAI;UAGL,UAAU,GACnB,MAAM,IAAI,IAAI;;MAGT,MAAM,YAAY,iBAAiB,EAAE,UAAU,CAAC,CAAC;CACtD,MAAM,GAAG,CAAC,AAAA,CAAC;AACZ,CAAC;AAED"
 }

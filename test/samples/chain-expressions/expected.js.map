@@ -7,5 +7,5 @@
   "sourcesContent": [
     "foo?.bar.baz;\nx?.(a, b, c);\nx()?.();"
   ],
-  "mappings": "AAAA,GAAG,EAAE,GAAG,CAAC,GAAG;AACZ,CAAC,GAAG,CAAC,EAAE,CAAC,EAAE,CAAC;AACX,CAAC;AACO"
+  "mappings": "AACA,AADA,GAAG,EAAE,GAAG,CAAC,GAAG;AACZ,CAAC,GAAG,CAAC,EAAE,CAAC,EAAE,CAAC;AACX,CAAC;AACO"
 }

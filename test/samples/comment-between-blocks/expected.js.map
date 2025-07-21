@@ -7,5 +7,5 @@
   "sourcesContent": [
     "// if true, yep\nif (condition) {\n\tconsole.log('yep');\n} // otherwise nope\nelse {\n\tconsole.log('nope');\n}\n"
   ],
-  "mappings": ";IACI,SAAS,EAAE,CAAC;CACf,OAAO,CAAC,GAAG,CAAC,KAAK;AAClB,CAAC;AACI,CAAC;CACL,OAAO,CAAC,GAAG,CAAC,MAAM;AACnB,CAAC;AAED"
+  "mappings": "AACA;IAAI,SAAS,EAAE,CAAC;CACf,OAAO,CAAC,GAAG,CAAC,KAAK;AAClB,CAAC;AACI,CAAC;CACL,OAAO,CAAC,GAAG,CAAC,MAAM;AACnB,CAAC;AAED"
 }

@@ -7,5 +7,5 @@
   "sourcesContent": [
     "// comment before an inserted block\n\"use strict\";\n\n// comment before an inserted node\nimport { foo } from \"wherever\";"
   ],
-  "mappings": ";AACA,YAAY;;;SAGH,GAAG,QAAQ,UAAU;AACC"
+  "mappings": "AACA;AAAA,YAAY;;;SAGH,GAAG,QAAQ,UAAU;AACC"
 }
