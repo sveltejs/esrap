@@ -122,7 +122,7 @@ export class Context {
 			throw new Error(message);
 		}
 
-		if (node.start && this.#sourceText) {
+		if (node.start != null && this.#sourceText) {
 			const { line, column } = getLineAndColumn(node.start, this.#sourceText);
 			this.location(line, column);
 		}
@@ -134,7 +134,7 @@ export class Context {
 			// @ts-ignore
 			visitor(node, this);
 		}
-		if (node.end && this.#sourceText) {
+		if (node.end != null && this.#sourceText) {
 			const { line, column } = getLineAndColumn(node.end, this.#sourceText);
 			this.location(line, column);
 		}
