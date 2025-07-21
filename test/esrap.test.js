@@ -7,6 +7,7 @@ import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
 import { acornTs, acornTsx, load } from './common.js';
 import tsx from '../src/languages/tsx/index.js';
+import { rm } from 'node:fs/promises';
 
 /** @param {TSESTree.Node} ast */
 function clean(ast) {

@@ -1067,7 +1067,9 @@ export default (options = {}) => {
 
 		// @ts-expect-error this isn't a real node type, but Acorn produces it
 		ParenthesizedExpression(node, context) {
-			return context.visit(node.expression);
+			context.write('(');
+			context.visit(node.expression);
+			context.write(')');
 		},
 
 		PrivateIdentifier(node, context) {
