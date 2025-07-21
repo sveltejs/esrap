@@ -8,12 +8,12 @@ export const dedent = 3;
 export const space = 4;
 
 /**
-* Get the line and column number from a character index in the source text.
-*
-* @param {number} charIndex
-* @param {string} sourceText
-* @returns {{ line: number, column: number }}
-*/
+ * Get the line and column number from a character index in the source text.
+ *
+ * @param {number} charIndex
+ * @param {string} sourceText
+ * @returns {{ line: number, column: number }}
+ */
 function getLineAndColumn(charIndex, sourceText) {
 	const lineZeroBased = sourceText.slice(0, charIndex).split('\n');
 	const columnZeroBased = lineZeroBased[lineZeroBased.length - 1].length;
@@ -122,7 +122,8 @@ export class Context {
 			throw new Error(message);
 		}
 
-		if (node.start && this.#sourceText) {
+		// type coercion here to check for both null and undefined
+		if (node.start != undefined && this.#sourceText) {
 			const { line, column } = getLineAndColumn(node.start, this.#sourceText);
 			this.location(line, column);
 		}
@@ -134,7 +135,9 @@ export class Context {
 			// @ts-ignore
 			visitor(node, this);
 		}
-		if (node.end && this.#sourceText) {
+
+		// type coercion here to check for both null and undefined
+		if (node.end != undefined && this.#sourceText) {
 			const { line, column } = getLineAndColumn(node.end, this.#sourceText);
 			this.location(line, column);
 		}

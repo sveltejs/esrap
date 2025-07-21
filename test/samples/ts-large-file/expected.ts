@@ -50,28 +50,38 @@ const defaultPkgPath = findUp(process.cwd(), 'package.json');
 
 const defaultCwd = defaultPkgPath ? path.dirname(defaultPkgPath) : undefined;
 
-export const add = new Command('add').description('Applies specified adders into a project').argument('[adder...]', 'adders to install').option('--cwd <path>', 'path to working directory', defaultCwd).option('--no-install', 'skips installing dependencies').option('--no-preconditions', 'skips validating preconditions').option('--default', 'applies default adder options for unspecified options', false).option('--community <adder...>', 'community adders to install', []).action((adderArgs, opts) => {
-	// validate workspace
-	if (opts.cwd === undefined) {
-		console.error('Invalid workspace: Please verify that you are inside of a Svelte project. You can also specify the working directory with `--cwd <path>`');
-		process.exit(1);
-	}
+export const add = new Command('add')
+	.description('Applies specified adders into a project')
+	.argument('[adder...]', 'adders to install')
+	.option('--cwd <path>', 'path to working directory', defaultCwd)
+	.option('--no-install', 'skips installing dependencies')
+	.option('--no-preconditions', 'skips validating preconditions')
+	.option('--default', 'applies default adder options for unspecified options', false)
+	.option('--community <adder...>', 'community adders to install', [])
+	.action((adderArgs, opts) => {
+		// validate workspace
+		if (opts.cwd === undefined) {
+			console.error(
+				'Invalid workspace: Please verify that you are inside of a Svelte project. You can also specify the working directory with `--cwd <path>`'
+			);
+			process.exit(1);
+		}
 
-	const adders = v.parse(AddersSchema, adderArgs);
-	const options = v.parse(OptionsSchema, opts);
-	const invalidAdders = adders.filter((a) => !adderIds.includes(a) && !aliases.includes(a));
+		const adders = v.parse(AddersSchema, adderArgs);
+		const options = v.parse(OptionsSchema, opts);
+		const invalidAdders = adders.filter((a) => !adderIds.includes(a) && !aliases.includes(a));
 
-	if (invalidAdders.length > 0) {
-		console.error(`Invalid adders specified: ${invalidAdders.join(', ')}`);
-		process.exit(1);
-	}
+		if (invalidAdders.length > 0) {
+			console.error(`Invalid adders specified: ${invalidAdders.join(', ')}`);
+			process.exit(1);
+		}
 
-	const dedupedIds = transformAliases(adders);
+		const dedupedIds = transformAliases(adders);
 
-	runCommand(async () => {
-		await runAddCommand(options, dedupedIds);
+		runCommand(async () => {
+			await runAddCommand(options, dedupedIds);
+		});
 	});
-});
 
 export async function runAddCommand(options: Options, adders: string[]): Promise<void> {
 	const selectedAdders = adders.map((id) => getAdderDetails(id));
@@ -85,16 +95,18 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 		for (const { id, name } of Object.values(categories)) {
 			const category = adderCategories[id];
 
-			const categoryOptions = category.map((id) => {
-				const config = getAdderConfig(id);
+			const categoryOptions = category
+				.map((id) => {
+					const config = getAdderConfig(id);
 
-				// we'll only display adders within their respective project types
-				if (projectType === 'kit' && !config.metadata.environments.kit) return;
+					// we'll only display adders within their respective project types
+					if (projectType === 'kit' && !config.metadata.environments.kit) return;
 
-				if (projectType === 'svelte' && !config.metadata.environments.svelte) return;
+					if (projectType === 'svelte' && !config.metadata.environments.svelte) return;
 
-				return { label: config.metadata.name, value: config.metadata.id };
-			}).filter((c) => !!c);
+					return { label: config.metadata.name, value: config.metadata.id };
+				})
+				.filter((c) => !!c);
 
 			if (categoryOptions.length > 0) {
 				adderOptions[name] = categoryOptions;
@@ -119,7 +131,9 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 
 	// run precondition checks
 	if (options.preconditions) {
-		const preconditions = selectedAdders.flatMap((c) => c.checks.preconditions).filter((p) => p !== undefined);
+		const preconditions = selectedAdders
+			.flatMap((c) => c.checks.preconditions)
+			.filter((p) => p !== undefined);
 
 		// add global checks
 		const { kit } = createWorkspace(options.cwd);
@@ -138,7 +152,9 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 		}
 
 		if (fails.length > 0) {
-			const message = fails.map(({ name, message }) => pc.yellow(`${name} (${message})`)).join('\n- ');
+			const message = fails
+				.map(({ name, message }) => pc.yellow(`${name} (${message})`))
+				.join('\n- ');
 
 			p.note(`- ${message}`, 'Preconditions not met');
 
@@ -238,7 +254,7 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 		try {
 			await formatFiles(options.cwd, filesToFormat);
 			formatSpinner.stop('Successfully formatted modified files');
-		} catch(e) {
+		} catch (e) {
 			formatSpinner.stop('Failed to format files');
 
 			if (e instanceof Error) p.log.error(e.message);
@@ -246,25 +262,29 @@ export async function runAddCommand(options: Options, adders: string[]): Promise
 	}
 
 	// print next steps
-	const nextStepsMsg = selectedAdders.filter((a) => a.config.integrationType === 'inline' && a.config.nextSteps).map((a) => a.config as InlineAdderConfig<any>).map((config) => {
-		const metadata = config.metadata;
-		let adderMessage = '';
+	const nextStepsMsg = selectedAdders
+		.filter((a) => a.config.integrationType === 'inline' && a.config.nextSteps)
+		.map((a) => a.config as InlineAdderConfig<any>)
+		.map((config) => {
+			const metadata = config.metadata;
+			let adderMessage = '';
 
-		if (selectedAdders.length > 1) {
-			adderMessage = `${pc.green(metadata.name)}:\n`;
-		}
+			if (selectedAdders.length > 1) {
+				adderMessage = `${pc.green(metadata.name)}:\n`;
+			}
 
-		const adderNextSteps = (config.nextSteps!)({
-			options: official[metadata.id],
-			cwd: options.cwd,
-			colors: pc,
-			docs: metadata.website?.documentation
-		});
+			const adderNextSteps = config.nextSteps!({
+				options: official[metadata.id],
+				cwd: options.cwd,
+				colors: pc,
+				docs: metadata.website?.documentation
+			});
 
-		adderMessage += `- ${adderNextSteps.join('\n- ')}`;
+			adderMessage += `- ${adderNextSteps.join('\n- ')}`;
 
-		return adderMessage;
-	}).join('\n\n');
+			return adderMessage;
+		})
+		.join('\n\n');
 
 	if (nextStepsMsg) p.note(nextStepsMsg, 'Next steps');
 }
@@ -280,7 +300,10 @@ export type InstallAdderOptions = { cwd: string; official?: AdderOption; communi
  * @param options {InstallAdderOptions}
  * @returns a list of paths of modified files
  */
-export async function installAdders({ cwd, official = {} }: InstallAdderOptions): Promise<string[]> {
+export async function installAdders({
+	cwd,
+	official = {}
+}: InstallAdderOptions): Promise<string[]> {
 	const adderDetails = Object.keys(official).map((id) => getAdderDetails(id));
 
 	// adders might specify that they should be executed after another adder.
@@ -293,7 +316,9 @@ export async function installAdders({ cwd, official = {} }: InstallAdderOptions)
 
 		return a.config.runsAfter.includes(b.config.metadata.id)
 			? 1
-			: b.config.runsAfter.includes(a.config.metadata.id) ? -1 : 0;
+			: b.config.runsAfter.includes(a.config.metadata.id)
+				? -1
+				: 0;
 	});
 
 	// apply adders
@@ -324,7 +349,10 @@ export async function installAdders({ cwd, official = {} }: InstallAdderOptions)
 	return Array.from(filesToFormat);
 }
 
-async function processExternalAdder<Args extends OptionDefinition>(config: ExternalAdderConfig<Args>, cwd: string) {
+async function processExternalAdder<Args extends OptionDefinition>(
+	config: ExternalAdderConfig<Args>,
+	cwd: string
+) {
 	if (!TESTING) p.log.message(`Executing external command ${pc.gray(`(${config.metadata.id})`)}`);
 
 	try {
@@ -332,7 +360,7 @@ async function processExternalAdder<Args extends OptionDefinition>(config: Exter
 			env: Object.assign(process.env, config.environment ?? {}),
 			stdio: TESTING ? 'pipe' : 'inherit'
 		});
-	} catch(error) {
+	} catch (error) {
 		const typedError = error as Error;
 
 		throw new Error('Failed executing external command: ' + typedError.message);
