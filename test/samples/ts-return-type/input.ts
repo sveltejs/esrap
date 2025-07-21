@@ -1,5 +1,5 @@
 class Fields {
 	static cuid(): string {
-		return 'random cuid...';
+		return 'random cuid...'
 	}
 }

@@ -69,10 +69,10 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		let input_json = '';
 		try {
 			input_js = fs.readFileSync(`${__dirname}/samples/${dir}/input.${fileExtension}`, 'utf-8');
-		} catch (error) {}
+		} catch (error) { }
 		try {
 			input_json = fs.readFileSync(`${__dirname}/samples/${dir}/input.json`).toString();
-		} catch (error) {}
+		} catch (error) { }
 
 		/** @type {TSESTree.Program} */
 		let ast;
@@ -127,6 +127,6 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			`${__dirname}/samples/${dir}/expected.${fileExtension}.map`
 		);
 
-		expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsed)))).toEqual(clean(ast));
+		expect(clean(/** @type {TSESTree.Node} */(/** @type {any} */ (parsed)))).toEqual(clean(ast));
 	});
 }

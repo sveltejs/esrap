@@ -337,7 +337,7 @@ export default (options = {}) => {
 			context.write('[');
 			sequence(
 				context,
-				/** @type {TSESTree.Node[]} */ (node.elements),
+				/** @type {TSESTree.Node[]} */(node.elements),
 				node.loc?.end ?? null,
 				false
 			);
