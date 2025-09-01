@@ -1676,7 +1676,7 @@ export default (options = {}) => {
 			context.write('interface ');
 			context.visit(node.id);
 			if (node.typeParameters) context.visit(node.typeParameters);
-			if (node.extends) {
+			if (node.extends && node.extends.length) {
 				context.write(' extends ');
 				sequence(context, node.extends, node.body.loc?.start ?? null, false);
 			}
