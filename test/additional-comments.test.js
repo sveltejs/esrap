@@ -13,7 +13,7 @@ import ts from '../src/languages/ts/index.js';
  * @param {AdditionalComment[]} comments - Comments to attach
  * @returns {string} Generated code
  */
-function printWithComments(ast, node, comments) {
+function print_with_comments(ast, node, comments) {
 	const additionalComments = new WeakMap();
 	additionalComments.set(node, comments);
 
@@ -26,7 +26,7 @@ function printWithComments(ast, node, comments) {
  * @param {TSESTree.Program} ast - Parsed AST
  * @returns {TSESTree.Node} The return statement
  */
-function getReturnStatement(ast) {
+function get_return_statement(ast) {
 	const functionDecl = ast.body[0];
 	// @ts-expect-error accessing function body
 	const statements = functionDecl.body.body;
@@ -41,7 +41,7 @@ test('additional comments are inserted correctly', () => {
 }`;
 
 	const { ast } = load(input);
-	const returnStatement = getReturnStatement(ast);
+	const returnStatement = get_return_statement(ast);
 	expect(returnStatement.type).toBe('ReturnStatement');
 
 	/** @type {AdditionalComment[]} */
@@ -58,7 +58,7 @@ test('additional comments are inserted correctly', () => {
 		}
 	];
 
-	const code = printWithComments(ast, returnStatement, comments);
+	const code = print_with_comments(ast, returnStatement, comments);
 
 	expect(code).toContain('// This is a leading comment');
 	expect(code).toContain('/* This is a trailing comment */');
@@ -67,7 +67,7 @@ test('additional comments are inserted correctly', () => {
 test('only leading comments are inserted when specified', () => {
 	const input = `function test() { return 42; }`;
 	const { ast } = load(input);
-	const returnStatement = getReturnStatement(ast);
+	const returnStatement = get_return_statement(ast);
 
 	/** @type {AdditionalComment[]} */
 	const comments = [
@@ -78,7 +78,7 @@ test('only leading comments are inserted when specified', () => {
 		}
 	];
 
-	const code = printWithComments(ast, returnStatement, comments);
+	const code = print_with_comments(ast, returnStatement, comments);
 
 	expect(code).toContain('// Leading only');
 	expect(code).not.toContain('trailing');
@@ -87,7 +87,7 @@ test('only leading comments are inserted when specified', () => {
 test('only trailing comments are inserted when specified', () => {
 	const input = `function test() { return 42; }`;
 	const { ast } = load(input);
-	const returnStatement = getReturnStatement(ast);
+	const returnStatement = get_return_statement(ast);
 
 	/** @type {AdditionalComment[]} */
 	const comments = [
@@ -98,7 +98,7 @@ test('only trailing comments are inserted when specified', () => {
 		}
 	];
 
-	const code = printWithComments(ast, returnStatement, comments);
+	const code = print_with_comments(ast, returnStatement, comments);
 
 	expect(code).toContain('/* Trailing only */');
 	expect(code).not.toContain('//');
