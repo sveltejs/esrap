@@ -1,6 +1,6 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Visitors } from '../../types.js' */
-/** @import { TSOptions, Comment } from '../types.js' */
+/** @import { TSOptions, BaseComment, AdditionalComment } from '../types.js' */
 import { Context } from 'esrap';
 
 /** @typedef {TSESTree.Node} Node */
@@ -74,7 +74,7 @@ const OPERATOR_PRECEDENCE = {
 };
 
 /**
- * @param {Comment} comment
+ * @param {BaseComment} comment
  * @param {Context} context
  */
 function write_comment(comment, context) {
@@ -101,8 +101,41 @@ export default (options = {}) => {
 	const quote_char = options.quotes === 'double' ? '"' : "'";
 
 	const comments = options.comments ?? [];
+	/** @type {WeakMap<TSESTree.Node, AdditionalComment[]>} */
+	const additionalComments = options.additionalComments ?? new WeakMap();
 
 	let comment_index = 0;
+
+	/**
+	 * Write additional comments for a node
+	 * @param {Context} context
+	 * @param {TSESTree.Node} node
+	 * @param {('leading' | 'trailing')} position
+	 */
+	function write_additional_comments(context, node, position) {
+		const nodeComments = additionalComments.get(node);
+		if (!nodeComments) return;
+
+		const relevantComments = nodeComments.filter((comment) => comment.position === position);
+
+		for (let i = 0; i < relevantComments.length; i += 1) {
+			const comment = relevantComments[i];
+
+			if (position === 'trailing' && i === 0) {
+				context.write(' ');
+			}
+
+			write_comment(comment, context);
+
+			if (position === 'leading') {
+				if (comment.type === 'Line') {
+					context.newline();
+				} else {
+					context.write(' ');
+				}
+			}
+		}
+	}
 
 	/**
 	 * Set `comment_index` to be the first comment after `start`.
@@ -586,11 +619,15 @@ export default (options = {}) => {
 
 	return {
 		_(node, context, visit) {
+			write_additional_comments(context, node, 'leading');
+
 			if (node.loc) {
 				flush_comments_until(context, null, node.loc.start, true);
 			}
 
 			visit(node);
+
+			write_additional_comments(context, node, 'trailing');
 		},
 
 		ArrayExpression: shared['ArrayExpression|ArrayPattern'],

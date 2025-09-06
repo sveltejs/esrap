@@ -55,7 +55,12 @@ const { code, map } = print(
     quotes: 'single',
 
     // an array of `{ type: 'Line' | 'Block', value: string, loc: { start, end } }` objects
-    comments: []
+    comments: [],
+
+    // a WeakMap of AST nodes to additional comments to insert at specific nodes
+    // useful for programmatically adding comments during code transformation,
+    // especially for nodes that were added programmatically
+    additionalComments: new WeakMap()
   })
 );
 ```
