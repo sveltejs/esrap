@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "let a: string | null = null;\n"
+  ],
+  "mappings": "IAAI,CAAgB,EAAb,MAAM,GAAG,IAAI,GAAG,IAAI"
+}

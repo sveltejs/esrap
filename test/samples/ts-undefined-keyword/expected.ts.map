@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "let a: number | undefined;\na = 2;\n"
+  ],
+  "mappings": "IAAI,CAAqB,EAAlB,MAAM,GAAG,SAAS;;AACzB,CAAC,GAAG,CAAC"
+}
