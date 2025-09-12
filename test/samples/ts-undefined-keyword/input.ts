@@ -1,2 +1,2 @@
-let a: number | undefined
-a = 2
+let a: number | undefined;
+a = 2;

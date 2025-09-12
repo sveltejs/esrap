@@ -45,7 +45,9 @@
     "prepublishOnly": "pnpm test && dts-buddy -m esrap:./src/public.d.ts -m esrap/languages/ts:./src/languages/ts/public.d.ts -m esrap/languages/tsx:./src/languages/tsx/public.d.ts",
     "sandbox": "node test/sandbox/index.js",
     "test": "vitest --run",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "format": "pnpm lint --write",
+		"lint": "prettier --check . --ignore-path .gitignore --ignore-path .prettierignore"
   },
   "license": "MIT",
   "dependencies": {
