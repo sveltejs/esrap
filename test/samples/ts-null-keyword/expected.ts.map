@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "let a: string | null = null"
+    "let a: string | null = null;\n"
   ],
   "mappings": "IAAI,CAAgB,EAAb,MAAM,GAAG,IAAI,GAAG,IAAI"
 }
