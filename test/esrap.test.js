@@ -177,6 +177,7 @@ const acorn = true;
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	// if (dir !== 'comment-inline') continue;
 	// if (dir !== 'comment-block') continue;
+	// if (dir !== 'jsdoc-indentation') continue;
 	if (dir[0] === '.') continue;
 	const tsMode = dir.startsWith('ts-') || dir.startsWith('tsx-');
 	const jsxMode = dir.startsWith('jsx-') || dir.startsWith('tsx-');
@@ -223,13 +224,27 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			// Add location information to AST nodes
 			addLocationToNode(oxc_ast, input_js);
 
-			// Convert OXC comment positions to location information
+			// Convert OXC comment positions to location information and normalize indentation
 			oxc_comments = oxc_comments.map((comment) => {
 				const startPos = getPositionFromOffset(input_js, comment.start);
 				const endPos = getPositionFromOffset(input_js, comment.end);
+				
+				let value = comment.value;
+				// Normalize indentation for block comments with newlines (same as acorn)
+				if (comment.type === 'Block' && /\n/.test(value)) {
+					let a = comment.start;
+					while (a > 0 && input_js[a - 1] !== '\n') a -= 1;
+
+					let b = a;
+					while (/[ \t]/.test(input_js[b])) b += 1;
+
+					const indentation = input_js.slice(a, b);
+					value = value.replace(new RegExp(`^${indentation}`, 'gm'), '');
+				}
+				
 				return {
 					type: comment.type,
-					value: comment.value,
+					value,
 					start: comment.start,
 					end: comment.end,
 					loc: {
