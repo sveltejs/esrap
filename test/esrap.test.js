@@ -7,7 +7,122 @@ import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
 import { acornTs, acornTsx, load } from './common.js';
 import tsx from '../src/languages/tsx/index.js';
-// import { parseSync } from 'oxc-parser';
+import { parseSync } from 'oxc-parser';
+
+/**
+ * Convert byte offset to line/column position
+ * @param {string} source
+ * @param {number} offset
+ * @returns {{ line: number, column: number }}
+ */
+function getPositionFromOffset(source, offset) {
+	let line = 1;
+	let column = 0;
+
+	for (let i = 0; i < offset && i < source.length; i++) {
+		if (source[i] === '\n') {
+			line++;
+			column = 0;
+		} else {
+			column++;
+		}
+	}
+
+	return { line, column };
+}
+
+/**
+ * Add location information to AST nodes using a more efficient approach
+ * @param {any} node
+ * @param {string} source
+ * @param {Set<any>} visited
+ */
+function addLocationToNode(node, source, visited = new Set()) {
+	if (!node || typeof node !== 'object' || visited.has(node)) {
+		return;
+	}
+
+	visited.add(node);
+
+	// Add loc to current node if it has start/end
+	if (node.start !== undefined && node.end !== undefined) {
+		node.loc = {
+			start: getPositionFromOffset(source, node.start),
+			end: getPositionFromOffset(source, node.end)
+		};
+	}
+
+	// Process specific known properties to avoid circular references
+	const propertiesToProcess = [
+		'body',
+		'expression',
+		'callee',
+		'object',
+		'property',
+		'arguments',
+		'params',
+		'declarations',
+		'id',
+		'init',
+		'key',
+		'value',
+		'properties',
+		'elements',
+		'left',
+		'right',
+		'test',
+		'consequent',
+		'alternate',
+		'argument',
+		'specifiers',
+		'local',
+		'imported',
+		'exported',
+		'source',
+		'moduleRequest',
+		'entries',
+		'importName',
+		'exportName',
+		'returnType',
+		'typeParameters',
+		'typeAnnotation',
+		'decorators',
+		'members',
+		'elementTypes',
+		'types',
+		'elementType',
+		'rest',
+		'computed',
+		'optional',
+		'shorthand',
+		'method',
+		'kind',
+		'definite',
+		'declare',
+		'generator',
+		'async',
+		'directive',
+		'block',
+		'handler',
+		'finalizer',
+		'cases',
+		'discriminant',
+		'guards',
+		'statements',
+		'declaration',
+		'specifier'
+	];
+
+	for (const prop of propertiesToProcess) {
+		if (node[prop] && typeof node[prop] === 'object') {
+			if (Array.isArray(node[prop])) {
+				node[prop].forEach((item) => addLocationToNode(item, source, visited));
+			} else {
+				addLocationToNode(node[prop], source, visited);
+			}
+		}
+	}
+}
 
 /** @param {TSESTree.Node} ast */
 function clean(ast) {
@@ -56,16 +171,18 @@ function clean(ast) {
 	return cleaned;
 }
 
-const oxc = false;
+const oxc = true;
 const acorn = true;
 
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
+	// if (dir !== 'comment-inline') continue;
+	// if (dir !== 'comment-block') continue;
 	if (dir[0] === '.') continue;
 	const tsMode = dir.startsWith('ts-') || dir.startsWith('tsx-');
 	const jsxMode = dir.startsWith('jsx-') || dir.startsWith('tsx-');
 	const fileExtension = (tsMode ? 'ts' : 'js') + (jsxMode ? 'x' : '');
 
-	// if (dir.includes('large-file')) continue;
+	if (dir.includes('large-file')) continue;
 
 	test(dir, async () => {
 		let input_js = '';
@@ -99,7 +216,30 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		} else {
 			({ ast: acorn_ast, comments: acorn_comments } = load(input_js, { jsx: true }));
 
-			// ({ program: oxc_ast, comments: oxc_comments } = parseSync('input.ts', input_js));
+			({ program: oxc_ast, comments: oxc_comments } = parseSync('input.ts', input_js, {
+				range: true
+			}));
+
+			// Add location information to AST nodes
+			addLocationToNode(oxc_ast, input_js);
+
+			// Convert OXC comment positions to location information
+			oxc_comments = oxc_comments.map((comment) => {
+				const startPos = getPositionFromOffset(input_js, comment.start);
+				const endPos = getPositionFromOffset(input_js, comment.end);
+				return {
+					type: comment.type,
+					value: comment.value,
+					start: comment.start,
+					end: comment.end,
+					loc: {
+						start: startPos,
+						end: endPos
+					}
+				};
+			});
+
+			// console.dir({acorn_comments, oxc_comments}, {depth: null})
 
 			opts = {
 				sourceMapSource: 'input.js',
@@ -112,7 +252,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			tsx({ comments: acorn_comments }),
 			opts
 		);
-		// const { code: oxc_code } = print(oxc_ast, tsx({ comments: oxc_comments }), opts);
+		const { code: oxc_code, map: oxc_map } = print(oxc_ast, tsx({ comments: oxc_comments }), opts);
 
 		if (acorn) {
 			fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.${fileExtension}`, acorn_code);
@@ -151,10 +291,16 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		}
 
 		if (oxc) {
-			// expect(oxc_code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
-			// 	`${__dirname}/samples/${dir}/expected.${fileExtension}`,
-			// 	'oxc'
-			// );
+			fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.oxc.js`, oxc_code);
+			// fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.oxc.json`, JSON.stringify(oxc_ast, null, '\t'));
+			const acornFile = fs.readFileSync(
+				`${__dirname}/samples/${dir}/expected.${fileExtension}`,
+				'utf-8'
+			);
+			const rmvSingleLine = (/** @type {string} */ str) => {
+				return str.trim().replace(/^\s*$(?:\r\n?|\n)/gm, '');
+			};
+			expect(rmvSingleLine(oxc_code)).toMatch(rmvSingleLine(acornFile));
 		}
 	});
 }
