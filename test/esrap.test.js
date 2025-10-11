@@ -178,7 +178,8 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	// if (dir !== 'comment-inline') continue;
 	// if (dir !== 'comment-block') continue;
 	// if (dir !== 'jsdoc-indentation') continue;
-	if (dir !== 'import-attributes') continue;
+	// if (dir !== 'import-attributes') continue;
+	// if (dir !== 'jsx-basic') continue;
 	if (dir[0] === '.') continue;
 	const tsMode = dir.startsWith('ts-') || dir.startsWith('tsx-');
 	const jsxMode = dir.startsWith('jsx-') || dir.startsWith('tsx-');
@@ -218,7 +219,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		} else {
 			({ ast: acorn_ast, comments: acorn_comments } = load(input_js, { jsx: true }));
 
-			({ program: oxc_ast, comments: oxc_comments } = parseSync('input.ts', input_js, {
+			({ program: oxc_ast, comments: oxc_comments } = parseSync(`input.${fileExtension}`, input_js, {
 				range: true
 			}));
 
