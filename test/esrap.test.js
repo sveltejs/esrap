@@ -219,9 +219,13 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		} else {
 			({ ast: acorn_ast, comments: acorn_comments } = load(input_js, { jsx: true }));
 
-			({ program: oxc_ast, comments: oxc_comments } = parseSync(`input.${fileExtension}`, input_js, {
-				range: true
-			}));
+			({ program: oxc_ast, comments: oxc_comments } = parseSync(
+				`input.${fileExtension}`,
+				input_js,
+				{
+					range: true
+				}
+			));
 
 			// Add location information to AST nodes
 			addLocationToNode(oxc_ast, input_js);
@@ -230,7 +234,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			oxc_comments = oxc_comments.map((comment) => {
 				const startPos = getPositionFromOffset(input_js, comment.start);
 				const endPos = getPositionFromOffset(input_js, comment.end);
-				
+
 				let value = comment.value;
 				// Normalize indentation for block comments with newlines (same as acorn)
 				if (comment.type === 'Block' && /\n/.test(value)) {
@@ -243,7 +247,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					const indentation = input_js.slice(a, b);
 					value = value.replace(new RegExp(`^${indentation}`, 'gm'), '');
 				}
-				
+
 				return {
 					type: comment.type,
 					value,
