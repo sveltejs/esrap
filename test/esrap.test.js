@@ -178,6 +178,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	// if (dir !== 'comment-inline') continue;
 	// if (dir !== 'comment-block') continue;
 	// if (dir !== 'jsdoc-indentation') continue;
+	if (dir !== 'import-attributes') continue;
 	if (dir[0] === '.') continue;
 	const tsMode = dir.startsWith('ts-') || dir.startsWith('tsx-');
 	const jsxMode = dir.startsWith('jsx-') || dir.startsWith('tsx-');

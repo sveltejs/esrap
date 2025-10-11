@@ -1133,6 +1133,11 @@ export default (options = {}) => {
 					context.visit(node.arguments[index]);
 				}
 			}
+			//@ts-expect-error for some reason the types haven't been updated
+			if (node.options) {
+				context.write(', ');
+				context.visit(node.options);
+			}
 			context.write(')');
 		},
 
