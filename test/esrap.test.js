@@ -56,12 +56,31 @@ function clean(ast) {
 	return cleaned;
 }
 
-/** @type {{ [key: string]: { skip: boolean, isBaseline: boolean, parse: (input: string, sourceType: 'module' | 'script', jsxMode: boolean, fileExtension: string) => { ast: TSESTree.Program, comments: TSESTree.Comment[] }, skipMap: boolean	 } }} */
+/**
+ * @type {{
+ *   [key: string]: {
+ *     skip: boolean,
+ *     isBaseline: boolean,
+ *     parse: (
+ *       input: string,
+ *       opts: {
+ *         sourceType: 'module' | 'script',
+ *         jsxMode: boolean,
+ *         fileExtension: string
+ *       }
+ *     ) => {
+ *       ast: TSESTree.Program,
+ *       comments: TSESTree.Comment[]
+ *     },
+ *     skipMap: boolean
+ *   }
+ * }}
+ */
 const parsers = {
 	acorn: {
 		skip: false,
 		isBaseline: true,
-		parse: (input, sourceType, jsxMode, fileExtension) => {
+		parse: (input, { jsxMode, sourceType }) => {
 			return acornParse(input, { jsxMode, sourceType });
 		},
 		skipMap: false
@@ -69,7 +88,7 @@ const parsers = {
 	oxc: {
 		skip: false,
 		isBaseline: false,
-		parse: (input, sourceType, jsxMode, fileExtension) => {
+		parse: (input, { fileExtension }) => {
 			return oxcParse(input, { fileExtension });
 		},
 		skipMap: true
@@ -126,7 +145,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					comments = [];
 					opts = {};
 				} else {
-					({ ast, comments } = parse(input_js, 'module', jsxMode, fileExtension));
+					({ ast, comments } = parse(input_js, { sourceType: 'module', jsxMode, fileExtension }));
 					opts = { sourceMapSource: 'input.js', sourceMapContent: input_js };
 				}
 
@@ -137,13 +156,12 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 				fs.writeFileSync(`${pDir}/_actual.${fileExtension}`, code);
 				fs.writeFileSync(`${pDir}/_actual.${fileExtension}.map`, JSON.stringify(map, null, '\t'));
 
-				const { ast: parsedAst } = parse(
-					code,
-					input_json.length > 0 ? 'script' : 'module',
+				const { ast: parsedAst } = parse(code, {
+					sourceType: input_json.length > 0 ? 'script' : 'module',
 					jsxMode,
 					fileExtension
-				);
-				
+				});
+
 				fs.writeFileSync(
 					`${pDir}/_actual.json`,
 					JSON.stringify(
