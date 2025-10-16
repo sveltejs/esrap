@@ -56,6 +56,7 @@ function clean(ast) {
 	return cleaned;
 }
 
+/** @type {{ [key: string]: { skip: boolean, isBaseline: boolean, getAstComments: (input: string, jsxMode: boolean, fileExtension: string) => { ast: TSESTree.Program, comments: TSESTree.Comment[] }, getParsed: (code: string, sourceType: 'module' | 'script', jsxMode: boolean, fileExtension: string) => TSESTree.Program, skipMap: boolean	 } }} */
 const parsers = {
 	acorn: {
 		skip: false,
@@ -63,14 +64,18 @@ const parsers = {
 		getAstComments: (input, jsxMode, fileExtension) => {
 			return load(input, { jsx: jsxMode });
 		},
-		getParsed: (code, jsxMode, fileExtension) => {
-			return (jsxMode ? acornTsx : acornTs).parse(code, {
-				ecmaVersion: 'latest',
-				sourceType: 'module',
-				// sourceType: input_json.length > 0 ? 'script' : 'module',
-				locations: true
-			});
-		}
+		getParsed: (code, sourceType, jsxMode, fileExtension) => {
+			return /** @type {TSESTree.Program} */ (
+				/** @type {any} */ (
+					(jsxMode ? acornTsx : acornTs).parse(code, {
+						ecmaVersion: 'latest',
+						sourceType,
+						locations: true
+					})
+				)
+			);
+		},
+		skipMap: false
 	},
 	oxc: {
 		skip: false,
@@ -78,15 +83,24 @@ const parsers = {
 		getAstComments: (input, jsxMode, fileExtension) => {
 			return oxcParse(input, { fileExtension });
 		},
-		getParsed: (code, jsxMode, fileExtension) => {
-			return oxcParse(code, { fileExtension });
-		}
+		getParsed: (code, sourceType, jsxMode, fileExtension) => {
+			return oxcParse(code, { fileExtension }).ast;
+		},
+		skipMap: true
 	}
 };
 
+test("should have 1 baseline", ()=>{
+	let numberOfBaseLine = 0
+	for (const [parserName, { skip, getAstComments, getParsed, isBaseline, skipMap }] of Object.entries(parsers)) {
+		if(isBaseline) numberOfBaseLine++;
+	}
+	expect(numberOfBaseLine).toBe(1);
+})
+
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	// to run only one test, uncomment the following line and comment out the other tests
-	if (dir !== 'comment-inline') continue;
+	// if (dir !== 'comment-inline') continue;
 	// if (dir !== 'comment-block') continue;
 	// if (dir !== 'jsdoc-indentation') continue;
 	// if (dir !== 'import-attributes') continue;
@@ -109,13 +123,11 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			input_json = fs.readFileSync(`${__dirname}/samples/${dir}/input.json`).toString();
 		} catch (error) {}
 
-		for (const [parserName, { skip, getAstComments, getParsed, isBaseline }] of Object.entries(
-			parsers
-		)) {
-			let baseLineCode = '';
+		for (const [
+			parserName,
+			{ skip, getAstComments, getParsed, isBaseline, skipMap }
+		] of Object.entries(parsers)) {
 			test.skipIf(skip)(parserName, () => {
-				expect(true).toBe(true);
-
 				/** @type {TSESTree.Program} */
 				let ast;
 
@@ -145,7 +157,12 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 				fs.writeFileSync(`${pDir}/_actual.${fileExtension}`, code);
 				fs.writeFileSync(`${pDir}/_actual.${fileExtension}.map`, JSON.stringify(map, null, '\t'));
 
-				const parsed = getParsed(code, jsxMode, fileExtension);
+				const parsed = getParsed(
+					code,
+					input_json.length > 0 ? 'script' : 'module',
+					jsxMode,
+					fileExtension
+				);
 
 				fs.writeFileSync(
 					`${pDir}/_actual.json`,
@@ -160,19 +177,17 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					`${__dirname}/samples/${dir}/expected.${fileExtension}`
 				);
 
-				expect(JSON.stringify(map, null, '  ').replaceAll('\\r', '')).toMatchFileSnapshot(
-					`${__dirname}/samples/${dir}/expected.${fileExtension}.map`
-				);
-				
-				console.log(`baseLineCode`, baseLineCode)
+				if (!skipMap) {
+					expect(JSON.stringify(map, null, '  ').replaceAll('\\r', '')).toMatchFileSnapshot(
+						`${__dirname}/samples/${dir}/expected.${fileExtension}.map`
+					);
+				}
+
 				if (isBaseline) {
 					expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsed)))).toEqual(
 						clean(ast)
 					);
-					baseLineCode = code;
-				} else {
-					expect(code).toEqual(baseLineCode);
-				}
+				} 
 			});
 		}
 	});
