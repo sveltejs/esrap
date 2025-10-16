@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
-import { acornTs, acornTsx, load, oxcLoad } from './common.js';
+import { acornTs, acornTsx, load, oxcParse } from './common.js';
 import tsx from '../src/languages/tsx/index.js';
 
 /** @param {TSESTree.Node} ast */
@@ -102,7 +102,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			opts = {};
 		} else {
 			({ ast: acorn_ast, comments: acorn_comments } = load(input_js, { jsx: true }));
-			({ ast: oxc_ast, comments: oxc_comments } = oxcLoad(input_js, { fileExtension }));
+			({ ast: oxc_ast, comments: oxc_comments } = oxcParse(input_js, { fileExtension }));
 
 			opts = {
 				sourceMapSource: 'input.js',

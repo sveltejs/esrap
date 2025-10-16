@@ -52,7 +52,7 @@ export function load(input, opts = {}) {
 /** @param {string} input
  * @param {{ fileExtension?: string }} opts
  */
-export function oxcLoad(input, opts = { fileExtension: 'js' }) {
+export function oxcParse(input, opts = { fileExtension: 'ts' }) {
 	const { program: ast, comments } = parseSync(`input.${opts.fileExtension}`, input, {
 		range: true
 	});
