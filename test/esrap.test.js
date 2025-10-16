@@ -7,6 +7,7 @@ import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
 import { acornTs, acornTsx, load, oxcParse } from './common.js';
 import tsx from '../src/languages/tsx/index.js';
+import { describe } from 'node:test';
 
 /** @param {TSESTree.Node} ast */
 function clean(ast) {
@@ -55,23 +56,50 @@ function clean(ast) {
 	return cleaned;
 }
 
-const oxc = true;
-const acorn = true;
+const parsers = {
+	acorn: {
+		skip: false,
+		isBaseline: true,
+		getAstComments: (input, jsxMode, fileExtension) => {
+			return load(input, { jsx: jsxMode });
+		},
+		getParsed: (code, jsxMode, fileExtension) => {
+			return (jsxMode ? acornTsx : acornTs).parse(code, {
+				ecmaVersion: 'latest',
+				sourceType: 'module',
+				// sourceType: input_json.length > 0 ? 'script' : 'module',
+				locations: true
+			});
+		}
+	},
+	oxc: {
+		skip: false,
+		isBaseline: false,
+		getAstComments: (input, jsxMode, fileExtension) => {
+			return oxcParse(input, { fileExtension });
+		},
+		getParsed: (code, jsxMode, fileExtension) => {
+			return oxcParse(code, { fileExtension });
+		}
+	}
+};
 
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
-	// if (dir !== 'comment-inline') continue;
+	// to run only one test, uncomment the following line and comment out the other tests
+	if (dir !== 'comment-inline') continue;
 	// if (dir !== 'comment-block') continue;
 	// if (dir !== 'jsdoc-indentation') continue;
 	// if (dir !== 'import-attributes') continue;
 	// if (dir !== 'jsx-basic') continue;
+
+	if (dir.includes('large-file')) continue;
+
 	if (dir[0] === '.') continue;
 	const tsMode = dir.startsWith('ts-') || dir.startsWith('tsx-');
 	const jsxMode = dir.startsWith('jsx-') || dir.startsWith('tsx-');
 	const fileExtension = (tsMode ? 'ts' : 'js') + (jsxMode ? 'x' : '');
 
-	if (dir.includes('large-file')) continue;
-
-	test(dir, async () => {
+	describe(dir, async () => {
 		let input_js = '';
 		let input_json = '';
 		try {
@@ -81,89 +109,71 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			input_json = fs.readFileSync(`${__dirname}/samples/${dir}/input.json`).toString();
 		} catch (error) {}
 
-		/** @type {TSESTree.Program} */
-		let acorn_ast;
-		/** @type {TSESTree.Program} */
-		let oxc_ast;
+		for (const [parserName, { skip, getAstComments, getParsed, isBaseline }] of Object.entries(
+			parsers
+		)) {
+			let baseLineCode = '';
+			test.skipIf(skip)(parserName, () => {
+				expect(true).toBe(true);
 
-		/** @type {TSESTree.Comment[]} */
-		let acorn_comments;
-		/** @type {TSESTree.Comment[]} */
-		let oxc_comments;
+				/** @type {TSESTree.Program} */
+				let ast;
 
-		/** @type {PrintOptions} */
-		let opts;
+				/** @type {TSESTree.Comment[]} */
+				let comments;
 
-		if (input_json.length > 0) {
-			acorn_ast = JSON.parse(input_json);
-			acorn_comments = [];
-			oxc_ast = JSON.parse(input_json);
-			oxc_comments = [];
-			opts = {};
-		} else {
-			({ ast: acorn_ast, comments: acorn_comments } = load(input_js, { jsx: true }));
-			({ ast: oxc_ast, comments: oxc_comments } = oxcParse(input_js, { fileExtension }));
+				/** @type {PrintOptions} */
+				let opts;
 
-			opts = {
-				sourceMapSource: 'input.js',
-				sourceMapContent: input_js
-			};
-		}
+				if (input_json.length > 0) {
+					ast = JSON.parse(input_json);
+					comments = [];
+					opts = {};
+				} else {
+					({ ast, comments } = getAstComments(input_js, jsxMode, fileExtension));
 
-		const { code: acorn_code, map: acorn_map } = print(
-			acorn_ast,
-			tsx({ comments: acorn_comments }),
-			opts
-		);
-		const { code: oxc_code, map: oxc_map } = print(oxc_ast, tsx({ comments: oxc_comments }), opts);
+					opts = {
+						sourceMapSource: 'input.js',
+						sourceMapContent: input_js
+					};
+				}
 
-		if (acorn) {
-			fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.${fileExtension}`, acorn_code);
-			fs.writeFileSync(
-				`${__dirname}/samples/${dir}/_actual.${fileExtension}.map`,
-				JSON.stringify(acorn_map, null, '\t')
-			);
+				const { code, map } = print(ast, tsx({ comments }), opts);
 
-			const parsed = (jsxMode ? acornTsx : acornTs).parse(acorn_code, {
-				ecmaVersion: 'latest',
-				sourceType: input_json.length > 0 ? 'script' : 'module',
-				locations: true
+				const pDir = `${__dirname}/samples/${dir}/${parserName}`;
+				if (!fs.existsSync(pDir)) fs.mkdirSync(pDir, { recursive: true });
+				fs.writeFileSync(`${pDir}/_actual.${fileExtension}`, code);
+				fs.writeFileSync(`${pDir}/_actual.${fileExtension}.map`, JSON.stringify(map, null, '\t'));
+
+				const parsed = getParsed(code, jsxMode, fileExtension);
+
+				fs.writeFileSync(
+					`${pDir}/_actual.json`,
+					JSON.stringify(
+						parsed,
+						(key, value) => (typeof value === 'bigint' ? Number(value) : value),
+						'\t'
+					)
+				);
+
+				expect(code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
+					`${__dirname}/samples/${dir}/expected.${fileExtension}`
+				);
+
+				expect(JSON.stringify(map, null, '  ').replaceAll('\\r', '')).toMatchFileSnapshot(
+					`${__dirname}/samples/${dir}/expected.${fileExtension}.map`
+				);
+				
+				console.log(`baseLineCode`, baseLineCode)
+				if (isBaseline) {
+					expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsed)))).toEqual(
+						clean(ast)
+					);
+					baseLineCode = code;
+				} else {
+					expect(code).toEqual(baseLineCode);
+				}
 			});
-
-			fs.writeFileSync(
-				`${__dirname}/samples/${dir}/_actual.json`,
-				JSON.stringify(
-					parsed,
-					(key, value) => (typeof value === 'bigint' ? Number(value) : value),
-					'\t'
-				)
-			);
-
-			expect(acorn_code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
-				`${__dirname}/samples/${dir}/expected.${fileExtension}`,
-				'acorn'
-			);
-
-			expect(JSON.stringify(acorn_map, null, '  ').replaceAll('\\r', '')).toMatchFileSnapshot(
-				`${__dirname}/samples/${dir}/expected.${fileExtension}.map`
-			);
-
-			expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsed)))).toEqual(
-				clean(acorn_ast)
-			);
-		}
-
-		if (oxc) {
-			fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.oxc.js`, oxc_code);
-			// fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.oxc.json`, JSON.stringify(oxc_ast, null, '\t'));
-			const acornFile = fs.readFileSync(
-				`${__dirname}/samples/${dir}/expected.${fileExtension}`,
-				'utf-8'
-			);
-			const rmvSingleLine = (/** @type {string} */ str) => {
-				return str.trim().replace(/^\s*$(?:\r\n?|\n)/gm, '');
-			};
-			expect(rmvSingleLine(oxc_code)).toMatch(rmvSingleLine(acornFile));
 		}
 	});
 }
