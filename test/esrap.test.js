@@ -90,13 +90,16 @@ const parsers = {
 	}
 };
 
-test("should have 1 baseline", ()=>{
-	let numberOfBaseLine = 0
-	for (const [parserName, { skip, getAstComments, getParsed, isBaseline, skipMap }] of Object.entries(parsers)) {
-		if(isBaseline) numberOfBaseLine++;
+test('should have 1 baseline', () => {
+	let numberOfBaseLine = 0;
+	for (const [
+		parserName,
+		{ skip, getAstComments, getParsed, isBaseline, skipMap }
+	] of Object.entries(parsers)) {
+		if (isBaseline) numberOfBaseLine++;
 	}
 	expect(numberOfBaseLine).toBe(1);
-})
+});
 
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	// to run only one test, uncomment the following line and comment out the other tests
@@ -127,7 +130,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			parserName,
 			{ skip, getAstComments, getParsed, isBaseline, skipMap }
 		] of Object.entries(parsers)) {
-			test.skipIf(skip)(parserName, () => {
+			test.skipIf(skip)(`test: ${dir}, parser: ${parserName}`, () => {
 				/** @type {TSESTree.Program} */
 				let ast;
 
@@ -187,7 +190,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsed)))).toEqual(
 						clean(ast)
 					);
-				} 
+				}
 			});
 		}
 	});
