@@ -54,7 +54,8 @@ export function load(input, opts = {}) {
  */
 export function oxcParse(input, opts = { fileExtension: 'ts' }) {
 	const { program: ast, comments } = parseSync(`input.${opts.fileExtension}`, input, {
-		range: true
+		// range: true,
+		// loc: true // https://github.com/oxc-project/oxc/issues/10307
 	});
 
 	const comments_with_pos = comments.map((comment) => {
