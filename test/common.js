@@ -116,46 +116,22 @@ function addLocationToNode(node, source, visited = new Set()) {
 		};
 	}
 
-	// Process specific known properties to avoid circular references
-	const propertiesToProcess = [
-		'body',
-		'expression',
-		'callee',
-		'object',
-		'property',
-		'arguments',
-		'params',
-		'declarations',
-		'id',
-		'init',
-		'key',
+	// Known non-AST properties to skip (much smaller and more maintainable)
+	const skipProperties = new Set([
+		'type',
+		'start',
+		'end',
+		'loc',
+		'range',
+		'raw',
 		'value',
-		'properties',
-		'elements',
-		'left',
-		'right',
-		'test',
-		'consequent',
-		'alternate',
-		'argument',
-		'specifiers',
-		'local',
-		'imported',
-		'exported',
-		'source',
-		'moduleRequest',
-		'entries',
-		'importName',
-		'exportName',
-		'returnType',
-		'typeParameters',
-		'typeAnnotation',
-		'decorators',
-		'members',
-		'elementTypes',
-		'types',
-		'elementType',
-		'rest',
+		'name',
+		'operator',
+		'prefix',
+		'postfix',
+		'regex',
+		'flags',
+		'pattern',
 		'computed',
 		'optional',
 		'shorthand',
@@ -165,24 +141,18 @@ function addLocationToNode(node, source, visited = new Set()) {
 		'declare',
 		'generator',
 		'async',
-		'directive',
-		'block',
-		'handler',
-		'finalizer',
-		'cases',
-		'discriminant',
-		'guards',
-		'statements',
-		'declaration',
-		'specifier'
-	];
+		'directive'
+	]);
 
-	for (const prop of propertiesToProcess) {
-		if (node[prop] && typeof node[prop] === 'object') {
-			if (Array.isArray(node[prop])) {
-				node[prop].forEach((item) => addLocationToNode(item, source, visited));
+	// Process all properties, filtering out known non-AST properties
+	for (const [key, value] of Object.entries(node)) {
+		if (skipProperties.has(key)) continue;
+
+		if (value && typeof value === 'object') {
+			if (Array.isArray(value)) {
+				value.forEach((item) => addLocationToNode(item, source, visited));
 			} else {
-				addLocationToNode(node[prop], source, visited);
+				addLocationToNode(value, source, visited);
 			}
 		}
 	}
