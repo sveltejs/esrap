@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
-import { acornTs, acornTsx, load, oxcParse } from './common.js';
+import { acornParse, oxcParse } from './common.js';
 import tsx from '../src/languages/tsx/index.js';
 import { describe } from 'node:test';
 
@@ -56,35 +56,21 @@ function clean(ast) {
 	return cleaned;
 }
 
-/** @type {{ [key: string]: { skip: boolean, isBaseline: boolean, getAstComments: (input: string, jsxMode: boolean, fileExtension: string) => { ast: TSESTree.Program, comments: TSESTree.Comment[] }, getParsed: (code: string, sourceType: 'module' | 'script', jsxMode: boolean, fileExtension: string) => TSESTree.Program, skipMap: boolean	 } }} */
+/** @type {{ [key: string]: { skip: boolean, isBaseline: boolean, parse: (input: string, sourceType: 'module' | 'script', jsxMode: boolean, fileExtension: string) => { ast: TSESTree.Program, comments: TSESTree.Comment[] }, skipMap: boolean	 } }} */
 const parsers = {
 	acorn: {
 		skip: false,
 		isBaseline: true,
-		getAstComments: (input, jsxMode, fileExtension) => {
-			return load(input, { jsx: jsxMode });
-		},
-		getParsed: (code, sourceType, jsxMode, fileExtension) => {
-			return /** @type {TSESTree.Program} */ (
-				/** @type {any} */ (
-					(jsxMode ? acornTsx : acornTs).parse(code, {
-						ecmaVersion: 'latest',
-						sourceType,
-						locations: true
-					})
-				)
-			);
+		parse: (input, sourceType, jsxMode, fileExtension) => {
+			return acornParse(input, { jsxMode, sourceType });
 		},
 		skipMap: false
 	},
 	oxc: {
 		skip: false,
 		isBaseline: false,
-		getAstComments: (input, jsxMode, fileExtension) => {
+		parse: (input, sourceType, jsxMode, fileExtension) => {
 			return oxcParse(input, { fileExtension });
-		},
-		getParsed: (code, sourceType, jsxMode, fileExtension) => {
-			return oxcParse(code, { fileExtension }).ast;
 		},
 		skipMap: true
 	}
@@ -92,10 +78,7 @@ const parsers = {
 
 test('should have 1 baseline', () => {
 	let numberOfBaseLine = 0;
-	for (const [
-		parserName,
-		{ skip, getAstComments, getParsed, isBaseline, skipMap }
-	] of Object.entries(parsers)) {
+	for (const [parserName, { skip, parse, isBaseline, skipMap }] of Object.entries(parsers)) {
 		if (isBaseline) numberOfBaseLine++;
 	}
 	expect(numberOfBaseLine).toBe(1);
@@ -108,6 +91,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	// if (dir !== 'jsdoc-indentation') continue;
 	// if (dir !== 'import-attributes') continue;
 	// if (dir !== 'jsx-basic') continue;
+	// if (dir !== 'with') continue;
 
 	if (dir.includes('large-file')) continue;
 
@@ -126,10 +110,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			input_json = fs.readFileSync(`${__dirname}/samples/${dir}/input.json`).toString();
 		} catch (error) {}
 
-		for (const [
-			parserName,
-			{ skip, getAstComments, getParsed, isBaseline, skipMap }
-		] of Object.entries(parsers)) {
+		for (const [parserName, { skip, parse, isBaseline, skipMap }] of Object.entries(parsers)) {
 			test.skipIf(skip)(`test: ${dir}, parser: ${parserName}`, () => {
 				/** @type {TSESTree.Program} */
 				let ast;
@@ -145,12 +126,8 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					comments = [];
 					opts = {};
 				} else {
-					({ ast, comments } = getAstComments(input_js, jsxMode, fileExtension));
-
-					opts = {
-						sourceMapSource: 'input.js',
-						sourceMapContent: input_js
-					};
+					({ ast, comments } = parse(input_js, 'module', jsxMode, fileExtension));
+					opts = { sourceMapSource: 'input.js', sourceMapContent: input_js };
 				}
 
 				const { code, map } = print(ast, tsx({ comments }), opts);
@@ -160,17 +137,17 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 				fs.writeFileSync(`${pDir}/_actual.${fileExtension}`, code);
 				fs.writeFileSync(`${pDir}/_actual.${fileExtension}.map`, JSON.stringify(map, null, '\t'));
 
-				const parsed = getParsed(
+				const { ast: parsedAst } = parse(
 					code,
 					input_json.length > 0 ? 'script' : 'module',
 					jsxMode,
 					fileExtension
 				);
-
+				
 				fs.writeFileSync(
 					`${pDir}/_actual.json`,
 					JSON.stringify(
-						parsed,
+						parsedAst,
 						(key, value) => (typeof value === 'bigint' ? Number(value) : value),
 						'\t'
 					)
@@ -187,7 +164,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 				}
 
 				if (isBaseline) {
-					expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsed)))).toEqual(
+					expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsedAst)))).toEqual(
 						clean(ast)
 					);
 				}
