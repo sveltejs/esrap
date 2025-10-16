@@ -53,46 +53,52 @@ export function load(input, opts = {}) {
  * @param {{ fileExtension?: string }} opts
  */
 export function oxcParse(input, opts = { fileExtension: 'ts' }) {
-	const { program: ast, comments } = parseSync(`input.${opts.fileExtension}`, input, {
-		// range: true,
-		// loc: true // https://github.com/oxc-project/oxc/issues/10307
+	// TO BE REMOVED WHEN https://github.com/oxc-project/oxc/issues/10307 IS DONE
+	//                    + remove the comments tweaked below
+	const loc_from_oxc = false;
+
+	let { program: ast, comments } = parseSync(`input.${opts.fileExtension}`, input, {
+		// @ts-expect-error
+		loc: loc_from_oxc
 	});
 
-	const comments_with_pos = comments.map((comment) => {
-		const startPos = getPositionFromOffset(input, comment.start);
-		const endPos = getPositionFromOffset(input, comment.end);
+	if (!loc_from_oxc) {
+		comments = comments.map((comment) => {
+			const startPos = getPositionFromOffset(input, comment.start);
+			const endPos = getPositionFromOffset(input, comment.end);
 
-		let value = comment.value;
-		// Normalize indentation for block comments with newlines (same as acorn)
-		if (comment.type === 'Block' && /\n/.test(value)) {
-			let a = comment.start;
-			while (a > 0 && input[a - 1] !== '\n') a -= 1;
+			let value = comment.value;
+			// Normalize indentation for block comments with newlines (same as acorn)
+			if (comment.type === 'Block' && /\n/.test(value)) {
+				let a = comment.start;
+				while (a > 0 && input[a - 1] !== '\n') a -= 1;
 
-			let b = a;
-			while (/[ \t]/.test(input[b])) b += 1;
+				let b = a;
+				while (/[ \t]/.test(input[b])) b += 1;
 
-			const indentation = input.slice(a, b);
-			value = value.replace(new RegExp(`^${indentation}`, 'gm'), '');
-		}
-
-		return {
-			type: comment.type,
-			value,
-			start: comment.start,
-			end: comment.end,
-			loc: {
-				start: startPos,
-				end: endPos
+				const indentation = input.slice(a, b);
+				value = value.replace(new RegExp(`^${indentation}`, 'gm'), '');
 			}
-		};
-	});
 
-	// Add location information to AST nodes
-	addLocationToNode(ast, input);
+			return {
+				type: comment.type,
+				value,
+				start: comment.start,
+				end: comment.end,
+				loc: {
+					start: startPos,
+					end: endPos
+				}
+			};
+		});
+
+		// Add location information to AST nodes
+		addLocationToNode(ast, input);
+	}
 
 	return {
 		ast: /** @type {TSESTree.Program} */ (/** @type {any} */ (ast)),
-		comments: /** @type {TSESTree.Comment[]} */ (/** @type {any} */ (comments_with_pos))
+		comments: /** @type {TSESTree.Comment[]} */ (/** @type {any} */ (comments))
 	};
 }
 
