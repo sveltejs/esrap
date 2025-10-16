@@ -5,7 +5,8 @@ import fs from 'node:fs';
 import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
-import { acornParse, oxcCommentsToEsrapComments, oxcParse } from './common.js';
+import { acornParse, oxcParse } from './common.js';
+import { oxcCommentsToEsrapComments } from './oxcCommentsToEsrapComments.js';
 import tsx from '../src/languages/tsx/index.js';
 import { describe } from 'node:test';
 
@@ -130,7 +131,10 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			input_json = fs.readFileSync(`${__dirname}/samples/${dir}/input.json`).toString();
 		} catch (error) {}
 
-		for (const [parserName, { skip, parse, commentsToEsrapComments, isBaseline, skipMap }] of Object.entries(parsers)) {
+		for (const [
+			parserName,
+			{ skip, parse, commentsToEsrapComments, isBaseline, skipMap }
+		] of Object.entries(parsers)) {
 			test.skipIf(skip)(`test: ${dir}, parser: ${parserName}`, () => {
 				/** @type {TSESTree.Program} */
 				let ast;
@@ -149,7 +153,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					({ ast, comments } = parse(input_js, { sourceType: 'module', jsxMode, fileExtension }));
 
 					if (commentsToEsrapComments) {
-						({ ast, comments }  = commentsToEsrapComments(input_js, ast, comments));
+						({ ast, comments } = commentsToEsrapComments(input_js, ast, comments));
 					}
 
 					opts = { sourceMapSource: 'input.js', sourceMapContent: input_js };
