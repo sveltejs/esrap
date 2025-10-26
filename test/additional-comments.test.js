@@ -3,7 +3,7 @@
 /** @import { AdditionalComment } from '../src/languages/types.js' */
 import { expect, test } from 'vitest';
 import { print } from '../src/index.js';
-import { load } from './common.js';
+import { acornParse } from './common.js';
 import ts from '../src/languages/ts/index.js';
 
 /**
@@ -40,7 +40,7 @@ test('additional comments are inserted correctly', () => {
 	return x;
 }`;
 
-	const { ast } = load(input);
+	const { ast } = acornParse(input);
 	const returnStatement = get_return_statement(ast);
 	expect(returnStatement.type).toBe('ReturnStatement');
 
@@ -66,7 +66,7 @@ test('additional comments are inserted correctly', () => {
 
 test('only leading comments are inserted when specified', () => {
 	const input = `function test() { return 42; }`;
-	const { ast } = load(input);
+	const { ast } = acornParse(input);
 	const returnStatement = get_return_statement(ast);
 
 	/** @type {AdditionalComment[]} */
@@ -86,7 +86,7 @@ test('only leading comments are inserted when specified', () => {
 
 test('only trailing comments are inserted when specified', () => {
 	const input = `function test() { return 42; }`;
-	const { ast } = load(input);
+	const { ast } = acornParse(input);
 	const returnStatement = get_return_statement(ast);
 
 	/** @type {AdditionalComment[]} */
@@ -110,7 +110,7 @@ test('additional comments multi-line comments have new line', () => {
 	return x;
 }`;
 
-	const { ast } = load(input);
+	const { ast } = acornParse(input);
 	const returnStatement = get_return_statement(ast);
 	expect(returnStatement.type).toBe('ReturnStatement');
 
