@@ -1,3 +1,8 @@
+pnpm-lock.yaml
+
 test/samples/*/*.js
 test/sandbox/_input.js
 test/sandbox/_output.js
+
+expected.ts
+expected.jsx

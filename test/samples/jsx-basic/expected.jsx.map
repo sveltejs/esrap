@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "console.log(<>\n    <div>\n        <img src=\"cat.png\" alt={\"An image of a flying cat\"} />\n        Time since last cat incident: {\"5 days\"}\n    </div>\n</>)"
+    "console.log(\n\t<>\n\t\t<div>\n\t\t\t<img src=\"cat.png\" alt={'An image of a flying cat'} />\n\t\t\tTime since last cat incident: {'5 days'}\n\t\t</div>\n\t</>\n);\n"
   ],
-  "mappings": "AAAA,OAAO,CAAC,GAAG,GAAG;IACV,CAAC,GAAG,CAAC;QACD,CAAC,GAAG,CAAC,GAAG,CAAC,SAAS,CAAC,GAAG,EAAE,0BAA0B,IAAI;sCACxB,CAAC,QAAQ,CAAC;IAC5C,EAAE,GAAG,CAAC;AACV"
+  "mappings": "AAAA,OAAO,CAAC,GAAG,GACR;EACD,CAAC,GAAG,CAAC;GACJ,CAAC,GAAG,CAAC,GAAG,CAAC,SAAS,CAAC,GAAG,EAAE,0BAA0B,IAAI;iCACxB,CAAC,QAAQ,CAAC;EACzC,EAAE,GAAG,CAAC;CACP"
 }
