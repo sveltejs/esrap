@@ -3,6 +3,8 @@ on: [push, pull_request]
 
 jobs:
   build:
+    # prevents this action from running on forks
+    if: github.repository == 'sveltejs/esrap'
     runs-on: ubuntu-latest
 
     steps:
