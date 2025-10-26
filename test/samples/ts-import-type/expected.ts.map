@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "const foo: import('foo/bar') = 123;\nconst bar: import('foo/bar').baz = 234;\n"
+    "import baz = require('baz');\n\nconst foo: import('foo/bar') = 123;\nconst bar: import('foo/bar').baz = 234;\n"
   ],
-  "mappings": "MAAM,GAAsB,SAAV,SAAS,IAAI,GAAG;MAC5B,GAA0B,SAAd,SAAS,EAAE,GAAG,GAAG,GAAG"
+  "mappings": "OAAO,GAAG,WAAW,KAAK;;MAEpB,GAAsB,SAAV,SAAS,IAAI,GAAG;MAC5B,GAA0B,SAAd,SAAS,EAAE,GAAG,GAAG,GAAG"
 }

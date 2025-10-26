@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "let a: string | null = null;\n"
+    "// basic\nconst foo = bar<T>;\n"
   ],
-  "mappings": "IAAI,CAAgB,EAAb,MAAM,GAAG,IAAI,GAAG,IAAI"
+  "mappings": ";MACM,GAAG,GAAG,GAAG,CAAC,CAAC"
 }

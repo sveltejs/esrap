@@ -1,6 +1,8 @@
 .DS_Store
 /node_modules
 /types
+/test/samples/*/acorn/*
+/test/samples/*/oxc/*
 /test/samples/*/_actual.*
 /test/sandbox/_input.ts
 /test/sandbox/_output.ts

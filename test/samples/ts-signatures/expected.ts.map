@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "interface Constructable {\n\tnew (): any;\n\tnew (value: string): MyClass;\n\tnew <T>(value: T): GenericClass<T>;\n\t(name: string): string;\n}\n\ntype Constructor = {\n\tnew (): object;\n\tnew (name: string, age: number): Person;\n};\n"
+  ],
+  "mappings": "UAAU,aAAa;QACd,GAAG;KACN,KAAa,EAAN,MAAM,GAAG,OAAO;KACvB,CAAC,EAAE,KAAQ,EAAD,CAAC,GAAG,YAAY,CAAC,CAAC;EAChC,IAAY,EAAN,MAAM,GAAG,MAAM;;;KAGlB,WAAW,YACP,MAAM,MACT,IAAY,EAAN,MAAM,EAAE,GAAW,EAAN,MAAM,GAAG,MAAM"
+}
