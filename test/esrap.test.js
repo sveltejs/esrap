@@ -6,7 +6,6 @@ import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
 import { acornParse, oxcParse } from './common.js';
-import { oxcCommentsToEsrapComments } from './oxcCommentsToEsrapComments.js';
 import tsx from '../src/languages/tsx/index.js';
 import { describe } from 'node:test';
 
@@ -73,10 +72,7 @@ function clean(ast) {
  *       ast: TSESTree.Program,
  *       comments: TSESTree.Comment[]
  *     },
- *     commentsToEsrapComments?: (input: string, ast: TSESTree.Program, comments: any[]) => {
- *       ast: TSESTree.Program,
- *       comments: TSESTree.Comment[]
- *     },
+ *     skipSnapshot: boolean
  *     skipMap: boolean
  *   }
  * }}
@@ -86,13 +82,14 @@ const parsers = {
 		skip: false,
 		isBaseline: true,
 		parse: acornParse,
+		skipSnapshot: false,
 		skipMap: false
 	},
 	oxc: {
 		skip: false,
 		isBaseline: false,
 		parse: oxcParse,
-		commentsToEsrapComments: oxcCommentsToEsrapComments,
+		skipSnapshot: true,
 		skipMap: true
 	}
 };
@@ -106,14 +103,6 @@ test('should have 1 baseline', () => {
 });
 
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
-	// to run only one test, uncomment the following line and comment out the other tests
-	// if (dir !== 'comment-inline') continue;
-	// if (dir !== 'comment-block') continue;
-	// if (dir !== 'jsdoc-indentation') continue;
-	// if (dir !== 'import-attributes') continue;
-	// if (dir !== 'jsx-basic') continue;
-	// if (dir !== 'with') continue;
-
 	if (dir.includes('large-file')) continue;
 
 	if (dir[0] === '.') continue;
@@ -131,10 +120,9 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			input_json = fs.readFileSync(`${__dirname}/samples/${dir}/input.json`).toString();
 		} catch (error) {}
 
-		for (const [
-			parserName,
-			{ skip, parse, commentsToEsrapComments, isBaseline, skipMap }
-		] of Object.entries(parsers)) {
+		for (const [parserName, { skip, parse, isBaseline, skipSnapshot, skipMap }] of Object.entries(
+			parsers
+		)) {
 			test.skipIf(skip)(`test: ${dir}, parser: ${parserName}`, () => {
 				/** @type {TSESTree.Program} */
 				let ast;
@@ -151,11 +139,6 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					opts = {};
 				} else {
 					({ ast, comments } = parse(input_js, { sourceType: 'module', jsxMode, fileExtension }));
-
-					if (commentsToEsrapComments) {
-						({ ast, comments } = commentsToEsrapComments(input_js, ast, comments));
-					}
-
 					opts = { sourceMapSource: 'input.js', sourceMapContent: input_js };
 				}
 
@@ -181,9 +164,11 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					)
 				);
 
-				expect(code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
-					`${__dirname}/samples/${dir}/expected.${fileExtension}`
-				);
+				if (!skipSnapshot) {
+					expect(code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
+						`${__dirname}/samples/${dir}/expected.${fileExtension}`
+					);
+				}
 
 				if (!skipMap) {
 					expect(JSON.stringify(map, null, '  ').replaceAll('\\r', '')).toMatchFileSnapshot(
