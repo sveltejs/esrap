@@ -9,6 +9,12 @@ import { acornTs, acornTsx, load } from './common.js';
 import tsx from '../src/languages/tsx/index.js';
 import { parseSync } from 'oxc-parser';
 
+const compareAcornSnapshots = true;
+// `oxc-parser` currently still does not provide `loc` information for comments (https://github.com/oxc-project/oxc/pull/13285),
+// so running the // tests for oxc results in about 20 test failures. But this is still helpful to ensure we support
+// both environments. Therefore keep the tests, but disable them for now.
+const compareOxcSnapshots = false;
+
 /** @param {TSESTree.Node} ast */
 function clean(ast) {
 	const cleaned = walk(ast, null, {
@@ -56,9 +62,6 @@ function clean(ast) {
 	return cleaned;
 }
 
-const oxc = true;
-const acorn = true;
-
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	if (dir[0] === '.') continue;
 	const tsMode = dir.startsWith('ts-') || dir.startsWith('tsx-');
@@ -99,7 +102,11 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		} else {
 			({ ast: acorn_ast, comments: acorn_comments } = load(input_js, { jsx: true }));
 
-			({ program: oxc_ast, comments: oxc_comments } = parseSync('input.ts', input_js));
+			// types are slightly different in oxc-parser, that's why we need the casting here
+			({ program: oxc_ast, comments: oxc_comments } =
+				/** @type {{ program: TSESTree.Program, comments: TSESTree.Comment[] }} */ (
+					/** @type {unknown} */ (parseSync('input.ts', input_js))
+				));
 
 			opts = {
 				sourceMapSource: 'input.js',
@@ -114,7 +121,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		);
 		const { code: oxc_code } = print(oxc_ast, tsx({ comments: oxc_comments }), opts);
 
-		if (acorn) {
+		if (compareAcornSnapshots) {
 			fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.${fileExtension}`, acorn_code);
 			fs.writeFileSync(
 				`${__dirname}/samples/${dir}/_actual.${fileExtension}.map`,
@@ -149,7 +156,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			);
 		}
 
-		if (oxc) {
+		if (compareOxcSnapshots) {
 			await expect(oxc_code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
 				`${__dirname}/samples/${dir}/expected.${fileExtension}`,
 				'oxc'
