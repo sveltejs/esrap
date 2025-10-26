@@ -90,6 +90,7 @@ function write_comment(comment, context) {
 		}
 
 		context.write('*/');
+		if (lines.length > 1) context.newline();
 	}
 }
 
@@ -130,7 +131,7 @@ export default (options = {}) => {
 			if (position === 'leading') {
 				if (comment.type === 'Line') {
 					context.newline();
-				} else {
+				} else if (comment.type === 'Block' && !comment.value.includes('\n')) {
 					context.write(' ');
 				}
 			}

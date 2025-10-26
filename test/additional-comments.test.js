@@ -103,3 +103,36 @@ test('only trailing comments are inserted when specified', () => {
 	expect(code).toContain('/* Trailing only */');
 	expect(code).not.toContain('//');
 });
+
+test('additional comments multi-line comments have new line', () => {
+	const input = `function example() {
+	const x = 1;
+	return x;
+}`;
+
+	const { ast } = load(input);
+	const returnStatement = get_return_statement(ast);
+	expect(returnStatement.type).toBe('ReturnStatement');
+
+	/** @type {AdditionalComment[]} */
+	const comments = [
+		{
+			type: 'Block',
+			value: '*\n * This is a trailing comment\n ',
+			position: 'leading'
+		}
+	];
+
+	const code = print_with_comments(ast, returnStatement, comments);
+
+	expect(code).toMatchInlineSnapshot(`
+		"function example() {
+			const x = 1;
+
+			/**
+			 * This is a trailing comment
+			 */
+			return x;
+		}"
+	`);
+});
