@@ -986,7 +986,11 @@ export default (options = {}) => {
 
 			context.visit(node.local);
 
-			if (node.local.name !== node.exported.name) {
+			if (
+				node.local.type === 'Identifier' &&
+				node.exported.type === 'Identifier' &&
+				node.local.name !== node.exported.name
+			) {
 				context.write(' as ');
 				context.visit(node.exported);
 			}
@@ -1133,11 +1137,19 @@ export default (options = {}) => {
 					context.visit(node.arguments[index]);
 				}
 			}
+			if (node.options) {
+				context.write(', ');
+				context.visit(node.options);
+			}
 			context.write(')');
 		},
 
 		ImportSpecifier(node, context) {
-			if (node.local.name !== node.imported.name) {
+			if (
+				node.local.type === 'Identifier' &&
+				node.imported.type === 'Identifier' &&
+				node.local.name !== node.imported.name
+			) {
 				context.visit(node.imported);
 				context.write(' as ');
 			}

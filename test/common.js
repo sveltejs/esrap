@@ -2,6 +2,7 @@
 
 import * as acorn from 'acorn';
 import { tsPlugin } from '@sveltejs/acorn-typescript';
+import { parseSync } from 'oxc-parser';
 
 /** @import { TSESTree } from '@typescript-eslint/types' */
 
@@ -9,16 +10,17 @@ export const acornTs = acorn.Parser.extend(tsPlugin());
 export const acornTsx = acorn.Parser.extend(tsPlugin({ jsx: true }));
 
 /** @param {string} input
- * @param {{ jsx?: boolean }} opts
+ * @param {{ jsxMode?: boolean, sourceType?: 'module' | 'script' }} opts
  */
-export function load(input, opts = {}) {
-	const jsx = opts.jsx ?? false;
+export function acornParse(input, opts = {}) {
+	const jsx = opts.jsxMode ?? false;
+	const sourceType = opts.sourceType ?? 'module';
 	/** @type {any[]} */
 	const comments = [];
 
 	const ast = (jsx ? acornTsx : acornTs).parse(input, {
 		ecmaVersion: 'latest',
-		sourceType: 'module',
+		sourceType,
 		locations: true,
 		onComment: (block, value, start, end, startLoc, endLoc) => {
 			if (block && /\n/.test(value)) {
@@ -45,5 +47,19 @@ export function load(input, opts = {}) {
 	return {
 		ast: /** @type {TSESTree.Program} */ (/** @type {any} */ (ast)),
 		comments
+	};
+}
+
+/** @param {string} input
+ * @param {{ fileExtension?: string }} opts
+ */
+export function oxcParse(input, opts = { fileExtension: 'ts' }) {
+	let { program: ast, comments } = parseSync(`input.${opts.fileExtension}`, input, {
+		// loc: true
+	});
+
+	return {
+		ast: /** @type {TSESTree.Program} */ (/** @type {any} */ (ast)),
+		comments: /** @type {TSESTree.Comment[]} */ (/** @type {any} */ (comments))
 	};
 }

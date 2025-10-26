@@ -20,7 +20,7 @@ importers:
         version: 1.0.5(acorn@8.15.0)
       '@typescript-eslint/types':
         specifier: ^8.2.0
-        version: 8.2.0
+        version: 8.46.1
       '@vitest/ui':
         specifier: ^2.1.1
         version: 2.1.1(vitest@2.1.1)
@@ -488,8 +488,8 @@ packages:
   '@types/node@20.12.14':
     resolution: {integrity: sha512-scnD59RpYD91xngrQQLGkE+6UrHUPzeKZWhhjBSa3HSkwjbQc38+q3RoIVEwxQGRw3M+j5hpNAM+lgV3cVormg==}
 
-  '@typescript-eslint/types@8.2.0':
-    resolution: {integrity: sha512-6a9QSK396YqmiBKPkJtxsgZZZVjYQ6wQ/TlI0C65z7vInaETuC6HAHD98AGLC8DyIPqHytvNuS8bBVvNLKyqvQ==}
+  '@typescript-eslint/types@8.46.1':
+    resolution: {integrity: sha512-C+soprGBHwWBdkDpbaRC4paGBrkIXxVlNohadL5o0kfhsXqOC6GYH2S/Obmig+I0HTDl8wMaRySwrfrXVP8/pQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@vitest/expect@2.1.1':
@@ -1499,7 +1499,7 @@ snapshots:
       undici-types: 5.26.5
     optional: true
 
-  '@typescript-eslint/types@8.2.0': {}
+  '@typescript-eslint/types@8.46.1': {}
 
   '@vitest/expect@2.1.1':
     dependencies:
