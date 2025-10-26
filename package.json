@@ -28,6 +28,7 @@
   "types": "./types/index.d.ts",
   "devDependencies": {
     "@changesets/cli": "^2.27.11",
+    "@oxc-parser/binding-darwin-arm64": "^0.95.0",
     "@sveltejs/acorn-typescript": "^1.0.5",
     "@typescript-eslint/types": "^8.2.0",
     "@vitest/ui": "^2.1.1",
