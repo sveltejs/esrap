@@ -89,6 +89,9 @@ const parsers = {
 		skip: false,
 		isBaseline: false,
 		parse: oxcParse,
+		// `oxc-parser` currently still does not provide `loc` information for comments (https://github.com/oxc-project/oxc/pull/13285),
+		// so running the tests for oxc parser results in about 20 test failures. But this is still helpful to ensure we support
+		// both environments. Therefore keep the tests, but skipSnapshot and skipMap for now on oxc.
 		skipSnapshot: true,
 		skipMap: true
 	}
