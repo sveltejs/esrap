@@ -7,7 +7,7 @@ import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
 import { acornTs, acornTsx, load } from './common.js';
 import tsx from '../src/languages/tsx/index.js';
-// import { parseSync } from 'oxc-parser';
+import { parseSync } from 'oxc-parser';
 
 /** @param {TSESTree.Node} ast */
 function clean(ast) {
@@ -56,7 +56,7 @@ function clean(ast) {
 	return cleaned;
 }
 
-const oxc = false;
+const oxc = true;
 const acorn = true;
 
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
@@ -99,7 +99,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		} else {
 			({ ast: acorn_ast, comments: acorn_comments } = load(input_js, { jsx: true }));
 
-			// ({ program: oxc_ast, comments: oxc_comments } = parseSync('input.ts', input_js));
+			({ program: oxc_ast, comments: oxc_comments } = parseSync('input.ts', input_js));
 
 			opts = {
 				sourceMapSource: 'input.js',
@@ -112,7 +112,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 			tsx({ comments: acorn_comments }),
 			opts
 		);
-		// const { code: oxc_code } = print(oxc_ast, tsx({ comments: oxc_comments }), opts);
+		const { code: oxc_code } = print(oxc_ast, tsx({ comments: oxc_comments }), opts);
 
 		if (acorn) {
 			fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.${fileExtension}`, acorn_code);
@@ -151,10 +151,10 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		}
 
 		if (oxc) {
-			// expect(oxc_code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
-			// 	`${__dirname}/samples/${dir}/expected.${fileExtension}`,
-			// 	'oxc'
-			// );
+			expect(oxc_code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
+				`${__dirname}/samples/${dir}/expected.${fileExtension}`,
+				'oxc'
+			);
 		}
 	});
 }
