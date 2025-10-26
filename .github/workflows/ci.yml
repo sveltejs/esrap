@@ -36,6 +36,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
+      - name: fix pnpm
+        run: rm pnpm-lock.yaml && rm -rf node_modules
       - name: install
         run: pnpm install --no-lockfile
       - name: test

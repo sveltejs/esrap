@@ -136,22 +136,21 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 				)
 			);
 
-			expect(acorn_code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
-				`${__dirname}/samples/${dir}/expected.${fileExtension}`,
-				'acorn'
-			);
+			await expect(
+				acorn_code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')
+			).toMatchFileSnapshot(`${__dirname}/samples/${dir}/expected.${fileExtension}`, 'acorn');
 
-			expect(JSON.stringify(acorn_map, null, '  ').replaceAll('\\r', '')).toMatchFileSnapshot(
+			await expect(JSON.stringify(acorn_map, null, '  ').replaceAll('\\r', '')).toMatchFileSnapshot(
 				`${__dirname}/samples/${dir}/expected.${fileExtension}.map`
 			);
 
-			expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsed)))).toEqual(
+			await expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsed)))).toEqual(
 				clean(acorn_ast)
 			);
 		}
 
 		if (oxc) {
-			expect(oxc_code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
+			await expect(oxc_code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
 				`${__dirname}/samples/${dir}/expected.${fileExtension}`,
 				'oxc'
 			);
