@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "let n: number = 42;\nlet s: string = 'Hello, TypeScript!';\nlet b: boolean = true;\nlet u: unknown = 'whatever';\nlet un: undefined = undefined;\nlet o: object = { name: 'Object' };\nlet bi: bigint = 1234567890123456789012345678901234567890n;\nlet ne: never;\nlet sy: symbol = Symbol('unique');\nlet a: any = { key: 'value' };\nlet v: () => void = () => {};\nlet arr: number[] = [1, 2, 3];\nlet snu: string | null = null;\nlet nun: number | undefined = undefined;\n\n// TODO: commented because acorn doesn't support type assertions but oxc does\n// let ta = <boolean>true;\n"
+  ],
+  "mappings": "IAAI,CAAS,EAAN,MAAM,GAAG,EAAE;IACd,CAAS,EAAN,MAAM,GAAG,oBAAoB;IAChC,CAAU,EAAP,OAAO,GAAG,IAAI;IACjB,CAAU,EAAP,OAAO,GAAG,UAAU;IACvB,EAAa,EAAT,SAAS,GAAG,SAAS;IACzB,CAAS,EAAN,MAAM,KAAK,IAAI,EAAE,QAAQ;IAC5B,EAAU,EAAN,MAAM,GAAG,yCAAyC;IACtD,EAAS,EAAL,KAAK;IACT,EAAU,EAAN,MAAM,GAAG,MAAM,CAAC,QAAQ;IAC5B,CAAM,EAAH,GAAG,KAAK,GAAG,EAAE,OAAO;IACvB,CAAa,QAAJ,IAAI,SAAS,CAAC,AAAA,CAAC;IACxB,GAAa,EAAR,MAAM,MAAM,CAAC,EAAE,CAAC,EAAE,CAAC;IACxB,GAAkB,EAAb,MAAM,GAAG,IAAI,GAAG,IAAI;IACzB,GAAuB,EAAlB,MAAM,GAAG,SAAS,GAAG,SAAS;;;"
+}

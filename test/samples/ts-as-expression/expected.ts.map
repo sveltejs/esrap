@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "const a: number = 42;\nconst b = a as unknown as string;\n\ntype C = {\n\tname: string;\n};\n\ntype D = {\n\tfirstName: string;\n};\n\nconst e: C = {\n\tname: 'foo'\n} as unknown as D;\n\nconst f = (Math.random() > 0.5 ? { firstName: 'name1' } : { firstName: 'name2' }) as unknown as D;\n"
+    "const a: number = 42;\nconst b = a as unknown as string;\n\ntype C = {\n\tname: string;\n};\n\ntype D = {\n\tfirstName: string;\n};\n\nconst e: C = {\n\tname: 'foo'\n} as unknown as D;\n\nconst f = (Math.random() > 0.5 ? { firstName: 'name1' } : { firstName: 'name2' }) as unknown as D;\n\nconst g = h(e['name']) as (scope: ng.IScope) => b;\n"
   ],
-  "mappings": "MAAM,CAAS,EAAN,MAAM,GAAG,EAAE;MACd,CAAC,GAAG,CAAC,IAAI,OAAO,IAAI,MAAM;;KAE3B,CAAC,KACL,IAAI,EAAE,MAAM;KAGR,CAAC,KACL,SAAS,EAAE,MAAM;;MAGZ,CAAI,EAAD,CAAC,KACT,IAAI,EAAE,KAAK,MACP,OAAO,IAAI,CAAC;MAEX,CAAC,IAAI,IAAI,CAAC,MAAM,KAAK,GAAG,KAAK,SAAS,EAAE,OAAO,OAAO,SAAS,EAAE,OAAO,OAAO,OAAO,IAAI,CAAC"
+  "mappings": "MAAM,CAAS,EAAN,MAAM,GAAG,EAAE;MACd,CAAC,GAAG,CAAC,IAAI,OAAO,IAAI,MAAM;;KAE3B,CAAC,KACL,IAAI,EAAE,MAAM;KAGR,CAAC,KACL,SAAS,EAAE,MAAM;;MAGZ,CAAI,EAAD,CAAC,KACT,IAAI,EAAE,KAAK,MACP,OAAO,IAAI,CAAC;MAEX,CAAC,IAAI,IAAI,CAAC,MAAM,KAAK,GAAG,KAAK,SAAS,EAAE,OAAO,OAAO,SAAS,EAAE,OAAO,OAAO,OAAO,IAAI,CAAC;MAE3F,CAAC,GAAG,CAAC,CAAC,CAAC,CAAC,MAAM,OAAO,KAAgB,EAAT,EAAE,CAAC,MAAM,KAAK,CAAC"
 }

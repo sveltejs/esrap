@@ -1,1 +1,1 @@
-let a: string | null = null
+let a: string | null = null;
