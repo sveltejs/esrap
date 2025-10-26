@@ -37,9 +37,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
       - name: fix pnpm
-        run: rm pnpm-lock.yaml && rm -rf node_modules
-      - name: install
-        run: pnpm install --no-lockfile
+        run: pnpm install --frozen-lockfile
       - name: test
         run: pnpm test
         env:
@@ -53,6 +51,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: pnpm
       - name: install
         run: pnpm install --frozen-lockfile
       - name: type check
