@@ -102,7 +102,6 @@ export default (options = {}) => {
 	const quote_char = options.quotes === 'double' ? '"' : "'";
 
 	const comments = options.comments ?? [];
-	/** @type {WeakMap<TSESTree.Node, AdditionalComment[]>} */
 	const additionalComments = options.additionalComments ?? new WeakMap();
 
 	let comment_index = 0;

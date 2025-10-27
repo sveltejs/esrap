@@ -7,21 +7,6 @@ import { acornParse } from './common.js';
 import ts from '../src/languages/ts/index.js';
 
 /**
- * Helper to create additional comments and print code
- * @param {TSESTree.Program} ast - Parsed AST
- * @param {TSESTree.Node} node - AST node to attach comments to
- * @param {AdditionalComment[]} comments - Comments to attach
- * @returns {string} Generated code
- */
-function print_with_comments(ast, node, comments) {
-	const additionalComments = new WeakMap();
-	additionalComments.set(node, comments);
-
-	const output = print(ast, ts({ additionalComments }));
-	return output.code;
-}
-
-/**
  * Helper to get return statement from a simple function
  * @param {TSESTree.Program} ast - Parsed AST
  * @returns {TSESTree.Node} The return statement
@@ -58,7 +43,10 @@ test('additional comments are inserted correctly', () => {
 		}
 	];
 
-	const code = print_with_comments(ast, returnStatement, comments);
+	const { code } = print(
+		ast,
+		ts({ additionalComments: new WeakMap([[returnStatement, comments]]) })
+	);
 
 	expect(code).toContain('// This is a leading comment');
 	expect(code).toContain('/* This is a trailing comment */');
@@ -78,7 +66,10 @@ test('only leading comments are inserted when specified', () => {
 		}
 	];
 
-	const code = print_with_comments(ast, returnStatement, comments);
+	const { code } = print(
+		ast,
+		ts({ additionalComments: new WeakMap([[returnStatement, comments]]) })
+	);
 
 	expect(code).toContain('// Leading only');
 	expect(code).not.toContain('trailing');
@@ -98,7 +89,10 @@ test('only trailing comments are inserted when specified', () => {
 		}
 	];
 
-	const code = print_with_comments(ast, returnStatement, comments);
+	const { code } = print(
+		ast,
+		ts({ additionalComments: new WeakMap([[returnStatement, comments]]) })
+	);
 
 	expect(code).toContain('/* Trailing only */');
 	expect(code).not.toContain('//');
@@ -118,20 +112,61 @@ test('additional comments multi-line comments have new line', () => {
 	const comments = [
 		{
 			type: 'Block',
-			value: '*\n * This is a trailing comment\n ',
+			value: '*\n * This is a leading comment\n ',
 			position: 'leading'
 		}
 	];
 
-	const code = print_with_comments(ast, returnStatement, comments);
+	const { code } = print(
+		ast,
+		ts({ additionalComments: new WeakMap([[returnStatement, comments]]) })
+	);
 
 	expect(code).toMatchInlineSnapshot(`
 		"function example() {
 			const x = 1;
 
 			/**
-			 * This is a trailing comment
+			 * This is a leading comment
 			 */
+			return x;
+		}"
+	`);
+});
+
+test('comments & additional comments', () => {
+	const input = `// existing comment
+	function example() {
+	const x = 1;
+	return x;
+}`;
+
+	const { ast, comments } = acornParse(input);
+	const returnStatement = get_return_statement(ast);
+	expect(returnStatement.type).toBe('ReturnStatement');
+
+	/** @type {WeakMap<TSESTree.Node, AdditionalComment[]>} */
+	const additionalComments = new WeakMap([
+		[
+			returnStatement,
+			[
+				{
+					type: 'Line',
+					value: 'This is a leading comment',
+					position: 'leading'
+				}
+			]
+		]
+	]);
+
+	const { code } = print(ast, ts({ comments, additionalComments }));
+
+	expect(code).toMatchInlineSnapshot(`
+		"// existing comment
+		function example() {
+			const x = 1;
+
+			//This is a leading comment
 			return x;
 		}"
 	`);
