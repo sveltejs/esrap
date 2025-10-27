@@ -129,8 +129,8 @@ test('additional comments multi-line comments have new line', () => {
 test('comments & additional comments', () => {
 	const input = `// existing comment
 	function example() {
-	const x = 1;
-	return x;
+	const myVal = 1;
+	return myVal;
 }`;
 
 	const { ast, comments } = acornParse(input);
@@ -139,7 +139,8 @@ test('comments & additional comments', () => {
 
 	/** @type {WeakMap<TSESTree.Node, AdditionalComment[]>} */
 	const additionalComments = new WeakMap([
-		[returnStatement, [{ value: ' This is a leading comment' }]]
+		// @ts-expect-error accessing return statement argument name
+		[returnStatement, [{ value: ` "${returnStatement.argument.name}" will be returned here.` }]]
 	]);
 
 	const { code } = print(ast, ts({ comments, additionalComments }));
@@ -147,10 +148,10 @@ test('comments & additional comments', () => {
 	expect(code).toMatchInlineSnapshot(`
 		"// existing comment
 		function example() {
-			const x = 1;
+			const myVal = 1;
 
-			// This is a leading comment
-			return x;
+			// "myVal" will be returned here.
+			return myVal;
 		}"
 	`);
 });
