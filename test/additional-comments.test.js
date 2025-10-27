@@ -29,20 +29,22 @@ test('additional comments are inserted correctly', () => {
 	const returnStatement = get_return_statement(ast);
 	expect(returnStatement.type).toBe('ReturnStatement');
 
-	/** @type {AdditionalComment[]} */
-	const comments = [
-		{ value: ' This is a leading comment' },
-		{
-			type: 'Block',
-			value: ' This is a trailing comment ',
-			position: 'trailing'
-		}
-	];
+	/** @type {WeakMap<TSESTree.Node, AdditionalComment[]>} */
+	const additionalComments = new WeakMap([
+		[
+			returnStatement,
+			[
+				{ value: ' This is a leading comment' },
+				{
+					type: 'Block',
+					value: ' This is a trailing comment ',
+					position: 'trailing'
+				}
+			]
+		]
+	]);
 
-	const { code } = print(
-		ast,
-		ts({ additionalComments: new WeakMap([[returnStatement, comments]]) })
-	);
+	const { code } = print(ast, ts({ additionalComments }));
 
 	expect(code).toContain('// This is a leading comment');
 	expect(code).toContain('/* This is a trailing comment */');
@@ -53,13 +55,10 @@ test('only leading comments are inserted when specified', () => {
 	const { ast } = acornParse(input);
 	const returnStatement = get_return_statement(ast);
 
-	/** @type {AdditionalComment[]} */
-	const comments = [{ value: ' Leading only' }];
+	/** @type {WeakMap<TSESTree.Node, AdditionalComment[]>} */
+	const additionalComments = new WeakMap([[returnStatement, [{ value: ' Leading only' }]]]);
 
-	const { code } = print(
-		ast,
-		ts({ additionalComments: new WeakMap([[returnStatement, comments]]) })
-	);
+	const { code } = print(ast, ts({ additionalComments }));
 
 	expect(code).toContain('// Leading only');
 	expect(code).not.toContain('trailing');
@@ -70,19 +69,21 @@ test('only trailing comments are inserted when specified', () => {
 	const { ast } = acornParse(input);
 	const returnStatement = get_return_statement(ast);
 
-	/** @type {AdditionalComment[]} */
-	const comments = [
-		{
-			type: 'Block',
-			value: ' Trailing only ',
-			position: 'trailing'
-		}
-	];
+	/** @type {WeakMap<TSESTree.Node, AdditionalComment[]>} */
+	const additionalComments = new WeakMap([
+		[
+			returnStatement,
+			[
+				{
+					type: 'Block',
+					value: ' Trailing only ',
+					position: 'trailing'
+				}
+			]
+		]
+	]);
 
-	const { code } = print(
-		ast,
-		ts({ additionalComments: new WeakMap([[returnStatement, comments]]) })
-	);
+	const { code } = print(ast, ts({ additionalComments }));
 
 	expect(code).toContain('/* Trailing only */');
 	expect(code).not.toContain('//');
@@ -98,19 +99,20 @@ test('additional comments multi-line comments have new line', () => {
 	const returnStatement = get_return_statement(ast);
 	expect(returnStatement.type).toBe('ReturnStatement');
 
-	/** @type {AdditionalComment[]} */
-	const comments = [
-		{
-			type: 'Block',
-			value: '*\n * This is a leading comment\n ',
-			position: 'leading'
-		}
-	];
+	/** @type {WeakMap<TSESTree.Node, AdditionalComment[]>} */
+	const additionalComments = new WeakMap([
+		[
+			returnStatement,
+			[
+				{
+					type: 'Block',
+					value: '*\n * This is a leading comment\n '
+				}
+			]
+		]
+	]);
 
-	const { code } = print(
-		ast,
-		ts({ additionalComments: new WeakMap([[returnStatement, comments]]) })
-	);
+	const { code } = print(ast, ts({ additionalComments }));
 
 	expect(code).toMatchInlineSnapshot(`
 		"function example() {
@@ -137,7 +139,7 @@ test('comments & additional comments', () => {
 
 	/** @type {WeakMap<TSESTree.Node, AdditionalComment[]>} */
 	const additionalComments = new WeakMap([
-		[returnStatement, [{ value: 'This is a leading comment' }]]
+		[returnStatement, [{ value: ' This is a leading comment' }]]
 	]);
 
 	const { code } = print(ast, ts({ comments, additionalComments }));
@@ -147,7 +149,7 @@ test('comments & additional comments', () => {
 		function example() {
 			const x = 1;
 
-			//This is a leading comment
+			// This is a leading comment
 			return x;
 		}"
 	`);
