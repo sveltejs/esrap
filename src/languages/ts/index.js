@@ -116,10 +116,13 @@ export default (options = {}) => {
 		const nodeComments = additionalComments.get(node);
 		if (!nodeComments) return;
 
-		const relevantComments = nodeComments.filter((comment) => comment.position === position);
+		const relevantComments = nodeComments.filter(
+			(comment) => (comment.position ?? 'leading') === position
+		);
 
 		for (let i = 0; i < relevantComments.length; i += 1) {
-			const comment = relevantComments[i];
+			/** @type {BaseComment} */
+			const comment = { type: 'Line', ...relevantComments[i] };
 
 			if (position === 'trailing' && i === 0) {
 				context.write(' ');

@@ -28,5 +28,8 @@ export interface Comment extends BaseComment {
 }
 
 export interface AdditionalComment extends BaseComment {
-	position: 'leading' | 'trailing';
+	/** @default 'Line' */
+	type?: 'Line' | 'Block';
+	/** @default 'leading' */
+	position?: 'leading' | 'trailing';
 }

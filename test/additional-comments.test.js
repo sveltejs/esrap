@@ -31,11 +31,7 @@ test('additional comments are inserted correctly', () => {
 
 	/** @type {AdditionalComment[]} */
 	const comments = [
-		{
-			type: 'Line',
-			value: ' This is a leading comment',
-			position: 'leading'
-		},
+		{ value: ' This is a leading comment' },
 		{
 			type: 'Block',
 			value: ' This is a trailing comment ',
@@ -58,13 +54,7 @@ test('only leading comments are inserted when specified', () => {
 	const returnStatement = get_return_statement(ast);
 
 	/** @type {AdditionalComment[]} */
-	const comments = [
-		{
-			type: 'Line',
-			value: ' Leading only',
-			position: 'leading'
-		}
-	];
+	const comments = [{ value: ' Leading only' }];
 
 	const { code } = print(
 		ast,
@@ -147,16 +137,7 @@ test('comments & additional comments', () => {
 
 	/** @type {WeakMap<TSESTree.Node, AdditionalComment[]>} */
 	const additionalComments = new WeakMap([
-		[
-			returnStatement,
-			[
-				{
-					type: 'Line',
-					value: 'This is a leading comment',
-					position: 'leading'
-				}
-			]
-		]
+		[returnStatement, [{ value: 'This is a leading comment' }]]
 	]);
 
 	const { code } = print(ast, ts({ comments, additionalComments }));
