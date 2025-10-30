@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.1.2
+
+### Patch Changes
+
+- 53b485d: fix: support typescript class decorator
+
 ## 2.1.1
 
 ### Patch Changes
