@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class Entity {\n\tconstructor(\n\t\tprivate readonly name: string,\n\t\tprivate readonly info: boolean\n\t) {}\n}\n\n@Entity('users', { info: true })\nclass User {}\n\nconst u = new User(); // will print \"random uuid...\"\n"
+  ],
+  "mappings": "MAAM,MAAM,CAAC,CAAC;CACb,WAAW;mBACO,IAAY,EAAN,MAAM;mBACZ,IAAa,EAAP,OAAO;GAC7B,CAAC,AAAA,CAAC;AACL,CAAC;;CAEA,MAAM,CAAC,OAAO,IAAI,IAAI,EAAE,IAAI;MACvB,IAAI,CAAC,CAAC,AAAA,CAAC;;MAEP,CAAC,OAAO,IAAI"
+}

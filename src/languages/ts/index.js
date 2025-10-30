@@ -501,6 +501,12 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'ClassDeclaration|ClassExpression': (node, context) => {
+			if (node.decorators) {
+				for (const decorator of node.decorators) {
+					context.visit(decorator);
+				}
+			}
+
 			if (node.declare) {
 				context.write('declare ');
 			}
