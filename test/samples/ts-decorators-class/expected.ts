@@ -1,4 +1,4 @@
-class Entity {
+export class Entity {
 	constructor(
 		private readonly name: string,
 		private readonly info: boolean
@@ -6,6 +6,14 @@ class Entity {
 }
 
 @Entity('users', { info: true })
-class User {}
+export class User {}
 
-const u = new User(); // will print "random uuid..."
+@Entity('categories', { info: false })
+class Category {}
+
+@Entity('tasks', { info: true })
+export class Task {}
+
+const u = new User();
+const c = new Category();
+const t = new Task();
