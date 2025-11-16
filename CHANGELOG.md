@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.1.3
+
+### Patch Changes
+
+- 9bf2740: fix: support export class with decorators
+
 ## 2.1.2
 
 ### Patch Changes
