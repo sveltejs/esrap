@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "class Entity {\n\tconstructor(\n\t\tprivate readonly name: string,\n\t\tprivate readonly info: boolean\n\t) {}\n}\n\n@Entity('users', { info: true })\nclass User {}\n\nconst u = new User(); // will print \"random uuid...\"\n"
+    "export class Entity {\n\tconstructor(\n\t\tprivate readonly name: string,\n\t\tprivate readonly info: boolean\n\t) {}\n}\n\n@Entity('users', { info: true })\nexport class User {}\n\n@Entity('categories', { info: false })\nclass Category {}\n\n@Entity('tasks', { info: true })\nexport class Task {}\n\nconst u = new User();\nconst c = new Category();\nconst t = new Task();\n"
   ],
-  "mappings": "MAAM,MAAM,CAAC,CAAC;CACb,WAAW;mBACO,IAAY,EAAN,MAAM;mBACZ,IAAa,EAAP,OAAO;GAC7B,CAAC,AAAA,CAAC;AACL,CAAC;;CAEA,MAAM,CAAC,OAAO,IAAI,IAAI,EAAE,IAAI;MACvB,IAAI,CAAC,CAAC,AAAA,CAAC;;MAEP,CAAC,OAAO,IAAI"
+  "mappings": "aAAa,MAAM,CAAC,CAAC;CACpB,WAAW;mBACO,IAAY,EAAN,MAAM;mBACZ,IAAa,EAAP,OAAO;GAC7B,CAAC,AAAA,CAAC;AACL,CAAC;;CAEA,MAAM,CAAC,OAAO,IAAI,IAAI,EAAE,IAAI;aAChB,IAAI,CAAC,CAAC,AAAA,CAAC;;CAEnB,MAAM,CAAC,YAAY,IAAI,IAAI,EAAE,KAAK;MAC7B,QAAQ,CAAC,CAAC,AAAA,CAAC;;CAEhB,MAAM,CAAC,OAAO,IAAI,IAAI,EAAE,IAAI;aAChB,IAAI,CAAC,CAAC,AAAA,CAAC;;MAEd,CAAC,OAAO,IAAI;MACZ,CAAC,OAAO,QAAQ;MAChB,CAAC,OAAO,IAAI"
 }
