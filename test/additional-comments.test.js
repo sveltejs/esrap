@@ -35,7 +35,7 @@ function get_return_statement(ast) {
 	return statements.find(/** @param {any} stmt */ (stmt) => stmt.type === 'ReturnStatement');
 }
 
-test.only('additional comments are inserted correctly', () => {
+test('additional comments are inserted correctly', () => {
 	const input = `function example() {
 	const x = 1;
 	return x;
