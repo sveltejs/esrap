@@ -3,7 +3,8 @@ import { TSESTree } from '@typescript-eslint/types';
 export type TSOptions = {
 	quotes?: 'double' | 'single';
 	comments?: Comment[];
-	additionalComments?: WeakMap<TSESTree.Node, AdditionalComment[]>;
+	getLeadingComments?: (node: TSESTree.Node) => BaseComment[] | undefined;
+	getTrailingComments?: (node: TSESTree.Node) => BaseComment[] | undefined;
 };
 
 interface Position {
@@ -25,8 +26,4 @@ export interface Comment extends BaseComment {
 		start: Position;
 		end: Position;
 	};
-}
-
-export interface AdditionalComment extends BaseComment {
-	position: 'leading' | 'trailing';
 }

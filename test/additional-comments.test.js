@@ -1,6 +1,6 @@
 // @ts-check
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { AdditionalComment } from '../src/languages/types.js' */
+/** @import { BaseComment } from '../src/languages/types.js' */
 import { expect, test } from 'vitest';
 import { print } from '../src/index.js';
 import { acornParse } from './common.js';
@@ -10,15 +10,35 @@ import ts from '../src/languages/ts/index.js';
  * Helper to create additional comments and print code
  * @param {TSESTree.Program} ast - Parsed AST
  * @param {TSESTree.Node} node - AST node to attach comments to
- * @param {AdditionalComment[]} comments - Comments to attach
+ * @param {BaseComment[]} leading - Comments to attach before the node
+ * @param {BaseComment[]} trailing - Comments to attach after the node
  * @returns {string} Generated code
  */
-function print_with_comments(ast, node, comments) {
-	const additionalComments = new WeakMap();
-	additionalComments.set(node, comments);
-
-	const output = print(ast, ts({ additionalComments }));
+function print_with_comments(ast, node, leading, trailing) {
+	const output = print(
+		ast,
+		ts({
+			getLeadingComments: (n) => (n === node ? leading : []),
+			getTrailingComments: (n) => (n === node ? trailing : [])
+		})
+	);
 	return output.code;
+}
+
+/**
+ * @param {string} value
+ * @returns {BaseComment}
+ */
+function line(value) {
+	return { type: 'Line', value };
+}
+
+/**
+ * @param {string} value
+ * @returns {BaseComment}
+ */
+function block(value) {
+	return { type: 'Block', value };
 }
 
 /**
@@ -34,7 +54,7 @@ function get_return_statement(ast) {
 	return statements.find(/** @param {any} stmt */ (stmt) => stmt.type === 'ReturnStatement');
 }
 
-test('additional comments are inserted correctly', () => {
+test.only('additional comments are inserted correctly', () => {
 	const input = `function example() {
 	const x = 1;
 	return x;
@@ -44,21 +64,15 @@ test('additional comments are inserted correctly', () => {
 	const returnStatement = get_return_statement(ast);
 	expect(returnStatement.type).toBe('ReturnStatement');
 
-	/** @type {AdditionalComment[]} */
-	const comments = [
-		{
-			type: 'Line',
-			value: ' This is a leading comment',
-			position: 'leading'
-		},
-		{
-			type: 'Block',
-			value: ' This is a trailing comment ',
-			position: 'trailing'
-		}
-	];
-
-	const code = print_with_comments(ast, returnStatement, comments);
+	const { code } = print(
+		ast,
+		ts({
+			getLeadingComments: (n) =>
+				n === returnStatement ? [line(' This is a leading comment')] : undefined,
+			getTrailingComments: (n) =>
+				n === returnStatement ? [block(' This is a trailing comment ')] : undefined
+		})
+	);
 
 	expect(code).toContain('// This is a leading comment');
 	expect(code).toContain('/* This is a trailing comment */');
@@ -69,16 +83,12 @@ test('only leading comments are inserted when specified', () => {
 	const { ast } = acornParse(input);
 	const returnStatement = get_return_statement(ast);
 
-	/** @type {AdditionalComment[]} */
-	const comments = [
-		{
-			type: 'Line',
-			value: ' Leading only',
-			position: 'leading'
-		}
-	];
-
-	const code = print_with_comments(ast, returnStatement, comments);
+	const { code } = print(
+		ast,
+		ts({
+			getLeadingComments: (n) => (n === returnStatement ? [line(' Leading only ')] : undefined)
+		})
+	);
 
 	expect(code).toContain('// Leading only');
 	expect(code).not.toContain('trailing');
@@ -89,16 +99,12 @@ test('only trailing comments are inserted when specified', () => {
 	const { ast } = acornParse(input);
 	const returnStatement = get_return_statement(ast);
 
-	/** @type {AdditionalComment[]} */
-	const comments = [
-		{
-			type: 'Block',
-			value: ' Trailing only ',
-			position: 'trailing'
-		}
-	];
-
-	const code = print_with_comments(ast, returnStatement, comments);
+	const { code } = print(
+		ast,
+		ts({
+			getTrailingComments: (n) => (n === returnStatement ? [block(' Trailing only ')] : undefined)
+		})
+	);
 
 	expect(code).toContain('/* Trailing only */');
 	expect(code).not.toContain('//');
@@ -114,23 +120,20 @@ test('additional comments multi-line comments have new line', () => {
 	const returnStatement = get_return_statement(ast);
 	expect(returnStatement.type).toBe('ReturnStatement');
 
-	/** @type {AdditionalComment[]} */
-	const comments = [
-		{
-			type: 'Block',
-			value: '*\n * This is a trailing comment\n ',
-			position: 'leading'
-		}
-	];
-
-	const code = print_with_comments(ast, returnStatement, comments);
+	const { code } = print(
+		ast,
+		ts({
+			getLeadingComments: (n) =>
+				n === returnStatement ? [block('*\n * This is a leading comment\n ')] : undefined
+		})
+	);
 
 	expect(code).toMatchInlineSnapshot(`
 		"function example() {
 			const x = 1;
 
 			/**
-			 * This is a trailing comment
+			 * This is a leading comment
 			 */
 			return x;
 		}"

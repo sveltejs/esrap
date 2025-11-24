@@ -1,6 +1,6 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Visitors } from '../../types.js' */
-/** @import { TSOptions, BaseComment, AdditionalComment } from '../types.js' */
+/** @import { TSOptions, BaseComment } from '../types.js' */
 import { Context } from 'esrap';
 
 /** @typedef {TSESTree.Node} Node */
@@ -102,25 +102,22 @@ export default (options = {}) => {
 	const quote_char = options.quotes === 'double' ? '"' : "'";
 
 	const comments = options.comments ?? [];
-	/** @type {WeakMap<TSESTree.Node, AdditionalComment[]>} */
-	const additionalComments = options.additionalComments ?? new WeakMap();
 
 	let comment_index = 0;
 
 	/**
 	 * Write additional comments for a node
 	 * @param {Context} context
-	 * @param {TSESTree.Node} node
+	 * @param {BaseComment[] | undefined} comments
 	 * @param {('leading' | 'trailing')} position
 	 */
-	function write_additional_comments(context, node, position) {
-		const nodeComments = additionalComments.get(node);
-		if (!nodeComments) return;
+	function write_additional_comments(context, comments, position) {
+		if (!comments) {
+			return;
+		}
 
-		const relevantComments = nodeComments.filter((comment) => comment.position === position);
-
-		for (let i = 0; i < relevantComments.length; i += 1) {
-			const comment = relevantComments[i];
+		for (let i = 0; i < comments.length; i += 1) {
+			const comment = comments[i];
 
 			if (position === 'trailing' && i === 0) {
 				context.write(' ');
@@ -809,7 +806,7 @@ export default (options = {}) => {
 
 	return {
 		_(node, context, visit) {
-			write_additional_comments(context, node, 'leading');
+			write_additional_comments(context, options.getLeadingComments?.(node), 'leading');
 
 			if (node.loc) {
 				flush_comments_until(context, null, node.loc.start, true);
@@ -817,7 +814,7 @@ export default (options = {}) => {
 
 			visit(node);
 
-			write_additional_comments(context, node, 'trailing');
+			write_additional_comments(context, options.getTrailingComments?.(node), 'trailing');
 		},
 
 		AccessorProperty:
