@@ -7,25 +7,6 @@ import { acornParse } from './common.js';
 import ts from '../src/languages/ts/index.js';
 
 /**
- * Helper to create additional comments and print code
- * @param {TSESTree.Program} ast - Parsed AST
- * @param {TSESTree.Node} node - AST node to attach comments to
- * @param {BaseComment[]} leading - Comments to attach before the node
- * @param {BaseComment[]} trailing - Comments to attach after the node
- * @returns {string} Generated code
- */
-function print_with_comments(ast, node, leading, trailing) {
-	const output = print(
-		ast,
-		ts({
-			getLeadingComments: (n) => (n === node ? leading : []),
-			getTrailingComments: (n) => (n === node ? trailing : [])
-		})
-	);
-	return output.code;
-}
-
-/**
  * @param {string} value
  * @returns {BaseComment}
  */
