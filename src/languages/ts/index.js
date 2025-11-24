@@ -535,6 +535,12 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'ClassDeclaration|ClassExpression': (node, context) => {
+			if (node.decorators) {
+				for (const decorator of node.decorators) {
+					context.visit(decorator);
+				}
+			}
+
 			if (node.declare) {
 				context.write('declare ');
 			}
@@ -994,12 +1000,27 @@ export default (options = {}) => {
 		},
 
 		ExportNamedDeclaration(node, context) {
-			context.write('export ');
-
 			if (node.declaration) {
-				context.visit(node.declaration);
+				// Check if declaration has decorators (ClassDeclaration, ClassExpression can have them)
+				const decl = /** @type {any} */ (node.declaration);
+				if (decl.decorators && decl.decorators.length > 0) {
+					for (const decorator of decl.decorators) {
+						context.visit(decorator);
+					}
+					context.write('export ');
+					// Temporarily remove decorators so ClassDeclaration doesn't print them again
+					const savedDecorators = decl.decorators;
+					decl.decorators = [];
+					context.visit(node.declaration);
+					decl.decorators = savedDecorators;
+				} else {
+					context.write('export ');
+					context.visit(node.declaration);
+				}
 				return;
 			}
+
+			context.write('export ');
 
 			if (node.exportKind === 'type') {
 				context.write('type ');
