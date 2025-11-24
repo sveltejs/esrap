@@ -1,2 +1,2 @@
 export * from './index';
-export { Comment } from '../types';
+export { BaseComment, Comment } from '../types';
