@@ -57,10 +57,10 @@ const { code, map } = print(
     // an array of `{ type: 'Line' | 'Block', value: string, loc: { start, end } }` objects
     comments: [],
 
-    // a WeakMap of AST nodes to additional comments to insert at specific nodes
-    // useful for programmatically adding comments during code transformation,
-    // especially for nodes that were added programmatically
-    additionalComments: new WeakMap()
+    // a pair of functions for inserting additional comments before or after a given node.
+    // returns `Array<{ type: 'Line' | 'Block', value: string }>` or `undefined`
+    getLeadingComments: (node) => [{ type: 'Line', value: ' a comment before the node' }],
+    getTrailingComments: (node) => [{ type: 'Block', value: ' a comment after the node' }]
   })
 );
 ```
