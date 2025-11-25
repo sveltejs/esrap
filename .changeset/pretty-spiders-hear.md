@@ -2,4 +2,4 @@
 'esrap': minor
 ---
 
-feat: add additionalComments option for programmatic comment insertion
+feat: add `getLeadingComments` & `getTrailingComments` option for programmatic comment insertion
