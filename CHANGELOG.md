@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.2.0
+
+### Minor Changes
+
+- da2f84d: feat: add `getLeadingComments` & `getTrailingComments` option for programmatic comment insertion
+
 ## 2.1.3
 
 ### Patch Changes
