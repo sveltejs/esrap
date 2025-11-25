@@ -1,6 +1,10 @@
+import { TSESTree } from '@typescript-eslint/types';
+
 export type TSOptions = {
 	quotes?: 'double' | 'single';
 	comments?: Comment[];
+	getLeadingComments?: (node: TSESTree.Node) => BaseComment[] | undefined;
+	getTrailingComments?: (node: TSESTree.Node) => BaseComment[] | undefined;
 };
 
 interface Position {
@@ -10,11 +14,14 @@ interface Position {
 
 // this exists in TSESTree but because of the inanity around enums
 // it's easier to do this ourselves
-export interface Comment {
+export interface BaseComment {
 	type: 'Line' | 'Block';
 	value: string;
 	start?: number;
 	end?: number;
+}
+
+export interface Comment extends BaseComment {
 	loc: {
 		start: Position;
 		end: Position;

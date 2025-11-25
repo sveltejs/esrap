@@ -1,6 +1,6 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { Visitors } from '../../types.js' */
-/** @import { TSOptions, Comment } from '../types.js' */
+/** @import { TSOptions, BaseComment } from '../types.js' */
 import { Context } from 'esrap';
 
 /** @typedef {TSESTree.Node} Node */
@@ -74,7 +74,7 @@ const OPERATOR_PRECEDENCE = {
 };
 
 /**
- * @param {Comment} comment
+ * @param {BaseComment} comment
  * @param {Context} context
  */
 function write_comment(comment, context) {
@@ -90,6 +90,7 @@ function write_comment(comment, context) {
 		}
 
 		context.write('*/');
+		if (lines.length > 1) context.newline();
 	}
 }
 
@@ -103,6 +104,36 @@ export default (options = {}) => {
 	const comments = options.comments ?? [];
 
 	let comment_index = 0;
+
+	/**
+	 * Write additional comments for a node
+	 * @param {Context} context
+	 * @param {BaseComment[] | undefined} comments
+	 * @param {('leading' | 'trailing')} position
+	 */
+	function write_additional_comments(context, comments, position) {
+		if (!comments) {
+			return;
+		}
+
+		for (let i = 0; i < comments.length; i += 1) {
+			const comment = comments[i];
+
+			if (position === 'trailing' && i === 0) {
+				context.write(' ');
+			}
+
+			write_comment(comment, context);
+
+			if (position === 'leading') {
+				if (comment.type === 'Line') {
+					context.newline();
+				} else if (comment.type === 'Block' && !comment.value.includes('\n')) {
+					context.write(' ');
+				}
+			}
+		}
+	}
 
 	/**
 	 * Set `comment_index` to be the first comment after `start`.
@@ -775,11 +806,15 @@ export default (options = {}) => {
 
 	return {
 		_(node, context, visit) {
+			write_additional_comments(context, options.getLeadingComments?.(node), 'leading');
+
 			if (node.loc) {
 				flush_comments_until(context, null, node.loc.start, true);
 			}
 
 			visit(node);
+
+			write_additional_comments(context, options.getTrailingComments?.(node), 'trailing');
 		},
 
 		AccessorProperty:

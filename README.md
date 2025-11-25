@@ -55,7 +55,12 @@ const { code, map } = print(
     quotes: 'single',
 
     // an array of `{ type: 'Line' | 'Block', value: string, loc: { start, end } }` objects
-    comments: []
+    comments: [],
+
+    // a pair of functions for inserting additional comments before or after a given node.
+    // returns `Array<{ type: 'Line' | 'Block', value: string }>` or `undefined`
+    getLeadingComments: (node) => [{ type: 'Line', value: ' a comment before the node' }],
+    getTrailingComments: (node) => [{ type: 'Block', value: ' a comment after the node' }]
   })
 );
 ```
