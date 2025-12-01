@@ -1,10 +1,11 @@
 import { TSESTree } from '@typescript-eslint/types';
+import { BaseNode } from '../types';
 
 export type TSOptions = {
 	quotes?: 'double' | 'single';
 	comments?: Comment[];
-	getLeadingComments?: (node: TSESTree.Node) => BaseComment[] | undefined;
-	getTrailingComments?: (node: TSESTree.Node) => BaseComment[] | undefined;
+	getLeadingComments?: (node: BaseNode) => BaseComment[] | undefined;
+	getTrailingComments?: (node: BaseNode) => BaseComment[] | undefined;
 };
 
 interface Position {
