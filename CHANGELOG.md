@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.2.1
+
+### Patch Changes
+
+- 4b2b920: fix: loosen types for `getLeadingComments` and `getTrailingComments`
+
 ## 2.2.0
 
 ### Minor Changes
