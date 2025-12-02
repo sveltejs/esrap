@@ -2,4 +2,4 @@
 'esrap': patch
 ---
 
-Fix types for packages that depend on esrap by making @typescript-eslint/types a dependency
+fix: add `@typescript-eslint/types` as a dependency since some types are exported
