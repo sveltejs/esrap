@@ -51,8 +51,8 @@
 	},
 	"license": "MIT",
 	"dependencies": {
-		"@typescript-eslint/types": "^8.2.0",
-		"@jridgewell/sourcemap-codec": "^1.4.15"
+		"@jridgewell/sourcemap-codec": "^1.4.15",
+		"@typescript-eslint/types": "^8.2.0"
 	},
 	"packageManager": "pnpm@9.8.0",
 	"publishConfig": {
