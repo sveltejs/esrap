@@ -1,4 +1,3 @@
-/** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { BaseNode, Command, Visitors } from './types' */
 
 export const margin = 0;
