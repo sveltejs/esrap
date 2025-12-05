@@ -1,5 +1,4 @@
-import { TSESTree } from '@typescript-eslint/types';
-import { Context } from 'esrap';
+import type { Context } from 'esrap';
 
 export type BaseNode = {
 	type: string;
@@ -22,19 +21,6 @@ export type Visitors<T extends BaseNode = BaseNode> = T['type'] extends '_'
 	: SpecialisedVisitors<T> & { _?: (node: T, context: Context, visit: (node: T) => void) => void };
 
 export { Context };
-
-export type TypeAnnotationNodes =
-	| TSESTree.TypeNode
-	| TSESTree.TypeElement
-	| TSESTree.TSTypeAnnotation
-	| TSESTree.TSPropertySignature
-	| TSESTree.TSTypeParameter
-	| TSESTree.TSTypeParameterDeclaration
-	| TSESTree.TSTypeParameterInstantiation
-	| TSESTree.TSEnumMember
-	| TSESTree.TSInterfaceHeritage
-	| TSESTree.TSClassImplements
-	| TSExpressionWithTypeArguments;
 
 type TSExpressionWithTypeArguments = {
 	type: 'TSExpressionWithTypeArguments';

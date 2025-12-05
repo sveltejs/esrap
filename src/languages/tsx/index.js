@@ -3,8 +3,6 @@
 /** @import { TSOptions } from '../types.js' */
 import ts from '../ts/index.js';
 
-/** @typedef {TSESTree.Node} Node */
-
 /**
  * @param {TSOptions} [options]
  * @returns {Visitors<TSESTree.Node>}
