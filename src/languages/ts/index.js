@@ -280,10 +280,6 @@ export default (options = {}) => {
 			const child = children[i];
 
 			if (prev !== null) {
-				if (multiline_nodes[i - 1] || multiline_nodes[i]) {
-					context.margin();
-				}
-
 				if (nodes[i]) {
 					if (multiline) {
 						context.newline();
