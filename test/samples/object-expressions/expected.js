@@ -25,12 +25,15 @@ obj = {
 	get foo() {
 		return _foo;
 	},
+
 	set foo(value) {
 		_foo = value;
 	},
+
 	get [foo]() {
 		return _foo;
 	},
+
 	set [foo](value) {
 		_foo = value;
 	}
