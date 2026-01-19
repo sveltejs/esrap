@@ -233,6 +233,20 @@ export default (options = {}) => {
 	}
 
 	/**
+	 * @param {TSESTree.Node} node
+	 * @returns {boolean}
+	 */
+	function is_object_expression(node) {
+		if (!node) return false;
+		if (node.type === 'ObjectExpression') return true;
+		if (node.type === 'Property') {
+			const value = node.value?.type === 'AssignmentPattern' ? node.value.left : node.value;
+			return value?.type === 'ObjectExpression';
+		}
+		return false;
+	}
+
+	/**
 	 * @param {Context} context
 	 * @param {TSESTree.Node[]} nodes
 	 * @param {{ line: number, column: number }} until
@@ -280,6 +294,12 @@ export default (options = {}) => {
 			const child = children[i];
 
 			if (prev !== null) {
+				if (multiline_nodes[i - 1] && multiline_nodes[i]) {
+					if (!is_object_expression(nodes[i - 1]) || !is_object_expression(nodes[i])) {
+						context.margin();
+					}
+				}
+
 				if (nodes[i]) {
 					if (multiline) {
 						context.newline();
