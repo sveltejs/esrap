@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "const obj = {\n\tfoo: 'bar',\n\tbaz: 'qux',\n\tquux: 'corge',\n\tgrault: 'garply',\n\twaldo: 'fred',\n\tplugh: 'xyzzy',\n\tthud: 'quux',\n\tlevel11: {\n\t\tlevel12: {\n\t\t\thello: 'world'\n\t\t}\n\t},\n\tlevel21: {\n\t\tlevel22: {\n\t\t\tworld: 'hello'\n\t\t}\n\t}\n};\n"
+    "const obj = {\n\tfoo: 'bar',\n\tlevel11: { level12: { hello: 'world' } },\n\tlevel21: { level22: { world: 'hello' } },\n\thello: 'world',\n\tlevel31: { level32: {} }\n};\n"
   ],
-  "mappings": "MAAM,GAAG;CACR,GAAG,EAAE,KAAK;CACV,GAAG,EAAE,KAAK;CACV,IAAI,EAAE,OAAO;CACb,MAAM,EAAE,QAAQ;CAChB,KAAK,EAAE,MAAM;CACb,KAAK,EAAE,OAAO;CACd,IAAI,EAAE,MAAM;CACZ,OAAO,IACN,OAAO,IACN,KAAK,EAAE,OAAO;CAGhB,OAAO,IACN,OAAO,IACN,KAAK,EAAE,OAAO;"
+  "mappings": "MAAM,GAAG;CACR,GAAG,EAAE,KAAK;CACV,OAAO,IAAI,OAAO,IAAI,KAAK,EAAE,OAAO;CACpC,OAAO,IAAI,OAAO,IAAI,KAAK,EAAE,OAAO;CACpC,KAAK,EAAE,OAAO;CACd,OAAO,IAAI,OAAO;"
 }
