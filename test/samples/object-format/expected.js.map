@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "const obj = {\n\tfoo: 'bar',\n\tbaz: 'qux',\n\tquux: 'corge',\n\tgrault: 'garply',\n\twaldo: 'fred',\n\tplugh: 'xyzzy',\n\tthud: 'quux',\n\tlevel11: {\n\t\tlevel12: {\n\t\t\tlevel13: {\n\t\t\t\tlevel14: {\n\t\t\t\t\tlevel15: {\n\t\t\t\t\t\tlevel16: {\n\t\t\t\t\t\t\tlevel17: {\n\t\t\t\t\t\t\t\tlevel18: {\n\t\t\t\t\t\t\t\t\tlevel19: {}\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t},\n\tlevel21: {\n\t\tlevel22: {\n\t\t\tlevel23: {\n\t\t\t\tlevel24: {\n\t\t\t\t\tlevel25: {\n\t\t\t\t\t\tlevel26: {\n\t\t\t\t\t\t\tlevel27: {\n\t\t\t\t\t\t\t\tlevel28: {\n\t\t\t\t\t\t\t\t\tlevel29: {}\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n};\n"
+    "const obj = {\n\tfoo: 'bar',\n\tbaz: 'qux',\n\tquux: 'corge',\n\tgrault: 'garply',\n\twaldo: 'fred',\n\tplugh: 'xyzzy',\n\tthud: 'quux',\n\tlevel11: {\n\t\tlevel12: {\n\t\t\thello: 'world'\n\t\t}\n\t},\n\tlevel21: {\n\t\tlevel22: {\n\t\t\tworld: 'hello'\n\t\t}\n\t}\n};\n"
   ],
-  "mappings": "MAAM,GAAG;CACR,GAAG,EAAE,KAAK;CACV,GAAG,EAAE,KAAK;CACV,IAAI,EAAE,OAAO;CACb,MAAM,EAAE,QAAQ;CAChB,KAAK,EAAE,MAAM;CACb,KAAK,EAAE,OAAO;CACd,IAAI,EAAE,MAAM;CACZ,OAAO;EACN,OAAO;GACN,OAAO;IACN,OAAO;KACN,OAAO,IACN,OAAO,IACN,OAAO,IACN,OAAO,IACN,OAAO;;;;;CASf,OAAO;EACN,OAAO;GACN,OAAO;IACN,OAAO;KACN,OAAO,IACN,OAAO,IACN,OAAO,IACN,OAAO,IACN,OAAO;;;;;"
+  "mappings": "MAAM,GAAG;CACR,GAAG,EAAE,KAAK;CACV,GAAG,EAAE,KAAK;CACV,IAAI,EAAE,OAAO;CACb,MAAM,EAAE,QAAQ;CAChB,KAAK,EAAE,MAAM;CACb,KAAK,EAAE,OAAO;CACd,IAAI,EAAE,MAAM;CACZ,OAAO,IACN,OAAO,IACN,KAAK,EAAE,OAAO;CAGhB,OAAO,IACN,OAAO,IACN,KAAK,EAAE,OAAO;"
 }
