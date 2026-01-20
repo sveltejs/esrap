@@ -1,5 +1,12 @@
 # esrap changelog
 
+## 2.2.2
+
+### Patch Changes
+
+- fc7edf6: fix: `context.multiline` now bubbles up through child-contexts
+- 8f2fc99: fix: remove extra margin between multiline object
+
 ## 2.2.1
 
 ### Patch Changes
