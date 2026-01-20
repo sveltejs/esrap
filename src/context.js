@@ -1,4 +1,3 @@
-/** @import { TSESTree } from '@typescript-eslint/types' */
 /** @import { BaseNode, Command, Visitors } from './types' */
 
 export const margin = 0;
@@ -51,7 +50,7 @@ export class Context {
 	append(context) {
 		this.#commands.push(context.#commands);
 
-		if (this.#has_newline) {
+		if (this.#has_newline || context.multiline) {
 			this.multiline = true;
 		}
 	}
