@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "const obj = {\n\tfoo: 'bar',\n\tlevel11: { level12: { hello: 'world' } },\n\tlevel21: { level22: { world: 'hello' } },\n\thello: 'world',\n\tlevel31: { level32: {} }\n};\n"
+    "const obj1 = {\n\tfoo: 'bar',\n\tlevel11: { level12: { hello: 'world' } },\n\tlevel21: { level22: { world: 'hello' } },\n\thello: 'world',\n\tlevel31: { level32: {} }\n};\n\nconst obj2 = {\n\tbefore: 1,\n\tobject: {\n\t\ta: 'lorem ipsum dolor sit amet',\n\t\tb: 'lorem ipsum dolor sit amet',\n\t\tc: 'lorem ipsum dolor sit amet',\n\t},\n\tarray: [\n\t\t'lorem ipsum dolor sit amet',\n\t\t'lorem ipsum dolor sit amet',\n\t\t'lorem ipsum dolor sit amet',\n\t],\n\tafter: 2\n};\n"
   ],
-  "mappings": "MAAM,GAAG;CACR,GAAG,EAAE,KAAK;CACV,OAAO,IAAI,OAAO,IAAI,KAAK,EAAE,OAAO;CACpC,OAAO,IAAI,OAAO,IAAI,KAAK,EAAE,OAAO;CACpC,KAAK,EAAE,OAAO;CACd,OAAO,IAAI,OAAO;"
+  "mappings": "MAAM,IAAI;CACT,GAAG,EAAE,KAAK;CACV,OAAO,IAAI,OAAO,IAAI,KAAK,EAAE,OAAO;CACpC,OAAO,IAAI,OAAO,IAAI,KAAK,EAAE,OAAO;CACpC,KAAK,EAAE,OAAO;CACd,OAAO,IAAI,OAAO;;;MAGb,IAAI;CACT,MAAM,EAAE,CAAC;CACT,MAAM;EACL,CAAC,EAAE,4BAA4B;EAC/B,CAAC,EAAE,4BAA4B;EAC/B,CAAC,EAAE,4BAA4B;;CAEhC,KAAK;EACJ,4BAA4B;EAC5B,4BAA4B;EAC5B,4BAA4B;;CAE7B,KAAK,EAAE,CAAC;"
 }

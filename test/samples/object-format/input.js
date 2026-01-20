@@ -12,15 +12,11 @@ const obj2 = {
 		a: 'lorem ipsum dolor sit amet',
 		b: 'lorem ipsum dolor sit amet',
 		c: 'lorem ipsum dolor sit amet',
-		d: 'lorem ipsum dolor sit amet',
-		e: 'lorem ipsum dolor sit amet'
 	},
 	array: [
 		'lorem ipsum dolor sit amet',
 		'lorem ipsum dolor sit amet',
 		'lorem ipsum dolor sit amet',
-		'lorem ipsum dolor sit amet',
-		'lorem ipsum dolor sit amet'
 	],
 	after: 2
 };
