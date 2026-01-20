@@ -233,6 +233,16 @@ export default (options = {}) => {
 	}
 
 	/**
+	 * @param {TSESTree.Node} node
+	 * @returns {boolean}
+	 */
+	function has_object_or_array_value(node) {
+		if (!node || node.type !== 'Property') return false;
+		const value = node.value?.type === 'AssignmentPattern' ? node.value.left : node.value;
+		return value?.type === 'ObjectExpression' || value?.type === 'ArrayExpression';
+	}
+
+	/**
 	 * @param {Context} context
 	 * @param {TSESTree.Node[]} nodes
 	 * @param {{ line: number, column: number }} until
@@ -280,8 +290,10 @@ export default (options = {}) => {
 			const child = children[i];
 
 			if (prev !== null) {
-				if (multiline_nodes[i - 1] || multiline_nodes[i]) {
-					context.margin();
+				if (multiline_nodes[i - 1] && multiline_nodes[i]) {
+					if (!has_object_or_array_value(nodes[i - 1]) || !has_object_or_array_value(nodes[i])) {
+						context.margin();
+					}
 				}
 
 				if (nodes[i]) {
