@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "class A {\n\tprivate name: string;\n\tpublic firstName: string;\n\tpublic lastName: string;\n\tpublic static foo: string;\n\n\tprivate x() { return 1; }\n\tpublic y() { return 2; }\n\tprotected z() { return 3; }\n}\n"
+    "class A {\n\tprivate name: string;\n\tpublic firstName: string;\n\tpublic lastName: string;\n\tpublic static foo: string;\n\n\tprivate x() {\n\t\treturn 1;\n\t}\n\tpublic y() {\n\t\treturn 2;\n\t}\n\tprotected z() {\n\t\treturn 3;\n\t}\n}\n"
   ],
-  "mappings": "MAAM,CAAC,CAAC,CAAC;SACA,IAAI,EAAE,MAAM;QACb,SAAS,EAAE,MAAM;QACjB,QAAQ,EAAE,MAAM;eACT,GAAG,EAAE,MAAM;;SAEjB,CAAC,GAAG,CAAC;SAAQ,CAAC;CAAE,CAAC;;QAClB,CAAC,GAAG,CAAC;SAAQ,CAAC;CAAE,CAAC;;WACd,CAAC,GAAG,CAAC;SAAQ,CAAC;CAAE,CAAC;AAC5B,CAAC"
+  "mappings": "MAAM,CAAC,CAAC,CAAC;SACA,IAAI,EAAE,MAAM;QACb,SAAS,EAAE,MAAM;QACjB,QAAQ,EAAE,MAAM;eACT,GAAG,EAAE,MAAM;;SAEjB,CAAC,GAAG,CAAC;SACL,CAAC;CACT,CAAC;;QACM,CAAC,GAAG,CAAC;SACJ,CAAC;CACT,CAAC;;WACS,CAAC,GAAG,CAAC;SACP,CAAC;CACT,CAAC;AACF,CAAC"
 }
