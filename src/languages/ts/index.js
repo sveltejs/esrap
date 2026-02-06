@@ -638,6 +638,10 @@ export default (options = {}) => {
 				context.write('abstract ');
 			}
 
+			if (node.accessibility) {
+				context.write(node.accessibility + ' ');
+			}
+
 			if (node.static) {
 				context.write('static ');
 			}
