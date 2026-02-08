@@ -1,5 +1,13 @@
 # esrap changelog
 
+## 2.2.3
+
+### Patch Changes
+
+- 4994752: fix: print function accessibility
+- f9137c4: fix: print `superTypeParameters`
+- 779b3f5: fix: print override keyword
+
 ## 2.2.2
 
 ### Patch Changes
