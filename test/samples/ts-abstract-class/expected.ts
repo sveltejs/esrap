@@ -5,3 +5,9 @@ abstract class A {
 	abstract get a() 
 	abstract set b(x: string) 
 }
+
+class B extends A {
+	override a() {
+		return this.foo;
+	}
+}

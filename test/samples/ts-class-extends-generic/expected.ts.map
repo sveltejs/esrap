@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class Foo extends Bar<X> {}\n"
+  ],
+  "mappings": "MAAM,GAAG,SAAS,GAAG,CAAC,CAAC,EAAE,CAAC,AAAA,CAAC"
+}
