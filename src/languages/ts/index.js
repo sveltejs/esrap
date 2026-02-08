@@ -645,6 +645,10 @@ export default (options = {}) => {
 				context.write('abstract ');
 			}
 
+			if (node.accessibility) {
+				context.write(node.accessibility + ' ');
+			}
+
 			if (node.override) {
 				context.write('override ');
 			}
