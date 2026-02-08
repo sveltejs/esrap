@@ -566,6 +566,13 @@ export default (options = {}) => {
 			if (node.superClass) {
 				context.write('extends ');
 				context.visit(node.superClass);
+
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				var type_arguments = node.superTypeParameters ?? node.superTypeArguments;
+				if (type_arguments) {
+					context.visit(type_arguments);
+				}
+
 				context.write(' ');
 			}
 
