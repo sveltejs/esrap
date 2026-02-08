@@ -1,5 +1,4 @@
-import { TSESTree } from '@typescript-eslint/types';
-import { BaseNode } from '../types';
+import type { BaseNode } from '../types';
 
 export type TSOptions = {
 	quotes?: 'double' | 'single';
