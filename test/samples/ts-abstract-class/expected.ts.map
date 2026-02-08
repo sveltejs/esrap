@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "abstract class A {\n\tabstract foo: string;\n\tabstract bar: string;\n\n\tabstract get a();\n\tabstract set b(x: string);\n}\n"
+    "abstract class A {\n\tabstract foo: string;\n\tabstract bar: string;\n\n\tabstract get a();\n\tabstract set b(x: string);\n}\n\nclass B extends A {\n\toverride a() {\n\t\treturn this.foo;\n\t}\n}\n"
   ],
-  "mappings": "eAAe,CAAC,CAAC,CAAC;UACR,GAAG,EAAE,MAAM;UACX,GAAG,EAAE,MAAM;;cAEP,CAAC;cACD,CAAC,CAAC,CAAS,EAAN,MAAM;AACzB,CAAC"
+  "mappings": "eAAe,CAAC,CAAC,CAAC;UACR,GAAG,EAAE,MAAM;UACX,GAAG,EAAE,MAAM;;cAEP,CAAC;cACD,CAAC,CAAC,CAAS,EAAN,MAAM;AACzB,CAAC;;MAEK,CAAC,SAAS,CAAC,CAAC,CAAC;UACT,CAAC,GAAG,CAAC;SACN,IAAI,CAAC,GAAG;CAChB,CAAC;AACF,CAAC"
 }

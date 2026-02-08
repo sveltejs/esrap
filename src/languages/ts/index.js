@@ -645,6 +645,10 @@ export default (options = {}) => {
 				context.write('abstract ');
 			}
 
+			if (node.override) {
+				context.write('override ');
+			}
+
 			if (node.static) {
 				context.write('static ');
 			}
