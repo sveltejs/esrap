@@ -11,6 +11,9 @@ importers:
       '@jridgewell/sourcemap-codec':
         specifier: ^1.4.15
         version: 1.5.0
+      '@typescript-eslint/types':
+        specifier: ^8.2.0
+        version: 8.46.1
     devDependencies:
       '@changesets/cli':
         specifier: ^2.27.11
@@ -18,9 +21,6 @@ importers:
       '@sveltejs/acorn-typescript':
         specifier: ^1.0.5
         version: 1.0.5(acorn@8.15.0)
-      '@typescript-eslint/types':
-        specifier: ^8.2.0
-        version: 8.46.1
       '@vitest/ui':
         specifier: ^2.1.1
         version: 2.1.1(vitest@2.1.1)
