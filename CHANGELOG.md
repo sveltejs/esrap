@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.2.4
+
+### Patch Changes
+
+- d22f488: fix: add `@typescript-eslint/types` as a dependency since some types are exported
+
 ## 2.2.3
 
 ### Patch Changes
