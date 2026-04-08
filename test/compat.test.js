@@ -8,6 +8,7 @@
 import { expect, test } from 'vitest';
 import { parse } from 'acorn';
 import { print } from 'esrap';
+// we use ts from esrap/languages/ts instead source in purpose
 import ts from 'esrap/languages/ts';
 import { acornParse } from './common.js';
 
