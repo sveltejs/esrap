@@ -43,7 +43,7 @@
 	"scripts": {
 		"changeset:version": "changeset version",
 		"changeset:publish": "changeset publish",
-		"check": "tsc",
+		"check": "dts-buddy -m esrap:./src/public.d.ts -m esrap/languages/ts:./src/languages/ts/public.d.ts -m esrap/languages/tsx:./src/languages/tsx/public.d.ts && tsc",
 		"prepublishOnly": "pnpm test && dts-buddy -m esrap:./src/public.d.ts -m esrap/languages/ts:./src/languages/ts/public.d.ts -m esrap/languages/tsx:./src/languages/tsx/public.d.ts",
 		"sandbox": "node test/sandbox/index.js",
 		"test": "vitest --run",
