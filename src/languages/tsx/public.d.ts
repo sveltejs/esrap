@@ -1,2 +1,5 @@
-export * from './index';
-export type { BaseComment, Comment } from '../types';
+import type { Visitors, BaseNode } from '../../types';
+import type { TSOptions, BaseComment, Comment } from '../types';
+export type { BaseComment, Comment };
+export type { TSOptions };
+export default function tsx(options?: TSOptions): Visitors<BaseNode>;
