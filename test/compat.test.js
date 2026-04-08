@@ -1,6 +1,9 @@
+// @ts-check
 // Verify that print() accepts nodes from different type systems
-// without type errors (e.g. @types/estree vs @typescript-eslint/types)
-// `pnpm check` should pass
+// without type errors (e.g. @types/estree vs @typescript-eslint/types).
+// The runtime behavior is identical - these tests exist to catch
+// type incompatibilities that would break consumers at `tsc` time.
+// See also: `pnpm check`
 
 import { expect, test } from 'vitest';
 import { parse } from 'acorn';
@@ -9,12 +12,7 @@ import ts from 'esrap/languages/ts';
 import { acornParse } from './common.js';
 
 test('estree nodes with ts() visitors', () => {
-	const ast = /** @type {import('estree').Node} */ (
-		parse('const x = 1;', {
-			ecmaVersion: 'latest',
-			sourceType: 'module'
-		})
-	);
+	const ast = parse('const x = 1;', { ecmaVersion: 'latest', sourceType: 'module' });
 
 	const { code } = print(ast, ts());
 
