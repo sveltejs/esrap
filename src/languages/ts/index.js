@@ -1849,7 +1849,18 @@ export default (options = {}) => {
 			context.write('{[');
 
 			if (node.typeParameter) {
-				context.visit(node.typeParameter);
+				const type_parameter_name = node.typeParameter.name;
+
+				if (type_parameter_name && typeof type_parameter_name === 'object') {
+					context.visit(type_parameter_name);
+				} else {
+					context.write(type_parameter_name, node.typeParameter);
+				}
+
+				if (node.typeParameter.constraint) {
+					context.write(' in ');
+					context.visit(node.typeParameter.constraint);
+				}
 			} else {
 				context.visit(node.key);
 				context.write(' in ');
@@ -2019,9 +2030,14 @@ export default (options = {}) => {
 
 		TSModuleDeclaration(node, context) {
 			if (node.declare) context.write('declare ');
-			else context.write('namespace ');
 
-			context.visit(node.id);
+			if (node.global) {
+				context.write('global', node.id);
+			} else {
+				const kind = node.kind ?? (node.id.type === 'Literal' ? 'module' : 'namespace');
+				context.write(kind + ' ');
+				context.visit(node.id);
+			}
 
 			if (!node.body) return;
 			context.visit(node.body);

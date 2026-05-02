@@ -27,3 +27,12 @@ test('@typescript-eslint/types nodes with ts() visitors', () => {
 
 	expect(code).toBe('const x: number = 1;');
 });
+
+test('acorn TS printer preserves module and mapped-type keywords', () => {
+	const input = 'declare module "svelte" {\n}\n\ntype M = { [K in keyof JSON]: K }\n';
+	const { ast, comments } = acornParse(input);
+
+	const { code } = print(ast, ts({ comments }));
+
+	expect(code).toBe('declare module "svelte" {\n}\n\ntype M = {[K in keyof JSON]: K};');
+});
