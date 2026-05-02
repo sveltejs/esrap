@@ -1848,23 +1848,19 @@ export default (options = {}) => {
 		TSMappedType(node, context) {
 			context.write('{[');
 
-			if (node.typeParameter) {
-				const type_parameter_name = node.typeParameter.name;
+			const legacy_type_parameter = /** @type {any} */ (node)['typeParameter'];
+			const key = node.key ?? legacy_type_parameter?.name;
+			const constraint = node.constraint ?? legacy_type_parameter?.constraint;
 
-				if (type_parameter_name && typeof type_parameter_name === 'object') {
-					context.visit(type_parameter_name);
-				} else {
-					context.write(type_parameter_name, node.typeParameter);
-				}
-
-				if (node.typeParameter.constraint) {
-					context.write(' in ');
-					context.visit(node.typeParameter.constraint);
-				}
+			if (key && typeof key === 'object') {
+				context.visit(key);
 			} else {
-				context.visit(node.key);
+				context.write(key, node);
+			}
+
+			if (constraint) {
 				context.write(' in ');
-				context.visit(node.constraint);
+				context.visit(constraint);
 			}
 
 			context.write(']');
