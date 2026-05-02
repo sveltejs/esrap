@@ -2030,6 +2030,7 @@ export default (options = {}) => {
 			if (node.global) {
 				context.write('global', node.id);
 			} else {
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				const kind = node.kind ?? (node.id.type === 'Literal' ? 'module' : 'namespace');
 				context.write(kind + ' ');
 				context.visit(node.id);
