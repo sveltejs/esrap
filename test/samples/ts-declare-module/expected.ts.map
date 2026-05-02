@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "declare module \"svelte\" {\n}\n"
+    "declare module 'svelte' {}\n"
   ],
   "mappings": "eAAe,QAAQ;"
 }
