@@ -1848,7 +1848,7 @@ export default (options = {}) => {
 		TSMappedType(node, context) {
 			context.write('{[');
 
-			const legacy_type_parameter = /** @type {any} */ (node)['typeParameter'];
+			const legacy_type_parameter = node.typeParameter;
 			const key = node.key ?? legacy_type_parameter?.name;
 			const constraint = node.constraint ?? legacy_type_parameter?.constraint;
 
@@ -1864,10 +1864,12 @@ export default (options = {}) => {
 			}
 
 			context.write(']');
+
 			if (node.typeAnnotation) {
 				context.write(': ');
 				context.visit(node.typeAnnotation);
 			}
+
 			context.write('}');
 		},
 
