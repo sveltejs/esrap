@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.2.6
+
+### Patch Changes
+
+- 038a3d2: fix: print `declare module` and mapped types
+
 ## 2.2.5
 
 ### Patch Changes
