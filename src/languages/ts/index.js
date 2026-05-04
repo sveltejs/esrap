@@ -1848,7 +1848,7 @@ export default (options = {}) => {
 		TSMappedType(node, context) {
 			context.write('{[');
 
-			const legacy_type_parameter = /** @type {any} */ (node)['typeParameter'];
+			const legacy_type_parameter = node.typeParameter;
 			const key = node.key ?? legacy_type_parameter?.name;
 			const constraint = node.constraint ?? legacy_type_parameter?.constraint;
 
@@ -1864,10 +1864,12 @@ export default (options = {}) => {
 			}
 
 			context.write(']');
+
 			if (node.typeAnnotation) {
 				context.write(': ');
 				context.visit(node.typeAnnotation);
 			}
+
 			context.write('}');
 		},
 
@@ -2027,10 +2029,19 @@ export default (options = {}) => {
 		TSModuleDeclaration(node, context) {
 			if (node.declare) context.write('declare ');
 
-			if (node.global) {
+			const is_global = 'global' in node && node.global === true;
+
+			if (is_global) {
 				context.write('global', node.id);
 			} else {
-				const kind = node.kind ?? (node.id.type === 'Literal' ? 'module' : 'namespace');
+				const has_literal_id = 'value' in node.id;
+
+				const kind =
+					'kind' in node && (node.kind === 'module' || node.kind === 'namespace')
+						? node.kind
+						: has_literal_id
+							? 'module'
+							: 'namespace';
 				context.write(kind + ' ');
 				context.visit(node.id);
 			}
