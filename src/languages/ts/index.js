@@ -2029,19 +2029,11 @@ export default (options = {}) => {
 		TSModuleDeclaration(node, context) {
 			if (node.declare) context.write('declare ');
 
-			const is_global = 'global' in node && node.global === true;
-
-			if (is_global) {
+			if (node.global) {
 				context.write('global', node.id);
 			} else {
-				const has_literal_id = 'value' in node.id;
-
-				const kind =
-					'kind' in node && (node.kind === 'module' || node.kind === 'namespace')
-						? node.kind
-						: has_literal_id
-							? 'module'
-							: 'namespace';
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				const kind = node.kind ?? (node.id.type === 'Literal' ? 'module' : 'namespace');
 				context.write(kind + ' ');
 				context.visit(node.id);
 			}
