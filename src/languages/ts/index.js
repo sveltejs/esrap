@@ -856,9 +856,17 @@ export default (options = {}) => {
 		ArrowFunctionExpression: (node, context) => {
 			if (node.async) context.write('async ');
 
+			if (node.typeParameters) {
+				context.visit(node.typeParameters);
+			}
+
 			context.write('(');
-			sequence(context, node.params, node.body.loc?.start ?? null, false);
-			context.write(') => ');
+			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
+			context.write(')');
+
+			if (node.returnType) context.visit(node.returnType);
+
+			context.write(' => ');
 
 			if (
 				node.body.type === 'ObjectExpression' ||
