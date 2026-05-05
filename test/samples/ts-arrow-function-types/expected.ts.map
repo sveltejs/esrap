@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "const identity = <T>(x: T): T => x;\n\nconst pair = <K, V>(key: K, value: V): [K, V] => [key, value];\n\nconst noTypeParams = (x: number): number => x + 1;\n\nconst onlyTypeParams = <T>(x: T) => x;\n\nconst onlyReturnType = (x: number): string => String(x);\n\nconst constrained = <T extends string>(x: T): T => x;\n"
+    "const identity = <T>(x: T): T => x;\n\nconst pair = <K, V>(key: K, value: V): [K, V] => [key, value];\n\nconst noTypeParams = (x: number): number => x + 1;\n\nconst onlyTypeParams = <T>(x: T) => x;\n\nconst onlyReturnType = (x: number): string => String(x);\n\nconst constrained = <T extends string>(x: T): T => x;\n\nconst withDefault = <T = number>(x: T): T => x;\n\nconst constrainedWithDefault = <T extends string = 'foo'>(x: T): T => x;\n"
   ],
-  "mappings": "MAAM,QAAQ,IAAI,CAAC,EAAE,CAAI,EAAD,CAAC,GAAG,CAAC,IAAI,CAAC;MAE5B,IAAI,IAAI,CAAC,EAAE,CAAC,EAAE,GAAM,EAAD,CAAC,EAAE,KAAQ,EAAD,CAAC,IAAI,CAAC,EAAE,CAAC,MAAM,GAAG,EAAE,KAAK;MAEtD,YAAY,IAAI,CAAS,EAAN,MAAM,GAAG,MAAM,IAAI,CAAC,GAAG,CAAC;MAE3C,cAAc,IAAI,CAAC,EAAE,CAAI,EAAD,CAAC,KAAK,CAAC;MAE/B,cAAc,IAAI,CAAS,EAAN,MAAM,GAAG,MAAM,IAAI,MAAM,CAAC,CAAC;MAEhD,WAAW,IAAI,CAAgB,SAAN,MAAM,EAAE,CAAI,EAAD,CAAC,GAAG,CAAC,IAAI,CAAC"
+  "mappings": "MAAM,QAAQ,IAAI,CAAC,EAAE,CAAI,EAAD,CAAC,GAAG,CAAC,IAAI,CAAC;MAE5B,IAAI,IAAI,CAAC,EAAE,CAAC,EAAE,GAAM,EAAD,CAAC,EAAE,KAAQ,EAAD,CAAC,IAAI,CAAC,EAAE,CAAC,MAAM,GAAG,EAAE,KAAK;MAEtD,YAAY,IAAI,CAAS,EAAN,MAAM,GAAG,MAAM,IAAI,CAAC,GAAG,CAAC;MAE3C,cAAc,IAAI,CAAC,EAAE,CAAI,EAAD,CAAC,KAAK,CAAC;MAE/B,cAAc,IAAI,CAAS,EAAN,MAAM,GAAG,MAAM,IAAI,MAAM,CAAC,CAAC;MAEhD,WAAW,IAAI,CAAgB,SAAN,MAAM,EAAE,CAAI,EAAD,CAAC,GAAG,CAAC,IAAI,CAAC;MAE9C,WAAW,IAAI,CAAU,GAAN,MAAM,EAAE,CAAI,EAAD,CAAC,GAAG,CAAC,IAAI,CAAC;MAExC,sBAAsB,IAAI,CAAwB,SAAd,MAAM,GAAG,KAAK,EAAE,CAAI,EAAD,CAAC,GAAG,CAAC,IAAI,CAAC"
 }

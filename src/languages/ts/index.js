@@ -1801,6 +1801,11 @@ export default (options = {}) => {
 				context.write(' extends ');
 				context.visit(node.constraint);
 			}
+
+			if (node.default) {
+				context.write(' = ');
+				context.visit(node.default);
+			}
 		},
 
 		TSTypePredicate(node, context) {
