@@ -1154,11 +1154,7 @@ export default (options = {}) => {
 		},
 
 		ExportDefaultDeclaration(node, context) {
-			const kw = create_keyword_write(
-				context,
-				node,
-				(n) => !!(n.loc && single_line_node(n))
-			);
+			const kw = create_keyword_write(context, node, (n) => !!(n.loc && single_line_node(n)));
 			kw('export ');
 			kw('default ');
 

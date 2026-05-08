@@ -51,7 +51,9 @@ function mapped(source) {
 		sourceMapEncodeMappings: false
 	});
 	expect(map.mappings).toBeTruthy();
-	const mappings = /** @type {[number, number, number, number][][]} */ (/** @type {unknown} */ (map.mappings));
+	const mappings = /** @type {[number, number, number, number][][]} */ (
+		/** @type {unknown} */ (map.mappings)
+	);
 	return { source, code, mappings };
 }
 
