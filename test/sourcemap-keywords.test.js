@@ -119,3 +119,77 @@ test('class static and get map to source keywords', () => {
 		expect(seg_get[3]).toBe(source.indexOf('get'));
 	}
 });
+
+test('throw / return / await map to source keywords', () => {
+	{
+		const { source, code, mappings } = mapped(`function f() { throw new Error('x'); }`);
+		const seg = mappingAtSubstring(code, 'throw', mappings);
+		expect(seg[3]).toBe(source.indexOf('throw'));
+	}
+
+	{
+		const { source, code, mappings } = mapped(`function f() { return 42; }`);
+		const seg = mappingAtSubstring(code, 'return', mappings);
+		expect(seg[3]).toBe(source.indexOf('return'));
+	}
+
+	{
+		const { source, code, mappings } = mapped(`async function f() { await thing(); }`);
+		const seg = mappingAtSubstring(code, 'await', mappings);
+		expect(seg[3]).toBe(source.indexOf('await'));
+	}
+});
+
+test('if / else map to source keywords', () => {
+	const { source, code, mappings } = mapped(`if (x) { a(); } else { b(); }`);
+
+	const seg_if = mappingAtSubstring(code, 'if', mappings);
+	expect(seg_if[3]).toBe(source.indexOf('if'));
+
+	const seg_else = mappingAtSubstring(code, 'else', mappings);
+	expect(seg_else[3]).toBe(source.indexOf('else'));
+});
+
+test('try / catch / finally map to source keywords', () => {
+	const { source, code, mappings } = mapped(`try { a(); } catch (e) { b(); } finally { c(); }`);
+
+	const seg_try = mappingAtSubstring(code, 'try', mappings);
+	expect(seg_try[3]).toBe(source.indexOf('try'));
+
+	const seg_catch = mappingAtSubstring(code, 'catch', mappings);
+	expect(seg_catch[3]).toBe(source.indexOf('catch'));
+
+	const seg_finally = mappingAtSubstring(code, 'finally', mappings);
+	expect(seg_finally[3]).toBe(source.indexOf('finally'));
+});
+
+test('do / while map to source keywords', () => {
+	const { source, code, mappings } = mapped(`do { a(); } while (cond);`);
+
+	const seg_do = mappingAtSubstring(code, 'do', mappings);
+	expect(seg_do[3]).toBe(source.indexOf('do'));
+
+	const seg_while = mappingAtSubstring(code, 'while', mappings);
+	expect(seg_while[3]).toBe(source.indexOf('while'));
+});
+
+test('switch / case / default map to source keywords', () => {
+	const { source, code, mappings } = mapped(`switch (x) { case 1: a(); break; default: b(); }`);
+
+	const seg_switch = mappingAtSubstring(code, 'switch', mappings);
+	expect(seg_switch[3]).toBe(source.indexOf('switch'));
+
+	const seg_case = mappingAtSubstring(code, 'case', mappings);
+	expect(seg_case[3]).toBe(source.indexOf('case'));
+
+	const seg_default = mappingAtSubstring(code, 'default', mappings);
+	expect(seg_default[3]).toBe(source.indexOf('default'));
+});
+
+test('decorator-prefixed class falls back gracefully', () => {
+	const source = `@dec\nclass D {}`;
+	const { code, mappings } = mapped(source);
+
+	expect(code).toContain('class');
+	expect(mappings.length).toBeGreaterThan(0);
+});

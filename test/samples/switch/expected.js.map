@@ -7,5 +7,5 @@
   "sourcesContent": [
     "switch (foo) {\n\tcase 1:\n\t\tblah();\n\t\tbreak;\n\tcase 2:\n\t\tblah();\n\tdefault:\n\t\tblah();\n}"
   ],
-  "mappings": "AAAA,MAAM,EAAE,GAAG;MACL,CAAC;EACL,IAAI;EACJ,KAAK;;MACD,CAAC;EACL,IAAI;;;EAEJ,IAAI;"
+  "mappings": "AAAA,MAAM,EAAE,GAAG;CACV,IAAI,CAAC,CAAC;EACL,IAAI;EACJ,KAAK;;CACN,IAAI,CAAC,CAAC;EACL,IAAI;;CACL,OAAO;EACN,IAAI;"
 }

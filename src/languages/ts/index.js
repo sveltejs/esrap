@@ -785,7 +785,7 @@ export default (options = {}) => {
 			}
 
 			if (node.accessibility) {
-				kw(/** @type {string} */ (node.accessibility) + ' ');
+				kw(node.accessibility + ' ');
 			}
 
 			if (node.override) {
@@ -843,7 +843,7 @@ export default (options = {}) => {
 			const kw = create_keyword_write(context, node, field_modifiers_keywords_map_ok);
 
 			if (node.accessibility) {
-				kw(/** @type {string} */ (node.accessibility) + ' ');
+				kw(node.accessibility + ' ');
 			}
 
 			if (
@@ -1131,7 +1131,17 @@ export default (options = {}) => {
 		DoWhileStatement(node, context) {
 			write_keyword(context, node, 'do', ' ');
 			context.visit(node.body);
-			context.write(' while (');
+
+			const test_loc = node.test.loc?.start;
+			const body_end = node.body.loc?.end;
+			if (test_loc && body_end && body_end.line === test_loc.line && test_loc.column >= 7) {
+				context.write(' ');
+				write_source_keyword(context, test_loc.line, test_loc.column - 7, 'while');
+				context.write(' (');
+			} else {
+				context.write(' while (');
+			}
+
 			context.visit(node.test);
 			context.write(');');
 		},
@@ -1284,7 +1294,16 @@ export default (options = {}) => {
 
 			if (node.alternate) {
 				context.space();
-				context.write('else ');
+
+				const alt_loc = node.alternate.loc?.start;
+				const con_end = node.consequent.loc?.end;
+				if (alt_loc && con_end && con_end.line === alt_loc.line && alt_loc.column >= 5) {
+					write_source_keyword(context, alt_loc.line, alt_loc.column - 5, 'else');
+					context.write(' ');
+				} else {
+					context.write('else ');
+				}
+
 				context.visit(node.alternate);
 			}
 		},
@@ -1584,12 +1603,12 @@ export default (options = {}) => {
 
 				if (block.test) {
 					context.newline();
-					context.write('case ');
+					write_keyword(context, block, 'case', ' ');
 					context.visit(block.test);
 					context.write(':');
 				} else {
 					context.newline();
-					context.write('default:');
+					write_keyword(context, block, 'default', ':');
 				}
 
 				context.indent();
@@ -1648,19 +1667,30 @@ export default (options = {}) => {
 			context.visit(node.block);
 
 			if (node.handler) {
+				context.write(' ');
+
 				if (node.handler.param) {
-					context.write(' catch(');
+					write_keyword(context, node.handler, 'catch', '(');
 					context.visit(node.handler.param);
 					context.write(') ');
 				} else {
-					context.write(' catch ');
+					write_keyword(context, node.handler, 'catch', ' ');
 				}
 
 				context.visit(node.handler.body);
 			}
 
 			if (node.finalizer) {
-				context.write(' finally ');
+				const fin_loc = node.finalizer.loc?.start;
+				const prev_end = node.handler ? node.handler.loc?.end : node.block.loc?.end;
+				if (fin_loc && prev_end && prev_end.line === fin_loc.line && fin_loc.column >= 8) {
+					context.write(' ');
+					write_source_keyword(context, fin_loc.line, fin_loc.column - 8, 'finally');
+					context.write(' ');
+				} else {
+					context.write(' finally ');
+				}
+
 				context.visit(node.finalizer);
 			}
 		},
@@ -2359,19 +2389,12 @@ function handle_var_declaration(node, context) {
 
 	context.append(child_context);
 
-	if (node.loc) {
-		const kw = create_keyword_write(child_context, node, () => !!node.loc);
+	const kw = create_keyword_write(child_context, node, (n) => !!n.loc);
 
-		if (node.declare) kw('declare ');
-		kw(node.kind);
-		child_context.write(' ');
-	} else {
-		if (node.declare) {
-			child_context.write('declare ');
-		}
+	if (node.declare) kw('declare ');
+	kw(node.kind);
+	child_context.write(' ');
 
-		child_context.write(`${node.kind} `);
-	}
 	child_context.append(open);
 
 	let first = true;
