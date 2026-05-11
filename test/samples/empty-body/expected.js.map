@@ -7,5 +7,5 @@
   "sourcesContent": [
     "while (a) ;\ndo ; while (a);\nfor (; ; ) ;\nif (a) ;\nif (a) ; else ;\nif (a) ; else if (b) ; else ;"
   ],
-  "mappings": "OAAO,CAAC;;YACI,CAAC;;;;IAET,CAAC;IACD,CAAC;IACD,CAAC,aAAa,CAAC"
+  "mappings": "AAAA,KAAK,EAAE,CAAC;;AACR,EAAE,GAAG,KAAK,EAAE,CAAC;;AACb,GAAG;;AACH,EAAE,EAAE,CAAC;AACL,EAAE,EAAE,CAAC,IAAI,IAAI;AACb,EAAE,EAAE,CAAC,IAAI,IAAI,CAAC,EAAE,EAAE,CAAC,IAAI,IAAI"
 }
