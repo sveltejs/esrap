@@ -95,12 +95,14 @@ function write_source_keyword(context, line, column, keyword) {
  *
  * @param {import('esrap').Context} context
  * @param {TSESTree.Node} node
- * @param {(n: any) => boolean} map_ok When false or missing `loc`, writes go through `context.write` only.
+ * @param {(n: any) => boolean} [map_ok] When false or missing `loc`, writes go through `context.write` only.
  * @returns {(fragment: string) => void}
  */
 function create_keyword_write(context, node, map_ok) {
 	let cursor =
-		map_ok(node) && node.loc ? { line: node.loc.start.line, col: node.loc.start.column } : null;
+		node.loc && (!map_ok || map_ok(node))
+			? { line: node.loc.start.line, col: node.loc.start.column }
+			: null;
 
 	return (fragment) => {
 		if (cursor) {
@@ -697,7 +699,7 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'ForInStatement|ForOfStatement': (node, context) => {
-			const kw = create_keyword_write(context, node, (n) => !!n.loc);
+			const kw = create_keyword_write(context, node);
 
 			kw('for ');
 			if (node.type === 'ForOfStatement' && node.await) {
@@ -1164,7 +1166,7 @@ export default (options = {}) => {
 		},
 
 		ExportDefaultDeclaration(node, context) {
-			const kw = create_keyword_write(context, node, (n) => !!(n.loc && single_line_node(n)));
+			const kw = create_keyword_write(context, node, single_line_node);
 			kw('export ');
 			kw('default ');
 
@@ -1196,7 +1198,7 @@ export default (options = {}) => {
 				return;
 			}
 
-			const kw = create_keyword_write(context, node, (n) => !!n.loc);
+			const kw = create_keyword_write(context, node);
 
 			kw('export ');
 			if (node.exportKind === 'type') {
@@ -1335,7 +1337,7 @@ export default (options = {}) => {
 				}
 			}
 
-			const kw = create_keyword_write(context, node, (n) => !!n.loc);
+			const kw = create_keyword_write(context, node);
 
 			kw('import ');
 			if (node.importKind == 'type') {
@@ -1507,7 +1509,7 @@ export default (options = {}) => {
 
 			// shorthand methods
 			if (node.value.type === 'FunctionExpression') {
-				const kw = create_keyword_write(context, node, (n) => !!n.loc);
+				const kw = create_keyword_write(context, node);
 
 				if (node.kind !== 'init') kw(node.kind + ' ');
 				if (node.value.async) kw('async ');
@@ -1773,7 +1775,7 @@ export default (options = {}) => {
 			],
 
 		TSDeclareFunction(node, context) {
-			const kw = create_keyword_write(context, node, (n) => !!n.loc);
+			const kw = create_keyword_write(context, node);
 
 			kw('declare ');
 
@@ -2389,7 +2391,7 @@ function handle_var_declaration(node, context) {
 
 	context.append(child_context);
 
-	const kw = create_keyword_write(child_context, node, (n) => !!n.loc);
+	const kw = create_keyword_write(child_context, node);
 
 	if (node.declare) kw('declare ');
 	kw(node.kind + ' ');
