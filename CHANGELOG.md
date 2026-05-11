@@ -1,5 +1,12 @@
 # esrap changelog
 
+## 2.2.7
+
+### Patch Changes
+
+- 5d382df: fix: print type parameters and return type of arrow functions, and default of type parameters
+- 02b140b: fix: add locations to keywords
+
 ## 2.2.6
 
 ### Patch Changes
