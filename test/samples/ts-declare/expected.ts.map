@@ -7,5 +7,5 @@
   "sourcesContent": [
     "declare function a(): void;\ndeclare const b: number;\ndeclare class c {}\n\nexport {};\n"
   ],
-  "mappings": "AAAA,QAAQ,AAAA,QAAQ,CAAC,CAAC,IAAI,IAAI;;AAC1B,QAAQ,AAAA,KAAK,CAAC,CAAS,EAAN,MAAM;;AACvB,QAAQ,AAAA,MAAM,AAAA,CAAC,CAAC,CAAC,AAAA,CAAC;;AAElB,OAAO"
+  "mappings": "AAAA,QAAQ,AAAA,QAAQ,CAAC,CAAC,IAAI,IAAI;;AAC1B,QAAQ,AAAA,MAAM,AAAA,CAAS,EAAN,MAAM;;AACvB,QAAQ,AAAA,MAAM,AAAA,CAAC,CAAC,CAAC,AAAA,CAAC;;AAElB,OAAO"
 }
