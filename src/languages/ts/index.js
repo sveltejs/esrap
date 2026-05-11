@@ -2392,8 +2392,7 @@ function handle_var_declaration(node, context) {
 	const kw = create_keyword_write(child_context, node, (n) => !!n.loc);
 
 	if (node.declare) kw('declare ');
-	kw(node.kind);
-	child_context.write(' ');
+	kw(node.kind + ' ');
 
 	child_context.append(open);
 
