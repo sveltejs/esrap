@@ -998,9 +998,17 @@ export default (options = {}) => {
 				write_keyword(context, node, 'async', ' ');
 			}
 
+			if (node.typeParameters) {
+				context.visit(node.typeParameters);
+			}
+
 			context.write('(');
-			sequence(context, node.params, node.body.loc?.start ?? null, false);
-			context.write(') => ');
+			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
+			context.write(')');
+
+			if (node.returnType) context.visit(node.returnType);
+
+			context.write(' => ');
 
 			if (
 				node.body.type === 'ObjectExpression' ||
@@ -1981,6 +1989,11 @@ export default (options = {}) => {
 			if (node.constraint) {
 				context.write(' extends ');
 				context.visit(node.constraint);
+			}
+
+			if (node.default) {
+				context.write(' = ');
+				context.visit(node.default);
 			}
 		},
 

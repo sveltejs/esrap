@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const identity = <T>(x: T): T => x;\n\nconst pair = <K, V>(key: K, value: V): [K, V] => [key, value];\n\nconst noTypeParams = (x: number): number => x + 1;\n\nconst onlyTypeParams = <T>(x: T) => x;\n\nconst onlyReturnType = (x: number): string => String(x);\n\nconst constrained = <T extends string>(x: T): T => x;\n\nconst withDefault = <T = number>(x: T): T => x;\n\nconst constrainedWithDefault = <T extends string = 'foo'>(x: T): T => x;\n"
+  ],
+  "mappings": "AAAA,MAAM,AAAA,QAAQ,IAAI,CAAC,EAAE,CAAI,EAAD,CAAC,GAAG,CAAC,IAAI,CAAC;AAElC,MAAM,AAAA,IAAI,IAAI,CAAC,EAAE,CAAC,EAAE,GAAM,EAAD,CAAC,EAAE,KAAQ,EAAD,CAAC,IAAI,CAAC,EAAE,CAAC,MAAM,GAAG,EAAE,KAAK;AAE5D,MAAM,AAAA,YAAY,IAAI,CAAS,EAAN,MAAM,GAAG,MAAM,IAAI,CAAC,GAAG,CAAC;AAEjD,MAAM,AAAA,cAAc,IAAI,CAAC,EAAE,CAAI,EAAD,CAAC,KAAK,CAAC;AAErC,MAAM,AAAA,cAAc,IAAI,CAAS,EAAN,MAAM,GAAG,MAAM,IAAI,MAAM,CAAC,CAAC;AAEtD,MAAM,AAAA,WAAW,IAAI,CAAgB,SAAN,MAAM,EAAE,CAAI,EAAD,CAAC,GAAG,CAAC,IAAI,CAAC;AAEpD,MAAM,AAAA,WAAW,IAAI,CAAU,GAAN,MAAM,EAAE,CAAI,EAAD,CAAC,GAAG,CAAC,IAAI,CAAC;AAE9C,MAAM,AAAA,sBAAsB,IAAI,CAAwB,SAAd,MAAM,GAAG,KAAK,EAAE,CAAI,EAAD,CAAC,GAAG,CAAC,IAAI,CAAC"
+}
