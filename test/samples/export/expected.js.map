@@ -7,5 +7,5 @@
   "sourcesContent": [
     "const foo = 42;\nexport { foo };"
   ],
-  "mappings": "AAAA,KAAK,CAAC,GAAG,GAAG,EAAE;;AACd,OAAO,EAAE,GAAG"
+  "mappings": "AAAA,MAAM,AAAA,GAAG,GAAG,EAAE;;AACd,OAAO,EAAE,GAAG"
 }
