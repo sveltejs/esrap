@@ -7,5 +7,5 @@
   "sourcesContent": [
     "import { foo } from 'x' with {type: 'json'};\nimport { bar } from 'y' with { \"blah\": \"true\", baz: \"false\" };\nimport('baz', { with: { stuff: true }}).then(blah);"
   ],
-  "mappings": "SAAS,GAAG,QAAQ,GAAG,QAAO,IAAI,EAAE,MAAM;SACjC,GAAG,QAAQ,GAAG,QAAQ,MAAM,EAAE,MAAM,EAAE,GAAG,EAAE,OAAO;;OACpD,KAAK,IAAI,IAAI,IAAI,KAAK,EAAE,IAAI,MAAK,IAAI,CAAC,IAAI"
+  "mappings": "AAAA,OAAO,EAAE,GAAG,QAAQ,GAAG,QAAO,IAAI,EAAE,MAAM;AAC1C,OAAO,EAAE,GAAG,QAAQ,GAAG,QAAQ,MAAM,EAAE,MAAM,EAAE,GAAG,EAAE,OAAO;;AAC3D,MAAM,CAAC,KAAK,IAAI,IAAI,IAAI,KAAK,EAAE,IAAI,MAAK,IAAI,CAAC,IAAI"
 }
