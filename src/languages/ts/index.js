@@ -1134,9 +1134,9 @@ export default (options = {}) => {
 
 			const test_loc = node.test.loc?.start;
 			const body_end = node.body.loc?.end;
-			if (test_loc && body_end && body_end.line === test_loc.line && test_loc.column >= 7) {
+			if (test_loc && body_end && body_end.line === test_loc.line && test_loc.column >= 6) {
 				context.write(' ');
-				write_source_keyword(context, test_loc.line, test_loc.column - 7, 'while');
+				write_source_keyword(context, body_end.line, body_end.column + 1, 'while');
 				context.write(' (');
 			} else {
 				context.write(' while (');
@@ -1297,8 +1297,8 @@ export default (options = {}) => {
 
 				const alt_loc = node.alternate.loc?.start;
 				const con_end = node.consequent.loc?.end;
-				if (alt_loc && con_end && con_end.line === alt_loc.line && alt_loc.column >= 5) {
-					write_source_keyword(context, alt_loc.line, alt_loc.column - 5, 'else');
+				if (alt_loc && con_end && con_end.line === alt_loc.line && alt_loc.column >= 4) {
+					write_source_keyword(context, con_end.line, con_end.column + 1, 'else');
 					context.write(' ');
 				} else {
 					context.write('else ');
@@ -1683,9 +1683,9 @@ export default (options = {}) => {
 			if (node.finalizer) {
 				const fin_loc = node.finalizer.loc?.start;
 				const prev_end = node.handler ? node.handler.loc?.end : node.block.loc?.end;
-				if (fin_loc && prev_end && prev_end.line === fin_loc.line && fin_loc.column >= 8) {
+				if (fin_loc && prev_end && prev_end.line === fin_loc.line && fin_loc.column >= 7) {
 					context.write(' ');
-					write_source_keyword(context, fin_loc.line, fin_loc.column - 8, 'finally');
+					write_source_keyword(context, prev_end.line, prev_end.column + 1, 'finally');
 					context.write(' ');
 				} else {
 					context.write(' finally ');
