@@ -1406,6 +1406,8 @@ export default (options = {}) => {
 		},
 
 		ImportSpecifier(node, context) {
+			if (node.importKind == 'type') context.write('type ');
+
 			if (
 				node.local.type === 'Identifier' &&
 				node.imported.type === 'Identifier' &&
@@ -1415,7 +1417,6 @@ export default (options = {}) => {
 				context.write(' as ');
 			}
 
-			if (node.importKind == 'type') context.write('type ');
 			context.visit(node.local);
 		},
 
