@@ -1010,12 +1010,7 @@ export default (options = {}) => {
 
 			context.write(' => ');
 
-			if (
-				node.body.type === 'ObjectExpression' ||
-				(node.body.type === 'AssignmentExpression' && node.body.left.type === 'ObjectPattern') ||
-				(node.body.type === 'LogicalExpression' && node.body.left.type === 'ObjectExpression') ||
-				(node.body.type === 'ConditionalExpression' && node.body.test.type === 'ObjectExpression')
-			) {
+			if (arrow_concise_body_needs_wrap(node.body)) {
 				context.write('(');
 				context.visit(node.body);
 				context.write(')');
@@ -2321,6 +2316,34 @@ export default (options = {}) => {
 };
 
 /** @satisfies {Visitors} */
+
+/**
+ * Arrow functions with a concise body must wrap certain expressions in parentheses,
+ * otherwise `{` can start a block statement instead of an object literal (`as` /
+ * `satisfies` / `!` do not change that (e.g. `() => { x } as const`).
+ * @param {TSESTree.BlockStatement | TSESTree.Expression} body
+ * @returns {boolean}
+ */
+function arrow_concise_body_needs_wrap(body) {
+	if (body.type === 'BlockStatement') return false;
+
+	switch (body.type) {
+		case 'ObjectExpression':
+			return true;
+		case 'AssignmentExpression':
+			return body.left.type === 'ObjectPattern';
+		case 'LogicalExpression':
+			return body.left.type === 'ObjectExpression';
+		case 'ConditionalExpression':
+			return body.test.type === 'ObjectExpression';
+		case 'TSAsExpression':
+		case 'TSSatisfiesExpression':
+		case 'TSNonNullExpression':
+			return body.expression ? arrow_concise_body_needs_wrap(body.expression) : false;
+		default:
+			return false;
+	}
+}
 
 /**
  *
