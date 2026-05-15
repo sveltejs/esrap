@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.2.9
+
+### Patch Changes
+
+- aa3078c: fix: keep braces for concise arrow functions with `as/satifies` type suffix
+
 ## 2.2.8
 
 ### Patch Changes
