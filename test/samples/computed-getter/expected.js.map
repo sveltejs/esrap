@@ -7,5 +7,5 @@
   "sourcesContent": [
     "obj = {\n\tget [foo]() {\n\t\treturn bar;\n\t}\n}\n"
   ],
-  "mappings": "AAAA,GAAG;CACF,IAAI,CAAC,GAAG,IAAI,CAAC;EACZ,MAAM,CAAC,GAAG;CACX,CAAC;"
+  "mappings": "AAAA,GAAG;CACF,KAAK,GAAG,IAAI,CAAC;EACZ,OAAO,GAAG;CACX,CAAC;"
 }

@@ -7,5 +7,5 @@
   "sourcesContent": [
     "/* hello */\nimport 'potato';\n"
   ],
-  "mappings": ";AACA,MAAM,CAAC,QAAQ"
+  "mappings": ";AACA,OAAO,QAAQ"
 }

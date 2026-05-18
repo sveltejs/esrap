@@ -7,5 +7,5 @@
   "sourcesContent": [
     "class Example {\n\taccessor count: number = 0;\n\tprivate accessor privateCount: number;\n\tpublic accessor publicCount: number = 5;\n\tprotected accessor protectedCount: number;\n}\n\nabstract class AbstractExample {\n\tabstract accessor abstractCount: number;\n\tprotected abstract accessor protectedAbstractCount: number;\n}\n\nclass MyClass {\n\tconstructor(\n\t\tprotected x: number,\n\t\tprivate y: string\n\t) {}\n}\n"
   ],
-  "mappings": "AAAA,MAAM,AAAA,OAAO,CAAC,CAAC;CACd,SAAS,AAAA,KAAK,EAAE,MAAM,GAAG,CAAC;CAC1B,QAAQ,AAAA,SAAS,AAAA,YAAY,EAAE,MAAM;CACrC,OAAO,AAAA,SAAS,AAAA,WAAW,EAAE,MAAM,GAAG,CAAC;CACvC,UAAU,AAAA,SAAS,AAAA,cAAc,EAAE,MAAM;AAC1C,CAAC;;AAED,SAAS,AAAA,MAAM,AAAA,eAAe,CAAC,CAAC;CAC/B,SAAS,AAAA,SAAS,AAAA,aAAa,EAAE,MAAM;CACvC,UAAU,AAAA,SAAS,AAAA,SAAS,AAAA,sBAAsB,EAAE,MAAM;AAC3D,CAAC;;AAED,MAAM,AAAA,OAAO,CAAC,CAAC;CACd,WAAW,WACA,CAAS,EAAN,MAAM,UACX,CAAS,EAAN,MAAM,EAChB,CAAC,AAAA,CAAC;AACL,CAAC"
+  "mappings": "AAAA,MAAM,OAAO,CAAC,CAAC;CACd,SAAS,KAAK,EAAE,MAAM,GAAG,CAAC;CAC1B,QAAQ,SAAS,YAAY,EAAE,MAAM;CACrC,OAAO,SAAS,WAAW,EAAE,MAAM,GAAG,CAAC;CACvC,UAAU,SAAS,cAAc,EAAE,MAAM;AAC1C,CAAC;;AAED,SAAS,MAAM,eAAe,CAAC,CAAC;CAC/B,SAAS,SAAS,aAAa,EAAE,MAAM;CACvC,UAAU,SAAS,SAAS,sBAAsB,EAAE,MAAM;AAC3D,CAAC;;AAED,MAAM,OAAO,CAAC,CAAC;CACd,WAAW,WACA,CAAS,EAAN,MAAM,UACX,CAAS,EAAN,MAAM,EAChB,CAAC,AAAA,CAAC;AACL,CAAC"
 }

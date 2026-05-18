@@ -7,5 +7,5 @@
   "sourcesContent": [
     "import type A from 'foo';\nimport type { B } from 'foo';\nimport { C, type D, type E as F } from 'foo';\n"
   ],
-  "mappings": "AAAA,OAAO,AAAA,KAAK,AAAA,CAAC,MAAM,KAAK;AACxB,OAAO,AAAA,KAAK,EAAE,CAAC,QAAQ,KAAK;AAC5B,OAAO,EAAE,CAAC,OAAO,CAAC,OAAO,CAAC,IAAI,CAAC,QAAQ,KAAK"
+  "mappings": "AAAA,OAAO,KAAK,CAAC,MAAM,KAAK;AACxB,OAAO,OAAO,CAAC,QAAQ,KAAK;AAC5B,SAAS,CAAC,OAAO,CAAC,OAAO,CAAC,IAAI,CAAC,QAAQ,KAAK"
 }
