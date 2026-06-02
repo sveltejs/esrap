@@ -361,7 +361,7 @@ export default (options = {}) => {
 	 * @param {{ line: number, column: number }} until
 	 * @param {boolean} pad
 	 */
-	function sequence(context, nodes, until, pad, separator = ',') {
+	function sequence(context, nodes, until, pad, separator = ',', trailing_newline = true) {
 		let multiline = false;
 		let length = -1;
 
@@ -427,7 +427,7 @@ export default (options = {}) => {
 
 		if (multiline) {
 			context.dedent();
-			context.newline();
+			if (trailing_newline) context.newline();
 		} else if (pad && length > 0) {
 			context.write(' ');
 		}
@@ -2107,11 +2107,13 @@ export default (options = {}) => {
 		},
 
 		TSUnionType(node, context) {
-			sequence(context, node.types, node.loc?.end ?? null, false, ' |');
+			// no trailing newline, so a following `=>` stays on the same line
+			sequence(context, node.types, node.loc?.end ?? null, false, ' |', false);
 		},
 
 		TSIntersectionType(node, context) {
-			sequence(context, node.types, node.loc?.end ?? null, false, ' &');
+			// no trailing newline, so a following `=>` stays on the same line
+			sequence(context, node.types, node.loc?.end ?? null, false, ' &', false);
 		},
 
 		TSInferType(node, context) {

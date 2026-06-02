@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const toNode = (\n\tkind: string\n): { kind: 'logical'; value: string } | { kind: 'binary'; value: number } =>\n\tkind === 'and' ? { kind: 'logical', value: kind } : { kind: 'binary', value: 1 };\n"
+  ],
+  "mappings": "AAAA,MAAM,AAAA,MAAM,IACX,IAAY,EAAN,MAAM;GACR,IAAI,EAAE,SAAS,EAAE,KAAK,EAAE,MAAM;GAAO,IAAI,EAAE,QAAQ,EAAE,KAAK,EAAE,MAAM,MACtE,IAAI,KAAK,KAAK;KAAK,IAAI,EAAE,SAAS,EAAE,KAAK,EAAE,IAAI;KAAO,IAAI,EAAE,QAAQ,EAAE,KAAK,EAAE,CAAC"
+}
