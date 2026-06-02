@@ -1,5 +1,12 @@
 # esrap changelog
 
+## 2.2.10
+
+### Patch Changes
+
+- 8fa143f: fix: keep `=>` on same line when return type annotation wraps onto multiple lines
+- 39554cc: fix: add parentheses for `as`/`satisfies` expressions inside unary and `**`/binary operands
+
 ## 2.2.9
 
 ### Patch Changes
