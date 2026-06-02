@@ -2,4 +2,4 @@
 'esrap': patch
 ---
 
-Fix invalid output (`Unexpected newline before "=>"`) when an arrow function has a return type annotation that wraps onto multiple lines
+fix: keep `=>` on same line when return type annotation wraps onto multiple lines
