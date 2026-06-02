@@ -2106,12 +2106,12 @@ export default (options = {}) => {
 		},
 
 		TSUnionType(node, context) {
-			// no closing bracket follows, so don't leave a trailing newline
+			// no trailing newline, so a following `=>` stays on the same line
 			sequence(context, node.types, node.loc?.end ?? null, false, ' |', false);
 		},
 
 		TSIntersectionType(node, context) {
-			// no closing bracket follows, so don't leave a trailing newline
+			// no trailing newline, so a following `=>` stays on the same line
 			sequence(context, node.types, node.loc?.end ?? null, false, ' &', false);
 		},
 
