@@ -25,7 +25,6 @@ export const EXPRESSIONS_PRECEDENCE = {
 	ImportExpression: 19,
 	NewExpression: 19,
 	Literal: 18,
-	TSSatisfiesExpression: 18,
 	TSInstantiationExpression: 18,
 	TSNonNullExpression: 18,
 	TSTypeAssertion: 18,
@@ -33,11 +32,13 @@ export const EXPRESSIONS_PRECEDENCE = {
 	ClassExpression: 17,
 	FunctionExpression: 17,
 	ObjectExpression: 17,
-	TSAsExpression: 16,
 	UpdateExpression: 16,
 	UnaryExpression: 15,
 	BinaryExpression: 14,
-	LogicalExpression: 13,
+	// `as`/`satisfies` sit between binary and logical operators
+	TSAsExpression: 13,
+	TSSatisfiesExpression: 13,
+	LogicalExpression: 12,
 	ConditionalExpression: 4,
 	ArrowFunctionExpression: 3,
 	AssignmentExpression: 3,
@@ -360,7 +361,7 @@ export default (options = {}) => {
 	 * @param {{ line: number, column: number }} until
 	 * @param {boolean} pad
 	 */
-	function sequence(context, nodes, until, pad, separator = ',') {
+	function sequence(context, nodes, until, pad, separator = ',', trailing_newline = true) {
 		let multiline = false;
 		let length = -1;
 
@@ -426,7 +427,7 @@ export default (options = {}) => {
 
 		if (multiline) {
 			context.dedent();
-			context.newline();
+			if (trailing_newline) context.newline();
 		} else if (pad && length > 0) {
 			context.write(' ');
 		}
@@ -2106,11 +2107,13 @@ export default (options = {}) => {
 		},
 
 		TSUnionType(node, context) {
-			sequence(context, node.types, node.loc?.end ?? null, false, ' |');
+			// no trailing newline, so a following `=>` stays on the same line
+			sequence(context, node.types, node.loc?.end ?? null, false, ' |', false);
 		},
 
 		TSIntersectionType(node, context) {
-			sequence(context, node.types, node.loc?.end ?? null, false, ' &');
+			// no trailing newline, so a following `=>` stays on the same line
+			sequence(context, node.types, node.loc?.end ?? null, false, ' &', false);
 		},
 
 		TSInferType(node, context) {
@@ -2241,7 +2244,16 @@ export default (options = {}) => {
 		},
 
 		TSNonNullExpression(node, context) {
-			context.visit(node.expression);
+			// operator expressions can't take a postfix `!` directly: `(0 as number)!`, `(await x)!`
+			if (
+				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSNonNullExpression
+			) {
+				context.write('(');
+				context.visit(node.expression);
+				context.write(')');
+			} else {
+				context.visit(node.expression);
+			}
 			context.write('!');
 		},
 
@@ -2354,6 +2366,11 @@ function arrow_concise_body_needs_wrap(body) {
  */
 function needs_parens(node, parent, is_right) {
 	if (node.type === 'PrivateIdentifier') return false;
+
+	if (!is_right && (node.type === 'TSAsExpression' || node.type === 'TSSatisfiesExpression')) {
+		// `**` would be invalid, `&`/`|` would be swallowed into the trailing type
+		return parent.operator === '**' || parent.operator === '&' || parent.operator === '|';
+	}
 
 	// special case where logical expressions and coalesce expressions cannot be mixed,
 	// either of them need to be wrapped with parentheses
