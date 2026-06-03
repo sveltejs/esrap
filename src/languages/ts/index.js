@@ -580,6 +580,7 @@ export default (options = {}) => {
 			}
 
 			const needs_parens =
+				node.callee.type === 'ChainExpression' ||
 				EXPRESSIONS_PRECEDENCE[node.callee.type] < EXPRESSIONS_PRECEDENCE.CallExpression ||
 				(node.type === 'NewExpression' && has_call_expression(node.callee));
 
@@ -1440,7 +1441,10 @@ export default (options = {}) => {
 		LogicalExpression: shared['BinaryExpression|LogicalExpression'],
 
 		MemberExpression(node, context) {
-			if (EXPRESSIONS_PRECEDENCE[node.object.type] < EXPRESSIONS_PRECEDENCE.MemberExpression) {
+			if (
+				node.object.type === 'ChainExpression' ||
+				EXPRESSIONS_PRECEDENCE[node.object.type] < EXPRESSIONS_PRECEDENCE.MemberExpression
+			) {
 				context.write('(');
 				context.visit(node.object);
 				context.write(')');
@@ -1638,7 +1642,13 @@ export default (options = {}) => {
 		},
 
 		TaggedTemplateExpression(node, context) {
-			context.visit(node.tag);
+			if (node.tag.type === 'ChainExpression') {
+				context.write('(');
+				context.visit(node.tag);
+				context.write(')');
+			} else {
+				context.visit(node.tag);
+			}
 			context.visit(node.quasi);
 		},
 
@@ -1710,6 +1720,14 @@ export default (options = {}) => {
 			context.write(node.operator);
 
 			if (node.operator.length > 1) {
+				context.write(' ');
+			} else if (
+				(node.operator === '+' || node.operator === '-') &&
+				((node.argument.type === 'UnaryExpression' && node.argument.operator === node.operator) ||
+					(node.argument.type === 'UpdateExpression' &&
+						node.argument.prefix &&
+						node.argument.operator[0] === node.operator))
+			) {
 				context.write(' ');
 			}
 
@@ -2394,7 +2412,7 @@ function needs_parens(node, parent, is_right) {
 		// Different node types
 		return (
 			(!is_right &&
-				precedence === UNARY_PRECEDENCE &&
+				(precedence === UNARY_PRECEDENCE || node.type === 'AwaitExpression') &&
 				parent_precedence === BINARY_PRECEDENCE &&
 				parent.operator === '**') ||
 			precedence < parent_precedence
