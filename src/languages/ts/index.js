@@ -671,6 +671,13 @@ export default (options = {}) => {
 
 			if (node.id) {
 				context.visit(node.id);
+			}
+
+			if (node.typeParameters) {
+				context.visit(node.typeParameters);
+			}
+
+			if (node.id || node.typeParameters) {
 				context.write(' ');
 			}
 
@@ -813,6 +820,12 @@ export default (options = {}) => {
 			context.visit(node.key);
 			if (node.computed) context.write(']');
 
+			// optional method (`m?()`)
+			if (node.optional) context.write('?');
+
+			// @ts-expect-error `typeParameters` lives on the method node, not its value
+			if (node.typeParameters) context.visit(node.typeParameters);
+
 			context.write('(');
 			sequence(
 				context,
@@ -845,6 +858,8 @@ export default (options = {}) => {
 
 			const kw = create_keyword_write(context, node, field_modifiers_keywords_map_ok);
 
+			if (node.declare) kw('declare ');
+
 			if (node.accessibility) {
 				kw(node.accessibility + ' ');
 			}
@@ -862,6 +877,10 @@ export default (options = {}) => {
 				kw('static ');
 			}
 
+			if (node.override) kw('override ');
+
+			if (node.readonly) kw('readonly ');
+
 			if (
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.accessor ||
@@ -878,6 +897,10 @@ export default (options = {}) => {
 			} else {
 				context.visit(node.key);
 			}
+
+			// `x?: T` (optional) / `x!: T` (definite assignment)
+			if (node.optional) context.write('?');
+			else if (node.definite) context.write('!');
 
 			if (node.typeAnnotation) {
 				if (node.type === 'AccessorProperty' || node.type === 'TSAbstractAccessorProperty') {
@@ -1288,6 +1311,9 @@ export default (options = {}) => {
 		Identifier(node, context) {
 			let name = node.name;
 			context.write(name, node);
+
+			// optional parameters (`a?: T`) carry `optional` on the identifier
+			if (node.optional) context.write('?');
 
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
@@ -1979,6 +2005,11 @@ export default (options = {}) => {
 		},
 
 		TSTypeParameter(node, context) {
+			// modifiers: `const T`, `in T` / `out T` (variance)
+			if (node.const) context.write('const ');
+			if (node.in) context.write('in ');
+			if (node.out) context.write('out ');
+
 			if (node.name && node.name.type) context.visit(node.name);
 			// @ts-expect-error type mismatch TSESTree and acorn-typescript?
 			else context.write(node.name, node);
@@ -2045,7 +2076,16 @@ export default (options = {}) => {
 		},
 
 		TSMappedType(node, context) {
-			context.write('{[');
+			context.write('{');
+
+			// `readonly` / `+readonly` / `-readonly` modifier
+			if (node.readonly) {
+				context.write(
+					node.readonly === '-' ? '-readonly ' : node.readonly === '+' ? '+readonly ' : 'readonly '
+				);
+			}
+
+			context.write('[');
 
 			const legacy_type_parameter = node.typeParameter;
 			const key = node.key ?? legacy_type_parameter?.name;
@@ -2062,7 +2102,18 @@ export default (options = {}) => {
 				context.visit(constraint);
 			}
 
+			// `as` key remapping
+			if (node.nameType) {
+				context.write(' as ');
+				context.visit(node.nameType);
+			}
+
 			context.write(']');
+
+			// `?` / `+?` / `-?` optionality modifier
+			if (node.optional) {
+				context.write(node.optional === '-' ? '-?' : node.optional === '+' ? '+?' : '?');
+			}
 
 			if (node.typeAnnotation) {
 				context.write(': ');
