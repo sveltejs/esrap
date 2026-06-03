@@ -2,4 +2,4 @@
 'esrap': patch
 ---
 
-refactor: derive `needs_parens` precedence checks from the precedence table instead of hard-coded numbers, so they can't drift out of sync (the cause of #131)
+refactor: derive `needs_parens` precedence checks from the precedence table instead of hard-coded numbers
