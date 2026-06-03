@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "a ?? (b || c);\n(a ?? b) || c;"
+    "a ?? (b || c);\n(a ?? b) || c;\n(a || b) && c;\na && (b || c);\na || b && c;"
   ],
-  "mappings": "AAAA,CAAC,KAAK,CAAC,IAAI,CAAC;CACX,CAAC,IAAI,CAAC,KAAK,CAAC"
+  "mappings": "AAAA,CAAC,KAAK,CAAC,IAAI,CAAC;CACX,CAAC,IAAI,CAAC,KAAK,CAAC;CACZ,CAAC,IAAI,CAAC,KAAK,CAAC;AACb,CAAC,KAAK,CAAC,IAAI,CAAC;AACZ,CAAC,IAAI,CAAC,IAAI,CAAC"
 }
