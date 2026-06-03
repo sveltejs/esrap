@@ -2402,16 +2402,15 @@ function needs_parens(node, parent, is_right) {
 		return true;
 	}
 
-	const precedence = EXPRESSIONS_PRECEDENCE[node.type];
-	const parent_precedence = EXPRESSIONS_PRECEDENCE[parent.type];
-
 	// `**` can't take a unary/await left operand: `-2 ** 2`, `await x ** 2` are syntax errors
 	const unary_base_of_pow =
 		!is_right &&
 		parent.operator === '**' &&
 		(node.type === 'UnaryExpression' || node.type === 'AwaitExpression');
-
 	if (unary_base_of_pow) return true;
+
+	const precedence = EXPRESSIONS_PRECEDENCE[node.type];
+	const parent_precedence = EXPRESSIONS_PRECEDENCE[parent.type];
 	if (precedence !== parent_precedence) return precedence < parent_precedence;
 
 	const operator = /** @type {TSESTree.BinaryExpression} */ (node).operator;
