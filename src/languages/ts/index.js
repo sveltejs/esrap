@@ -1437,10 +1437,11 @@ export default (options = {}) => {
 		LogicalExpression: shared['BinaryExpression|LogicalExpression'],
 
 		MemberExpression(node, context) {
-			if (
+			const needs_parens =
 				node.object.type === 'ChainExpression' ||
-				EXPRESSIONS_PRECEDENCE[node.object.type] < EXPRESSIONS_PRECEDENCE.MemberExpression
-			) {
+				EXPRESSIONS_PRECEDENCE[node.object.type] < EXPRESSIONS_PRECEDENCE.MemberExpression;
+
+			if (needs_parens) {
 				context.write('(');
 				context.visit(node.object);
 				context.write(')');
@@ -2404,46 +2405,28 @@ function needs_parens(node, parent, is_right) {
 	const precedence = EXPRESSIONS_PRECEDENCE[node.type];
 	const parent_precedence = EXPRESSIONS_PRECEDENCE[parent.type];
 
-	if (precedence !== parent_precedence) {
-		// Different node types
-		return (
-			(!is_right &&
-				(precedence === EXPRESSIONS_PRECEDENCE.UnaryExpression ||
-					precedence === EXPRESSIONS_PRECEDENCE.AwaitExpression) &&
-				parent_precedence === EXPRESSIONS_PRECEDENCE.BinaryExpression &&
-				parent.operator === '**') ||
-			precedence < parent_precedence
-		);
-	}
+	// `**` can't take a unary/await left operand: `-2 ** 2`, `await x ** 2` are syntax errors
+	const unary_base_of_pow =
+		!is_right &&
+		parent.operator === '**' &&
+		(node.type === 'UnaryExpression' || node.type === 'AwaitExpression');
 
-	if (
-		precedence !== EXPRESSIONS_PRECEDENCE.LogicalExpression &&
-		precedence !== EXPRESSIONS_PRECEDENCE.BinaryExpression
-	) {
-		// Not a `LogicalExpression` or `BinaryExpression`
-		return false;
-	}
+	if (unary_base_of_pow) return true;
+	if (precedence !== parent_precedence) return precedence < parent_precedence;
 
-	if (
-		/** @type {TSESTree.BinaryExpression} */ (node).operator === '**' &&
-		parent.operator === '**'
-	) {
-		// Exponentiation operator has right-to-left associativity
+	const operator = /** @type {TSESTree.BinaryExpression} */ (node).operator;
+
+	if (operator === '**' && parent.operator === '**') {
+		// exponentiation is right-associative
 		return !is_right;
 	}
 
 	if (is_right) {
-		// Parenthesis are used if both operators have the same precedence
-		return (
-			OPERATOR_PRECEDENCE[/** @type {TSESTree.BinaryExpression} */ (node).operator] <=
-			OPERATOR_PRECEDENCE[parent.operator]
-		);
+		// parentheses are needed when both operators have the same precedence
+		return OPERATOR_PRECEDENCE[operator] <= OPERATOR_PRECEDENCE[parent.operator];
 	}
 
-	return (
-		OPERATOR_PRECEDENCE[/** @type {TSESTree.BinaryExpression} */ (node).operator] <
-		OPERATOR_PRECEDENCE[parent.operator]
-	);
+	return OPERATOR_PRECEDENCE[operator] < OPERATOR_PRECEDENCE[parent.operator];
 }
 
 /** @param {TSESTree.Node} node */
