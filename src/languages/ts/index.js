@@ -46,6 +46,10 @@ export const EXPRESSIONS_PRECEDENCE = {
 	RestElement: 1
 };
 
+const UNARY_PRECEDENCE = EXPRESSIONS_PRECEDENCE.UnaryExpression;
+const BINARY_PRECEDENCE = EXPRESSIONS_PRECEDENCE.BinaryExpression;
+const LOGICAL_PRECEDENCE = EXPRESSIONS_PRECEDENCE.LogicalExpression;
+
 const OPERATOR_PRECEDENCE = {
 	'||': 2,
 	'&&': 3,
@@ -2389,12 +2393,15 @@ function needs_parens(node, parent, is_right) {
 	if (precedence !== parent_precedence) {
 		// Different node types
 		return (
-			(!is_right && precedence === 15 && parent_precedence === 14 && parent.operator === '**') ||
+			(!is_right &&
+				precedence === UNARY_PRECEDENCE &&
+				parent_precedence === BINARY_PRECEDENCE &&
+				parent.operator === '**') ||
 			precedence < parent_precedence
 		);
 	}
 
-	if (precedence !== 12 && precedence !== 14) {
+	if (precedence !== LOGICAL_PRECEDENCE && precedence !== BINARY_PRECEDENCE) {
 		// Not a `LogicalExpression` or `BinaryExpression`
 		return false;
 	}
