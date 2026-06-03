@@ -2394,7 +2394,7 @@ function needs_parens(node, parent, is_right) {
 		);
 	}
 
-	if (precedence !== 13 && precedence !== 14) {
+	if (precedence !== 12 && precedence !== 14) {
 		// Not a `LogicalExpression` or `BinaryExpression`
 		return false;
 	}
