@@ -945,7 +945,9 @@ export default (options = {}) => {
 					null,
 				false
 			);
-			context.write(') => ');
+			context.write(')');
+
+			context.write(' => ');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			context.visit(node.typeAnnotation?.typeAnnotation ?? node.returnType?.typeAnnotation);
