@@ -511,23 +511,11 @@ export default (options = {}) => {
 			// 	// Avoids confusion in `for` loops initializers
 			// 	chunks.write('(');
 			// }
-			if (needs_parens(node.left, node, false)) {
-				context.write('(');
-				context.visit(node.left);
-				context.write(')');
-			} else {
-				context.visit(node.left);
-			}
+			visit_parenthesized(context, node.left, operand_needs_parens(node.left, node, false));
 
 			context.write(` ${node.operator} `);
 
-			if (needs_parens(node.right, node, true)) {
-				context.write('(');
-				context.visit(node.right);
-				context.write(')');
-			} else {
-				context.visit(node.right);
-			}
+			visit_parenthesized(context, node.right, operand_needs_parens(node.right, node, true));
 		},
 
 		/**
@@ -575,18 +563,12 @@ export default (options = {}) => {
 				write_keyword(context, node, 'new', ' ');
 			}
 
-			const needs_parens =
+			const needs =
 				node.callee.type === 'ChainExpression' ||
 				EXPRESSIONS_PRECEDENCE[node.callee.type] < EXPRESSIONS_PRECEDENCE.CallExpression ||
 				(node.type === 'NewExpression' && has_call_expression(node.callee));
 
-			if (needs_parens) {
-				context.write('(');
-				context.visit(node.callee);
-				context.write(')');
-			} else {
-				context.visit(node.callee);
-			}
+			visit_parenthesized(context, node.callee, needs);
 
 			if (/** @type {TSESTree.CallExpression} */ (node).optional) {
 				context.write('?.');
@@ -1437,17 +1419,11 @@ export default (options = {}) => {
 		LogicalExpression: shared['BinaryExpression|LogicalExpression'],
 
 		MemberExpression(node, context) {
-			const needs_parens =
+			const needs =
 				node.object.type === 'ChainExpression' ||
 				EXPRESSIONS_PRECEDENCE[node.object.type] < EXPRESSIONS_PRECEDENCE.MemberExpression;
 
-			if (needs_parens) {
-				context.write('(');
-				context.visit(node.object);
-				context.write(')');
-			} else {
-				context.visit(node.object);
-			}
+			visit_parenthesized(context, node.object, needs);
 
 			if (node.computed) {
 				if (node.optional) {
@@ -2209,16 +2185,10 @@ export default (options = {}) => {
 
 		TSAsExpression(node, context) {
 			if (node.expression) {
-				const needs_parens =
+				const needs =
 					EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSAsExpression;
 
-				if (needs_parens) {
-					context.write('(');
-					context.visit(node.expression);
-					context.write(')');
-				} else {
-					context.visit(node.expression);
-				}
+				visit_parenthesized(context, node.expression, needs);
 			}
 			context.write(' as ');
 			context.visit(node.typeAnnotation);
@@ -2264,15 +2234,10 @@ export default (options = {}) => {
 
 		TSNonNullExpression(node, context) {
 			// operator expressions can't take a postfix `!` directly: `(0 as number)!`, `(await x)!`
-			if (
-				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSNonNullExpression
-			) {
-				context.write('(');
-				context.visit(node.expression);
-				context.write(')');
-			} else {
-				context.visit(node.expression);
-			}
+			const needs =
+				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSNonNullExpression;
+
+			visit_parenthesized(context, node.expression, needs);
 			context.write('!');
 		},
 
@@ -2313,17 +2278,11 @@ export default (options = {}) => {
 
 		TSSatisfiesExpression(node, context) {
 			if (node.expression) {
-				const needs_parens =
+				const needs =
 					EXPRESSIONS_PRECEDENCE[node.expression.type] <
 					EXPRESSIONS_PRECEDENCE.TSSatisfiesExpression;
 
-				if (needs_parens) {
-					context.write('(');
-					context.visit(node.expression);
-					context.write(')');
-				} else {
-					context.visit(node.expression);
-				}
+				visit_parenthesized(context, node.expression, needs);
 			}
 			context.write(' satisfies ');
 			context.visit(node.typeAnnotation);
@@ -2383,7 +2342,7 @@ function arrow_concise_body_needs_wrap(body) {
  * @param {boolean} is_right
  * @returns
  */
-function needs_parens(node, parent, is_right) {
+function operand_needs_parens(node, parent, is_right) {
 	if (node.type === 'PrivateIdentifier') return false;
 
 	if (!is_right && (node.type === 'TSAsExpression' || node.type === 'TSSatisfiesExpression')) {
@@ -2428,6 +2387,21 @@ function needs_parens(node, parent, is_right) {
 	return OPERATOR_PRECEDENCE[operator] < OPERATOR_PRECEDENCE[parent.operator];
 }
 
+/**
+ * @param {Context} context
+ * @param {TSESTree.Node} node
+ * @param {boolean} needs
+ */
+function visit_parenthesized(context, node, needs) {
+	if (needs) {
+		context.write('(');
+		context.visit(node);
+		context.write(')');
+	} else {
+		context.visit(node);
+	}
+}
+
 /** @param {TSESTree.Node} node */
 function has_call_expression(node) {
 	while (node) {
@@ -2439,6 +2413,7 @@ function has_call_expression(node) {
 			return false;
 		}
 	}
+	return false;
 }
 
 /**
