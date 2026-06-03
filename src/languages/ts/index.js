@@ -677,7 +677,13 @@ export default (options = {}) => {
 
 			if (node.superClass) {
 				context.write('extends ');
+				// the `extends` clause is a LeftHandSideExpression; anything lower (a
+				// logical/binary/conditional/etc.) must be parenthesized
+				const wrap_super =
+					EXPRESSIONS_PRECEDENCE[node.superClass.type] < EXPRESSIONS_PRECEDENCE.NewExpression;
+				if (wrap_super) context.write('(');
 				context.visit(node.superClass);
+				if (wrap_super) context.write(')');
 
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				var type_arguments = node.superTypeParameters ?? node.superTypeArguments;
@@ -1131,7 +1137,14 @@ export default (options = {}) => {
 
 		Decorator(node, context) {
 			context.write('@');
+			// a decorator must be an identifier/member/call (or parenthesized); anything
+			// else (ternary, logical, assignment, unary, `as`, optional chain…) needs wrapping
+			const wrap =
+				/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
+				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
+			if (wrap) context.write('(');
 			context.visit(node.expression);
+			if (wrap) context.write(')');
 			context.newline();
 		},
 
@@ -1241,13 +1254,8 @@ export default (options = {}) => {
 		},
 
 		ExpressionStatement(node, context) {
-			if (
-				node.expression.type === 'ObjectExpression' ||
-				(node.expression.type === 'AssignmentExpression' &&
-					node.expression.left.type === 'ObjectPattern') ||
-				node.expression.type === 'FunctionExpression'
-			) {
-				// is an AssignmentExpression to an ObjectPattern
+			if (leads_with_curly_or_keyword(node.expression)) {
+				// would otherwise be parsed as a block / function / class declaration
 				context.write('(');
 				context.visit(node.expression);
 				context.write(');');
@@ -1639,7 +1647,12 @@ export default (options = {}) => {
 		},
 
 		TaggedTemplateExpression(node, context) {
-			if (node.tag.type === 'ChainExpression') {
+			// the tag is a LeftHandSideExpression; a lower-precedence tag (logical,
+			// conditional, arrow, `as`, unary…) or an optional chain must be wrapped
+			const wrap =
+				/** @type {string} */ (node.tag.type) === 'ChainExpression' ||
+				EXPRESSIONS_PRECEDENCE[node.tag.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
+			if (wrap) {
 				context.write('(');
 				context.visit(node.tag);
 				context.write(')');
@@ -2405,11 +2418,14 @@ function needs_parens(node, parent, is_right) {
 	const precedence = EXPRESSIONS_PRECEDENCE[node.type];
 	const parent_precedence = EXPRESSIONS_PRECEDENCE[parent.type];
 
-	// `**` can't take a unary/await left operand: `-2 ** 2`, `await x ** 2` are syntax errors
+	// `**` can't take a unary/await/assertion left operand: `-2 ** 2`, `await x ** 2`,
+	// `<T>x ** 2` are syntax errors
 	const unary_base_of_pow =
 		!is_right &&
 		parent.operator === '**' &&
-		(node.type === 'UnaryExpression' || node.type === 'AwaitExpression');
+		(node.type === 'UnaryExpression' ||
+			node.type === 'AwaitExpression' ||
+			node.type === 'TSTypeAssertion');
 
 	if (unary_base_of_pow) return true;
 	if (precedence !== parent_precedence) return precedence < parent_precedence;
@@ -2440,6 +2456,95 @@ function has_call_expression(node) {
 			return false;
 		}
 	}
+}
+
+/**
+ * True when printing `node` as an expression statement would begin with `{`,
+ * `function`, or `class` — which the parser would misread as a block, function
+ * declaration, or class declaration. Walks the left spine following the same
+ * parenthesization the visitors apply, so it stops as soon as a child position
+ * would already be wrapped.
+ * @param {TSESTree.Node} node
+ * @returns {boolean}
+ */
+function leads_with_curly_or_keyword(node) {
+	while (node) {
+		switch (node.type) {
+			case 'ObjectExpression':
+			case 'ObjectPattern':
+			case 'FunctionExpression':
+			case 'ClassExpression':
+				return true;
+
+			case 'BinaryExpression':
+			case 'LogicalExpression':
+				if (needs_parens(node.left, node, false)) return false;
+				node = node.left;
+				continue;
+
+			case 'AssignmentExpression':
+				node = node.left;
+				continue;
+
+			case 'ConditionalExpression':
+				if (
+					EXPRESSIONS_PRECEDENCE[node.test.type] <= EXPRESSIONS_PRECEDENCE.ConditionalExpression
+				) {
+					return false;
+				}
+				node = node.test;
+				continue;
+
+			case 'MemberExpression':
+				if (
+					/** @type {string} */ (node.object.type) === 'ChainExpression' ||
+					EXPRESSIONS_PRECEDENCE[node.object.type] < EXPRESSIONS_PRECEDENCE.MemberExpression
+				) {
+					return false;
+				}
+				node = node.object;
+				continue;
+
+			case 'CallExpression':
+				if (
+					/** @type {string} */ (node.callee.type) === 'ChainExpression' ||
+					EXPRESSIONS_PRECEDENCE[node.callee.type] < EXPRESSIONS_PRECEDENCE.CallExpression
+				) {
+					return false;
+				}
+				node = node.callee;
+				continue;
+
+			case 'TaggedTemplateExpression':
+				if (
+					/** @type {string} */ (node.tag.type) === 'ChainExpression' ||
+					EXPRESSIONS_PRECEDENCE[node.tag.type] < EXPRESSIONS_PRECEDENCE.CallExpression
+				) {
+					return false;
+				}
+				node = node.tag;
+				continue;
+
+			case 'UpdateExpression':
+				if (node.prefix) return false;
+				node = node.argument;
+				continue;
+
+			case 'TSAsExpression':
+			case 'TSSatisfiesExpression':
+			case 'TSNonNullExpression':
+				node = node.expression;
+				continue;
+
+			// a sequence expression always prints its own wrapping parens
+			case 'SequenceExpression':
+				return false;
+
+			default:
+				return false;
+		}
+	}
+	return false;
 }
 
 /**
