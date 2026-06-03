@@ -2409,7 +2409,7 @@ function needs_parens(node, parent, is_right) {
 		return (
 			(!is_right &&
 				(precedence === EXPRESSIONS_PRECEDENCE.UnaryExpression ||
-					node.type === 'AwaitExpression') &&
+					precedence === EXPRESSIONS_PRECEDENCE.AwaitExpression) &&
 				parent_precedence === EXPRESSIONS_PRECEDENCE.BinaryExpression &&
 				parent.operator === '**') ||
 			precedence < parent_precedence
