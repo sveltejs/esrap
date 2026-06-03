@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.2.11
+
+### Patch Changes
+
+- 16e353d: fix: keep required parentheses for mixed `&&`/`||` logical expressions
+
 ## 2.2.10
 
 ### Patch Changes
