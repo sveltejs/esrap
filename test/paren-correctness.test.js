@@ -46,3 +46,19 @@ test('keeps parentheses around an `await` operand of `**`', () => {
 	expect(code).toBe('async () => (await a) ** b;');
 	expect(() => acornParse(code)).not.toThrow();
 });
+
+// `?:` is right-associative, so a conditional in the test position must keep its
+// parentheses, otherwise `(a ? b : c) ? d : e` re-associates to `a ? b : (c ? d : e)`
+test.each([
+	'(a ? b : c) ? d : e;',
+	'(a ? b : c) ? d : e ? f : g;'
+])('keeps parentheses around a conditional test %j', (input) => {
+	const code = printed(input);
+	expect(code).toBe(input);
+	expect(() => acornParse(code)).not.toThrow();
+});
+
+// a conditional in the consequent/alternate position does NOT need parentheses
+test('leaves a nested conditional in the alternate untouched', () => {
+	expect(printed('a ? b : c ? d : e;')).toBe('a ? b : c ? d : e;');
+});
