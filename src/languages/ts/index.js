@@ -493,7 +493,7 @@ export default (options = {}) => {
 			context.write('[');
 			sequence(
 				context,
-				/** @type {TSESTree.Node[]} */(node.elements),
+				/** @type {TSESTree.Node[]} */ (node.elements),
 				node.loc?.end ?? null,
 				false
 			);
@@ -960,8 +960,8 @@ export default (options = {}) => {
 				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.typeAnnotation?.typeAnnotation?.loc?.start ??
-				node.returnType?.typeAnnotation?.loc?.start ??
-				null,
+					node.returnType?.typeAnnotation?.loc?.start ??
+					null,
 				false
 			);
 
@@ -987,7 +987,7 @@ export default (options = {}) => {
 
 		AccessorProperty:
 			shared[
-			'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
 			],
 
 		ArrayExpression: shared['ArrayExpression|ArrayPattern'],
@@ -1548,7 +1548,7 @@ export default (options = {}) => {
 
 		PropertyDefinition:
 			shared[
-			'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
 			],
 
 		RestElement: shared['RestElement|SpreadElement'],
@@ -1771,12 +1771,12 @@ export default (options = {}) => {
 
 		TSAbstractAccessorProperty:
 			shared[
-			'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
 			],
 
 		TSAbstractPropertyDefinition:
 			shared[
-			'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
 			],
 
 		TSDeclareFunction(node, context) {
