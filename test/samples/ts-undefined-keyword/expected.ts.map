@@ -7,5 +7,5 @@
   "sourcesContent": [
     "let a: number | undefined;\na = 2;\n"
   ],
-  "mappings": "AAAA,IAAI,AAAA,CAAqB,EAAlB,MAAM,GAAG,SAAS;;AACzB,CAAC,GAAG,CAAC"
+  "mappings": "AAAA,IAAI,CAAqB,EAAlB,MAAM,GAAG,SAAS;;AACzB,CAAC,GAAG,CAAC"
 }

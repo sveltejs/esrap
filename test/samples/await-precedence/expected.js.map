@@ -7,5 +7,5 @@
   "sourcesContent": [
     "await (a || b);\nawait c;"
   ],
-  "mappings": "AAAA,KAAK,EAAE,CAAC,IAAI,CAAC;AACb,KAAK,CAAC,CAAC"
+  "mappings": "AAAA,OAAO,CAAC,IAAI,CAAC;AACb,MAAM,CAAC"
 }
