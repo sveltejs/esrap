@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "export const atproto = (o?: {\n\tA?: string;\n}) => {};\n"
+    "export const atproto = (o?: { A?: string }) => {};\n"
   ],
-  "mappings": "AAAA,MAAM,CAAC,MAAM,AAAA,OAAO,IAAI,CAEvB,KADA,CAAC,GAAG,MAAM,OACL,CAAC,AAAA,CAAC"
+  "mappings": "AAAA,MAAM,CAAC,MAAM,AAAA,OAAO,IAAI,CAAkB,KAAZ,CAAC,GAAG,MAAM,OAAO,CAAC,AAAA,CAAC"
 }

@@ -1,3 +1,1 @@
-export const atproto = (o?: {
-	A?: string;
-}) => {};
+export const atproto = (o?: { A?: string }) => {};
