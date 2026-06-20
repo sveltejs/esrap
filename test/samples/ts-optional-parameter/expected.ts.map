@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "export const atproto = (o?: {\n\tA?: string;\n}) => {};\n"
+  ],
+  "mappings": "AAAA,MAAM,CAAC,MAAM,AAAA,OAAO,IAAI,CAEvB,KADA,CAAC,GAAG,MAAM,OACL,CAAC,AAAA,CAAC"
+}
