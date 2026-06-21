@@ -1,5 +1,12 @@
 # esrap changelog
 
+## 2.2.12
+
+### Patch Changes
+
+- 6aef4e0: fix: preserve `?` on optional identifiers (e.g. optional parameters)
+- a990517: fix: preserve required parentheses that were being dropped, changing meaning or producing invalid output (nested unary operators, parenthesized optional chains, and `await` as the left operand of `**`)
+
 ## 2.2.11
 
 ### Patch Changes
