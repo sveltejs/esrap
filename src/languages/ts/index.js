@@ -1289,6 +1289,7 @@ export default (options = {}) => {
 			let name = node.name;
 			context.write(name, node);
 
+			if (node.optional) context.write('?');
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
 
