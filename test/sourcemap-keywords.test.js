@@ -193,3 +193,30 @@ test('decorator-prefixed class falls back gracefully', () => {
 	expect(code).toContain('class');
 	expect(mappings.length).toBeGreaterThan(0);
 });
+
+test('no positive whitespace mapping directly after keyword', () => {
+	// Positive source-map segment at gen_col == keyword_end (e.g. space after
+	// keyword) causes downstream source-map consumers to treat whitespace columns
+	// as adjacent expression positions.
+	for (const source of [
+		`function f() {\n\treturn x ?? 1;\n}`,
+		`function g() {\n\treturn a || b;\n}`,
+		`async function h() {\n\tawait p();\n}`,
+		`const k = 1;`,
+		`let m = 1;`
+	]) {
+		const { code, mappings } = mapped(source);
+		for (const keyword of ['return', 'await', 'const', 'let', 'function']) {
+			const idx = code.indexOf(keyword);
+			if (idx < 0) continue;
+			const end_idx = idx + keyword.length;
+			const { gen_line, gen_col } = generatedLineColumn(code, end_idx);
+			const line_segments = mappings[gen_line] || [];
+			const offender = line_segments.find((s) => s[0] === gen_col && s.length >= 4);
+			expect(
+				offender,
+				`expected no positive mapping at gen ${gen_line + 1}:${gen_col} (just after \`${keyword}\` in ${JSON.stringify(source)}), got ${JSON.stringify(offender)}`
+			).toBeUndefined();
+		}
+	}
+});

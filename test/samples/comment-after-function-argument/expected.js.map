@@ -7,5 +7,5 @@
   "sourcesContent": [
     "foo(function bar() {\n\t// logic goes here\n}, true); // trailing comment\n"
   ],
-  "mappings": "AAAA,GAAG;CAAC,QAAQ,CAAC,GAAG,GAAG,CAAC;;CAEpB,CAAC;CAAE,IAAI;"
+  "mappings": "AAAA,GAAG;CAAC,SAAS,GAAG,GAAG,CAAC;;CAEpB,CAAC;CAAE,IAAI;"
 }

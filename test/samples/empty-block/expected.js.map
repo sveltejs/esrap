@@ -7,5 +7,5 @@
   "sourcesContent": [
     "if (false) {\n\n}\n\nfunction x() {\n\n}\n"
   ],
-  "mappings": "AAAA,EAAE,EAAE,KAAK,EAAE,CAAC,AAEZ,CAAC;;AAED,QAAQ,CAAC,CAAC,GAAG,CAAC,AAEd,CAAC"
+  "mappings": "AAAA,IAAI,KAAK,EAAE,CAAC,AAEZ,CAAC;;AAED,SAAS,CAAC,GAAG,CAAC,AAEd,CAAC"
 }

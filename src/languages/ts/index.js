@@ -75,8 +75,9 @@ const OPERATOR_PRECEDENCE = {
 };
 
 /**
- * Writes `keyword` bounded by source map locations for the exact character span,
- * so breakpoints line up on keywords (not only identifiers and braces).
+ * Writes `keyword` with a source map location at its start, so breakpoints
+ * line up on keywords (not only identifiers and braces). No end marker; the
+ * keyword's mapping naturally yields to the following expression.
  *
  * @param {import('esrap').Context} context
  * @param {number} line ESTree / acorn 1-based line
@@ -86,7 +87,6 @@ const OPERATOR_PRECEDENCE = {
 function write_source_keyword(context, line, column, keyword) {
 	context.location(line, column);
 	context.write(keyword);
-	context.location(line, column + keyword.length);
 }
 
 /**
