@@ -653,6 +653,13 @@ export default (options = {}) => {
 
 			if (node.id) {
 				context.visit(node.id);
+			}
+
+			if (node.typeParameters) {
+				context.visit(node.typeParameters);
+			}
+
+			if (node.id || node.typeParameters) {
 				context.write(' ');
 			}
 

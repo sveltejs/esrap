@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class Foo<T> {}\nclass Baz<T> extends Bar<T> {}\n"
+  ],
+  "mappings": "AAAA,MAAM,AAAA,GAAG,CAAC,CAAC,EAAE,CAAC,AAAA,CAAC;AACf,MAAM,AAAA,GAAG,CAAC,CAAC,UAAU,GAAG,CAAC,CAAC,EAAE,CAAC,AAAA,CAAC"
+}
