@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "declare global {\n\tnamespace App {\n\t\tinterface Error {\n\t\t\tfoo: string;\n\t\t}\n\t}\n}\n\nexport {};\n"
+    "declare global {\n\tnamespace App {\n\t\tinterface Error {\n\t\t\tfoo: string;\n\t\t}\n\t}\n}\n\nnamespace A.B.C {\n\texport const x = 1;\n}\n\nnamespace D {\n\texport const x = 1;\n}\n\nexport {};\n"
   ],
-  "mappings": "QAAQ,MAAM;WACH,GAAG;YACF,KAAK,GACd,GAAG,EAAE,MAAM;;;;AAKd,OAAO"
+  "mappings": "QAAQ,MAAM;WACH,GAAG;YACF,KAAK,GACd,GAAG,EAAE,MAAM;;;;UAKJ,CAAC,CAAC,CAAC,CAAC,CAAC;CACd,MAAM,CAAC,MAAM,AAAA,CAAC,GAAG,CAAC;;;UAGT,CAAC;CACV,MAAM,CAAC,MAAM,AAAA,CAAC,GAAG,CAAC;;;AAGnB,OAAO"
 }
