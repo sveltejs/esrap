@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "export const atproto = (o?: { A?: string }) => {};\nfunction f(a?: number) {}\nconst g = (a?: number) => a;\nclass C {\n\tm(a?: number) {}\n}\ninterface I {\n\tm(a?: number): void;\n}\ntype F = (a?: number) => void;\n"
+  ],
+  "mappings": "AAAA,MAAM,CAAC,MAAM,AAAA,OAAO,IAAI,CAAkB,KAAZ,CAAC,GAAG,MAAM,OAAO,CAAC,AAAA,CAAC;;AACjD,QAAQ,CAAC,CAAC,CAAC,CAAU,GAAN,MAAM,EAAE,CAAC,AAAA,CAAC;;AACzB,MAAM,AAAA,CAAC,IAAI,CAAU,GAAN,MAAM,KAAK,CAAC;;AAC3B,MAAM,AAAA,CAAC,CAAC,CAAC;CACR,CAAC,CAAC,CAAU,GAAN,MAAM,EAAE,CAAC,AAAA,CAAC;AACjB,CAAC;;UACS,CAAC,GACV,CAAC,CAAC,CAAU,GAAN,MAAM,GAAG,IAAI;;KAEf,CAAC,IAAI,CAAU,GAAN,MAAM,KAAK,IAAI"
+}

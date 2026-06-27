@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class A {\n\tm<T>(x: T): T {\n\t\treturn x;\n\t}\n\tstatic async n<T>(): Promise<T> {}\n}\n"
+  ],
+  "mappings": "AAAA,MAAM,AAAA,CAAC,CAAC,CAAC;CACR,CAAC,CAAC,CAAC,EAAE,CAAI,EAAD,CAAC,GAAG,CAAC,CAAC,CAAC;EACd,MAAM,CAAC,CAAC;CACT,CAAC;;CACD,OAAO,AAAA,MAAM,AAAA,CAAC,CAAC,CAAC,KAAK,OAAO,CAAC,CAAC,EAAE,CAAC,AAAA,CAAC;AACnC,CAAC"
+}

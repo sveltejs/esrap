@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "function f<const T>(a: T): T {\n\treturn a;\n}\nclass A<in T, out U> {}\n"
+  ],
+  "mappings": "AAAA,QAAQ,CAAC,CAAC,OAAC,CAAO,EAAE,CAAI,EAAD,CAAC,GAAG,CAAC,CAAC,CAAC;CAC7B,MAAM,CAAC,CAAC;AACT,CAAC;;AACD,MAAM,AAAA,CAAC,IAAC,CAAI,MAAE,CAAK,EAAE,CAAC,AAAA,CAAC"
+}
