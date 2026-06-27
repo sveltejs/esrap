@@ -1,5 +1,15 @@
 # esrap changelog
 
+## 2.2.13
+
+### Patch Changes
+
+- 9b35c04: fix: preserve required parentheses in three more cases that changed meaning or produced invalid output
+- 9b35c04: chore: derive `needs_parens` precedence checks from the precedence table instead of hard-coded numbers
+- 61c8f1f: fix: preserve more TypeScript markers when printing
+- 9b35c04: fix: add parentheses required by specific grammar positions
+- 79dea45: fix: print valid TypeScript for `asserts` predicates, qualified namespaces, and computed signature keys
+
 ## 2.2.12
 
 ### Patch Changes
