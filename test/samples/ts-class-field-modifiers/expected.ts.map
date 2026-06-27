@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class A {\n\tx?: number;\n}\nclass B {\n\tx!: number;\n}\nclass C {\n\treadonly x = 1;\n}\nclass D {\n\tdeclare x: number;\n}\nclass E extends F {\n\toverride y = 1;\n}\nclass G {\n\tpublic static readonly x = 1;\n}\n"
+  ],
+  "mappings": "AAAA,MAAM,AAAA,CAAC,CAAC,CAAC;CACR,CAAC,GAAG,MAAM;AACX,CAAC;;AACD,MAAM,AAAA,CAAC,CAAC,CAAC;CACR,CAAC,GAAG,MAAM;AACX,CAAC;;AACD,MAAM,AAAA,CAAC,CAAC,CAAC;CACR,SAAS,AAAA,CAAC,GAAG,CAAC;AACf,CAAC;;AACD,MAAM,AAAA,CAAC,CAAC,CAAC;CACR,QAAQ,AAAA,CAAC,EAAE,MAAM;AAClB,CAAC;;AACD,MAAM,AAAA,CAAC,SAAS,CAAC,CAAC,CAAC;CAClB,SAAS,AAAA,CAAC,GAAG,CAAC;AACf,CAAC;;AACD,MAAM,AAAA,CAAC,CAAC,CAAC;CACR,OAAO,AAAA,OAAO,AAAA,SAAS,AAAA,CAAC,GAAG,CAAC;AAC7B,CAAC"
+}
