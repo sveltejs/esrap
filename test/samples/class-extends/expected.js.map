@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class A extends (B || C) {}\nclass B extends (cond ? B : D) {}\nconst C = class extends (a = b) {};\nclass D extends B.C {}\nclass E extends new B() {}\nclass F extends f() {}\n"
+  ],
+  "mappings": "AAAA,MAAM,AAAA,CAAC,UAAU,CAAC,IAAI,CAAC,EAAE,CAAC,AAAA,CAAC;AAC3B,MAAM,AAAA,CAAC,UAAU,IAAI,GAAG,CAAC,GAAG,CAAC,EAAE,CAAC,AAAA,CAAC;;AACjC,MAAM,AAAA,CAAC,GAAG,MAAM,SAAS,CAAC,GAAG,CAAC,EAAE,CAAC,AAAA,CAAC;;AAClC,MAAM,AAAA,CAAC,SAAS,CAAC,CAAC,CAAC,CAAC,CAAC,AAAA,CAAC;AACtB,MAAM,AAAA,CAAC,SAAS,GAAG,CAAC,CAAC,GAAG,CAAC,AAAA,CAAC;AAC1B,MAAM,AAAA,CAAC,SAAS,CAAC,GAAG,CAAC,AAAA,CAAC"
+}

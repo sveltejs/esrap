@@ -11,5 +11,20 @@ class User {
 	id: string;
 }
 
+@(a ? b : c)
+class Conditional {}
+
+@(a || b)
+class Logical {}
+
+@dec
+class Identifier {}
+
+@a.b.c
+class Member {}
+
+@a()
+class Call {}
+
 const u = new User();
 console.log(u.id); // will print "random uuid..."

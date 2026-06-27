@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "foo?.bar.baz;\nx?.(a, b, c);\nx()?.();"
+    "foo?.bar.baz;\nx?.(a, b, c);\nx()?.();\na?.b.c;\na?.b().c;\na?.b?.c;\n(a?.b)();\n(a?.b).c;\nnew (a?.b)();\ndelete (a?.b).c;\n(a?.b)`x`;\n(a?.())();\n"
   ],
-  "mappings": "AAAA,GAAG,EAAE,GAAG,CAAC,GAAG;AACZ,CAAC,GAAG,CAAC,EAAE,CAAC,EAAE,CAAC;AACX,CAAC"
+  "mappings": "AAAA,GAAG,EAAE,GAAG,CAAC,GAAG;AACZ,CAAC,GAAG,CAAC,EAAE,CAAC,EAAE,CAAC;AACX,CAAC;AACD,CAAC,EAAE,CAAC,CAAC,CAAC;AACN,CAAC,EAAE,CAAC,GAAG,CAAC;AACR,CAAC,EAAE,CAAC,EAAE,CAAC;CACN,CAAC,EAAE,CAAC;CACJ,CAAC,EAAE,CAAC,EAAE,CAAC;AACR,GAAG,EAAE,CAAC,EAAE,CAAC;QACD,CAAC,EAAE,CAAC,EAAE,CAAC;CACd,CAAC,EAAE,CAAC;CACJ,CAAC"
 }

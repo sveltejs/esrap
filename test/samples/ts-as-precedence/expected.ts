@@ -19,6 +19,11 @@ a as C && b;
 1 + (0 satisfies number);
 (0 satisfies number)!;
 
+// prettier-ignore
+const asserted = (<T>x) ** y;
+
+const tag = (x as T)`t`;
+
 async function f() {
 	await (0 as any);
 	await (0 satisfies number);

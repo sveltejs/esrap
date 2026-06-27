@@ -1,3 +1,12 @@
 foo?.bar.baz;
 x?.(a, b, c);
 x()?.();
+a?.b.c;
+a?.b().c;
+a?.b?.c;
+(a?.b)();
+(a?.b).c;
+new (a?.b)();
+delete (a?.b).c;
+(a?.b)`x`;
+(a?.())();

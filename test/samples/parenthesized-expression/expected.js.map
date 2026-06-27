@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "a + b;\n"
+    "a + b;\n({} + []);\n(class {});\n(class C {});\n({} ? a : b);\n({} && a);\n(function () {})`x`;\n({}).x;\n(function () {})();\nx = {};\n[a] = b;\n"
   ],
-  "mappings": "AAAA,CAAC,GAAG,CAAC"
+  "mappings": "AAAA,CAAC,GAAG,CAAC;;CAEJ,MAAM,AAAA,CAAC,AAAA,CAAC;CACR,MAAM,AAAA,CAAC,CAAC,CAAC,AAAA,CAAC;MACL,CAAC,GAAG,CAAC;OACJ,CAAC;CACP,QAAQ,IAAI,CAAC,AAAA,CAAC;KACV,CAAC;CACL,QAAQ,IAAI,CAAC,AAAA,CAAC;AACf,CAAC;CACA,CAAC,IAAI,CAAC"
 }
