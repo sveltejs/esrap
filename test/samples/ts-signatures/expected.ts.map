@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "interface Constructable {\n\tnew (): any;\n\tnew (value: string): MyClass;\n\tnew <T>(value: T): GenericClass<T>;\n\t(name: string): string;\n}\n\ntype Constructor = {\n\tnew (): object;\n\tnew (name: string, age: number): Person;\n};\n"
+    "interface Constructable {\n\tnew (): any;\n\tnew (value: string): MyClass;\n\tnew <T>(value: T): GenericClass<T>;\n\t(name: string): string;\n}\n\ninterface Signatures {\n\t[Symbol.iterator](): number;\n\tx(): void;\n\t[k: string]: number;\n}\n\ntype Constructor = {\n\tnew (): object;\n\tnew (name: string, age: number): Person;\n};\n\ntype Computed = {\n\t[Symbol.iterator](): number;\n};\n"
   ],
-  "mappings": "UAAU,aAAa;QACd,GAAG;KACN,KAAa,EAAN,MAAM,GAAG,OAAO;KACvB,CAAC,EAAE,KAAQ,EAAD,CAAC,GAAG,YAAY,CAAC,CAAC;EAChC,IAAY,EAAN,MAAM,GAAG,MAAM;;;KAGlB,WAAW,YACP,MAAM,MACT,IAAY,EAAN,MAAM,EAAE,GAAW,EAAN,MAAM,GAAG,MAAM"
+  "mappings": "UAAU,aAAa;QACd,GAAG;KACN,KAAa,EAAN,MAAM,GAAG,OAAO;KACvB,CAAC,EAAE,KAAQ,EAAD,CAAC,GAAG,YAAY,CAAC,CAAC;EAChC,IAAY,EAAN,MAAM,GAAG,MAAM;;;UAGb,UAAU,IAClB,MAAM,CAAC,QAAQ,KAAK,MAAM,EAC3B,CAAC,IAAI,IAAI,GACR,CAAS,EAAN,MAAM,GAAG,MAAM;;KAGf,WAAW,YACP,MAAM,MACT,IAAY,EAAN,MAAM,EAAE,GAAW,EAAN,MAAM,GAAG,MAAM;KAGnC,QAAQ,MACX,MAAM,CAAC,QAAQ,KAAK,MAAM"
 }

@@ -1886,7 +1886,9 @@ export default (options = {}) => {
 		},
 
 		TSPropertySignature(node, context) {
+			if (node.computed) context.write('[');
 			context.visit(node.key);
+			if (node.computed) context.write(']');
 			if (node.optional) context.write('?');
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
@@ -1999,19 +2001,14 @@ export default (options = {}) => {
 		},
 
 		TSTypePredicate(node, context) {
-			if (node.parameterName) {
-				context.visit(node.parameterName);
-			} else if (node.typeAnnotation) {
-				context.visit(node.typeAnnotation);
-			}
+			// `asserts` precedes the parameter name; `is <type>` follows it. Forms:
+			// `x is T`, `asserts x is T`, `asserts x`
+			if (node.asserts) context.write('asserts ');
 
-			if (node.asserts) {
-				context.write(' asserts ');
-			} else {
-				context.write(' is ');
-			}
+			if (node.parameterName) context.visit(node.parameterName);
 
 			if (node.typeAnnotation) {
+				context.write(' is ');
 				context.visit(node.typeAnnotation.typeAnnotation);
 			}
 		},
@@ -2097,7 +2094,9 @@ export default (options = {}) => {
 		},
 
 		TSMethodSignature(node, context) {
+			if (node.computed) context.write('[');
 			context.visit(node.key);
+			if (node.computed) context.write(']');
 
 			context.write('(');
 			sequence(
@@ -2255,8 +2254,17 @@ export default (options = {}) => {
 				context.visit(node.id);
 			}
 
-			if (!node.body) return;
-			context.visit(node.body);
+			// a qualified name (`namespace A.B.C`) is represented as nested
+			// `TSModuleDeclaration`s whose body is the next name part, not a block
+			let body = /** @type {any} */ (node.body);
+			while (body && body.type === 'TSModuleDeclaration') {
+				context.write('.');
+				context.visit(body.id);
+				body = body.body;
+			}
+
+			if (!body) return;
+			context.visit(body);
 		},
 
 		TSNonNullExpression(node, context) {
