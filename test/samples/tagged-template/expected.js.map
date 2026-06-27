@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "foo`bar`;"
+    "foo`bar`;\nconst a = (x || y)`tpl`;\nconst b = a.b`t`;\nconst c = f()`t`;\n"
   ],
-  "mappings": "AAAA,GAAG"
+  "mappings": "AAAA,GAAG;;AACH,MAAM,AAAA,CAAC,IAAI,CAAC,IAAI,CAAC;AACjB,MAAM,AAAA,CAAC,GAAG,CAAC,CAAC,CAAC;AACb,MAAM,AAAA,CAAC,GAAG,CAAC"
 }

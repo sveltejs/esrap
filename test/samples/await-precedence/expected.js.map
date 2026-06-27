@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "await (a || b);\nawait c;"
+    "await (a || b);\nawait c;\nasync () => (await a) ** b;\n"
   ],
-  "mappings": "AAAA,KAAK,EAAE,CAAC,IAAI,CAAC;AACb,KAAK,CAAC,CAAC"
+  "mappings": "AAAA,KAAK,EAAE,CAAC,IAAI,CAAC;AACb,KAAK,CAAC,CAAC;AACP,KAAK,QAAQ,KAAK,CAAC,CAAC,KAAK,CAAC"
 }
