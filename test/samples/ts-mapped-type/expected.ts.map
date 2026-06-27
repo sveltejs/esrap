@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "type M = { [K in keyof JSON]: K };\n"
+    "type M = { [K in keyof JSON]: K };\ntype R = { readonly [K in T]: V };\ntype O = { [K in T]?: V };\ntype Neg = { -readonly [K in T]-?: V };\ntype Pos = { +readonly [K in T]+?: V };\ntype As = { [K in T as `g${K & string}`]: V };\n"
   ],
-  "mappings": "KAAK,CAAC,KAAG,CAAwB,UAAV,IAAI,GAAG,CAAC"
+  "mappings": "KAAK,CAAC,KAAG,CAAwB,UAAV,IAAI,GAAG,CAAC;KAC1B,CAAC,cAAG,CAAwB,IAAP,CAAC,GAAG,CAAC;KAC1B,CAAC,KAAG,CAAgB,IAAR,CAAC,IAAI,CAAC;KAClB,GAAG,eAAG,CAA2B,IAAT,CAAC,KAAK,CAAC;KAC/B,GAAG,eAAG,CAA2B,IAAT,CAAC,KAAK,CAAC;KAC/B,EAAE,KAAG,CAAmC,IAA3B,CAAC,QAAQ,CAAC,GAAG,MAAM,KAAK,CAAC"
 }
