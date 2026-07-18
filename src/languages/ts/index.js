@@ -484,20 +484,50 @@ export default (options = {}) => {
 		}
 	}
 
+	const boundary_tokens = options.boundaryTokens === true;
+
+	/**
+	 * A one-character synthetic token node so structural tokens (`(`, `[`, `{`,
+	 * unary operators, …) written where a node's SOURCE span begins or ends get a
+	 * sourcemap anchor. Without it, everything up to the next mapped token is
+	 * attributed to the PREVIOUS token's source position — `write(content, node)`
+	 * only maps tokens written with a node, and these boundary characters belong
+	 * to no written token. Opt-in (`boundaryTokens`): denser maps, byte-identical
+	 * output.
+	 * @param {{ line: number, column: number } | undefined} pos
+	 * @param {number} [length]
+	 */
+	function token_at(pos, length = 1) {
+		if (!boundary_tokens) return undefined;
+		if (!pos) return undefined;
+		return /** @type {any} */ ({
+			loc: { start: pos, end: { line: pos.line, column: pos.column + length } }
+		});
+	}
+
+	/** @param {{ line: number, column: number } | undefined} pos */
+	function token_before(pos) {
+		if (!boundary_tokens) return undefined;
+		if (!pos || pos.column === 0) return undefined;
+		return /** @type {any} */ ({
+			loc: { start: { line: pos.line, column: pos.column - 1 }, end: pos }
+		});
+	}
+
 	const shared = {
 		/**
 		 * @param {TSESTree.ArrayExpression | TSESTree.ArrayPattern} node
 		 * @param {Context} context
 		 */
 		'ArrayExpression|ArrayPattern': (node, context) => {
-			context.write('[');
+			context.write('[', token_at(node.loc?.start));
 			sequence(
 				context,
 				/** @type {TSESTree.Node[]} */ (node.elements),
 				node.loc?.end ?? null,
 				false
 			);
-			context.write(']');
+			context.write(']', token_before(node.loc?.end));
 		},
 
 		/**
@@ -631,7 +661,7 @@ export default (options = {}) => {
 				join.write(' ');
 			}
 
-			context.write(')');
+			context.write(')', token_before(node.loc?.end));
 		},
 
 		/**
@@ -804,9 +834,9 @@ export default (options = {}) => {
 
 			if (node.value.generator) context.write('*');
 
-			if (node.computed) context.write('[');
+			if (node.computed) context.write('[', token_before(node.key.loc?.start));
 			context.visit(node.key);
-			if (node.computed) context.write(']');
+			if (node.computed) context.write(']', token_at(node.key.loc?.end));
 
 			// optional method (`m?()`)
 			if (node.optional) context.write('?');
@@ -879,9 +909,9 @@ export default (options = {}) => {
 			}
 
 			if (node.computed) {
-				context.write('[');
+				context.write('[', token_before(node.key.loc?.start));
 				context.visit(node.key);
-				context.write(']');
+				context.write(']', token_at(node.key.loc?.end));
 			} else {
 				context.visit(node.key);
 			}
@@ -1446,7 +1476,7 @@ export default (options = {}) => {
 				}
 				context.write('[');
 				context.visit(node.property);
-				context.write(']');
+				context.write(']', token_before(node.loc?.end));
 			} else {
 				context.write(node.optional ? '?.' : '.');
 				context.visit(node.property);
@@ -1464,22 +1494,28 @@ export default (options = {}) => {
 		NewExpression: shared['CallExpression|NewExpression'],
 
 		ObjectExpression(node, context) {
-			context.write('{');
+			context.write('{', token_at(node.loc?.start));
 			sequence(context, node.properties, node.loc?.end ?? null, true);
-			context.write('}');
+			context.write('}', token_before(node.loc?.end));
 		},
 
 		ObjectPattern(node, context) {
-			context.write('{');
+			context.write('{', token_at(node.loc?.start));
 			sequence(context, node.properties, node.loc?.end ?? null, true);
-			context.write('}');
+			context.write('}', token_before(node.loc?.end));
 
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
 
 		// @ts-expect-error this isn't a real node type, but Acorn produces it
 		ParenthesizedExpression(node, context) {
-			maybe_wrap(context, node.expression, true);
+			if (node.loc) {
+				context.write('(', token_at(node.loc.start));
+				context.visit(node.expression);
+				context.write(')', token_before(node.loc.end));
+			} else {
+				maybe_wrap(context, node.expression, true);
+			}
 		},
 
 		PrivateIdentifier(node, context) {
@@ -1513,9 +1549,9 @@ export default (options = {}) => {
 				if (node.kind !== 'init') kw(node.kind + ' ');
 				if (node.value.async) kw('async ');
 				if (node.value.generator) context.write('*');
-				if (node.computed) context.write('[');
+				if (node.computed) context.write('[', token_before(node.key.loc?.start));
 				context.visit(node.key);
-				if (node.computed) context.write(']');
+				if (node.computed) context.write(']', token_at(node.key.loc?.end));
 				context.write('(');
 				sequence(
 					context,
@@ -1530,12 +1566,17 @@ export default (options = {}) => {
 				context.write(' ');
 				context.visit(node.value.body);
 			} else {
-				if (node.computed) context.write('[');
+				if (node.computed) context.write('[', token_before(node.key.loc?.start));
 				if (node.kind === 'get' || node.kind === 'set') {
 					write_keyword(context, node, node.kind, ' ');
 				}
 				context.visit(node.key);
-				context.write(node.computed ? ']: ' : ': ');
+				if (node.computed) {
+					context.write(']', token_at(node.key.loc?.end));
+					context.write(': ');
+				} else {
+					context.write(': ');
+				}
 				context.visit(node.value);
 			}
 		},
@@ -1702,7 +1743,7 @@ export default (options = {}) => {
 		},
 
 		UnaryExpression(node, context) {
-			context.write(node.operator);
+			context.write(node.operator, token_at(node.loc?.start, node.operator.length));
 
 			if (node.operator.length > 1) {
 				context.write(' ');
@@ -1886,9 +1927,9 @@ export default (options = {}) => {
 		},
 
 		TSPropertySignature(node, context) {
-			if (node.computed) context.write('[');
+			if (node.computed) context.write('[', token_before(node.key.loc?.start));
 			context.visit(node.key);
-			if (node.computed) context.write(']');
+			if (node.computed) context.write(']', token_at(node.key.loc?.end));
 			if (node.optional) context.write('?');
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
@@ -2094,9 +2135,9 @@ export default (options = {}) => {
 		},
 
 		TSMethodSignature(node, context) {
-			if (node.computed) context.write('[');
+			if (node.computed) context.write('[', token_before(node.key.loc?.start));
 			context.visit(node.key);
-			if (node.computed) context.write(']');
+			if (node.computed) context.write(']', token_at(node.key.loc?.end));
 
 			context.write('(');
 			sequence(

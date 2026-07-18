@@ -10,7 +10,7 @@ export const acornTs = acorn.Parser.extend(tsPlugin());
 export const acornTsx = acorn.Parser.extend(tsPlugin({ jsx: true }));
 
 /** @param {string} input
- * @param {{ jsxMode?: boolean, sourceType?: 'module' | 'script' }} opts
+ * @param {{ jsxMode?: boolean, sourceType?: 'module' | 'script', preserveParens?: boolean }} opts
  */
 export function acornParse(input, opts = {}) {
 	const jsx = opts.jsxMode ?? false;
@@ -22,6 +22,7 @@ export function acornParse(input, opts = {}) {
 		ecmaVersion: 'latest',
 		sourceType,
 		locations: true,
+		preserveParens: opts.preserveParens ?? false,
 		onComment: (block, value, start, end, startLoc, endLoc) => {
 			if (block && /\n/.test(value)) {
 				let a = start;
