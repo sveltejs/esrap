@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "type Imported = import('pkg').Value<string>;\n\ninterface Derived extends Base<string> {}\n\nclass Implementation implements Contract<string> {}\n"
+  ],
+  "mappings": "KAAK,QAAQ,UAAU,KAAK,EAAE,KAAK,CAAC,MAAM;;UAEhC,OAAO,SAAS,IAAI,CAAC,MAAM;;AAErC,MAAM,AAAA,cAAc,YAAY,QAAQ,CAAC,MAAM,EAAE,CAAC,AAAA,CAAC"
+}

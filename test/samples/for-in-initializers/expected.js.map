@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "for ((key in object);;);\nfor (let present = (key in object);;);\n"
+  ],
+  "mappings": "AAAA,GAAG,GAAG,GAAG,IAAI,MAAM;AACnB,GAAG,EAAE,IAAI,AAAA,OAAO,IAAI,GAAG,IAAI,MAAM"
+}

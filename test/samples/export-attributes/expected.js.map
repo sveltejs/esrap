@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "export * from 'data.json' with { type: 'json' };\nexport { value } from 'data.json' with { type: 'json' };\n"
+  ],
+  "mappings": "eAAc,WAAW,QAAQ,IAAI,EAAE,MAAM;;AAC7C,OAAO,EAAE,KAAK,QAAQ,WAAW,QAAQ,IAAI,EAAE,MAAM"
+}

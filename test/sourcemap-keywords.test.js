@@ -44,7 +44,6 @@ function mapped(source, opts = {}) {
 		preserveParens: opts.preserveParens,
 		sourceType: 'module',
 		jsxMode: false,
-		// @ts-expect-error test driver matches `test/esrap.test.js` parser options
 		fileExtension: 'ts'
 	});
 	const { code, map } = print(ast, ts({ comments, boundaryTokens: opts.boundaryTokens }), {

@@ -1,0 +1,14 @@
+{
+	"type": "Program",
+	"sourceType": "script",
+	"body": [
+		{
+			"type": "ExpressionStatement",
+			"expression": {
+				"type": "Literal",
+				"value": null,
+				"bigint": "123"
+			}
+		}
+	]
+}

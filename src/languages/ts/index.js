@@ -357,6 +357,27 @@ export default (options = {}) => {
 
 	/**
 	 * @param {Context} context
+	 * @param {{ attributes?: TSESTree.ImportAttribute[], assertions?: TSESTree.ImportAttribute[] }} node
+	 */
+	function write_import_attributes(context, node) {
+		const attributes = node.attributes ?? node.assertions;
+		if (!attributes || attributes.length === 0) return;
+
+		context.write(node.attributes ? ' with { ' : ' assert { ');
+
+		for (let i = 0; i < attributes.length; i += 1) {
+			const { key, value } = attributes[i];
+			context.visit(key);
+			context.write(': ');
+			context.visit(value);
+			if (i < attributes.length - 1) context.write(', ');
+		}
+
+		context.write(' }');
+	}
+
+	/**
+	 * @param {Context} context
 	 * @param {TSESTree.Node[]} nodes
 	 * @param {{ line: number, column: number }} until
 	 * @param {boolean} pad
@@ -989,7 +1010,10 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'TSFunctionType|TSConstructorType': (node, context) => {
-			if (node.type === 'TSConstructorType') context.write('new ');
+			if (node.type === 'TSConstructorType') {
+				if (node.abstract) context.write('abstract ');
+				context.write('new ');
+			}
 			if (node.typeParameters) context.visit(node.typeParameters);
 
 			context.write('(');
@@ -1203,6 +1227,7 @@ export default (options = {}) => {
 
 			context.write(' from ');
 			context.visit(node.source);
+			write_import_attributes(context, node);
 			context.write(';');
 		},
 
@@ -1254,6 +1279,7 @@ export default (options = {}) => {
 			if (node.source) {
 				context.write(' from ');
 				context.visit(node.source);
+				write_import_attributes(context, node);
 			}
 
 			context.write(';');
@@ -1266,11 +1292,7 @@ export default (options = {}) => {
 
 			context.visit(node.local);
 
-			if (
-				node.local.type === 'Identifier' &&
-				node.exported.type === 'Identifier' &&
-				node.local.name !== node.exported.name
-			) {
+			if (!same_module_name(node.local, node.exported)) {
 				context.write(' as ');
 				context.visit(node.exported);
 			}
@@ -1288,9 +1310,9 @@ export default (options = {}) => {
 
 			if (node.init) {
 				if (node.init.type === 'VariableDeclaration') {
-					handle_var_declaration(node.init, context);
+					handle_var_declaration(node.init, context, true);
 				} else {
-					context.visit(node.init);
+					maybe_wrap(context, node.init, contains_in_operator(node.init));
 				}
 			}
 
@@ -1325,7 +1347,18 @@ export default (options = {}) => {
 			write_keyword(context, node, 'if', ' (');
 			context.visit(node.test);
 			context.write(') ');
-			context.visit(node.consequent);
+
+			if (node.alternate && statement_ends_with_unmatched_if(node.consequent)) {
+				context.write('{');
+				context.indent();
+				context.newline();
+				context.visit(node.consequent);
+				context.dedent();
+				context.newline();
+				context.write('}');
+			} else {
+				context.visit(node.consequent);
+			}
 
 			if (node.alternate) {
 				context.space();
@@ -1347,6 +1380,7 @@ export default (options = {}) => {
 			if (node.specifiers.length === 0) {
 				write_keyword(context, node, 'import', ' ');
 				context.visit(node.source);
+				write_import_attributes(context, node);
 				context.write(';');
 				return;
 			}
@@ -1395,19 +1429,7 @@ export default (options = {}) => {
 
 			context.write(' from ');
 			context.visit(node.source);
-			if (node.attributes && node.attributes.length > 0) {
-				context.write(' with { ');
-				for (let index = 0; index < node.attributes.length; index++) {
-					const { key, value } = node.attributes[index];
-					context.visit(key);
-					context.write(': ');
-					context.visit(value);
-					if (index + 1 !== node.attributes.length) {
-						context.write(', ');
-					}
-				}
-				context.write(' }');
-			}
+			write_import_attributes(context, node);
 			context.write(';');
 		},
 
@@ -1433,16 +1455,13 @@ export default (options = {}) => {
 		ImportSpecifier(node, context) {
 			if (node.importKind == 'type') context.write('type ');
 
-			if (
-				node.local.type === 'Identifier' &&
-				node.imported.type === 'Identifier' &&
-				node.local.name !== node.imported.name
-			) {
+			if (!same_module_name(node.imported, node.local)) {
 				context.visit(node.imported);
 				context.write(' as ');
+				context.visit(node.local);
+			} else {
+				context.visit(node.local);
 			}
-
-			context.visit(node.local);
 		},
 
 		LabeledStatement(node, context) {
@@ -1455,9 +1474,16 @@ export default (options = {}) => {
 			// TODO do we need to handle weird unicode characters somehow?
 			// str.replace(/\\u(\d{4})/g, (m, n) => String.fromCharCode(+n))
 
+			const bigint = /** @type {any} */ (node).bigint;
 			const value =
 				node.raw ||
-				(typeof node.value === 'string' ? quote(node.value, quote_char) : String(node.value));
+				(typeof node.value === 'bigint'
+					? `${node.value}n`
+					: bigint !== undefined
+						? `${bigint}n`
+						: typeof node.value === 'string'
+							? quote(node.value, quote_char)
+							: String(node.value));
 
 			context.write(value, node);
 		},
@@ -1778,12 +1804,7 @@ export default (options = {}) => {
 		},
 
 		VariableDeclarator(node, context) {
-			context.visit(node.id);
-
-			if (node.init) {
-				context.write(' = ');
-				context.visit(node.init);
-			}
+			handle_var_declarator(node, context, false);
 		},
 
 		WhileStatement(node, context) {
@@ -1927,6 +1948,7 @@ export default (options = {}) => {
 		},
 
 		TSPropertySignature(node, context) {
+			if (node.readonly) context.write('readonly ');
 			if (node.computed) context.write('[', token_before(node.key.loc?.start));
 			context.visit(node.key);
 			if (node.computed) context.write(']', token_at(node.key.loc?.end));
@@ -1991,6 +2013,10 @@ export default (options = {}) => {
 		//@ts-expect-error I don't know why, but this is relied upon in the tests, but doesn't exist in the TSESTree types
 		TSExpressionWithTypeArguments(node, context) {
 			context.visit(node.expression);
+
+			if (node.typeArguments || node.typeParameters) {
+				context.visit(node.typeArguments ?? node.typeParameters);
+			}
 		},
 
 		TSTypeAssertion(node, context) {
@@ -2063,6 +2089,10 @@ export default (options = {}) => {
 			if (node.expression) {
 				context.visit(node.expression);
 			}
+
+			if (node.typeArguments) {
+				context.visit(node.typeArguments);
+			}
 		},
 
 		TSEnumMember(node, context) {
@@ -2076,6 +2106,7 @@ export default (options = {}) => {
 		TSFunctionType: shared['TSFunctionType|TSConstructorType'],
 
 		TSIndexSignature(node, context) {
+			if (node.readonly) context.write('readonly ');
 			context.write('[');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
@@ -2138,6 +2169,11 @@ export default (options = {}) => {
 			if (node.computed) context.write('[', token_before(node.key.loc?.start));
 			context.visit(node.key);
 			if (node.computed) context.write(']', token_at(node.key.loc?.end));
+			if (node.optional) context.write('?');
+
+			if (node.typeParameters) {
+				context.visit(node.typeParameters);
+			}
 
 			context.write('(');
 			sequence(
@@ -2221,6 +2257,7 @@ export default (options = {}) => {
 
 		TSImportEqualsDeclaration(node, context) {
 			context.write('import ');
+			if (node.importKind === 'type') context.write('type ');
 			context.visit(node.id);
 			context.write(' = ');
 			context.visit(node.moduleReference);
@@ -2234,6 +2271,10 @@ export default (options = {}) => {
 			if (node.qualifier) {
 				context.write('.');
 				context.visit(node.qualifier);
+			}
+
+			if (node.typeArguments) {
+				context.visit(node.typeArguments);
 			}
 		},
 
@@ -2262,6 +2303,8 @@ export default (options = {}) => {
 		},
 
 		TSEnumDeclaration(node, context) {
+			if (node.declare) context.write('declare ');
+			if (node.const) context.write('const ');
 			context.write('enum ');
 			context.visit(node.id);
 			context.write(' {');
@@ -2341,6 +2384,10 @@ export default (options = {}) => {
 		TSInterfaceHeritage(node, context) {
 			if (node.expression) {
 				context.visit(node.expression);
+			}
+
+			if (node.typeArguments) {
+				context.visit(node.typeArguments);
 			}
 		},
 
@@ -2579,10 +2626,80 @@ function leads_with_curly_or_keyword(node) {
 }
 
 /**
+ * Whether printing a statement directly before an `else` would allow that `else`
+ * to bind to a nested, unmatched `if` instead.
+ * @param {TSESTree.Statement} node
+ * @returns {boolean}
+ */
+function statement_ends_with_unmatched_if(node) {
+	switch (node.type) {
+		case 'IfStatement':
+			return node.alternate === null || statement_ends_with_unmatched_if(node.alternate);
+		case 'ForStatement':
+		case 'ForInStatement':
+		case 'ForOfStatement':
+		case 'LabeledStatement':
+		case 'WhileStatement':
+		case 'WithStatement':
+			return statement_ends_with_unmatched_if(node.body);
+		default:
+			return false;
+	}
+}
+
+/**
+ * `in` expressions are forbidden by the `ExpressionNoIn` grammar used for
+ * classic `for` initializers unless a containing expression is parenthesized.
+ * @param {any} value
+ * @param {WeakSet<object>} [seen]
+ */
+function contains_in_operator(value, seen = new WeakSet()) {
+	if (!value || typeof value !== 'object') return false;
+	if (seen.has(value)) return false;
+	seen.add(value);
+
+	if (value.type === 'BinaryExpression' && value.operator === 'in') return true;
+
+	for (const key in value) {
+		if (key === 'loc') continue;
+		if (contains_in_operator(value[key], seen)) return true;
+	}
+
+	return false;
+}
+
+/**
+ * Module export names can be identifiers or string literals. Preserve the
+ * explicit `as` form whenever their AST representations differ.
+ * @param {any} a
+ * @param {any} b
+ */
+function same_module_name(a, b) {
+	if (a.type !== b.type) return false;
+	if (a.type === 'Identifier') return a.name === b.name;
+	return a.type === 'Literal' && a.value === b.value;
+}
+
+/**
+ * @param {TSESTree.VariableDeclarator} node
+ * @param {Context} context
+ * @param {boolean} no_in
+ */
+function handle_var_declarator(node, context, no_in) {
+	context.visit(node.id);
+
+	if (node.init) {
+		context.write(' = ');
+		maybe_wrap(context, node.init, no_in && contains_in_operator(node.init));
+	}
+}
+
+/**
  * @param {TSESTree.VariableDeclaration} node
  * @param {Context} context
+ * @param {boolean} [no_in]
  */
-function handle_var_declaration(node, context) {
+function handle_var_declaration(node, context, no_in = false) {
 	const open = context.new();
 	const join = context.new();
 	const child_context = context.new();
@@ -2602,7 +2719,7 @@ function handle_var_declaration(node, context) {
 		if (!first) child_context.append(join);
 		first = false;
 
-		child_context.visit(d);
+		handle_var_declarator(d, child_context, no_in);
 	}
 
 	const length = child_context.measure() + 2 * (node.declarations.length - 1);
