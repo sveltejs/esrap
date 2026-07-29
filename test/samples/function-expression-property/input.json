@@ -1,0 +1,37 @@
+{
+	"type": "Program",
+	"sourceType": "script",
+	"body": [
+		{
+			"type": "ExpressionStatement",
+			"expression": {
+				"type": "ObjectExpression",
+				"properties": [
+					{
+						"type": "Property",
+						"kind": "init",
+						"key": {
+							"type": "Identifier",
+							"name": "i"
+						},
+						"value": {
+							"type": "FunctionExpression",
+							"id": null,
+							"params": [],
+							"body": {
+								"type": "BlockStatement",
+								"body": []
+							},
+							"async": false,
+							"generator": false,
+							"expression": false
+						},
+						"method": false,
+						"shorthand": false,
+						"computed": false
+					}
+				]
+			}
+		}
+	]
+}
