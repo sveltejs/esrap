@@ -112,7 +112,8 @@ export function print(node, visitors, opts = {}) {
 			} else if (command === indent) {
 				current_newline += indent_str;
 			} else if (command === dedent) {
-				current_newline = current_newline.slice(0, -indent_str.length);
+				// `slice(0, -0)` would return an empty string, dropping the newline
+				current_newline = current_newline.slice(0, current_newline.length - indent_str.length);
 			}
 
 			return;
