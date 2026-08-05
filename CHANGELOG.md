@@ -1,5 +1,12 @@
 # esrap changelog
 
+## 2.3.1
+
+### Patch Changes
+
+- 9f349d1: fix: preserve JavaScript grammar and module semantics, along with TypeScript modifiers and generic arguments
+- 8990d22: fix: respect the ESTree `method` flag when printing object properties whose values are function expressions
+
 ## 2.3.0
 
 ### Minor Changes
