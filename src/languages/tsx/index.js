@@ -72,7 +72,9 @@ export default (options) => ({
 	},
 
 	JSXText(node, context) {
-		context.write(node.value, node);
+		// `value` is decoded — re-emitting it would turn `&lt;`, `&gt;`, `&#123;`
+		// and `&#125;` back into characters that can't appear in JSX text
+		context.write(node.raw ?? node.value, node);
 	},
 
 	JSXAttribute(node, context) {

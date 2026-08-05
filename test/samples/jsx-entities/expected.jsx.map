@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const comparison = <p>1 &lt; 2 &amp;&amp; 3 &gt; 2</p>;\nconst braces = <p>&#123;not an expression&#125;</p>;\n"
+  ],
+  "mappings": "AAAA,MAAM,AAAA,UAAU,IAAI,CAAC,CAAC,4BAA4B,EAAE,CAAC;AACrD,MAAM,AAAA,MAAM,IAAI,CAAC,CAAC,6BAA6B,EAAE,CAAC"
+}
