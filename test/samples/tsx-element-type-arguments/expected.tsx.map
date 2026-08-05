@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const list = <List<string> items={items} />;\nconst nested = <Table<Row, Column>>{children}</Table>;\nconst plain = <div className=\"x\" />;\n"
+  ],
+  "mappings": "AAAA,MAAM,AAAA,IAAI,IAAI,IAAI,CAAC,MAAM,EAAE,KAAK,EAAE,KAAK;AACvC,MAAM,AAAA,MAAM,IAAI,KAAK,CAAC,GAAG,EAAE,MAAM,GAAG,QAAQ,GAAG,KAAK;AACpD,MAAM,AAAA,KAAK,IAAI,GAAG,CAAC,SAAS,CAAC,GAAG"
+}

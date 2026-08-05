@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "type Tuple = [required: string, optional?: number, ...rest: boolean[]];\n\ninterface Accessors {\n\tget value(): string;\n\tset value(next: string);\n\tmethod(): void;\n}\n\ntype Instantiated = typeof identity<string>;\n"
+  ],
+  "mappings": "KAAK,KAAK,IAAI,QAAQ,EAAE,MAAM,EAAE,QAAQ,GAAG,MAAM,KAAK,IAAI,EAAE,OAAO;;UAEzD,SAAS,GAClB,GAAG,CAAC,KAAK,IAAI,MAAM,EACnB,GAAG,CAAC,KAAK,CAAC,IAAY,EAAN,MAAM,GACtB,MAAM,IAAI,IAAI;;KAGV,YAAY,UAAU,QAAQ,CAAC,MAAM"
+}

@@ -2086,6 +2086,11 @@ export default (options = {}) => {
 		TSTypeQuery(node, context) {
 			context.write('typeof ');
 			context.visit(node.exprName);
+
+			// instantiation expression (`typeof foo<string>`)
+			if (node.typeArguments) {
+				context.visit(node.typeArguments);
+			}
 		},
 
 		TSClassImplements(node, context) {
@@ -2169,6 +2174,11 @@ export default (options = {}) => {
 		},
 
 		TSMethodSignature(node, context) {
+			// accessor signatures (`get x(): string`, `set x(value: string)`)
+			if (node.kind === 'get' || node.kind === 'set') {
+				write_keyword(context, node, node.kind, ' ');
+			}
+
 			if (node.computed) context.write('[', token_before(node.key.loc?.start));
 			context.visit(node.key);
 			if (node.computed) context.write(']', token_at(node.key.loc?.end));
@@ -2204,6 +2214,8 @@ export default (options = {}) => {
 
 		TSNamedTupleMember(node, context) {
 			context.visit(node.label);
+			// optional element (`[a?: string]`)
+			if (node.optional) context.write('?');
 			context.write(': ');
 			context.visit(node.elementType);
 		},
