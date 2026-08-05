@@ -1850,7 +1850,9 @@ export default (options = {}) => {
 		TSDeclareFunction(node, context) {
 			const kw = create_keyword_write(context, node);
 
-			kw('declare ');
+			// bodyless functions are either ambient declarations or overload
+			// signatures — only the former are written with `declare`
+			if (node.declare) kw('declare ');
 
 			if (node.async) {
 				kw('async ');
