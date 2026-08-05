@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "let value!: number;\n\nclass Container {\n\tfield!: number;\n\taccessor other!: string;\n}\n\nexport { value, Container };\n"
+  ],
+  "mappings": "AAAA,IAAI,AAAA,KAAc,GAAN,MAAM;;AAElB,MAAM,AAAA,SAAS,CAAC,CAAC;CAChB,KAAK,GAAG,MAAM;CACd,SAAS,AAAA,KAAK,GAAG,MAAM;AACxB,CAAC;;AAED,OAAO,EAAE,KAAK,EAAE,SAAS"
+}

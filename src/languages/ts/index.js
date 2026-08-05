@@ -1339,6 +1339,8 @@ export default (options = {}) => {
 
 			// optional parameters (`a?: T`) carry `optional` on the identifier
 			if (node.optional) context.write('?');
+			// definite assignment (`let x!: T`) — see `handle_var_declarator`
+			else if (/** @type {any} */ (node).definite) context.write('!');
 
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
@@ -2689,7 +2691,9 @@ function same_module_name(a, b) {
  * @param {boolean} no_in
  */
 function handle_var_declarator(node, context, no_in) {
-	context.visit(node.id);
+	// `definite` sits on the declarator, but `!` belongs between the name and the
+	// type annotation — both of which are written by the identifier's own visitor
+	context.visit(node.definite ? /** @type {any} */ ({ ...node.id, definite: true }) : node.id);
 
 	if (node.init) {
 		context.write(' = ');
