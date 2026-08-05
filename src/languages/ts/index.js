@@ -1542,8 +1542,11 @@ export default (options = {}) => {
 				return;
 			}
 
-			// shorthand methods
-			if (node.value.type === 'FunctionExpression') {
+			// concise methods, getters and setters
+			if (
+				node.value.type === 'FunctionExpression' &&
+				(node.method || node.kind === 'get' || node.kind === 'set')
+			) {
 				const kw = create_keyword_write(context, node);
 
 				if (node.kind !== 'init') kw(node.kind + ' ');
