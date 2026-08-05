@@ -8,7 +8,7 @@ import ts from '../ts/index.js';
  * @returns {Visitors<TSESTree.Node>}
  */
 export default (options) => ({
-	...ts(options),
+	...ts(options, true),
 
 	JSXElement(node, context) {
 		context.visit(node.openingElement);
