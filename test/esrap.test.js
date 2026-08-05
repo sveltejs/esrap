@@ -29,6 +29,29 @@ function clean(ast) {
 			node.body = node.body.filter((node) => node.type !== 'EmptyStatement');
 			context.next();
 		},
+		IfStatement(node, context) {
+			if (
+				node.alternate &&
+				node.consequent.type === 'IfStatement' &&
+				node.consequent.alternate === null
+			) {
+				node.consequent = /** @type {any} */ ({
+					type: 'BlockStatement',
+					body: [node.consequent]
+				});
+			}
+
+			context.next();
+		},
+		Literal(node, context) {
+			const literal = /** @type {any} */ (node);
+			if (literal.bigint !== undefined) {
+				literal.value = literal.bigint;
+				delete literal.raw;
+			}
+
+			context.next();
+		},
 		Property(node, context) {
 			if (node.kind === 'init') {
 				if (node.value.type === 'FunctionExpression') {

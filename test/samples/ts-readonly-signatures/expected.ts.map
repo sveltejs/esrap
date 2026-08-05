@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "interface Example {\n\treadonly property?: string;\n\treadonly [key: string]: number;\n}\n"
+  ],
+  "mappings": "UAAU,OAAO,YACP,QAAQ,GAAG,MAAM,YAChB,GAAW,EAAN,MAAM,GAAG,MAAM"
+}

@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "interface Example {\n\toptional?<T>(value: T): T;\n}\n"
+  ],
+  "mappings": "UAAU,OAAO,GAChB,QAAQ,EAAE,CAAC,EAAE,KAAQ,EAAD,CAAC,GAAG,CAAC"
+}

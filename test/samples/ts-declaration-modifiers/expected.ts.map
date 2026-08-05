@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const enum Constant {\n\tvalue\n}\n\ndeclare enum Ambient {\n\tvalue\n}\n\nimport type Imported = require('pkg');\n\ntype Constructor = abstract new <T>(value: T) => T;\n"
+  ],
+  "mappings": "WAAW,QAAQ;CAClB,KAAK;;;aAGO,OAAO;CACnB,KAAK;;;YAGM,QAAQ,WAAW,KAAK;;KAE/B,WAAW,iBAAiB,CAAC,EAAE,KAAQ,EAAD,CAAC,KAAK,CAAC"
+}

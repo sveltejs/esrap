@@ -10,15 +10,16 @@ export const acornTs = acorn.Parser.extend(tsPlugin());
 export const acornTsx = acorn.Parser.extend(tsPlugin({ jsx: true }));
 
 /** @param {string} input
- * @param {{ jsxMode?: boolean, sourceType?: 'module' | 'script', preserveParens?: boolean }} opts
+ * @param {{ jsxMode?: boolean, sourceType?: 'module' | 'script', preserveParens?: boolean, fileExtension?: string }} opts
  */
 export function acornParse(input, opts = {}) {
 	const jsx = opts.jsxMode ?? false;
 	const sourceType = opts.sourceType ?? 'module';
+	const parser = opts.fileExtension === 'js' ? acorn.Parser : jsx ? acornTsx : acornTs;
 	/** @type {any[]} */
 	const comments = [];
 
-	const ast = (jsx ? acornTsx : acornTs).parse(input, {
+	const ast = parser.parse(input, {
 		ecmaVersion: 'latest',
 		sourceType,
 		locations: true,
