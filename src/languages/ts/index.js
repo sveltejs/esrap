@@ -2367,6 +2367,7 @@ export default (options = {}) => {
 		},
 
 		TSInterfaceDeclaration(node, context) {
+			if (node.declare) context.write('declare ');
 			context.write('interface ');
 			context.visit(node.id);
 			if (node.typeParameters) context.visit(node.typeParameters);
@@ -2411,6 +2412,7 @@ export default (options = {}) => {
 		},
 
 		TSTypeAliasDeclaration(node, context) {
+			if (node.declare) context.write('declare ');
 			context.write('type ');
 			context.visit(node.id);
 			if (node.typeParameters) context.visit(node.typeParameters);
