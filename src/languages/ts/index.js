@@ -1046,6 +1046,14 @@ export default (options = {}) => {
 
 			visit(node);
 
+			// a JSX empty expression prints nothing and exists only to hold the
+			// comments inside `{...}`. Flush them here, otherwise they are written
+			// by whichever node comes next — after the closing brace, where they
+			// are JSX text rather than a comment
+			if (node.type === 'JSXEmptyExpression' && node.loc) {
+				flush_comments_until(context, null, node.loc.end, false);
+			}
+
 			write_additional_comments(context, options.getTrailingComments?.(node), 'trailing');
 		},
 
