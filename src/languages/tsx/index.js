@@ -35,6 +35,11 @@ export default (options) => ({
 
 		context.visit(node.name);
 
+		// explicit type arguments (`<Comp<string> ... />`)
+		if (node.typeArguments) {
+			context.visit(node.typeArguments);
+		}
+
 		for (const attribute of node.attributes) {
 			context.write(' ');
 			context.visit(attribute);
