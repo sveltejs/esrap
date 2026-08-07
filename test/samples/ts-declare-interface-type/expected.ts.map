@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "declare interface Ambient {\n\tvalue: string;\n}\n\ndeclare type Alias = string;\n\nexport declare interface Exported<T> extends Ambient {\n\tother: T;\n}\n\ninterface Plain {\n\tvalue: string;\n}\n\ntype PlainAlias = number;\n"
+  ],
+  "mappings": "kBAAkB,OAAO,GACxB,KAAK,EAAE,MAAM;;aAGD,KAAK,GAAG,MAAM;;AAE3B,MAAM,mBAAmB,QAAQ,CAAC,CAAC,UAAU,OAAO,GACnD,KAAK,EAAE,CAAC;;UAGC,KAAK,GACd,KAAK,EAAE,MAAM;;KAGT,UAAU,GAAG,MAAM"
+}
