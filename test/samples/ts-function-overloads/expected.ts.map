@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "export function overloaded(value: string): string;\nexport function overloaded(value: number): number;\nexport function overloaded(value: any) {\n\treturn value;\n}\n\ndeclare function ambient(value: string): void;\n"
+  ],
+  "mappings": "AAAA,MAAM,CAAC,QAAQ,CAAC,UAAU,CAAC,KAAa,EAAN,MAAM,GAAG,MAAM;AACjD,MAAM,CAAC,QAAQ,CAAC,UAAU,CAAC,KAAa,EAAN,MAAM,GAAG,MAAM;;AACjD,MAAM,CAAC,QAAQ,CAAC,UAAU,CAAC,KAAU,EAAH,GAAG,EAAE,CAAC;CACvC,MAAM,CAAC,KAAK;AACb,CAAC;;AAED,QAAQ,AAAA,QAAQ,CAAC,OAAO,CAAC,KAAa,EAAN,MAAM,GAAG,IAAI"
+}
