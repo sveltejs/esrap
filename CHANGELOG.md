@@ -1,5 +1,17 @@
 # esrap changelog
 
+## 2.3.2
+
+### Patch Changes
+
+- d58be54: fix: preserve definite assignment assertions on variable declarations
+- ecb1725: fix: preserve character entities in JSX text
+- ebe96df: fix: don't drop newlines when `indent` is an empty string
+- 593d9b8: fix: only print `declare` on ambient function declarations
+- 60dd87f: fix: keep JSX comments inside their expression container
+- 74bf5d7: fix: print `declare` on ambient interfaces and type aliases
+- b7749d1: fix: preserve type-level syntax that was being dropped when printing
+
 ## 2.3.1
 
 ### Patch Changes
