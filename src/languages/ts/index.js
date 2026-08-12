@@ -315,9 +315,11 @@ export default (options = {}) => {
 	 * @param {{ line: number, column: number } | null} from
 	 * @param {{ line: number, column: number }} to
 	 * @param {boolean} pad
+	 * @param {boolean} [is_next_to_expression]
 	 */
-	function flush_comments_until(context, from, to, pad) {
+	function flush_comments_until(context, from, to, pad, is_next_to_expression = false) {
 		let first = true;
+		let jsdoc_type_casts = 0;
 
 		while (comment_index < comments.length) {
 			const comment = comments[comment_index];
@@ -331,10 +333,24 @@ export default (options = {}) => {
 				first = false;
 
 				write_comment(comment, context);
+				// Acorn removes the parentheses that give a JSDoc `@type` comment cast semantics.
+				// We have to do a best guess (because we don't have access to the original source)
+				// to detect it based on the comment starting with `* @type {`, and only when
+				// it's an expression (e.g. `const foo = /** @type {number} */ (1);`), not something
+				// else like a statement (e.g. `/** @type {number} */ let foo;`).
+				const is_jsdoc_type_cast =
+					is_next_to_expression &&
+					comment.type === 'Block' &&
+					/(?:^|\n)\s*\*\s*@type\s*{/.test(comment.value);
+
+				if (is_jsdoc_type_cast) {
+					context.write(' (');
+					jsdoc_type_casts += 1;
+				}
 
 				if (comment.loc.end.line < to.line) {
 					context.newline();
-				} else if (pad) {
+				} else if (pad && !is_jsdoc_type_cast) {
 					context.write(' ');
 				}
 
@@ -343,6 +359,8 @@ export default (options = {}) => {
 				break;
 			}
 		}
+
+		return jsdoc_type_casts;
 	}
 
 	/**
@@ -1040,11 +1058,23 @@ export default (options = {}) => {
 		_(node, context, visit) {
 			write_additional_comments(context, options.getLeadingComments?.(node), 'leading');
 
+			let jsdoc_type_casts = 0;
+
 			if (node.loc) {
-				flush_comments_until(context, null, node.loc.start, true);
+				jsdoc_type_casts = flush_comments_until(
+					context,
+					null,
+					node.loc.start,
+					true,
+					node.type in EXPRESSIONS_PRECEDENCE
+				);
 			}
 
 			visit(node);
+
+			if (jsdoc_type_casts > 0) {
+				context.write(')'.repeat(jsdoc_type_casts));
+			}
 
 			// a JSX empty expression prints nothing and exists only to hold the
 			// comments inside `{...}`. Flush them here, otherwise they are written
