@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.3.4
+
+### Patch Changes
+
+- e51f38f: fix: revert jsdoc type cast support (for now)
+
 ## 2.3.3
 
 ### Patch Changes
