@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "const foo = /** @type {number} */ (1);\n\nconst bar = /** @type {number} */ (/** @type {number} */ (1));\n"
+    "const foo = /** @type {number} */ (1);\n\nconst bar = /** @type {number} */ (/** @type {number} */ (1));\n\nlet /** @type {string} */ baz;\n\nfunction /** @type {Function} */ named(/** @type {string} */ parameter) {\n\tconsole.log(/** @type {string} */ (parameter));\n}\n\nconst [/** @type {string} */ element] = array;\nobject./** @type {string} */ member;\n\nclass /** @type {Function} */ Named {\n\t/** @type {Function} */ method() {}\n}\n"
   ],
-  "mappings": "AAAA,MAAM,AAAA,GAAG,0BAA0B,CAAC;AAEpC,MAAM,AAAA,GAAG,iDAAiD,CAAC"
+  "mappings": "AAAA,MAAM,AAAA,GAAG,0BAA0B,CAAC;AAEpC,MAAM,AAAA,GAAG,iDAAiD,CAAC;AAE3D,IAAI,sBAAsB,GAAG;;AAE7B,QAAQ,yBAAyB,KAAK,uBAAuB,SAAS,EAAE,CAAC;CACxE,OAAO,CAAC,GAAG,wBAAwB,SAAS;AAC7C,CAAC;;AAED,MAAM,uBAAuB,OAAO,IAAI,KAAK;;AAC7C,MAAM,uBAAuB,MAAM;;AAEnC,MAAM,wBAAwB,KAAK,CAAC,CAAC;yBACZ,MAAM,GAAG,CAAC,AAAA,CAAC;AACpC,CAAC"
 }

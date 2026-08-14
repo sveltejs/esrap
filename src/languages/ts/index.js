@@ -217,6 +217,179 @@ export default (options = {}) => {
 	const comments = options.comments ?? [];
 
 	let comment_index = 0;
+	/** @type {WeakMap<TSESTree.Node, TSESTree.Node>} */
+	const parents = new WeakMap();
+	let parents_initialized = false;
+
+	/** @param {unknown} value */
+	function is_node(value) {
+		return (
+			!!value && typeof value === 'object' && 'type' in value && typeof value.type === 'string'
+		);
+	}
+
+	/**
+	 * The printer sometimes visits a grandchild directly, so track AST parents
+	 * structurally rather than relying on the current visitor call stack.
+	 * @param {TSESTree.Node} node
+	 * @param {TSESTree.Node | null} [parent]
+	 * @param {WeakSet<TSESTree.Node>} [seen]
+	 */
+	function record_parents(node, parent = null, seen = new WeakSet()) {
+		if (seen.has(node)) return;
+		seen.add(node);
+
+		if (parent) parents.set(node, parent);
+
+		const values = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (node));
+		for (const key in values) {
+			if (key === 'loc' || key === 'parent') continue;
+
+			const value = values[key];
+			if (is_node(value)) {
+				record_parents(/** @type {TSESTree.Node} */ (value), node, seen);
+			} else if (Array.isArray(value)) {
+				for (const child of value) {
+					if (is_node(child)) {
+						record_parents(/** @type {TSESTree.Node} */ (child), node, seen);
+					}
+				}
+			}
+		}
+	}
+
+	/** @param {TSESTree.Node} node */
+	function is_expression_position(node) {
+		if (
+			!(node.type in EXPRESSIONS_PRECEDENCE) ||
+			node.type === 'ArrayPattern' ||
+			node.type === 'ObjectPattern' ||
+			node.type === 'RestElement'
+		) {
+			return false;
+		}
+
+		const parent = /** @type {any} */ (parents.get(node));
+		const grandparent = parent && parents.get(parent);
+		if (!parent) return true;
+
+		if (parent.type.startsWith('JSX')) {
+			return (
+				((parent.type === 'JSXExpressionContainer' || parent.type === 'JSXSpreadChild') &&
+					parent.expression === node) ||
+				(parent.type === 'JSXSpreadAttribute' && parent.argument === node)
+			);
+		}
+
+		if (parent.type.startsWith('TS')) {
+			if (parent.computed && parent.key === node) return true;
+
+			switch (parent.type) {
+				case 'TSAsExpression':
+				case 'TSSatisfiesExpression':
+				case 'TSNonNullExpression':
+				case 'TSInstantiationExpression':
+				case 'TSTypeAssertion':
+				case 'TSExportAssignment':
+					return parent.expression === node;
+				case 'TSEnumMember':
+					return parent.initializer === node;
+				case 'TSAbstractPropertyDefinition':
+				case 'TSAbstractAccessorProperty':
+					return parent.value === node;
+				default:
+					return false;
+			}
+		}
+
+		switch (parent.type) {
+			case 'VariableDeclarator':
+				return parent.init === node;
+			case 'VariableDeclaration': {
+				const variable_declaration = /** @type {TSESTree.VariableDeclaration} */ (parent);
+				return variable_declaration.declarations.some((declaration) => declaration.init === node);
+			}
+			case 'AssignmentPattern':
+				return parent.right === node;
+			case 'ArrayPattern':
+			case 'ObjectPattern':
+			case 'RestElement':
+			case 'CatchClause':
+			case 'ImportAttribute':
+			case 'MetaProperty':
+				return false;
+			case 'Property':
+				return (
+					(parent.computed && parent.key === node) ||
+					(parent.value === node && !parent.shorthand && grandparent?.type === 'ObjectExpression')
+				);
+			case 'PropertyDefinition':
+			case 'AccessorProperty':
+				return parent.value === node || (parent.computed && parent.key === node);
+			case 'MethodDefinition':
+				return parent.computed && parent.key === node;
+			case 'FunctionDeclaration':
+			case 'FunctionExpression':
+				return false;
+			case 'ArrowFunctionExpression':
+				return parent.body === node;
+			case 'ClassDeclaration':
+			case 'ClassExpression':
+				return parent.superClass === node;
+			case 'MemberExpression':
+				return parent.object === node || (parent.computed && parent.property === node);
+			case 'CallExpression':
+			case 'NewExpression':
+				return parent.callee === node || parent.arguments.includes(node);
+			case 'ImportExpression':
+				return parent.source === node || parent.options === node;
+			case 'TaggedTemplateExpression':
+				return parent.tag === node;
+			case 'TemplateLiteral':
+			case 'ArrayExpression':
+			case 'SequenceExpression':
+				return parent.expressions?.includes(node) || parent.elements?.includes(node);
+			case 'SpreadElement':
+			case 'AwaitExpression':
+			case 'UnaryExpression':
+			case 'YieldExpression':
+				return parent.argument === node;
+			case 'UpdateExpression':
+				return false;
+			case 'BinaryExpression':
+			case 'LogicalExpression':
+			case 'AssignmentExpression':
+				return parent.left === node || parent.right === node;
+			case 'ConditionalExpression':
+				return parent.test === node || parent.consequent === node || parent.alternate === node;
+			case 'ChainExpression':
+			case 'ExpressionStatement':
+			case 'Decorator':
+				return parent.expression === node;
+			case 'ReturnStatement':
+			case 'ThrowStatement':
+				return parent.argument === node;
+			case 'ForStatement':
+				return parent.init === node || parent.test === node || parent.update === node;
+			case 'ForInStatement':
+			case 'ForOfStatement':
+				return parent.right === node;
+			case 'IfStatement':
+			case 'WhileStatement':
+			case 'DoWhileStatement':
+				return parent.test === node;
+			case 'WithStatement':
+				return parent.object === node;
+			case 'SwitchStatement':
+				return parent.discriminant === node;
+			case 'SwitchCase':
+				return parent.test === node;
+			case 'ExportDefaultDeclaration':
+				return parent.declaration === node;
+			default:
+				return false;
+		}
+	}
 
 	/**
 	 * Write additional comments for a node
@@ -1056,6 +1229,11 @@ export default (options = {}) => {
 
 	return {
 		_(node, context, visit) {
+			if (!parents_initialized) {
+				record_parents(node);
+				parents_initialized = true;
+			}
+
 			write_additional_comments(context, options.getLeadingComments?.(node), 'leading');
 
 			let jsdoc_type_casts = 0;
@@ -1066,7 +1244,7 @@ export default (options = {}) => {
 					null,
 					node.loc.start,
 					true,
-					node.type in EXPRESSIONS_PRECEDENCE
+					is_expression_position(node)
 				);
 			}
 

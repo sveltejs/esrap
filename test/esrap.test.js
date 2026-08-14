@@ -128,6 +128,16 @@ test('should have 1 baseline', () => {
 	expect(numberOfBaseLine).toBe(1);
 });
 
+test('does not turn JSDoc on a shorthand property into a cast', () => {
+	const input = 'const object = { /** @type {string} */ property };';
+	const { ast, comments } = acornParse(input, { sourceType: 'module', fileExtension: 'js' });
+	const declaration = /** @type {any} */ (ast.body[0]);
+	const property = declaration.declarations[0].init.properties[0];
+	delete property.loc;
+
+	expect(print(ast, tsx({ comments })).code).toBe(input);
+});
+
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	if (dir.includes('large-file')) continue;
 
