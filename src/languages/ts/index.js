@@ -85,24 +85,20 @@ const BINDINGS = new WeakSet();
 
 /**
  * Marks a node as occupying a binding position.
- * @template T
- * @param {T} node
- * @returns {T}
+ * @param {object | null | undefined} node
+ * @returns {void}
  */
-function binding(node) {
+function track_binding(node) {
 	if (node && typeof node === 'object') BINDINGS.add(node);
-	return node;
 }
 
 /**
  * Marks an array of nodes (e.g. function params) as binding positions.
- * @template {any[]} T
- * @param {T} nodes
- * @returns {T}
+ * @param {(object | null | undefined)[] | null | undefined} nodes
+ * @returns {void}
  */
-function bindings(nodes) {
-	if (nodes) for (const node of nodes) binding(node);
-	return nodes;
+function track_bindings(nodes) {
+	if (nodes) for (const node of nodes) track_binding(node);
 }
 
 /**
@@ -853,13 +849,9 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			track_bindings(node.params);
 			context.write('(');
-			sequence(
-				context,
-				bindings(node.params),
-				(node.returnType ?? node.body).loc?.start ?? null,
-				false
-			);
+			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
 			context.write(')');
 
 			if (node.returnType) context.visit(node.returnType);
@@ -919,10 +911,11 @@ export default (options = {}) => {
 			// @ts-expect-error `typeParameters` lives on the method node, not its value
 			if (node.typeParameters) context.visit(node.typeParameters);
 
+			track_bindings(node.value.params);
 			context.write('(');
 			sequence(
 				context,
-				bindings(node.value.params),
+				node.value.params,
 				(node.value.returnType ?? node.value.body)?.loc?.start ?? node.loc?.end ?? null,
 				false
 			);
@@ -1041,11 +1034,13 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			track_bindings(node.parameters ?? node.params);
 			context.write('(');
 			sequence(
 				context,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				bindings(node.parameters ?? node.params),
+				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
 				false
@@ -1070,11 +1065,13 @@ export default (options = {}) => {
 			}
 			if (node.typeParameters) context.visit(node.typeParameters);
 
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			track_bindings(node.parameters ?? node.params);
 			context.write('(');
 			sequence(
 				context,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				bindings(node.parameters ?? node.params),
+				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.typeAnnotation?.typeAnnotation?.loc?.start ??
 					node.returnType?.typeAnnotation?.loc?.start ??
@@ -1141,13 +1138,9 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			track_bindings(node.params);
 			context.write('(');
-			sequence(
-				context,
-				bindings(node.params),
-				(node.returnType ?? node.body).loc?.start ?? null,
-				false
-			);
+			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
 			context.write(')');
 
 			if (node.returnType) context.visit(node.returnType);
@@ -1662,10 +1655,11 @@ export default (options = {}) => {
 				if (node.computed) context.write('[', token_before(node.key.loc?.start));
 				context.visit(node.key);
 				if (node.computed) context.write(']', token_at(node.key.loc?.end));
+				track_bindings(node.value.params);
 				context.write('(');
 				sequence(
 					context,
-					bindings(node.value.params),
+					node.value.params,
 					(node.value.returnType ?? node.value.body).loc?.start ?? null,
 					false
 				);
@@ -1828,7 +1822,8 @@ export default (options = {}) => {
 
 				if (node.handler.param) {
 					write_keyword(context, node.handler, 'catch', '(');
-					context.visit(binding(node.handler.param));
+					track_binding(node.handler.param);
+					context.visit(node.handler.param);
 					context.write(') ');
 				} else {
 					write_keyword(context, node.handler, 'catch', ' ');
@@ -1954,13 +1949,9 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			track_bindings(node.params);
 			context.write('(');
-			sequence(
-				context,
-				bindings(node.params),
-				node.returnType?.loc?.start ?? node.loc?.end ?? null,
-				false
-			);
+			sequence(context, node.params, node.returnType?.loc?.start ?? node.loc?.end ?? null, false);
 			context.write(')');
 
 			if (node.returnType) {
@@ -2276,11 +2267,13 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			track_bindings(node.parameters ?? node.params);
 			context.write('(');
 			sequence(
 				context,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				bindings(node.parameters ?? node.params),
+				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
 				false
@@ -2793,9 +2786,9 @@ function same_module_name(a, b) {
 function handle_var_declarator(node, context, no_in) {
 	// `definite` sits on the declarator, but `!` belongs between the name and the
 	// type annotation — both of which are written by the identifier's own visitor
-	context.visit(
-		binding(node.definite ? /** @type {any} */ ({ ...node.id, definite: true }) : node.id)
-	);
+	const id = node.definite ? /** @type {any} */ ({ ...node.id, definite: true }) : node.id;
+	track_binding(id);
+	context.visit(id);
 
 	if (node.init) {
 		context.write(' = ');
