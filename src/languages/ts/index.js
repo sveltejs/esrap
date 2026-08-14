@@ -75,6 +75,37 @@ const OPERATOR_PRECEDENCE = {
 };
 
 /**
+ * Nodes in binding positions (variable declarator ids, function parameters,
+ * catch clause params, etc). A JSDoc `@type` comment attached to one of these
+ * is an annotation on the binding, not a type cast, so it must not be wrapped
+ * in parentheses (see https://github.com/sveltejs/esrap/issues/164).
+ * @type {WeakSet<object>}
+ */
+const BINDINGS = new WeakSet();
+
+/**
+ * Marks a node as occupying a binding position.
+ * @template T
+ * @param {T} node
+ * @returns {T}
+ */
+function binding(node) {
+	if (node && typeof node === 'object') BINDINGS.add(node);
+	return node;
+}
+
+/**
+ * Marks an array of nodes (e.g. function params) as binding positions.
+ * @template {any[]} T
+ * @param {T} nodes
+ * @returns {T}
+ */
+function bindings(nodes) {
+	if (nodes) for (const node of nodes) binding(node);
+	return nodes;
+}
+
+/**
  * Writes `keyword` bounded by source map locations for the exact character span,
  * so breakpoints line up on keywords (not only identifiers and braces).
  *
@@ -823,7 +854,12 @@ export default (options = {}) => {
 			}
 
 			context.write('(');
-			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
+			sequence(
+				context,
+				bindings(node.params),
+				(node.returnType ?? node.body).loc?.start ?? null,
+				false
+			);
 			context.write(')');
 
 			if (node.returnType) context.visit(node.returnType);
@@ -886,7 +922,7 @@ export default (options = {}) => {
 			context.write('(');
 			sequence(
 				context,
-				node.value.params,
+				bindings(node.value.params),
 				(node.value.returnType ?? node.value.body)?.loc?.start ?? node.loc?.end ?? null,
 				false
 			);
@@ -1009,7 +1045,7 @@ export default (options = {}) => {
 			sequence(
 				context,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.parameters ?? node.params,
+				bindings(node.parameters ?? node.params),
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
 				false
@@ -1038,7 +1074,7 @@ export default (options = {}) => {
 			sequence(
 				context,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.parameters ?? node.params,
+				bindings(node.parameters ?? node.params),
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.typeAnnotation?.typeAnnotation?.loc?.start ??
 					node.returnType?.typeAnnotation?.loc?.start ??
@@ -1066,7 +1102,7 @@ export default (options = {}) => {
 					null,
 					node.loc.start,
 					true,
-					node.type in EXPRESSIONS_PRECEDENCE
+					node.type in EXPRESSIONS_PRECEDENCE && !BINDINGS.has(node)
 				);
 			}
 
@@ -1106,7 +1142,12 @@ export default (options = {}) => {
 			}
 
 			context.write('(');
-			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
+			sequence(
+				context,
+				bindings(node.params),
+				(node.returnType ?? node.body).loc?.start ?? null,
+				false
+			);
 			context.write(')');
 
 			if (node.returnType) context.visit(node.returnType);
@@ -1624,7 +1665,7 @@ export default (options = {}) => {
 				context.write('(');
 				sequence(
 					context,
-					node.value.params,
+					bindings(node.value.params),
 					(node.value.returnType ?? node.value.body).loc?.start ?? null,
 					false
 				);
@@ -1787,7 +1828,7 @@ export default (options = {}) => {
 
 				if (node.handler.param) {
 					write_keyword(context, node.handler, 'catch', '(');
-					context.visit(node.handler.param);
+					context.visit(binding(node.handler.param));
 					context.write(') ');
 				} else {
 					write_keyword(context, node.handler, 'catch', ' ');
@@ -1914,7 +1955,12 @@ export default (options = {}) => {
 			}
 
 			context.write('(');
-			sequence(context, node.params, node.returnType?.loc?.start ?? node.loc?.end ?? null, false);
+			sequence(
+				context,
+				bindings(node.params),
+				node.returnType?.loc?.start ?? node.loc?.end ?? null,
+				false
+			);
 			context.write(')');
 
 			if (node.returnType) {
@@ -2234,7 +2280,7 @@ export default (options = {}) => {
 			sequence(
 				context,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.parameters ?? node.params,
+				bindings(node.parameters ?? node.params),
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
 				false
@@ -2747,7 +2793,9 @@ function same_module_name(a, b) {
 function handle_var_declarator(node, context, no_in) {
 	// `definite` sits on the declarator, but `!` belongs between the name and the
 	// type annotation — both of which are written by the identifier's own visitor
-	context.visit(node.definite ? /** @type {any} */ ({ ...node.id, definite: true }) : node.id);
+	context.visit(
+		binding(node.definite ? /** @type {any} */ ({ ...node.id, definite: true }) : node.id)
+	);
 
 	if (node.init) {
 		context.write(' = ');

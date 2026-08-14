@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "let /** @type {number | undefined} */ computed;\n\nlet /** @type {number | undefined} */ a, /** @type {string} */ b;\n\nfunction foo(/** @type {number} */ x, /** @type {string} */ y) {}\n\nconst fn = (/** @type {number} */ z) => z;\n\ntry {\n\tfoo(1, '');\n} catch (/** @type {any} */ e) {}\n\nconst value = /** @type {number} */ (computed);\n"
+  ],
+  "mappings": "AAAA,IAAI,kCAAkC,QAAQ;;AAE9C,IAAI,kCAAkC,CAAC;uBAAwB,CAAC;;AAEhE,QAAQ,CAAC,GAAG,uBAAuB,CAAC,wBAAwB,CAAC,EAAE,CAAC,AAAA,CAAC;;AAEjE,MAAM,AAAA,EAAE,0BAA0B,CAAC,KAAK,CAAC;;AAEzC,GAAG,CAAC,CAAC;CACJ,GAAG,CAAC,CAAC,EAAE,EAAE;AACV,CAAC,CAAC,KAAK,oBAAqB,CAAC,EAAE,CAAC,AAAA,CAAC;;AAEjC,MAAM,AAAA,KAAK,0BAA0B,QAAQ"
+}
