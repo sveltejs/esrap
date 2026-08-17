@@ -75,6 +75,33 @@ const OPERATOR_PRECEDENCE = {
 };
 
 /**
+ * Nodes in binding positions (variable declarator ids, function parameters,
+ * catch clause params, etc). A JSDoc `@type` comment attached to one of these
+ * is an annotation on the binding, not a type cast, so it must not be wrapped
+ * in parentheses (see https://github.com/sveltejs/esrap/issues/164).
+ * @type {WeakSet<object>}
+ */
+const BINDINGS = new WeakSet();
+
+/**
+ * Marks a node as occupying a binding position.
+ * @param {object | null | undefined} node
+ * @returns {void}
+ */
+function track_binding(node) {
+	if (node && typeof node === 'object') BINDINGS.add(node);
+}
+
+/**
+ * Marks an array of nodes (e.g. function params) as binding positions.
+ * @param {(object | null | undefined)[] | null | undefined} nodes
+ * @returns {void}
+ */
+function track_bindings(nodes) {
+	if (nodes) for (const node of nodes) track_binding(node);
+}
+
+/**
  * Writes `keyword` bounded by source map locations for the exact character span,
  * so breakpoints line up on keywords (not only identifiers and braces).
  *
@@ -315,9 +342,11 @@ export default (options = {}) => {
 	 * @param {{ line: number, column: number } | null} from
 	 * @param {{ line: number, column: number }} to
 	 * @param {boolean} pad
+	 * @param {boolean} [is_next_to_expression]
 	 */
-	function flush_comments_until(context, from, to, pad) {
+	function flush_comments_until(context, from, to, pad, is_next_to_expression = false) {
 		let first = true;
+		let jsdoc_type_casts = 0;
 
 		while (comment_index < comments.length) {
 			const comment = comments[comment_index];
@@ -331,10 +360,24 @@ export default (options = {}) => {
 				first = false;
 
 				write_comment(comment, context);
+				// Acorn removes the parentheses that give a JSDoc `@type` comment cast semantics.
+				// We have to do a best guess (because we don't have access to the original source)
+				// to detect it based on the comment starting with `* @type {`, and only when
+				// it's an expression (e.g. `const foo = /** @type {number} */ (1);`), not something
+				// else like a statement (e.g. `/** @type {number} */ let foo;`).
+				const is_jsdoc_type_cast =
+					is_next_to_expression &&
+					comment.type === 'Block' &&
+					/(?:^|\n)\s*\*\s*@type\s*{/.test(comment.value);
+
+				if (is_jsdoc_type_cast) {
+					context.write(' (');
+					jsdoc_type_casts += 1;
+				}
 
 				if (comment.loc.end.line < to.line) {
 					context.newline();
-				} else if (pad) {
+				} else if (pad && !is_jsdoc_type_cast) {
 					context.write(' ');
 				}
 
@@ -343,6 +386,8 @@ export default (options = {}) => {
 				break;
 			}
 		}
+
+		return jsdoc_type_casts;
 	}
 
 	/**
@@ -804,6 +849,7 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			track_bindings(node.params);
 			context.write('(');
 			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
 			context.write(')');
@@ -865,6 +911,7 @@ export default (options = {}) => {
 			// @ts-expect-error `typeParameters` lives on the method node, not its value
 			if (node.typeParameters) context.visit(node.typeParameters);
 
+			track_bindings(node.value.params);
 			context.write('(');
 			sequence(
 				context,
@@ -987,6 +1034,8 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			track_bindings(node.parameters ?? node.params);
 			context.write('(');
 			sequence(
 				context,
@@ -1016,6 +1065,8 @@ export default (options = {}) => {
 			}
 			if (node.typeParameters) context.visit(node.typeParameters);
 
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			track_bindings(node.parameters ?? node.params);
 			context.write('(');
 			sequence(
 				context,
@@ -1040,11 +1091,23 @@ export default (options = {}) => {
 		_(node, context, visit) {
 			write_additional_comments(context, options.getLeadingComments?.(node), 'leading');
 
+			let jsdoc_type_casts = 0;
+
 			if (node.loc) {
-				flush_comments_until(context, null, node.loc.start, true);
+				jsdoc_type_casts = flush_comments_until(
+					context,
+					null,
+					node.loc.start,
+					true,
+					node.type in EXPRESSIONS_PRECEDENCE && !BINDINGS.has(node)
+				);
 			}
 
 			visit(node);
+
+			if (jsdoc_type_casts > 0) {
+				context.write(')'.repeat(jsdoc_type_casts));
+			}
 
 			// a JSX empty expression prints nothing and exists only to hold the
 			// comments inside `{...}`. Flush them here, otherwise they are written
@@ -1075,6 +1138,7 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			track_bindings(node.params);
 			context.write('(');
 			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
 			context.write(')');
@@ -1591,6 +1655,7 @@ export default (options = {}) => {
 				if (node.computed) context.write('[', token_before(node.key.loc?.start));
 				context.visit(node.key);
 				if (node.computed) context.write(']', token_at(node.key.loc?.end));
+				track_bindings(node.value.params);
 				context.write('(');
 				sequence(
 					context,
@@ -1757,6 +1822,7 @@ export default (options = {}) => {
 
 				if (node.handler.param) {
 					write_keyword(context, node.handler, 'catch', '(');
+					track_binding(node.handler.param);
 					context.visit(node.handler.param);
 					context.write(') ');
 				} else {
@@ -1883,6 +1949,7 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			track_bindings(node.params);
 			context.write('(');
 			sequence(context, node.params, node.returnType?.loc?.start ?? node.loc?.end ?? null, false);
 			context.write(')');
@@ -2200,6 +2267,8 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			track_bindings(node.parameters ?? node.params);
 			context.write('(');
 			sequence(
 				context,
@@ -2717,7 +2786,9 @@ function same_module_name(a, b) {
 function handle_var_declarator(node, context, no_in) {
 	// `definite` sits on the declarator, but `!` belongs between the name and the
 	// type annotation — both of which are written by the identifier's own visitor
-	context.visit(node.definite ? /** @type {any} */ ({ ...node.id, definite: true }) : node.id);
+	const id = node.definite ? /** @type {any} */ ({ ...node.id, definite: true }) : node.id;
+	track_binding(id);
+	context.visit(id);
 
 	if (node.init) {
 		context.write(' = ');
