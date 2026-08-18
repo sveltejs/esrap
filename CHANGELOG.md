@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.3.5
+
+### Patch Changes
+
+- 51da035: fix: re-introduce JSDoc type cast support, but don't treat JSDoc `@type` comments on binding identifiers (variable declarator ids, function parameters, catch params) as type casts
+
 ## 2.3.4
 
 ### Patch Changes
