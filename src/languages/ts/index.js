@@ -1779,6 +1779,7 @@ export default (options = {}) => {
 				/** @type {string} */ (node.tag.type) === 'ChainExpression' ||
 				EXPRESSIONS_PRECEDENCE[node.tag.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
 			maybe_wrap(context, node.tag, wrap);
+			if (node.typeArguments) context.visit(node.typeArguments);
 			context.visit(node.quasi);
 		},
 
