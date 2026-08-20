@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const [a, b]: string[] = ['foo', 'bar'];\n\nfunction fn([first, second]: number[]) {\n\treturn first + second;\n}\n"
+  ],
+  "mappings": "AAAA,MAAM,CAAC,CAAC,EAAE,CAAC,GAAG,MAAM,MAAM,KAAK,EAAE,KAAK;;AAEtC,QAAQ,CAAC,EAAE,EAAE,KAAK,EAAE,MAAM,GAAG,MAAM,IAAI,CAAC;CACvC,MAAM,CAAC,KAAK,GAAG,MAAM;AACtB,CAAC"
+}

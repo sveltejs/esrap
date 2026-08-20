@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "type Event = `on${string}`;\ntype Path<T extends string> = `/${T}/index.html`;\ntype Plain = `static_string`;\ntype Multi<A extends string, B extends string> = `prefix_${A}_middle_${B}_suffix`;\n"
+  ],
+  "mappings": "KAAK,KAAK,QAAQ,MAAM;KACnB,IAAI,CAAC,CAAgB,SAAN,MAAM,QAAQ,CAAC;KAC9B,KAAK;KACL,KAAK,CAAC,CAAgB,SAAN,MAAM,EAAE,CAAgB,SAAN,MAAM,cAAc,CAAC,WAAW,CAAC"
+}
