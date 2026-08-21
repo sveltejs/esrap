@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.3.6
+
+### Patch Changes
+
+- a46e8a2: fix: preserve type arguments on tagged templates, array pattern annotations, and template literal type quasis
+
 ## 2.3.5
 
 ### Patch Changes
