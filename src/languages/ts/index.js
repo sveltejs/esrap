@@ -594,6 +594,7 @@ export default (options = {}) => {
 				false
 			);
 			context.write(']', token_before(node.loc?.end));
+			if ('typeAnnotation' in node && node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
 
 		/**
@@ -1779,6 +1780,7 @@ export default (options = {}) => {
 				/** @type {string} */ (node.tag.type) === 'ChainExpression' ||
 				EXPRESSIONS_PRECEDENCE[node.tag.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
 			maybe_wrap(context, node.tag, wrap);
+			if (node.typeArguments) context.visit(node.typeArguments);
 			context.visit(node.quasi);
 		},
 
@@ -2065,7 +2067,16 @@ export default (options = {}) => {
 
 				if (/\n/.test(raw)) context.multiline = true;
 			}
-			context.write('`');
+			const raw = quasis[quasis.length - 1].value.raw;
+			context.write(raw + '`');
+			if (/\n/.test(raw)) context.multiline = true;
+		},
+
+		// @ts-expect-error not in TSESTree types
+		TSJSDocNullableType(node, context) {
+			if (!node.postfix) context.write('?');
+			context.visit(node.typeAnnotation);
+			if (node.postfix) context.write('?');
 		},
 
 		TSParameterProperty(node, context) {
