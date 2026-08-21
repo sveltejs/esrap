@@ -235,10 +235,22 @@ function write_comment(comment, context) {
 }
 
 /**
+ * In a JSX file, an arrow function's `<T>` type parameter list is parsed as a
+ * JSX element instead. A trailing comma (`<T,>`) disambiguates it, and is only
+ * needed for a lone type parameter — a second parameter, a constraint or a
+ * default already rules JSX out. Modifiers (`const`, `in`, `out`) do not.
+ * @param {TSESTree.TSTypeParameterDeclaration} node
+ */
+function jsx_ambiguous_type_parameters(node) {
+	return node.params.length === 1 && !node.params[0].constraint && !node.params[0].default;
+}
+
+/**
  * @param {TSOptions} [options]
+ * @param {boolean} [jsx] set by the `tsx` language module
  * @returns {Visitors<TSESTree.Node>}
  */
-export default (options = {}) => {
+export default (options = {}, jsx = false) => {
 	const quote_char = options.quotes === 'double' ? '"' : "'";
 
 	const comments = options.comments ?? [];
@@ -1136,7 +1148,13 @@ export default (options = {}) => {
 			}
 
 			if (node.typeParameters) {
-				context.visit(node.typeParameters);
+				if (jsx && jsx_ambiguous_type_parameters(node.typeParameters)) {
+					context.write('<');
+					context.visit(node.typeParameters.params[0]);
+					context.write(',>');
+				} else {
+					context.visit(node.typeParameters);
+				}
 			}
 
 			track_bindings(node.params);
