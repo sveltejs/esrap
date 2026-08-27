@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const row_template = ($$anchor, row = $.noop) => {\n\trow;\n};\n\nconst f = ({ a } = {}) => a;\n\nfunction g(x = 1) {\n\treturn x;\n}\n\nconst value = /** @type {number} */ (computed);\n"
+  ],
+  "mappings": "AAAA,MAAM,AAAA,YAAY,IAAI,QAAQ,EAAE,GAAG,GAAG,CAAC,CAAC,IAAI,KAAK,CAAC;CACjD,GAAG;AACJ,CAAC;;AAED,MAAM,AAAA,CAAC,MAAM,CAAC,YAAY,CAAC;;AAE3B,QAAQ,CAAC,CAAC,CAAC,CAAC,GAAG,CAAC,EAAE,CAAC;CAClB,MAAM,CAAC,CAAC;AACT,CAAC;;AAED,MAAM,AAAA,KAAK,0BAA0B,QAAQ"
+}
