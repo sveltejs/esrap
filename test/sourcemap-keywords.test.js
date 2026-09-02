@@ -1,6 +1,7 @@
 // @ts-check
 import { expect, test } from 'vitest';
 import ts from '../src/languages/ts/index.js';
+import tsx from '../src/languages/tsx/index.js';
 import { print } from '../src/index.js';
 import { acornParse } from './common.js';
 
@@ -23,39 +24,128 @@ function generatedLineColumn(code, index) {
  * @returns {[number, number, number, number]}
  */
 function mappingAtSubstring(code, needle, mappings) {
-	const idx = code.indexOf(needle);
-	expect(idx >= 0, `needle not in output: ${JSON.stringify(needle)}`).toBe(true);
-	const { gen_line, gen_col } = generatedLineColumn(code, idx);
-	const line = mappings[gen_line];
-	expect(line).toBeDefined();
-	const line_segments = /** @type {[number, number, number, number][]} */ (line);
-
-	const segment = line_segments.find((s) => s[0] === gen_col);
+	const segments = mappingsAtSubstring(code, needle, mappings);
+	const segment = segments[0];
 	expect(segment).toBeDefined();
 	return /** @type {[number, number, number, number]} */ (segment);
 }
 
 /**
+ * @param {string} code
+ * @param {string} needle
+ * @param {[number, number, number, number][][]} mappings
+ * @returns {[number, number, number, number][]}
+ */
+function mappingsAtSubstring(code, needle, mappings) {
+	const idx = code.indexOf(needle);
+	expect(idx >= 0, `needle not in output: ${JSON.stringify(needle)}`).toBe(true);
+	return mappingsAtIndex(code, idx, mappings);
+}
+
+/**
+ * @param {string} code
+ * @param {number} index
+ * @param {[number, number, number, number][][]} mappings
+ * @returns {[number, number, number, number][]}
+ */
+function mappingsAtIndex(code, index, mappings) {
+	const { gen_line, gen_col } = generatedLineColumn(code, index);
+	const line = mappings[gen_line];
+	expect(line).toBeDefined();
+	const line_segments = /** @type {[number, number, number, number][]} */ (line);
+	return line_segments.filter((segment) => segment[0] === gen_col);
+}
+
+/**
  * @param {string} source
- * @param {{ preserveParens?: boolean, boundaryTokens?: boolean }} [opts]
+ * @param {{ preserveParens?: boolean, boundaryTokens?: boolean, tokens?: boolean | any[], jsx?: boolean, sourceType?: 'module' | 'script' }} [opts]
  */
 function mapped(source, opts = {}) {
+	/** @type {any[]} the parser's tokens; passed to the printer when `opts.tokens` is `true` */
+	const tokens = [];
 	const { ast, comments } = acornParse(source, {
 		preserveParens: opts.preserveParens,
-		sourceType: 'module',
-		jsxMode: false,
-		fileExtension: 'ts'
+		sourceType: opts.sourceType ?? 'module',
+		jsxMode: opts.jsx ?? false,
+		fileExtension: opts.jsx ? 'tsx' : 'ts',
+		tokens
 	});
-	const { code, map } = print(ast, ts({ comments, boundaryTokens: opts.boundaryTokens }), {
-		sourceMapSource: 'input.ts',
-		sourceMapContent: source,
-		sourceMapEncodeMappings: false
-	});
+	const language = opts.jsx ? tsx : ts;
+	const { code, map } = print(
+		ast,
+		language({
+			comments,
+			boundaryTokens: opts.boundaryTokens,
+			tokens: opts.tokens === true ? tokens : opts.tokens || undefined
+		}),
+		{
+			sourceMapSource: 'input.ts',
+			sourceMapContent: source,
+			sourceMapEncodeMappings: false
+		}
+	);
 	expect(map.mappings).toBeTruthy();
 	const mappings = /** @type {[number, number, number, number][][]} */ (
 		/** @type {unknown} */ (map.mappings)
 	);
-	return { source, code, mappings };
+	return { source, code, mappings, tokens };
+}
+
+/**
+ * @param {string} source
+ * @param {string[]} delimiters
+ * @param {{ tokens?: boolean, jsx?: boolean, sourceType?: 'module' | 'script' }} [opts]
+ */
+function expectExactDelimiterMappings(source, delimiters, opts = {}) {
+	const inferred = mapped(source, {
+		boundaryTokens: true,
+		jsx: opts.jsx,
+		sourceType: opts.sourceType
+	});
+	const { code, mappings, tokens } = mapped(source, {
+		boundaryTokens: true,
+		tokens: opts.tokens,
+		jsx: opts.jsx,
+		sourceType: opts.sourceType
+	});
+	expect(code).toBe(inferred.code);
+
+	// a backtracking parser can emit a token twice
+	const seen = new Set();
+	/** @type {{ value: string, start: { line: number, column: number } }[]} */
+	const source_delimiters = [];
+	for (const token of tokens) {
+		const value = token.type.label;
+		if (!token.loc || !delimiters.includes(value === '${' ? '{' : value)) continue;
+		const key = `${value}:${token.loc.start.line}:${token.loc.start.column}`;
+		if (seen.has(key)) continue;
+		seen.add(key);
+		source_delimiters.push({ value, start: token.loc.start });
+	}
+
+	/** @type {{ value: string, index: number }[]} */
+	const generated_delimiters = [];
+	for (let i = 0; i < code.length; i += 1) {
+		if (code[i] === '$' && code[i + 1] === '{' && delimiters.includes('{')) {
+			generated_delimiters.push({ value: '${', index: i });
+			i += 1;
+		} else if (delimiters.includes(code[i])) {
+			generated_delimiters.push({ value: code[i], index: i });
+		}
+	}
+
+	expect(generated_delimiters.map((d) => d.value)).toEqual(source_delimiters.map((d) => d.value));
+	for (let i = 0; i < generated_delimiters.length; i += 1) {
+		const { start } = source_delimiters[i];
+		expect(
+			mappingsAtIndex(code, generated_delimiters[i].index, mappings).map((s) => s.slice(2))
+		).toContainEqual([start.line - 1, start.column]);
+	}
+}
+
+/** @param {string} source */
+function expectExactBracketMappings(source) {
+	expectExactDelimiterMappings(source, ['[', ']'], { tokens: true });
 }
 
 test('source mappings land on keywords (let / function / async / export)', () => {
@@ -263,4 +353,171 @@ test('source mappings anchor preserved parentheses', () => {
 
 	const seg_close = mappingAtSubstring(code, ')', mappings);
 	expect(seg_close[3]).toBe(source.indexOf(')'));
+});
+
+test.each([
+	['object property', `const object = { [\nkey\n]: value };`],
+	['object method', `const object = { async *[\nmethod\n]() {} };`],
+	['object getter', `const object = { get [\nkey\n]() { return 1; } };`],
+	['object setter', `const object = { set [\nkey\n](value) {} };`],
+	['class method', `class Example { [\nmethod\n]() {} }`],
+	['class field', `class Example { [\nfield\n] = 1; }`],
+	['type property signature', `type Example = { [\nkey\n]: string }`],
+	['type method signature', `type Example = { [\nmethod\n](): void }`]
+])('source mappings use supplied computed-key boundary locations for %s', (_name, source) => {
+	expectExactBracketMappings(source);
+});
+
+test('supplied computed-key locations can span comments and line breaks', () => {
+	expectExactBracketMappings(`const object = { [ /* before */\nkey\n/* after */ ]: value };`);
+});
+
+test('computed-key brackets are not guessed without tokens', () => {
+	// the old inference would anchor `[` to the space before `key`
+	const { code, mappings } = mapped(`const object = { [ key ]: value };`, { boundaryTokens: true });
+	expect(mappingsAtSubstring(code, '[', mappings)).toEqual([]);
+});
+
+test('tokens without locations leave mappings unchanged', () => {
+	const source = `const object = { [key]: fn(value) };`;
+	const { mappings, tokens } = mapped(source, { boundaryTokens: true });
+	const bare = tokens.map(({ type, value }) => ({ type, value }));
+	expect(mapped(source, { boundaryTokens: true, tokens: bare }).mappings).toEqual(mappings);
+	expect(mapped(source, { boundaryTokens: true, tokens: [] }).mappings).toEqual(mappings);
+});
+
+test('tokens out of source order still locate delimiters', () => {
+	// acorn-typescript backtracks and re-emits tokens, so its stream is not monotone
+	const source = `const object = { [ key ]: fn( value ) };`;
+	const { mappings, tokens } = mapped(source, { boundaryTokens: true, tokens: true });
+	const reversed = [...tokens].reverse();
+	expect(mapped(source, { boundaryTokens: true, tokens: reversed }).mappings).toEqual(mappings);
+});
+
+test('ESLint-style punctuator tokens locate delimiters', () => {
+	const source = `const object = { [ key ]: fn( value ) };`;
+	const { mappings, tokens } = mapped(source, { boundaryTokens: true, tokens: true });
+	const punctuators = tokens.map((token) => ({
+		type: 'Punctuator',
+		value: token.type.label,
+		loc: token.loc
+	}));
+	expect(mapped(source, { boundaryTokens: true, tokens: punctuators }).mappings).toEqual(mappings);
+});
+
+test.each([
+	['array expression', `const values = [ /* before */\nvalue\n/* after */ ];`],
+	['array pattern', `const [ /* before */\nvalue\n/* after */ ] = values;`],
+	['computed member access', `const value = object[ /* before */\nkey\n/* after */ ];`],
+	['array type', `type Values = Item /* before */ [ /* after */ ];`],
+	['index signature', `type Dictionary = { [ /* before */ key: string /* after */ ]: number };`],
+	[
+		'mapped type',
+		`type Selected = { [ /* before */ K in Keys as Rename<K> /* after */ ]: string };`
+	],
+	['tuple type', `type Pair = [ /* before */ First, Second /* after */ ];`],
+	['indexed access type', `type Value = Object[ /* before */ Key /* after */ ];`]
+])('source mappings use supplied square-bracket locations for %s', (_name, source) => {
+	expectExactBracketMappings(source);
+});
+
+test.each([
+	['block', `function example() { return; }`, ['{', '}'], {}],
+	['type literal', `type Example = { value: string };`, ['{', '}'], {}],
+	['mapped type', `type Example = { [K in Keys]: string };`, ['{', '}'], {}],
+	['module block', `namespace Example { export const value = 1; }`, ['{', '}'], {}],
+	['interface body', `interface Example { value: string }`, ['{', '}'], {}],
+	['parenthesized type', `type Example = (First | Second);`, ['(', ')'], {}],
+	['JSX expression container', `const element = <div>{value}</div>;`, ['{', '}'], { jsx: true }],
+	['JSX spread attribute', `const element = <div {...props} />;`, ['{', '}'], { jsx: true }]
+])('boundaryTokens maps outer delimiters for %s', (_name, source, delimiters, opts) => {
+	expectExactDelimiterMappings(source, delimiters, opts);
+});
+
+test.each([
+	['call expression', `const result = fn /* before */ ( /* inside */ value /* after */ );`, {}],
+	[
+		'new expression',
+		`const result = new Thing /* before */ ( /* inside */ value /* after */ );`,
+		{}
+	],
+	[
+		'function declaration',
+		`function example /* before */ ( /* inside */ value /* after */ ) {}`,
+		{}
+	],
+	['class method', `class Example { method /* before */ ( value /* after */ ) {} }`, {}],
+	['object method', `const object = { method /* before */ ( value /* after */ ) {} };`, {}],
+	['arrow function', `const callback = ( /* before */ value /* after */ ) => value;`, {}],
+	['empty arrow function', `const callback = /* before */ () => value;`, {}],
+	['nested method delimiters', `class Example { [getKey()] /* before */ (value = make()) {} }`, {}],
+	['nested parameter delimiters', `function example(value = make(1)) {}`, {}],
+	['call signature', `type Example = { ( /* before */ value: string /* after */ ): void };`, {}],
+	[
+		'construct signature',
+		`type Example = { new ( /* before */ value: string /* after */ ): object };`,
+		{}
+	],
+	['function type', `type Example = ( /* before */ value: string /* after */ ) => void;`, {}],
+	[
+		'constructor type',
+		`type Example = new ( /* before */ value: string /* after */ ) => object;`,
+		{}
+	],
+	[
+		'method signature',
+		`type Example = { method( /* before */ value: string /* after */ ): void };`,
+		{}
+	],
+	[
+		'declare function',
+		`declare function example( /* before */ value: string /* after */ ): void;`,
+		{}
+	],
+	['for statement', `for /* before */ (let i = 0; i < 1; i += 1) {}`, {}],
+	['for-of statement', `for /* before */ (const value of values) {}`, {}],
+	['if statement', `if /* before */ (condition /* after */) {}`, {}],
+	['while statement', `while /* before */ (condition /* after */) {}`, {}],
+	['do-while statement', `do {} while /* before */ (condition /* after */);`, {}],
+	['with statement', `with /* before */ (object /* after */) {}`, { sourceType: 'script' }],
+	['switch statement', `switch /* before */ (value /* after */) { default: break; }`, {}],
+	['catch clause', `try {} catch /* before */ (error /* after */) {}`, {}],
+	['import expression', `const module = import( /* before */ 'module' /* after */ );`, {}],
+	['external module reference', `import Alias = require( /* before */ 'module' /* after */ );`, {}],
+	['import type', `type Value = import( /* before */ 'module' /* after */ ).Value;`, {}]
+])('supplied tokens map internal parentheses for %s', (_name, source, opts) => {
+	expectExactDelimiterMappings(source, ['(', ')'], {
+		tokens: true,
+		sourceType: 'sourceType' in opts && opts.sourceType === 'script' ? 'script' : undefined
+	});
+});
+
+test.each([
+	['named import', `import { /* before */ value /* after */ } from 'module';`],
+	['empty named export', `export { /* inside */ };`],
+	['import attributes', `import value from 'module' with { type: 'json' };`],
+	['static block', `class Example { static /* before */ { value; } }`],
+	['switch body', `switch (value) /* before */ { default: break; }`],
+	['enum body', `enum Example /* before */ { Value }`],
+	['template interpolation', 'const result = `before ${ /* before */ value /* after */ } after`;'],
+	['template-literal type interpolation', 'type Result = `before ${Value} after`;']
+])('supplied tokens map internal curly braces for %s', (_name, source) => {
+	expectExactDelimiterMappings(source, ['{', '}'], { tokens: true });
+});
+
+test('control-flow mappings select the outer authored parentheses', () => {
+	const source = `if /* before */ ((condition)) {}`;
+	const { code, mappings, tokens } = mapped(source, { boundaryTokens: true, tokens: true });
+	const opens = tokens.filter((token) => token.type.label === '(');
+	const closes = tokens.filter((token) => token.type.label === ')');
+
+	expect(
+		mappingsAtSubstring(code, '(', mappings).map((segment) => segment.slice(2))
+	).toContainEqual([opens[0].loc.start.line - 1, opens[0].loc.start.column]);
+	expect(
+		mappingsAtSubstring(code, ')', mappings).map((segment) => segment.slice(2))
+	).toContainEqual([
+		closes[closes.length - 1].loc.start.line - 1,
+		closes[closes.length - 1].loc.start.column
+	]);
 });
