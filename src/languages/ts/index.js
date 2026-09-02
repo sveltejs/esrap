@@ -1656,6 +1656,7 @@ export default (options = {}) => {
 				if (node.computed) context.write('[', token_before(node.key.loc?.start));
 				context.visit(node.key);
 				if (node.computed) context.write(']', token_at(node.key.loc?.end));
+				if (node.value.typeParameters) context.visit(node.value.typeParameters);
 				track_bindings(node.value.params);
 				context.write('(');
 				sequence(
