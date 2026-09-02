@@ -1043,7 +1043,7 @@ export default (options = {}) => {
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
 				false
 			);
 			context.write(')');
@@ -1074,9 +1074,7 @@ export default (options = {}) => {
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.typeAnnotation?.typeAnnotation?.loc?.start ??
-					node.returnType?.typeAnnotation?.loc?.start ??
-					null,
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
 				false
 			);
 			context.write(')');
@@ -2286,7 +2284,7 @@ export default (options = {}) => {
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
 				false
 			);
 			context.write(')');
