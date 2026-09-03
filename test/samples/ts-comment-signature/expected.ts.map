@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    null
+    "type F = (a: A /* c1 */) /* c2 */ => /* c3 */ T;\n\ntype G = { (a /* c1 */) /* c2 */ };\n\ntype H = { m(a /* c1 */) /* c2 */ };\n\nfunction f(a /* c1 */) /* c2 */ {}\n\nconst g = (a /* c1 */) /* c2 */ => a;\n"
   ],
-  "mappings": ""
+  "mappings": "KAAK,CAAC,IAAI,CAAI,EAAD,CAAC,gCAAgC,CAAC;KAE1C,CAAC,MAAM,CAAC;KAER,CAAC,KAAK,CAAC,CAAC,CAAC;;AAEd,QAAQ,CAAC,CAAC,CAAC,CAAC,oBAAoB,CAAC,AAAA,CAAC;;AAElC,MAAM,AAAA,CAAC,IAAI,CAAC,uBAAuB,CAAC"
 }
