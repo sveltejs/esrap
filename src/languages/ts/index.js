@@ -924,9 +924,13 @@ export default (options = {}) => {
 
 			if (node.value.returnType) context.visit(node.value.returnType);
 
-			context.write(' ');
-
-			if (node.value.body) context.visit(node.value.body);
+			if (node.value.body) {
+				context.write(' ');
+				context.visit(node.value.body);
+			} else {
+				// abstract methods and overload signatures
+				context.write(';');
+			}
 		},
 
 		/**
@@ -1654,6 +1658,7 @@ export default (options = {}) => {
 				if (node.computed) context.write('[', token_before(node.key.loc?.start));
 				context.visit(node.key);
 				if (node.computed) context.write(']', token_at(node.key.loc?.end));
+				if (node.value.typeParameters) context.visit(node.value.typeParameters);
 				track_bindings(node.value.params);
 				context.write('(');
 				sequence(
