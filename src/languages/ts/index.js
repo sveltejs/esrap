@@ -569,16 +569,8 @@ export default (options = {}) => {
 	 * @param {TSESTree.Node[]} params
 	 * @param {TSESTree.Node | null | undefined} prefix
 	 * @param {TSESTree.Node | null | undefined} suffix
-	 * @param {{ line: number, column: number } | null} [until] where trailing comments of the list stop
 	 */
-	function write_params(
-		context,
-		node,
-		params,
-		prefix,
-		suffix,
-		until = suffix?.loc?.start ?? node.loc?.end ?? null
-	) {
+	function write_params(context, node, params, prefix, suffix) {
 		const open = prefix?.loc
 			? located_token(node, '(', prefix.loc.end, 'after')
 			: params[0]?.loc
@@ -586,7 +578,7 @@ export default (options = {}) => {
 				: located_token(node, '(', node.loc?.start, 'after');
 
 		context.write('(', open);
-		sequence(context, params, until, false);
+		sequence(context, params, suffix?.loc?.start ?? node.loc?.end ?? null, false);
 		context.write(')', located_token(node, ')', suffix?.loc?.start ?? node.loc?.end, 'before'));
 	}
 
@@ -975,9 +967,13 @@ export default (options = {}) => {
 
 			if (node.value.returnType) context.visit(node.value.returnType);
 
-			context.write(' ');
-
-			if (node.value.body) context.visit(node.value.body);
+			if (node.value.body) {
+				context.write(' ');
+				context.visit(node.value.body);
+			} else {
+				// abstract methods and overload signatures
+				context.write(';');
+			}
 		},
 
 		/**
@@ -1089,14 +1085,7 @@ export default (options = {}) => {
 			const parameters = signature_parameters(node);
 			const return_type = signature_return_type(node);
 			track_bindings(parameters);
-			write_params(
-				context,
-				node,
-				parameters,
-				node.typeParameters,
-				return_type,
-				return_type?.loc?.start ?? null
-			);
+			write_params(context, node, parameters, node.typeParameters, return_type);
 
 			if (return_type) context.visit(return_type);
 		},
@@ -1115,14 +1104,7 @@ export default (options = {}) => {
 			const parameters = signature_parameters(node);
 			const return_type = signature_return_type(node);
 			track_bindings(parameters);
-			write_params(
-				context,
-				node,
-				parameters,
-				node.typeParameters,
-				return_type,
-				return_type?.typeAnnotation?.loc?.start ?? null
-			);
+			write_params(context, node, parameters, node.typeParameters, return_type);
 
 			context.write(' => ');
 
@@ -1697,6 +1679,7 @@ export default (options = {}) => {
 				if (node.computed) context.write('[', enclosing_token(node, node.key, '['));
 				context.visit(node.key);
 				if (node.computed) context.write(']', enclosing_token(node, node.key, ']'));
+				if (node.value.typeParameters) context.visit(node.value.typeParameters);
 				track_bindings(node.value.params);
 				write_params(
 					context,
@@ -2337,14 +2320,7 @@ export default (options = {}) => {
 			const parameters = signature_parameters(node);
 			const return_type = signature_return_type(node);
 			track_bindings(parameters);
-			write_params(
-				context,
-				node,
-				parameters,
-				node.typeParameters ?? node.key,
-				return_type,
-				return_type?.loc?.start ?? null
-			);
+			write_params(context, node, parameters, node.typeParameters ?? node.key, return_type);
 
 			if (return_type) context.visit(return_type);
 		},
