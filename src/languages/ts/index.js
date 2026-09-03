@@ -2,6 +2,7 @@
 /** @import { Visitors } from '../../types.js' */
 /** @import { TSOptions, BaseComment } from '../types.js' */
 import { Context } from 'esrap';
+import { boundary_tokens, compare_positions } from './boundary-tokens.js';
 
 /** @typedef {TSESTree.Node} Node */
 
@@ -340,7 +341,7 @@ export default (options = {}) => {
 	/**
 	 * @param {Context} context
 	 * @param {{ line: number, column: number } | null} from
-	 * @param {{ line: number, column: number }} to
+	 * @param {{ line: number, column: number } | null} to
 	 * @param {boolean} pad
 	 * @param {boolean} [is_next_to_expression]
 	 */
@@ -402,13 +403,15 @@ export default (options = {}) => {
 
 	/**
 	 * @param {Context} context
-	 * @param {{ attributes?: TSESTree.ImportAttribute[], assertions?: TSESTree.ImportAttribute[] }} node
+	 * @param {TSESTree.Node & { attributes?: TSESTree.ImportAttribute[], assertions?: TSESTree.ImportAttribute[] }} node
 	 */
 	function write_import_attributes(context, node) {
 		const attributes = node.attributes ?? node.assertions;
 		if (!attributes || attributes.length === 0) return;
 
-		context.write(node.attributes ? ' with { ' : ' assert { ');
+		context.write(node.attributes ? ' with ' : ' assert ');
+		context.write('{', located_token(node, '{', attributes[0].loc?.start, 'before'));
+		context.write(' ');
 
 		for (let i = 0; i < attributes.length; i += 1) {
 			const { key, value } = attributes[i];
@@ -418,13 +421,17 @@ export default (options = {}) => {
 			if (i < attributes.length - 1) context.write(', ');
 		}
 
-		context.write(' }');
+		context.write(' ');
+		context.write(
+			'}',
+			located_token(node, '}', attributes[attributes.length - 1].loc?.end, 'after')
+		);
 	}
 
 	/**
 	 * @param {Context} context
 	 * @param {TSESTree.Node[]} nodes
-	 * @param {{ line: number, column: number }} until
+	 * @param {{ line: number, column: number } | null} until
 	 * @param {boolean} pad
 	 */
 	function sequence(context, nodes, until, pad, separator = ',', trailing_newline = true) {
@@ -550,34 +557,62 @@ export default (options = {}) => {
 		}
 	}
 
-	const boundary_tokens = options.boundaryTokens === true;
+	const { token_at, token_before, located_token, enclosing_token } = boundary_tokens(options);
 
 	/**
-	 * A one-character synthetic token node so structural tokens (`(`, `[`, `{`,
-	 * unary operators, …) written where a node's SOURCE span begins or ends get a
-	 * sourcemap anchor. Without it, everything up to the next mapped token is
-	 * attributed to the PREVIOUS token's source position — `write(content, node)`
-	 * only maps tokens written with a node, and these boundary characters belong
-	 * to no written token. Opt-in (`boundaryTokens`): denser maps, byte-identical
-	 * output.
-	 * @param {{ line: number, column: number } | undefined} pos
-	 * @param {number} [length]
+	 * A parenthesised parameter list. `(` is anchored to the first one after
+	 * `prefix` (the type parameters, name or key before the list) or, without
+	 * one, to the last `(` before the first parameter; `)` to the last one
+	 * before `suffix` (the return type or body after the list).
+	 * @param {Context} context
+	 * @param {TSESTree.Node} node
+	 * @param {TSESTree.Node[]} params
+	 * @param {TSESTree.Node | null | undefined} prefix
+	 * @param {TSESTree.Node | null | undefined} suffix
 	 */
-	function token_at(pos, length = 1) {
-		if (!boundary_tokens) return undefined;
-		if (!pos) return undefined;
-		return /** @type {any} */ ({
-			loc: { start: pos, end: { line: pos.line, column: pos.column + length } }
-		});
+	function write_params(context, node, params, prefix, suffix) {
+		const open = prefix?.loc
+			? located_token(node, '(', prefix.loc.end, 'after')
+			: params[0]?.loc
+				? located_token(node, '(', params[0].loc.start, 'before')
+				: located_token(node, '(', node.loc?.start, 'after');
+
+		context.write('(', open);
+		sequence(context, params, suffix?.loc?.start ?? node.loc?.end ?? null, false);
+		context.write(')', located_token(node, ')', suffix?.loc?.start ?? node.loc?.end, 'before'));
 	}
 
-	/** @param {{ line: number, column: number } | undefined} pos */
-	function token_before(pos) {
-		if (!boundary_tokens) return undefined;
-		if (!pos || pos.column === 0) return undefined;
-		return /** @type {any} */ ({
-			loc: { start: { line: pos.line, column: pos.column - 1 }, end: pos }
-		});
+	/**
+	 * The first `(` in `node`, for `keyword (…)` forms
+	 * @param {TSESTree.Node} node
+	 */
+	function opening_paren(node) {
+		return located_token(node, '(', node.loc?.start, 'after');
+	}
+
+	/**
+	 * `keyword (`, with the keyword mapped and the parenthesis anchored
+	 * @param {Context} context
+	 * @param {TSESTree.Node} node
+	 * @param {string} keyword
+	 * @param {string} [suffix=' '] between the keyword and the parenthesis
+	 */
+	function write_keyword_paren(context, node, keyword, suffix = ' ') {
+		write_keyword(context, node, keyword, suffix);
+		context.write('(', opening_paren(node));
+	}
+
+	/**
+	 * Parentheses the author wrote, anchored to their source positions
+	 * @param {Context} context
+	 * @param {TSESTree.Node} node
+	 * @param {TSESTree.Node} inner
+	 */
+	function write_parenthesized(context, node, inner) {
+		if (!node.loc) return maybe_wrap(context, inner, true);
+		context.write('(', token_at(node.loc.start));
+		context.visit(inner);
+		context.write(')', token_before(node.loc.end));
 	}
 
 	const shared = {
@@ -671,11 +706,12 @@ export default (options = {}) => {
 			}
 
 			if (node.typeArguments) context.visit(node.typeArguments);
+			const call_prefix = node.typeArguments ?? node.callee;
 
 			const open = context.new();
 			const join = context.new();
 
-			context.write('(');
+			context.write('(', located_token(node, '(', call_prefix.loc?.end, 'after'));
 			context.append(open);
 
 			// if the final argument is multiline, it doesn't need to force all the
@@ -800,7 +836,7 @@ export default (options = {}) => {
 				else context.write('await ');
 			}
 
-			context.write('(');
+			context.write('(', opening_paren(node));
 
 			if (node.left.type === 'VariableDeclaration') {
 				handle_var_declaration(node.left, context);
@@ -810,7 +846,8 @@ export default (options = {}) => {
 
 			context.write(node.type === 'ForInStatement' ? ' in ' : ' of ');
 			context.visit(node.right);
-			context.write(') ');
+			context.write(')', located_token(node, ')', node.body.loc?.start, 'before'));
+			context.write(' ');
 			context.visit(node.body);
 		},
 
@@ -851,9 +888,13 @@ export default (options = {}) => {
 			}
 
 			track_bindings(node.params);
-			context.write('(');
-			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
-			context.write(')');
+			write_params(
+				context,
+				node,
+				node.params,
+				node.typeParameters ?? node.id,
+				node.returnType ?? node.body
+			);
 
 			if (node.returnType) context.visit(node.returnType);
 
@@ -902,25 +943,27 @@ export default (options = {}) => {
 
 			if (node.value.generator) context.write('*');
 
-			if (node.computed) context.write('[', token_before(node.key.loc?.start));
+			if (node.computed) context.write('[', enclosing_token(node, node.key, '['));
 			context.visit(node.key);
-			if (node.computed) context.write(']', token_at(node.key.loc?.end));
+			if (node.computed) context.write(']', enclosing_token(node, node.key, ']'));
 
 			// optional method (`m?()`)
 			if (node.optional) context.write('?');
 
-			// @ts-expect-error `typeParameters` lives on the method node, not its value
-			if (node.typeParameters) context.visit(node.typeParameters);
+			// `typeParameters` lives on the method node, not its value
+			const method_type_parameters =
+				/** @type {{ typeParameters?: TSESTree.TSTypeParameterDeclaration }} */ (node)
+					.typeParameters;
+			if (method_type_parameters) context.visit(method_type_parameters);
 
 			track_bindings(node.value.params);
-			context.write('(');
-			sequence(
+			write_params(
 				context,
+				node,
 				node.value.params,
-				(node.value.returnType ?? node.value.body)?.loc?.start ?? node.loc?.end ?? null,
-				false
+				method_type_parameters ?? node.key,
+				node.value.returnType ?? node.value.body
 			);
-			context.write(')');
 
 			if (node.value.returnType) context.visit(node.value.returnType);
 
@@ -982,9 +1025,9 @@ export default (options = {}) => {
 			}
 
 			if (node.computed) {
-				context.write('[', token_before(node.key.loc?.start));
+				context.write('[', enclosing_token(node, node.key, '['));
 				context.visit(node.key);
-				context.write(']', token_at(node.key.loc?.end));
+				context.write(']', enclosing_token(node, node.key, ']'));
 			} else {
 				context.visit(node.key);
 			}
@@ -1039,24 +1082,12 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			track_bindings(node.parameters ?? node.params);
-			context.write('(');
-			sequence(
-				context,
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.parameters ?? node.params,
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
-				false
-			);
-			context.write(')');
+			const parameters = signature_parameters(node);
+			const return_type = signature_return_type(node);
+			track_bindings(parameters);
+			write_params(context, node, parameters, node.typeParameters, return_type);
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			if (node.typeAnnotation || node.returnType) {
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				context.visit(node.typeAnnotation ?? node.returnType);
-			}
+			if (return_type) context.visit(return_type);
 		},
 
 		/**
@@ -1070,23 +1101,14 @@ export default (options = {}) => {
 			}
 			if (node.typeParameters) context.visit(node.typeParameters);
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			track_bindings(node.parameters ?? node.params);
-			context.write('(');
-			sequence(
-				context,
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.parameters ?? node.params,
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
-				false
-			);
-			context.write(')');
+			const parameters = signature_parameters(node);
+			const return_type = signature_return_type(node);
+			track_bindings(parameters);
+			write_params(context, node, parameters, node.typeParameters, return_type);
 
 			context.write(' => ');
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			context.visit(node.typeAnnotation?.typeAnnotation ?? node.returnType?.typeAnnotation);
+			context.visit(/** @type {TSESTree.Node} */ (return_type?.typeAnnotation));
 		}
 	};
 
@@ -1142,9 +1164,7 @@ export default (options = {}) => {
 			}
 
 			track_bindings(node.params);
-			context.write('(');
-			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
-			context.write(')');
+			write_params(context, node, node.params, node.typeParameters, node.returnType ?? node.body);
 
 			if (node.returnType) context.visit(node.returnType);
 
@@ -1279,13 +1299,15 @@ export default (options = {}) => {
 			if (test_loc && body_end && body_end.line === test_loc.line && test_loc.column >= 6) {
 				context.write(' ');
 				write_source_keyword(context, body_end.line, body_end.column + 1, 'while');
-				context.write(' (');
+				context.write(' ');
 			} else {
-				context.write(' while (');
+				context.write(' while ');
 			}
 
+			context.write('(', located_token(node, '(', node.body.loc?.end, 'after'));
 			context.visit(node.test);
-			context.write(');');
+			context.write(')', located_token(node, ')', node.loc?.end, 'before'));
+			context.write(';');
 		},
 
 		EmptyStatement(node, context) {
@@ -1347,9 +1369,12 @@ export default (options = {}) => {
 				else context.write('type ');
 			}
 
-			context.write('{');
+			context.write('{', located_token(node, '{', node.loc?.start, 'after'));
 			sequence(context, node.specifiers, node.source?.loc?.start ?? node.loc?.end ?? null, true);
-			context.write('}');
+			context.write(
+				'}',
+				located_token(node, '}', node.source?.loc?.start ?? node.loc?.end, 'before')
+			);
 
 			if (node.source) {
 				context.write(' from ');
@@ -1381,7 +1406,7 @@ export default (options = {}) => {
 		},
 
 		ForStatement: (node, context) => {
-			write_keyword(context, node, 'for', ' (');
+			write_keyword_paren(context, node, 'for');
 
 			if (node.init) {
 				if (node.init.type === 'VariableDeclaration') {
@@ -1396,7 +1421,8 @@ export default (options = {}) => {
 			context.write('; ');
 			if (node.update) context.visit(node.update);
 
-			context.write(') ');
+			context.write(')', located_token(node, ')', node.body.loc?.start, 'before'));
+			context.write(' ');
 			context.visit(node.body);
 		},
 
@@ -1421,9 +1447,10 @@ export default (options = {}) => {
 		},
 
 		IfStatement(node, context) {
-			write_keyword(context, node, 'if', ' (');
+			write_keyword_paren(context, node, 'if');
 			context.visit(node.test);
-			context.write(') ');
+			context.write(')', located_token(node, ')', node.consequent.loc?.start, 'before'));
+			context.write(' ');
 
 			if (node.alternate && statement_ends_with_unmatched_if(node.consequent)) {
 				context.write('{');
@@ -1499,9 +1526,9 @@ export default (options = {}) => {
 			}
 
 			if (named_specifiers.length > 0) {
-				context.write('{');
+				context.write('{', located_token(node, '{', node.loc?.start, 'after'));
 				sequence(context, named_specifiers, node.source.loc?.start ?? null, true);
-				context.write('}');
+				context.write('}', located_token(node, '}', node.source.loc?.start, 'before'));
 			}
 
 			context.write(' from ');
@@ -1511,7 +1538,7 @@ export default (options = {}) => {
 		},
 
 		ImportExpression(node, context) {
-			write_keyword(context, node, 'import', '(');
+			write_keyword_paren(context, node, 'import', '');
 			context.visit(node.source);
 			//@ts-expect-error for some reason the types haven't been updated
 			if (node.arguments) {
@@ -1526,7 +1553,7 @@ export default (options = {}) => {
 				context.write(', ');
 				context.visit(node.options);
 			}
-			context.write(')');
+			context.write(')', token_before(node.loc?.end));
 		},
 
 		ImportSpecifier(node, context) {
@@ -1577,7 +1604,7 @@ export default (options = {}) => {
 				if (node.optional) {
 					context.write('?.');
 				}
-				context.write('[');
+				context.write('[', enclosing_token(node, node.property, '['));
 				context.visit(node.property);
 				context.write(']', token_before(node.loc?.end));
 			} else {
@@ -1612,13 +1639,7 @@ export default (options = {}) => {
 
 		// @ts-expect-error this isn't a real node type, but Acorn produces it
 		ParenthesizedExpression(node, context) {
-			if (node.loc) {
-				context.write('(', token_at(node.loc.start));
-				context.visit(node.expression);
-				context.write(')', token_before(node.loc.end));
-			} else {
-				maybe_wrap(context, node.expression, true);
-			}
+			write_parenthesized(context, node, node.expression);
 		},
 
 		PrivateIdentifier(node, context) {
@@ -1655,32 +1676,31 @@ export default (options = {}) => {
 				if (node.kind !== 'init') kw(node.kind + ' ');
 				if (node.value.async) kw('async ');
 				if (node.value.generator) context.write('*');
-				if (node.computed) context.write('[', token_before(node.key.loc?.start));
+				if (node.computed) context.write('[', enclosing_token(node, node.key, '['));
 				context.visit(node.key);
-				if (node.computed) context.write(']', token_at(node.key.loc?.end));
+				if (node.computed) context.write(']', enclosing_token(node, node.key, ']'));
 				if (node.value.typeParameters) context.visit(node.value.typeParameters);
 				track_bindings(node.value.params);
-				context.write('(');
-				sequence(
+				write_params(
 					context,
+					node,
 					node.value.params,
-					(node.value.returnType ?? node.value.body).loc?.start ?? null,
-					false
+					node.value.typeParameters ?? node.key,
+					node.value.returnType ?? node.value.body
 				);
-				context.write(')');
 
 				if (node.value.returnType) context.visit(node.value.returnType);
 
 				context.write(' ');
 				context.visit(node.value.body);
 			} else {
-				if (node.computed) context.write('[', token_before(node.key.loc?.start));
+				if (node.computed) context.write('[', enclosing_token(node, node.key, '['));
 				if (node.kind === 'get' || node.kind === 'set') {
 					write_keyword(context, node, node.kind, ' ');
 				}
 				context.visit(node.key);
 				if (node.computed) {
-					context.write(']', token_at(node.key.loc?.end));
+					context.write(']', enclosing_token(node, node.key, ']'));
 					context.write(': ');
 				} else {
 					context.write(': ');
@@ -1721,7 +1741,8 @@ export default (options = {}) => {
 		SpreadElement: shared['RestElement|SpreadElement'],
 
 		StaticBlock(node, context) {
-			write_keyword(context, node, 'static', ' {');
+			write_keyword(context, node, 'static', ' ');
+			context.write('{', located_token(node, '{', node.loc?.start, 'after'));
 			context.indent();
 			context.newline();
 
@@ -1729,7 +1750,7 @@ export default (options = {}) => {
 
 			context.dedent();
 			context.newline();
-			context.write('}');
+			context.write('}', token_before(node.loc?.end));
 		},
 
 		Super(node, context) {
@@ -1737,9 +1758,14 @@ export default (options = {}) => {
 		},
 
 		SwitchStatement(node, context) {
-			write_keyword(context, node, 'switch', ' (');
+			write_keyword_paren(context, node, 'switch');
 			context.visit(node.discriminant);
-			context.write(') {');
+			context.write(
+				')',
+				located_token(node, ')', node.cases[0]?.loc?.start ?? node.loc?.end, 'before')
+			);
+			context.write(' ');
+			context.write('{', located_token(node, '{', node.discriminant.loc?.end, 'after'));
 			context.indent();
 
 			let first = true;
@@ -1773,7 +1799,7 @@ export default (options = {}) => {
 
 			context.dedent();
 			context.newline();
-			context.write('}');
+			context.write('}', token_before(node.loc?.end));
 		},
 
 		TaggedTemplateExpression(node, context) {
@@ -1795,9 +1821,10 @@ export default (options = {}) => {
 			for (let i = 0; i < expressions.length; i++) {
 				const raw = quasis[i].value.raw;
 
-				context.write(raw + '${');
+				context.write(raw);
+				context.write('${', enclosing_token(node, expressions[i], '${'));
 				context.visit(expressions[i]);
-				context.write('}');
+				context.write('}', enclosing_token(node, expressions[i], '}'));
 
 				if (/\n/.test(raw)) context.multiline = true;
 			}
@@ -1826,10 +1853,14 @@ export default (options = {}) => {
 				context.write(' ');
 
 				if (node.handler.param) {
-					write_keyword(context, node.handler, 'catch', '(');
+					write_keyword_paren(context, node.handler, 'catch', '');
 					track_binding(node.handler.param);
 					context.visit(node.handler.param);
-					context.write(') ');
+					context.write(
+						')',
+						located_token(node.handler, ')', node.handler.body.loc?.start, 'before')
+					);
+					context.write(' ');
 				} else {
 					write_keyword(context, node.handler, 'catch', ' ');
 				}
@@ -1892,16 +1923,18 @@ export default (options = {}) => {
 		},
 
 		WhileStatement(node, context) {
-			write_keyword(context, node, 'while', ' (');
+			write_keyword_paren(context, node, 'while');
 			context.visit(node.test);
-			context.write(') ');
+			context.write(')', located_token(node, ')', node.body.loc?.start, 'before'));
+			context.write(' ');
 			context.visit(node.body);
 		},
 
 		WithStatement(node, context) {
-			write_keyword(context, node, 'with', ' (');
+			write_keyword_paren(context, node, 'with');
 			context.visit(node.object);
-			context.write(') ');
+			context.write(')', located_token(node, ')', node.body.loc?.start, 'before'));
+			context.write(' ');
 			context.visit(node.body);
 		},
 
@@ -1955,13 +1988,9 @@ export default (options = {}) => {
 			}
 
 			track_bindings(node.params);
-			context.write('(');
-			sequence(context, node.params, node.returnType?.loc?.start ?? node.loc?.end ?? null, false);
-			context.write(')');
+			write_params(context, node, node.params, node.typeParameters ?? node.id, node.returnType);
 
-			if (node.returnType) {
-				context.visit(node.returnType);
-			}
+			if (node.returnType) context.visit(node.returnType);
 
 			context.write(';');
 		},
@@ -2020,7 +2049,9 @@ export default (options = {}) => {
 
 		TSArrayType(node, context) {
 			context.visit(node.elementType);
-			context.write('[]');
+			const element_end = node.elementType.loc?.end;
+			context.write('[', located_token(node, '[', element_end, 'after'));
+			context.write(']', token_before(node.loc?.end));
 		},
 
 		TSTypeAnnotation(node, context) {
@@ -2029,16 +2060,18 @@ export default (options = {}) => {
 		},
 
 		TSTypeLiteral(node, context) {
-			context.write('{ ');
+			context.write('{', token_at(node.loc?.start));
+			context.write(' ');
 			sequence(context, node.members, node.loc?.end ?? null, false, ';');
-			context.write(' }');
+			context.write(' ');
+			context.write('}', token_before(node.loc?.end));
 		},
 
 		TSPropertySignature(node, context) {
 			if (node.readonly) context.write('readonly ');
-			if (node.computed) context.write('[', token_before(node.key.loc?.start));
+			if (node.computed) context.write('[', enclosing_token(node, node.key, '['));
 			context.visit(node.key);
-			if (node.computed) context.write(']', token_at(node.key.loc?.end));
+			if (node.computed) context.write(']', enclosing_token(node, node.key, ']'));
 			if (node.optional) context.write('?');
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
@@ -2064,9 +2097,10 @@ export default (options = {}) => {
 			for (let i = 0; i < types.length; i++) {
 				const raw = quasis[i].value.raw;
 
-				context.write(raw + '${');
+				context.write(raw);
+				context.write('${', enclosing_token(node, types[i], '${'));
 				context.visit(types[i]);
-				context.write('}');
+				context.write('}', enclosing_token(node, types[i], '}'));
 
 				if (/\n/.test(raw)) context.multiline = true;
 			}
@@ -2208,18 +2242,24 @@ export default (options = {}) => {
 
 		TSIndexSignature(node, context) {
 			if (node.readonly) context.write('readonly ');
-			context.write('[');
+			const first_parameter = node.parameters[0];
+			const last_parameter = node.parameters[node.parameters.length - 1];
+			context.write('[', enclosing_token(node, first_parameter, '['));
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			sequence(context, node.parameters, node.typeAnnotation?.loc?.start ?? null, false);
-			context.write(']');
+			context.write(']', enclosing_token(node, last_parameter, ']'));
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			context.visit(node.typeAnnotation);
 		},
 
 		TSMappedType(node, context) {
-			context.write('{');
+			context.write('{', token_at(node.loc?.start));
+			const legacy_type_parameter = node.typeParameter;
+			const key = node.key ?? legacy_type_parameter?.name;
+			const constraint = node.constraint ?? legacy_type_parameter?.constraint;
+			const first_bracket_child = key && typeof key === 'object' ? key : legacy_type_parameter;
+			const last_bracket_child = node.nameType ?? constraint ?? first_bracket_child;
 
 			// `readonly` / `+readonly` / `-readonly` modifier
 			if (node.readonly) {
@@ -2228,11 +2268,7 @@ export default (options = {}) => {
 				);
 			}
 
-			context.write('[');
-
-			const legacy_type_parameter = node.typeParameter;
-			const key = node.key ?? legacy_type_parameter?.name;
-			const constraint = node.constraint ?? legacy_type_parameter?.constraint;
+			context.write('[', enclosing_token(node, first_bracket_child, '['));
 
 			if (key && typeof key === 'object') {
 				context.visit(key);
@@ -2251,7 +2287,7 @@ export default (options = {}) => {
 				context.visit(node.nameType);
 			}
 
-			context.write(']');
+			context.write(']', enclosing_token(node, last_bracket_child, ']'));
 
 			// `?` / `+?` / `-?` optionality modifier
 			if (node.optional) {
@@ -2263,7 +2299,7 @@ export default (options = {}) => {
 				context.visit(node.typeAnnotation);
 			}
 
-			context.write('}');
+			context.write('}', token_before(node.loc?.end));
 		},
 
 		TSMethodSignature(node, context) {
@@ -2272,39 +2308,27 @@ export default (options = {}) => {
 				write_keyword(context, node, node.kind, ' ');
 			}
 
-			if (node.computed) context.write('[', token_before(node.key.loc?.start));
+			if (node.computed) context.write('[', enclosing_token(node, node.key, '['));
 			context.visit(node.key);
-			if (node.computed) context.write(']', token_at(node.key.loc?.end));
+			if (node.computed) context.write(']', enclosing_token(node, node.key, ']'));
 			if (node.optional) context.write('?');
 
 			if (node.typeParameters) {
 				context.visit(node.typeParameters);
 			}
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			track_bindings(node.parameters ?? node.params);
-			context.write('(');
-			sequence(
-				context,
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.parameters ?? node.params,
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
-				false
-			);
-			context.write(')');
+			const parameters = signature_parameters(node);
+			const return_type = signature_return_type(node);
+			track_bindings(parameters);
+			write_params(context, node, parameters, node.typeParameters ?? node.key, return_type);
 
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			if (node.typeAnnotation || node.returnType) {
-				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				context.visit(node.typeAnnotation ?? node.returnType);
-			}
+			if (return_type) context.visit(return_type);
 		},
 
 		TSTupleType(node, context) {
-			context.write('[');
+			context.write('[', token_at(node.loc?.start));
 			sequence(context, node.elementTypes, node.loc?.end ?? null, false);
-			context.write(']');
+			context.write(']', token_before(node.loc?.end));
 		},
 
 		TSNamedTupleMember(node, context) {
@@ -2353,16 +2377,18 @@ export default (options = {}) => {
 		TSConstructorType: shared['TSFunctionType|TSConstructorType'],
 
 		TSExternalModuleReference(node, context) {
-			context.write('require(');
+			context.write('require');
+			context.write('(', opening_paren(node));
 			context.visit(node.expression);
-			context.write(');');
+			context.write(')', token_before(node.loc?.end));
+			context.write(';');
 		},
 
 		TSIndexedAccessType(node, context) {
 			context.visit(node.objectType);
-			context.write('[');
+			context.write('[', enclosing_token(node, node.indexType, '['));
 			context.visit(node.indexType);
-			context.write(']');
+			context.write(']', token_before(node.loc?.end));
 		},
 
 		TSImportEqualsDeclaration(node, context) {
@@ -2374,9 +2400,10 @@ export default (options = {}) => {
 		},
 
 		TSImportType(node, context) {
-			context.write('import(');
+			context.write('import');
+			context.write('(', opening_paren(node));
 			context.visit(node.argument);
-			context.write(')');
+			context.write(')', located_token(node, ')', node.argument.loc?.end, 'after'));
 
 			if (node.qualifier) {
 				context.write('.');
@@ -2417,23 +2444,25 @@ export default (options = {}) => {
 			if (node.const) context.write('const ');
 			context.write('enum ');
 			context.visit(node.id);
-			context.write(' {');
+			context.write(' ');
+			context.write('{', located_token(node, '{', node.id.loc?.end, 'after'));
 			context.indent();
 			context.newline();
 			sequence(context, node.members ?? node.body.members, node.loc?.end ?? null, false);
 			context.dedent();
 			context.newline();
-			context.write('}');
+			context.write('}', token_before(node.loc?.end));
 		},
 
 		TSModuleBlock(node, context) {
-			context.write(' {');
+			context.write(' ');
+			context.write('{', token_at(node.loc?.start));
 			context.indent();
 			context.newline();
 			body(context, node);
 			context.dedent();
 			context.newline();
-			context.write('}');
+			context.write('}', token_before(node.loc?.end));
 		},
 
 		TSModuleDeclaration(node, context) {
@@ -2482,9 +2511,10 @@ export default (options = {}) => {
 				context.write(' extends ');
 				sequence(context, node.extends, node.body.loc?.start ?? null, false);
 			}
-			context.write(' {');
+			context.write(' ');
+			context.write('{', token_at(node.body.loc?.start));
 			context.visit(node.body);
-			context.write('}');
+			context.write('}', token_before(node.body.loc?.end));
 		},
 
 		TSInstantiationExpression(node, context) {
@@ -2504,7 +2534,7 @@ export default (options = {}) => {
 
 		//@ts-expect-error I don't know why, but this is relied upon in the tests, but doesn't exist in the TSESTree types
 		TSParenthesizedType(node, context) {
-			maybe_wrap(context, node.typeAnnotation, true);
+			write_parenthesized(context, node, node.typeAnnotation);
 		},
 
 		TSSatisfiesExpression(node, context) {
@@ -2884,7 +2914,23 @@ function quote(string, char) {
  * @param {{ line: number, column: number }} b
  */
 function before(a, b) {
-	if (a.line < b.line) return true;
-	if (a.line > b.line) return false;
-	return a.column < b.column;
+	return compare_positions(a, b) < 0;
+}
+
+/**
+ * `acorn-typescript` and `@typescript-eslint/types` name the parameter list
+ * of signatures differently
+ * @param {{ params: TSESTree.Parameter[], parameters?: TSESTree.Parameter[] }} node
+ */
+function signature_parameters(node) {
+	return node.parameters ?? node.params;
+}
+
+/**
+ * `acorn-typescript` and `@typescript-eslint/types` name the return type of
+ * signatures differently
+ * @param {{ returnType: TSESTree.TSTypeAnnotation | undefined, typeAnnotation?: TSESTree.TSTypeAnnotation }} node
+ */
+function signature_return_type(node) {
+	return node.typeAnnotation ?? node.returnType;
 }
