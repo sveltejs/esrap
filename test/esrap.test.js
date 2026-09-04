@@ -6,6 +6,7 @@ import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
 import { acornParse, oxcParse } from './common.js';
+import ts from '../src/languages/ts/index.js';
 import tsx from '../src/languages/tsx/index.js';
 import { describe } from 'node:test';
 
@@ -183,7 +184,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					opts = { sourceMapSource: 'input.js', sourceMapContent: input_js };
 				}
 
-				const { code, map } = print(ast, tsx({ comments }), opts);
+				const { code, map } = print(ast, (jsxMode ? tsx : ts)({ comments }), opts);
 
 				const pDir = `${__dirname}/samples/${dir}/${parserName}`;
 				if (!fs.existsSync(pDir)) fs.mkdirSync(pDir, { recursive: true });

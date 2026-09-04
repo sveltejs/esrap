@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const identity = <T,>(value: T): T => value;\nconst pair = <T, U>(a: T, b: U): [T, U] => [a, b];\nconst element = <div>{identity('x')}</div>;\n"
+  ],
+  "mappings": "AAAA,MAAM,AAAA,QAAQ,IAAI,CAAC,GAAG,KAAQ,EAAD,CAAC,GAAG,CAAC,IAAI,KAAK;AAC3C,MAAM,AAAA,IAAI,IAAI,CAAC,EAAE,CAAC,EAAE,CAAI,EAAD,CAAC,EAAE,CAAI,EAAD,CAAC,IAAI,CAAC,EAAE,CAAC,MAAM,CAAC,EAAE,CAAC;AAChD,MAAM,AAAA,OAAO,IAAI,GAAG,EAAE,QAAQ,CAAC,GAAG,IAAI,GAAG"
+}
