@@ -944,9 +944,13 @@ export default (options = {}) => {
 
 			if (node.value.returnType) context.visit(node.value.returnType);
 
-			context.write(' ');
-
-			if (node.value.body) context.visit(node.value.body);
+			if (node.value.body) {
+				context.write(' ');
+				context.visit(node.value.body);
+			} else {
+				// abstract methods and overload signatures
+				context.write(';');
+			}
 		},
 
 		/**
@@ -1063,7 +1067,7 @@ export default (options = {}) => {
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
 				false
 			);
 			context.write(')');
@@ -1094,9 +1098,7 @@ export default (options = {}) => {
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.typeAnnotation?.typeAnnotation?.loc?.start ??
-					node.returnType?.typeAnnotation?.loc?.start ??
-					null,
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
 				false
 			);
 			context.write(')');
@@ -1676,6 +1678,7 @@ export default (options = {}) => {
 				if (node.computed) context.write('[', token_before(node.key.loc?.start));
 				context.visit(node.key);
 				if (node.computed) context.write(']', token_at(node.key.loc?.end));
+				if (node.value.typeParameters) context.visit(node.value.typeParameters);
 				track_param_bindings(node.value.params);
 				context.write('(');
 				sequence(
@@ -2306,7 +2309,7 @@ export default (options = {}) => {
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
 				false
 			);
 			context.write(')');
