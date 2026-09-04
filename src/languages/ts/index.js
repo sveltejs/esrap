@@ -84,12 +84,34 @@ const OPERATOR_PRECEDENCE = {
 const BINDINGS = new WeakSet();
 
 /**
- * Marks a node as occupying a binding position.
+ * Marks a binding pattern and all of its nested binding targets.
  * @param {object | null | undefined} node
  * @returns {void}
  */
 function track_binding(node) {
-	if (node && typeof node === 'object') BINDINGS.add(node);
+	if (!node || typeof node !== 'object') return;
+
+	BINDINGS.add(node);
+
+	switch (/** @type {any} */ (node).type) {
+		case 'AssignmentPattern':
+			track_binding(/** @type {any} */ (node).left);
+			break;
+		case 'RestElement':
+			track_binding(/** @type {any} */ (node).argument);
+			break;
+		case 'ArrayPattern':
+			track_bindings(/** @type {any} */ (node).elements);
+			break;
+		case 'ObjectPattern':
+			for (const property of /** @type {any} */ (node).properties) {
+				track_binding(property.type === 'Property' ? property.value : property);
+			}
+			break;
+		case 'TSParameterProperty':
+			track_binding(/** @type {any} */ (node).parameter);
+			break;
+	}
 }
 
 /**
@@ -99,24 +121,6 @@ function track_binding(node) {
  */
 function track_bindings(nodes) {
 	if (nodes) for (const node of nodes) track_binding(node);
-}
-
-/**
- * Tracks function parameters as binding positions. A param with a default value
- * is an `AssignmentPattern`; the binding is its `left`, not the pattern itself —
- * the comment flush that decides whether a JSDoc `@type` cast gets wrapped in
- * parentheses happens on the identifier's own visit.
- * @param {(object | null | undefined)[] | null | undefined} params
- * @returns {void}
- */
-function track_param_bindings(params) {
-	if (!params) return;
-	track_bindings(params);
-	for (const param of params) {
-		if (/** @type {any} */ (param)?.type === 'AssignmentPattern') {
-			track_binding(/** @type {any} */ (param).left);
-		}
-	}
 }
 
 /**
@@ -870,7 +874,7 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
-			track_param_bindings(node.params);
+			track_bindings(node.params);
 			context.write('(');
 			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
 			context.write(')');
@@ -932,7 +936,7 @@ export default (options = {}) => {
 			// @ts-expect-error `typeParameters` lives on the method node, not its value
 			if (node.typeParameters) context.visit(node.typeParameters);
 
-			track_param_bindings(node.value.params);
+			track_bindings(node.value.params);
 			context.write('(');
 			sequence(
 				context,
@@ -1060,7 +1064,7 @@ export default (options = {}) => {
 			}
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			track_param_bindings(node.parameters ?? node.params);
+			track_bindings(node.parameters ?? node.params);
 			context.write('(');
 			sequence(
 				context,
@@ -1091,7 +1095,7 @@ export default (options = {}) => {
 			if (node.typeParameters) context.visit(node.typeParameters);
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			track_param_bindings(node.parameters ?? node.params);
+			track_bindings(node.parameters ?? node.params);
 			context.write('(');
 			sequence(
 				context,
@@ -1161,7 +1165,7 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
-			track_param_bindings(node.params);
+			track_bindings(node.params);
 			context.write('(');
 			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
 			context.write(')');
@@ -1679,7 +1683,7 @@ export default (options = {}) => {
 				context.visit(node.key);
 				if (node.computed) context.write(']', token_at(node.key.loc?.end));
 				if (node.value.typeParameters) context.visit(node.value.typeParameters);
-				track_param_bindings(node.value.params);
+				track_bindings(node.value.params);
 				context.write('(');
 				sequence(
 					context,
@@ -1967,6 +1971,7 @@ export default (options = {}) => {
 
 			if (node.id) {
 				context.write(' ');
+				track_binding(node.id);
 				context.visit(node.id);
 			}
 
@@ -1974,7 +1979,7 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
-			track_param_bindings(node.params);
+			track_bindings(node.params);
 			context.write('(');
 			sequence(context, node.params, node.returnType?.loc?.start ?? node.loc?.end ?? null, false);
 			context.write(')');
@@ -2230,6 +2235,7 @@ export default (options = {}) => {
 			if (node.readonly) context.write('readonly ');
 			context.write('[');
 
+			track_bindings(node.parameters);
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			sequence(context, node.parameters, node.typeAnnotation?.loc?.start ?? null, false);
 			context.write(']');
@@ -2302,7 +2308,7 @@ export default (options = {}) => {
 			}
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			track_param_bindings(node.parameters ?? node.params);
+			track_bindings(node.parameters ?? node.params);
 			context.write('(');
 			sequence(
 				context,

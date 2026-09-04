@@ -47,3 +47,32 @@ test('JSDoc @type comment on a parameter with a default value is not wrapped', (
 	// output must be valid JavaScript
 	expect(() => new Function(code)).not.toThrow();
 });
+
+test.each([
+	['a rest parameter', 'function f(.../** @type {any} */ rest) {}', 'js'],
+	[
+		'a nested parameter pattern',
+		'function f({ key: [/** @type {any} */ value] = [] } = {}) {}',
+		'js'
+	],
+	[
+		'a TypeScript parameter property',
+		'class C { constructor(public /** @type {any} */ value) {} }',
+		'ts'
+	],
+	['a declared function identifier', 'declare function /** @type {any} */ f(): void;', 'ts'],
+	[
+		'an index signature parameter',
+		'interface X { [/** @type {any} */ key: string]: unknown }',
+		'ts'
+	],
+	['a destructured variable', 'let [/** @type {any} */ value] = values;', 'js'],
+	['a destructured catch parameter', 'try {} catch ({ key: /** @type {any} */ value }) {}', 'js']
+])('JSDoc @type comment on %s is not wrapped', (_, input, fileExtension) => {
+	const { ast, comments } = acornParse(input, { fileExtension });
+	const { code } = print(ast, ts({ comments }), {});
+
+	expect(code).toContain('/** @type {any} */');
+	expect(code).not.toContain('*/ (');
+	expect(() => acornParse(code, { fileExtension })).not.toThrow();
+});

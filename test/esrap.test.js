@@ -128,6 +128,21 @@ test('should have 1 baseline', () => {
 	expect(numberOfBaseLine).toBe(1);
 });
 
+test('preserves JSDoc type casts from Acorn parenthesized expressions', () => {
+	const source = `const foo = /** @type {number} */ (1);
+const bar = /** @type {number} */ (/** @type {number} */ (1));`;
+	const { ast, comments } = acornParse(source, {
+		sourceType: 'module',
+		jsxMode: false,
+		fileExtension: 'js',
+		preserveParens: true
+	});
+	const type_cast = /** @type {any} */ (ast.body[0]).declarations[0].init;
+
+	expect(type_cast.type).toBe('ParenthesizedExpression');
+	expect(print(ast, tsx({ comments })).code).toBe(source);
+});
+
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	if (dir.includes('large-file')) continue;
 
