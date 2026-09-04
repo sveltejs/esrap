@@ -1,5 +1,14 @@
 # esrap changelog
 
+## 2.3.7
+
+### Patch Changes
+
+- 17f34a4: fix: print a semicolon after body-less class methods (abstract methods and overload signatures)
+- f332286: fix: don't treat JSDoc `@type` comments re-anchored to parameter defaults or named function ids as type casts
+- ba2b98b: fix: print type parameters of object-literal methods
+- 2e4485b: fix: keep comments that follow a signature's `=>` or closing parenthesis in place
+
 ## 2.3.6
 
 ### Patch Changes
