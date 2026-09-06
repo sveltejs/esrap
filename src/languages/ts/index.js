@@ -85,12 +85,34 @@ const OPERATOR_PRECEDENCE = {
 const BINDINGS = new WeakSet();
 
 /**
- * Marks a node as occupying a binding position.
+ * Marks a binding pattern and all of its nested binding targets.
  * @param {object | null | undefined} node
  * @returns {void}
  */
 function track_binding(node) {
-	if (node && typeof node === 'object') BINDINGS.add(node);
+	if (!node || typeof node !== 'object') return;
+
+	BINDINGS.add(node);
+
+	switch (/** @type {any} */ (node).type) {
+		case 'AssignmentPattern':
+			track_binding(/** @type {any} */ (node).left);
+			break;
+		case 'RestElement':
+			track_binding(/** @type {any} */ (node).argument);
+			break;
+		case 'ArrayPattern':
+			track_bindings(/** @type {any} */ (node).elements);
+			break;
+		case 'ObjectPattern':
+			for (const property of /** @type {any} */ (node).properties) {
+				track_binding(property.type === 'Property' ? property.value : property);
+			}
+			break;
+		case 'TSParameterProperty':
+			track_binding(/** @type {any} */ (node).parameter);
+			break;
+	}
 }
 
 /**
@@ -880,6 +902,8 @@ export default (options = {}) => {
 					context.write(' ');
 				}
 			}
+
+			if (node.id) track_binding(node.id);
 
 			if (node.id) context.visit(node.id);
 
@@ -1980,6 +2004,7 @@ export default (options = {}) => {
 
 			if (node.id) {
 				context.write(' ');
+				track_binding(node.id);
 				context.visit(node.id);
 			}
 
@@ -2246,6 +2271,7 @@ export default (options = {}) => {
 			const last_parameter = node.parameters[node.parameters.length - 1];
 			context.write('[', enclosing_token(node, first_parameter, '['));
 
+			track_bindings(node.parameters);
 			sequence(context, node.parameters, node.typeAnnotation?.loc?.start ?? null, false);
 			context.write(']', enclosing_token(node, last_parameter, ']'));
 
