@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const identity = <T,>(value: T): T => value;\nconst pair = <T, U>(a: T, b: U): [T, U] => [a, b];\nconst constant = <const T,>(value: T) => value;\nconst nested =\n\t<T,>(value: T) =>\n\t<U,>(other: U) => [value, other];\nconst apply = <T,>(fn: <U>(value: U) => U, value: T) => fn(value);\n\nfunction declared<T>(value: T): T {\n\treturn value;\n}\n\nclass Box<T> {}\ninterface Result<T> {\n\tvalue: T;\n}\ntype Identity = <T>(value: T) => T;\n\nconst element = <div>{identity('x')}</div>;\nconst component = <Component<string> value={identity('x')} />;\n"
+  ],
+  "mappings": "AAAA,MAAM,AAAA,QAAQ,IAAI,CAAC,GAAG,KAAQ,EAAD,CAAC,GAAG,CAAC,IAAI,KAAK;AAC3C,MAAM,AAAA,IAAI,IAAI,CAAC,EAAE,CAAC,EAAE,CAAI,EAAD,CAAC,EAAE,CAAI,EAAD,CAAC,IAAI,CAAC,EAAE,CAAC,MAAM,CAAC,EAAE,CAAC;AAChD,MAAM,AAAA,QAAQ,UAAI,CAAO,GAAG,KAAQ,EAAD,CAAC,KAAK,KAAK;AAC9C,MAAM,AAAA,MAAM,IACV,CAAC,GAAG,KAAQ,EAAD,CAAC,MACZ,CAAC,GAAG,KAAQ,EAAD,CAAC,MAAM,KAAK,EAAE,KAAK;AAChC,MAAM,AAAA,KAAK,IAAI,CAAC,GAAG,EAAsB,GAAjB,CAAC,GAAE,KAAQ,EAAD,CAAC,KAAK,CAAC,EAAE,KAAQ,EAAD,CAAC,KAAK,EAAE,CAAC,KAAK;;AAEhE,QAAQ,CAAC,QAAQ,CAAC,CAAC,GAAE,KAAQ,EAAD,CAAC,GAAG,CAAC,CAAC,CAAC;CAClC,MAAM,CAAC,KAAK;AACb,CAAC;;AAED,MAAM,AAAA,GAAG,CAAC,CAAC,GAAE,CAAC,AAAA,CAAC;;UACL,MAAM,CAAC,CAAC,KACjB,KAAK,EAAE,CAAC;;KAEJ,QAAQ,IAAI,CAAC,GAAE,KAAQ,EAAD,CAAC,KAAK,CAAC;;AAElC,MAAM,AAAA,OAAO,IAAI,GAAG,EAAE,QAAQ,CAAC,GAAG,IAAI,GAAG;AACzC,MAAM,AAAA,SAAS,IAAI,SAAS,CAAC,MAAM,EAAE,KAAK,EAAE,QAAQ,CAAC,GAAG"
+}
