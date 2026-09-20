@@ -28,7 +28,7 @@
 	"types": "./types/index.d.ts",
 	"devDependencies": {
 		"@changesets/cli": "^2.27.11",
-		"@sveltejs/acorn-typescript": "^1.0.5",
+		"@sveltejs/acorn-typescript": "^1.0.13",
 		"@types/estree": "^1.0.8",
 		"@typescript-eslint/types": "^8.2.0",
 		"@vitest/ui": "^2.1.1",
