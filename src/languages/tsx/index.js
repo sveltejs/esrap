@@ -14,6 +14,19 @@ export default (options) => {
 	return {
 		...ts(options),
 
+		TSTypeParameterDeclaration(node, context) {
+			context.write('<');
+
+			for (let i = 0; i < node.params.length; i++) {
+				if (i > 0) context.write(', ');
+				context.visit(node.params[i]);
+			}
+
+			// Keep single-parameter declarations unambiguous with JSX.
+			if (node.params.length === 1) context.write(',');
+			context.write('>');
+		},
+
 		JSXElement(node, context) {
 			context.visit(node.openingElement);
 
