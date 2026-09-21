@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.3.8
+
+### Patch Changes
+
+- 4a0bb7f: fix: add trailing commas to single type parameter declarations in the TSX printer so generic arrow functions remain valid TSX
+
 ## 2.3.7
 
 ### Patch Changes
