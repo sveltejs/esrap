@@ -133,12 +133,19 @@ export function print(node, visitors, opts = {}) {
 		}
 
 		if (command.type === 'Location') {
-			current_line.push([
+			const prev = current_line[current_line.length - 1];
+
+			/** @type {Segment} */
+			const segment = [
 				current_column,
 				0, // source index is always zero
 				command.line - 1,
 				command.column
-			]);
+			];
+
+			if (!prev || prev[0] !== segment[0] || prev[2] !== segment[2] || prev[3] !== segment[3]) {
+				current_line.push(segment);
+			}
 		}
 	}
 

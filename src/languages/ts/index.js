@@ -676,8 +676,15 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'CallExpression|NewExpression': (node, context) => {
+			const loc = node.loc ?? node.callee.loc;
+
+			if (loc) {
+				const { line, column } = loc.start;
+				context.location(line, column);
+			}
+
 			if (node.type === 'NewExpression') {
-				write_keyword(context, node, 'new', ' ');
+				context.write('new ');
 			}
 
 			const wrap =
