@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"let a = () => ({ x } = { x: 42 });\nlet b = () => ({} || bar);\nlet c = () => ({} ? foo : bar);"
-	],
-	"mappings": "AAAA,IAAI,CAAC,YAAY,CAAC,OAAO,CAAC,EAAE,EAAE;AAC9B,IAAI,CAAC,gBAAgB,GAAG;AACxB,IAAI,CAAC,eAAe,GAAG,GAAG,GAAG"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "let a = () => ({ x } = { x: 42 });\nlet b = () => ({} || bar);\nlet c = () => ({} ? foo : bar);"
+  ],
+  "mappings": "AAAA,IAAI,AAAA,CAAC,YAAY,CAAC,OAAO,CAAC,EAAE,EAAE;AAC9B,IAAI,AAAA,CAAC,gBAAgB,GAAG;AACxB,IAAI,AAAA,CAAC,eAAe,GAAG,GAAG,GAAG"
 }

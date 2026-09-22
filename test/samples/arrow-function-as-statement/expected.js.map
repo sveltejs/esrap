@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"() => {\n\n};\n"
-	],
-	"mappings": "MAAM,CAAC,AAEP,CAAC"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "() => {\n\n};\n"
+  ],
+  "mappings": "MAAM,CAAC,AAEP,CAAC"
 }

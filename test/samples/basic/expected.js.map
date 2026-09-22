@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"foo({ a: 1 });\n"
-	],
-	"mappings": "AAAA,GAAG,GAAG,CAAC,EAAE,CAAC"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "foo({ a: 1 });\n"
+  ],
+  "mappings": "AAAA,GAAG,GAAG,CAAC,EAAE,CAAC"
 }
