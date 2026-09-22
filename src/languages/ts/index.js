@@ -1956,7 +1956,8 @@ export default (options = {}) => {
 		},
 
 		TSNamespaceExportDeclaration(node, context) {
-			context.write('export as namespace ');
+			token(context, 'export', node);
+			context.write(' as namespace ');
 			context.visit(node.id);
 			context.write(';');
 		},
@@ -2222,7 +2223,8 @@ export default (options = {}) => {
 		},
 
 		TSImportEqualsDeclaration(node, context) {
-			context.write('import ');
+			token(context, 'import', node);
+			context.write(' ');
 			if (node.importKind === 'type') context.write('type ');
 			context.visit(node.id);
 			context.write(' = ');
@@ -2230,7 +2232,8 @@ export default (options = {}) => {
 		},
 
 		TSImportType(node, context) {
-			context.write('import(');
+			token(context, 'import', node);
+			context.write('(');
 			context.visit(node.argument);
 			context.write(')');
 
@@ -2678,8 +2681,8 @@ function handle_var_declaration(node, context, no_in = false) {
 
 	context.append(child_context);
 
-	if (node.declare) child_context.write('declare ');
-	child_context.write(`${node.kind} `);
+	token(child_context, node.declare ? `declare ${node.kind}` : node.kind, node);
+	child_context.write(' ');
 
 	child_context.append(open);
 

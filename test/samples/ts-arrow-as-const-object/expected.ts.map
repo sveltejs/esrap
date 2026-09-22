@@ -7,5 +7,5 @@
   "sourcesContent": [
     "const as_const = [].map(() => ({ baz }) as const);\nconst non_null = [].map(() => ({ baz: 1 })!);\nconst satisfies = [].map(() => ({ x: 1 }) satisfies { x: number });\n"
   ],
-  "mappings": "MAAM,QAAQ,GAAG,GAAG,GAAG,UAAU,GAAG,MAAO,KAAK;MAC1C,QAAQ,GAAG,GAAG,GAAG,WAAU,GAAG,EAAE,CAAC;MACjC,SAAS,GAAG,GAAG,GAAG,UAAU,CAAC,EAAE,CAAC,eAAgB,CAAC,EAAE,MAAM"
+  "mappings": "AAAA,KAAK,CAAC,QAAQ,GAAG,GAAG,GAAG,UAAU,GAAG,MAAO,KAAK;AAChD,KAAK,CAAC,QAAQ,GAAG,GAAG,GAAG,WAAU,GAAG,EAAE,CAAC;AACvC,KAAK,CAAC,SAAS,GAAG,GAAG,GAAG,UAAU,CAAC,EAAE,CAAC,eAAgB,CAAC,EAAE,MAAM"
 }

@@ -7,5 +7,5 @@
   "sourcesContent": [
     "let a = () => ({ x } = { x: 42 });\nlet b = () => ({} || bar);\nlet c = () => ({} ? foo : bar);"
   ],
-  "mappings": "IAAI,CAAC,YAAY,CAAC,OAAO,CAAC,EAAE,EAAE;IAC1B,CAAC,gBAAgB,GAAG;IACpB,CAAC,eAAe,GAAG,GAAG,GAAG"
+  "mappings": "AAAA,GAAG,CAAC,CAAC,YAAY,CAAC,OAAO,CAAC,EAAE,EAAE;AAC9B,GAAG,CAAC,CAAC,gBAAgB,GAAG;AACxB,GAAG,CAAC,CAAC,eAAe,GAAG,GAAG,GAAG"
 }

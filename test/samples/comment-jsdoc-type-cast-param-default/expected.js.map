@@ -7,5 +7,5 @@
   "sourcesContent": [
     "const row_template = ($$anchor, row = $.noop) => {\n\trow;\n};\n\nconst f = ({ a } = {}) => a;\n\nfunction g(x = 1) {\n\treturn x;\n}\n\nconst value = /** @type {number} */ (computed);\n"
   ],
-  "mappings": "MAAM,YAAY,IAAI,QAAQ,EAAE,GAAG,GAAG,CAAC,CAAC,IAAI,KAAK,CAAC;CACjD,GAAG;AACJ,CAAC;;MAEK,CAAC,MAAM,CAAC,YAAY,CAAC;;SAElB,CAAC,CAAC,CAAC,GAAG,CAAC,EAAE,CAAC;CAClB,MAAM,CAAC,CAAC;AACT,CAAC;;MAEK,KAAK,0BAA0B,QAAQ"
+  "mappings": "AAAA,KAAK,CAAC,YAAY,IAAI,QAAQ,EAAE,GAAG,GAAG,CAAC,CAAC,IAAI,KAAK,CAAC;CACjD,GAAG;AACJ,CAAC;;AAED,KAAK,CAAC,CAAC,MAAM,CAAC,YAAY,CAAC;;SAElB,CAAC,CAAC,CAAC,GAAG,CAAC,EAAE,CAAC;CAClB,MAAM,CAAC,CAAC;AACT,CAAC;;AAED,KAAK,CAAC,KAAK,0BAA0B,QAAQ"
 }
