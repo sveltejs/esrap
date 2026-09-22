@@ -133,12 +133,19 @@ export function print(node, visitors, opts = {}) {
 		}
 
 		if (command.type === 'Location') {
-			current_line.push([
+			const prev = current_line[current_line.length - 1];
+
+			/** @type {Segment} */
+			const segment = [
 				current_column,
 				0, // source index is always zero
 				command.line - 1,
 				command.column
-			]);
+			];
+
+			if (!prev || prev[0] !== segment[0] || prev[2] !== segment[2] || prev[3] !== segment[3]) {
+				current_line.push(segment);
+			}
 		}
 	}
 
@@ -161,6 +168,6 @@ export function print(node, visitors, opts = {}) {
 }
 
 // it sucks that we have to export the class rather than just
-// re-exporting it via public.ts, but otherwise TypeScript
+// re-exporting it via public.d.ts, but otherwise TypeScript
 // gets confused about private fields because it is really dumb!
 export { Context };
