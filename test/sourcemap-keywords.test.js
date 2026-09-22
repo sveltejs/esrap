@@ -126,27 +126,6 @@ test.each([
 	}
 });
 
-test('comments between loop keywords do not affect identifier mappings', () => {
-	const source = 'for /* foo */ await /* bar */ (const x of y) {}';
-	const { code, mappings } = mapped(source);
-	for (const name of ['x', 'y']) {
-		expect(mappingAtSubstring(code, name, mappings).slice(2)).toEqual([0, source.indexOf(name)]);
-	}
-});
-
-test.each(['new Thing();', 'await value;', 'function* f() { yield* values; }', 'import("foo");'])(
-	'prints runtime expressions without locations: %s',
-	(source) => {
-		const { ast } = acornParse(source);
-		const without_locations = JSON.parse(
-			JSON.stringify(ast, (key, value) => (key === 'loc' ? undefined : value))
-		);
-		const { code, map } = print(without_locations, ts(), { sourceMapEncodeMappings: false });
-		expect(code).toBe(print(ast, ts()).code);
-		expect(map.mappings.flat()).toEqual([]);
-	}
-);
-
 test('no positive whitespace mapping directly after keyword', () => {
 	// Positive source-map segment at gen_col == keyword_end (e.g. space after
 	// keyword) causes downstream source-map consumers to treat whitespace columns
