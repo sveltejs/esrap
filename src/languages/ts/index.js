@@ -1,5 +1,5 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Visitors } from '../../types.js' */
+/** @import { BaseNode, Visitors } from '../../types.js' */
 /** @import { TSOptions, BaseComment } from '../types.js' */
 import { Context } from 'esrap';
 
@@ -258,7 +258,7 @@ function write_comment(comment, context) {
 
 /**
  * @param {TSOptions} [options]
- * @returns {Visitors<TSESTree.Node>}
+ * @returns {Visitors<BaseNode>}
  */
 export default (options = {}) => {
 	const quote_char = options.quotes === 'double' ? '"' : "'";
@@ -1114,7 +1114,8 @@ export default (options = {}) => {
 		}
 	};
 
-	return {
+	/** @type {Visitors<TSESTree.Node>} */
+	const visitors = {
 		_(node, context, visit) {
 			write_additional_comments(context, options.getLeadingComments?.(node), 'leading');
 
@@ -2560,6 +2561,9 @@ export default (options = {}) => {
 			context.visit(node.right);
 		}
 	};
+
+	// Accept compatible ASTs from other parsers at the public boundary.
+	return /** @type {Visitors<BaseNode>} */ (visitors);
 };
 
 /** @satisfies {Visitors} */
