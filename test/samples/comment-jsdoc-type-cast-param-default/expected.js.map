@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"const row_template = ($$anchor, row = $.noop) => {\n\trow;\n};\n\nconst f = ({ a } = {}) => a;\n\nfunction g(x = 1) {\n\treturn x;\n}\n\nconst value = /** @type {number} */ (computed);\n"
-	],
-	"mappings": "MAAM,YAAY,IAAI,QAAQ,EAAE,GAAG,GAAG,CAAC,CAAC,IAAI,KAAK,CAAC;CACjD,GAAG;AACJ,CAAC;;MAEK,CAAC,MAAM,CAAC,YAAY,CAAC;;SAElB,CAAC,CAAC,CAAC,GAAG,CAAC,EAAE,CAAC;QACX,CAAC;AACT,CAAC;;MAEK,KAAK,0BAA0B,QAAQ"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const row_template = ($$anchor, row = $.noop) => {\n\trow;\n};\n\nconst f = ({ a } = {}) => a;\n\nfunction g(x = 1) {\n\treturn x;\n}\n\nconst value = /** @type {number} */ (computed);\n"
+  ],
+  "mappings": "MAAM,YAAY,IAAI,QAAQ,EAAE,GAAG,GAAG,CAAC,CAAC,IAAI,KAAK,CAAC;CACjD,GAAG;AACJ,CAAC;;MAEK,CAAC,MAAM,CAAC,YAAY,CAAC;;SAElB,CAAC,CAAC,CAAC,GAAG,CAAC,EAAE,CAAC;QACX,CAAC;AACT,CAAC;;MAEK,KAAK,0BAA0B,QAAQ"
 }

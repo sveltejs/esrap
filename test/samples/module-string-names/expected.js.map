@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"import { 'not-an-identifier' as binding } from 'pkg';\nexport { binding as 'not-an-identifier' };\nexport { 'not-an-identifier' as 'another-name' } from 'pkg';\n"
-	],
-	"mappings": "SAAS,mBAAmB,IAAI,OAAO,QAAQ,KAAK;;SAC3C,OAAO,IAAI,mBAAmB;SAC9B,mBAAmB,IAAI,cAAc,QAAQ,KAAK"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "import { 'not-an-identifier' as binding } from 'pkg';\nexport { binding as 'not-an-identifier' };\nexport { 'not-an-identifier' as 'another-name' } from 'pkg';\n"
+  ],
+  "mappings": "SAAS,mBAAmB,IAAI,OAAO,QAAQ,KAAK;;SAC3C,OAAO,IAAI,mBAAmB;SAC9B,mBAAmB,IAAI,cAAc,QAAQ,KAAK"
 }

@@ -10,5 +10,6 @@
 		"lib": ["esnext", "dom"],
 		"skipLibCheck": true
 	},
-	"include": ["./src/**/*.js", "./test/*.js"]
+	"include": ["./src", "./test/**/*.js"],
+	"exclude": ["./test/samples"]
 }

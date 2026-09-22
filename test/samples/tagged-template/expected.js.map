@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"foo`bar`;\nconst a = (x || y)`tpl`;\nconst b = a.b`t`;\nconst c = f()`t`;\n"
-	],
-	"mappings": "AAAA,GAAG;;MACG,CAAC,IAAI,CAAC,IAAI,CAAC;MACX,CAAC,GAAG,CAAC,CAAC,CAAC;MACP,CAAC,GAAG,CAAC"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "foo`bar`;\nconst a = (x || y)`tpl`;\nconst b = a.b`t`;\nconst c = f()`t`;\n"
+  ],
+  "mappings": "AAAA,GAAG;;MACG,CAAC,IAAI,CAAC,IAAI,CAAC;MACX,CAAC,GAAG,CAAC,CAAC,CAAC;MACP,CAAC,GAAG,CAAC"
 }

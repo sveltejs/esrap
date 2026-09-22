@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"obj = {\n\tfoo() {\n\t\tconsole.log('foo');\n\t},\n\tasync bar() {\n\t\tconsole.log('bar');\n\t},\n\t*baz() {\n\t\tconsole.log('baz');\n\t}\n};"
-	],
-	"mappings": "AAAA,GAAG;CACF,GAAG,GAAG,CAAC;EACN,OAAO,CAAC,GAAG,CAAC,KAAK;CAClB,CAAC;;OACK,GAAG,GAAG,CAAC;EACZ,OAAO,CAAC,GAAG,CAAC,KAAK;CAClB,CAAC;;EACA,GAAG,GAAG,CAAC;EACP,OAAO,CAAC,GAAG,CAAC,KAAK;CAClB,CAAC;"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "obj = {\n\tfoo() {\n\t\tconsole.log('foo');\n\t},\n\tasync bar() {\n\t\tconsole.log('bar');\n\t},\n\t*baz() {\n\t\tconsole.log('baz');\n\t}\n};"
+  ],
+  "mappings": "AAAA,GAAG;CACF,GAAG,GAAG,CAAC;EACN,OAAO,CAAC,GAAG,CAAC,KAAK;CAClB,CAAC;;OACK,GAAG,GAAG,CAAC;EACZ,OAAO,CAAC,GAAG,CAAC,KAAK;CAClB,CAAC;;EACA,GAAG,GAAG,CAAC;EACP,OAAO,CAAC,GAAG,CAAC,KAAK;CAClB,CAAC;"
 }

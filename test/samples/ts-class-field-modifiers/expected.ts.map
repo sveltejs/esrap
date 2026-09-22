@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"class A {\n\tx?: number;\n}\nclass B {\n\tx!: number;\n}\nclass C {\n\treadonly x = 1;\n}\nclass D {\n\tdeclare x: number;\n}\nclass E extends F {\n\toverride y = 1;\n}\nclass G {\n\tpublic static readonly x = 1;\n}\n"
-	],
-	"mappings": "MAAM,CAAC,CAAC,CAAC;CACR,CAAC,GAAG,MAAM;AACX,CAAC;;MACK,CAAC,CAAC,CAAC;CACR,CAAC,GAAG,MAAM;AACX,CAAC;;MACK,CAAC,CAAC,CAAC;UACC,CAAC,GAAG,CAAC;AACf,CAAC;;MACK,CAAC,CAAC,CAAC;SACA,CAAC,EAAE,MAAM;AAClB,CAAC;;MACK,CAAC,SAAS,CAAC,CAAC,CAAC;UACT,CAAC,GAAG,CAAC;AACf,CAAC;;MACK,CAAC,CAAC,CAAC;wBACe,CAAC,GAAG,CAAC;AAC7B,CAAC"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class A {\n\tx?: number;\n}\nclass B {\n\tx!: number;\n}\nclass C {\n\treadonly x = 1;\n}\nclass D {\n\tdeclare x: number;\n}\nclass E extends F {\n\toverride y = 1;\n}\nclass G {\n\tpublic static readonly x = 1;\n}\n"
+  ],
+  "mappings": "MAAM,CAAC,CAAC,CAAC;CACR,CAAC,GAAG,MAAM;AACX,CAAC;;MACK,CAAC,CAAC,CAAC;CACR,CAAC,GAAG,MAAM;AACX,CAAC;;MACK,CAAC,CAAC,CAAC;UACC,CAAC,GAAG,CAAC;AACf,CAAC;;MACK,CAAC,CAAC,CAAC;SACA,CAAC,EAAE,MAAM;AAClB,CAAC;;MACK,CAAC,SAAS,CAAC,CAAC,CAAC;UACT,CAAC,GAAG,CAAC;AACf,CAAC;;MACK,CAAC,CAAC,CAAC;wBACe,CAAC,GAAG,CAAC;AAC7B,CAAC"
 }

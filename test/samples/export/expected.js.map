@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"const foo = 42;\nexport { foo };"
-	],
-	"mappings": "MAAM,GAAG,GAAG,EAAE;;SACL,GAAG"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const foo = 42;\nexport { foo };"
+  ],
+  "mappings": "MAAM,GAAG,GAAG,EAAE;;SACL,GAAG"
 }

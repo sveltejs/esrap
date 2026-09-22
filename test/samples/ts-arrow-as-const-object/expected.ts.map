@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"const as_const = [].map(() => ({ baz }) as const);\nconst non_null = [].map(() => ({ baz: 1 })!);\nconst satisfies = [].map(() => ({ x: 1 }) satisfies { x: number });\n"
-	],
-	"mappings": "MAAM,QAAQ,MAAM,GAAG,UAAU,GAAG,MAAO,KAAK;MAC1C,QAAQ,MAAM,GAAG,WAAU,GAAG,EAAE,CAAC;MACjC,SAAS,MAAM,GAAG,UAAU,CAAC,EAAE,CAAC,eAAgB,CAAC,EAAE,MAAM"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const as_const = [].map(() => ({ baz }) as const);\nconst non_null = [].map(() => ({ baz: 1 })!);\nconst satisfies = [].map(() => ({ x: 1 }) satisfies { x: number });\n"
+  ],
+  "mappings": "MAAM,QAAQ,GAAG,GAAG,GAAG,UAAU,GAAG,MAAO,KAAK;MAC1C,QAAQ,GAAG,GAAG,GAAG,WAAU,GAAG,EAAE,CAAC;MACjC,SAAS,GAAG,GAAG,GAAG,UAAU,CAAC,EAAE,CAAC,eAAgB,CAAC,EAAE,MAAM"
 }

@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"const [a, b]: string[] = ['foo', 'bar'];\n\nfunction fn([first, second]: number[]) {\n\treturn first + second;\n}\n"
-	],
-	"mappings": "OAAO,CAAC,EAAE,CAAC,GAAG,MAAM,MAAM,KAAK,EAAE,KAAK;;SAE7B,EAAE,EAAE,KAAK,EAAE,MAAM,GAAG,MAAM,IAAI,CAAC;QAChC,KAAK,GAAG,MAAM;AACtB,CAAC"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const [a, b]: string[] = ['foo', 'bar'];\n\nfunction fn([first, second]: number[]) {\n\treturn first + second;\n}\n"
+  ],
+  "mappings": "OAAO,CAAC,EAAE,CAAC,GAAG,MAAM,MAAM,KAAK,EAAE,KAAK;;SAE7B,EAAE,EAAE,KAAK,EAAE,MAAM,GAAG,MAAM,IAAI,CAAC;QAChC,KAAK,GAAG,MAAM;AACtB,CAAC"
 }

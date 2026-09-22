@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"let value!: number;\n\nclass Container {\n\tfield!: number;\n\taccessor other!: string;\n}\n\nexport { value, Container };\n"
-	],
-	"mappings": "IAAI,KAAc,GAAN,MAAM;;MAEZ,SAAS,CAAC,CAAC;CAChB,KAAK,GAAG,MAAM;UACL,KAAK,GAAG,MAAM;AACxB,CAAC;;SAEQ,KAAK,EAAE,SAAS"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "let value!: number;\n\nclass Container {\n\tfield!: number;\n\taccessor other!: string;\n}\n\nexport { value, Container };\n"
+  ],
+  "mappings": "IAAI,KAAc,GAAN,MAAM;;MAEZ,SAAS,CAAC,CAAC;CAChB,KAAK,GAAG,MAAM;UACL,KAAK,GAAG,MAAM;AACxB,CAAC;;SAEQ,KAAK,EAAE,SAAS"
 }
