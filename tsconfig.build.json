@@ -1,0 +1,15 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"noEmit": false,
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"declarationDir": "./types",
+		"sourceMap": true,
+		"rootDir": "./src",
+		"paths": {
+			"esrap": ["./src/public.ts"]
+		}
+	},
+	"include": ["./src"]
+}
