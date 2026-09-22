@@ -1364,13 +1364,8 @@ export default (options = {}) => {
 		},
 
 		ImportExpression(node, context) {
-			// Dynamic import has no callee identifier to provide a call-site mapping.
-			if (node.loc) {
-				const { line, column } = node.loc.start;
-				context.location(line, column);
-			}
-
-			context.write('import(');
+			token(context, 'import', node);
+			context.write('(');
 			context.visit(node.source);
 			//@ts-expect-error for some reason the types haven't been updated
 			if (node.arguments) {
@@ -1752,17 +1747,11 @@ export default (options = {}) => {
 		},
 
 		YieldExpression(node, context) {
-			// Map generator suspension points and errors from delegated iterators.
-			if (node.loc) {
-				const { line, column } = node.loc.start;
-				context.location(line, column);
-			}
+			token(context, node.delegate ? 'yield*' : 'yield', node);
 
 			if (node.argument) {
-				context.write(node.delegate ? 'yield* ' : 'yield ');
+				context.write(' ');
 				context.visit(node.argument);
-			} else {
-				context.write(node.delegate ? 'yield*' : 'yield');
 			}
 		},
 
