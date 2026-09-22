@@ -7,5 +7,5 @@
   "sourcesContent": [
     "-(-a);\n+(+a);\n-(--a);\n"
   ],
-  "mappings": "GAAG,CAAC;GACD,CAAC;IACA,CAAC"
+  "mappings": "AAAA,CAAC,CAAC,CAAC,CAAC;AACJ,CAAC,CAAC,CAAC,CAAC;AACJ,CAAC,GAAG,CAAC"
 }

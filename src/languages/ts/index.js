@@ -1071,13 +1071,14 @@ export default (options = {}) => {
 		BlockStatement: shared['BlockStatement|ClassBody'],
 
 		BreakStatement(node, context) {
+			token(context, 'break', node);
+
 			if (node.label) {
-				context.write('break ');
+				context.write(' ');
 				context.visit(node.label);
-				context.write(';');
-			} else {
-				context.write('break;');
 			}
+
+			context.write(';');
 		},
 
 		CallExpression: shared['CallExpression|NewExpression'],
@@ -1127,13 +1128,14 @@ export default (options = {}) => {
 		},
 
 		ContinueStatement(node, context) {
+			token(context, 'continue', node);
+
 			if (node.label) {
-				context.write('continue ');
+				context.write(' ');
 				context.visit(node.label);
-				context.write(';');
-			} else {
-				context.write('continue;');
 			}
+
+			context.write(';');
 		},
 
 		DebuggerStatement(node, context) {
@@ -1155,7 +1157,8 @@ export default (options = {}) => {
 		},
 
 		DoWhileStatement(node, context) {
-			context.write('do ');
+			token(context, 'do', node);
+			context.write(' ');
 			context.visit(node.body);
 			context.write(' while (');
 			context.visit(node.test);
@@ -1288,7 +1291,9 @@ export default (options = {}) => {
 		},
 
 		IfStatement(node, context) {
-			context.write('if (');
+			token(context, 'if', node);
+
+			context.write(' (');
 			context.visit(node.test);
 			context.write(') ');
 
@@ -1550,6 +1555,8 @@ export default (options = {}) => {
 		RestElement: shared['RestElement|SpreadElement'],
 
 		ReturnStatement(node, context) {
+			token(context, 'return', node);
+
 			if (node.argument) {
 				const contains_comment =
 					comments[comment_index] &&
@@ -1557,11 +1564,11 @@ export default (options = {}) => {
 					node.argument.loc &&
 					before(comments[comment_index].loc.start, node.argument.loc.start);
 
-				context.write(contains_comment ? 'return (' : 'return ');
+				context.write(contains_comment ? ' (' : ' ');
 				context.visit(node.argument);
 				context.write(contains_comment ? ');' : ';');
 			} else {
-				context.write('return;');
+				context.write(';');
 			}
 		},
 
@@ -1590,7 +1597,9 @@ export default (options = {}) => {
 		},
 
 		SwitchStatement(node, context) {
-			context.write('switch (');
+			token(context, 'switch', node);
+
+			context.write(' (');
 			context.visit(node.discriminant);
 			context.write(') {');
 			context.indent();
@@ -1666,13 +1675,15 @@ export default (options = {}) => {
 		},
 
 		ThrowStatement(node, context) {
-			context.write('throw ');
+			token(context, 'throw', node);
+			context.write(' ');
 			if (node.argument) context.visit(node.argument);
 			context.write(';');
 		},
 
 		TryStatement(node, context) {
-			context.write('try ');
+			token(context, 'try', node);
+			context.write(' ');
 			context.visit(node.block);
 
 			if (node.handler) {
@@ -1695,7 +1706,7 @@ export default (options = {}) => {
 		},
 
 		UnaryExpression(node, context) {
-			context.write(node.operator, token_at(node.loc?.start, node.operator.length));
+			token(context, node.operator, node);
 
 			if (node.operator.length > 1) {
 				context.write(' ');
@@ -1734,14 +1745,16 @@ export default (options = {}) => {
 		},
 
 		WhileStatement(node, context) {
-			context.write('while (');
+			token(context, 'while', node);
+			context.write(' (');
 			context.visit(node.test);
 			context.write(') ');
 			context.visit(node.body);
 		},
 
 		WithStatement(node, context) {
-			context.write('with (');
+			token(context, 'with', node);
+			context.write(' (');
 			context.visit(node.object);
 			context.write(') ');
 			context.visit(node.body);
