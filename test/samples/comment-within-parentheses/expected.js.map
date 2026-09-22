@@ -1,11 +1,11 @@
 {
-  "version": 3,
-  "names": [],
-  "sources": [
-    "input.js"
-  ],
-  "sourcesContent": [
-    "function foo() {\n\treturn (// hey\n\tabc);\n}\n\nfunction bar() {\n\treturn (/* hey */\n\tabc);\n}"
-  ],
-  "mappings": "AAAA,QAAQ,CAAC,GAAG,GAAG,CAAC;CACf,MAAM;CACN,GAAG;AACJ,CAAC;;AAED,QAAQ,CAAC,GAAG,GAAG,CAAC;CACf,MAAM;CACN,GAAG;AACJ,CAAC"
+	"version": 3,
+	"names": [],
+	"sources": [
+		"input.js"
+	],
+	"sourcesContent": [
+		"function foo() {\n\treturn (// hey\n\tabc);\n}\n\nfunction bar() {\n\treturn (/* hey */\n\tabc);\n}"
+	],
+	"mappings": "AAAA,SAAS,GAAG,GAAG,CAAC;CACf;CACA,GAAG;AACJ,CAAC;;AAED,SAAS,GAAG,GAAG,CAAC;CACf;CACA,GAAG;AACJ,CAAC"
 }

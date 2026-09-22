@@ -1,11 +1,11 @@
 {
-  "version": 3,
-  "names": [],
-  "sources": [
-    "input.js"
-  ],
-  "sourcesContent": [
-    "12345n;\n"
-  ],
-  "mappings": "AAAA,MAAM"
+	"version": 3,
+	"names": [],
+	"sources": [
+		"input.js"
+	],
+	"sourcesContent": [
+		"12345n;\n"
+	],
+	"mappings": "AAAA,MAAM"
 }

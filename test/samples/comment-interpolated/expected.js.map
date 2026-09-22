@@ -1,11 +1,11 @@
 {
-  "version": 3,
-  "names": [],
-  "sources": [
-    "input.js"
-  ],
-  "sourcesContent": [
-    "a = /* the answer */ 42;\n"
-  ],
-  "mappings": "AAAA,CAAC,oBAAoB,EAAE"
+	"version": 3,
+	"names": [],
+	"sources": [
+		"input.js"
+	],
+	"sourcesContent": [
+		"a = /* the answer */ 42;\n"
+	],
+	"mappings": "AAAA,CAAC,oBAAoB,EAAE"
 }

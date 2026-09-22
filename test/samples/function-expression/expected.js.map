@@ -1,11 +1,11 @@
 {
-  "version": 3,
-  "names": [],
-  "sources": [
-    "input.js"
-  ],
-  "sourcesContent": [
-    "(function(){\n\n})\nlet object = {\n    foo() {\n        \n    }\n}"
-  ],
-  "mappings": "CAAC,QAAQ,IAAE,CAAC,AAEZ,CAAC;;AACD,IAAI,AAAA,MAAM,KACN,GAAG,GAAG,CAAC,AAEP,CAAC"
+	"version": 3,
+	"names": [],
+	"sources": [
+		"input.js"
+	],
+	"sourcesContent": [
+		"(function(){\n\n})\nlet object = {\n    foo() {\n        \n    }\n}"
+	],
+	"mappings": "CAAC,YAAU,CAAC,AAEZ,CAAC;;AACD,IAAI,MAAM,KACN,GAAG,GAAG,CAAC,AAEP,CAAC"
 }

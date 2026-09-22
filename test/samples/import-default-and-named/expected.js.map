@@ -1,11 +1,11 @@
 {
-  "version": 3,
-  "names": [],
-  "sources": [
-    "input.js"
-  ],
-  "sourcesContent": [
-    "import a, { b, c as d } from 'x';"
-  ],
-  "mappings": "AAAA,OAAO,AAAA,CAAC,IAAI,CAAC,EAAE,CAAC,IAAI,CAAC,QAAQ,GAAG"
+	"version": 3,
+	"names": [],
+	"sources": [
+		"input.js"
+	],
+	"sourcesContent": [
+		"import a, { b, c as d } from 'x';"
+	],
+	"mappings": "AAAA,OAAO,CAAC,IAAI,CAAC,EAAE,CAAC,IAAI,CAAC,QAAQ,GAAG"
 }

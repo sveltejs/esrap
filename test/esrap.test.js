@@ -219,7 +219,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 				}
 
 				if (!skipMap) {
-					expect(JSON.stringify(map, null, '  ').replaceAll('\\r', '')).toMatchFileSnapshot(
+					expect(JSON.stringify(map, null, '\t').replaceAll('\\r', '')).toMatchFileSnapshot(
 						`${__dirname}/samples/${dir}/expected.${fileExtension}.map`
 					);
 				}
