@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"switch (foo) {\n\tcase 1:\n\t\tblah();\n\t\tbreak;\n\tcase 2:\n\t\tblah();\n\tdefault:\n\t\tblah();\n}"
-	],
-	"mappings": "AAAA,QAAQ,GAAG;CACV,KAAK,CAAC;EACL,IAAI;EACJ;;CACD,KAAK,CAAC;EACL,IAAI;;CACL;EACC,IAAI;"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "switch (foo) {\n\tcase 1:\n\t\tblah();\n\t\tbreak;\n\tcase 2:\n\t\tblah();\n\tdefault:\n\t\tblah();\n}"
+  ],
+  "mappings": "AAAA,MAAM,EAAE,GAAG;CACV,IAAI,CAAC,CAAC;EACL,IAAI;EACJ,KAAK;;CACN,IAAI,CAAC,CAAC;EACL,IAAI;;CACL,OAAO;EACN,IAAI;"
 }

@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"import { foo as bar } from 'x';"
-	],
-	"mappings": "AAAA,SAAS,GAAG,IAAI,GAAG,QAAQ,GAAG"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "import { foo as bar } from 'x';"
+  ],
+  "mappings": "AAAA,OAAO,EAAE,GAAG,IAAI,GAAG,QAAQ,GAAG"
 }

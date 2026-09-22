@@ -1,11 +1,11 @@
 {
-	"version": 3,
-	"names": [],
-	"sources": [
-		"input.js"
-	],
-	"sourcesContent": [
-		"import {\n\tabc,\n\tbcd,\n\tcde,\n\tdef,\n\tefg,\n\tfgh,\n\tghi,\n\thij,\n\tijk,\n\tjkl,\n\tklm,\n\tlmn,\n\tmno,\n\tnop,\n\topq\n} from 'x';"
-	],
-	"mappings": "AAAA;CACC,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;OACG,GAAG"
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "import {\n\tabc,\n\tbcd,\n\tcde,\n\tdef,\n\tefg,\n\tfgh,\n\tghi,\n\thij,\n\tijk,\n\tjkl,\n\tklm,\n\tlmn,\n\tmno,\n\tnop,\n\topq\n} from 'x';"
+  ],
+  "mappings": "AAAA,OAAO;CACN,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;OACG,GAAG"
 }

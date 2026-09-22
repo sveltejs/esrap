@@ -124,7 +124,8 @@ function track_bindings(nodes) {
 }
 
 /**
- * Writes `keyword` with a leading source map location so that breakpoints line up
+ * Writes `keyword` bounded by source map locations for the exact character span,
+ * so breakpoints line up on keywords (not only identifiers and braces).
  *
  * @param {import('esrap').Context} context
  * @param {number} line ESTree / acorn 1-based line
@@ -134,6 +135,7 @@ function track_bindings(nodes) {
 function write_source_keyword(context, line, column, keyword) {
 	context.location(line, column);
 	context.write(keyword);
+	context.location(line, column + keyword.length);
 }
 
 /**
