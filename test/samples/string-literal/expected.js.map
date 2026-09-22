@@ -7,5 +7,5 @@
   "sourcesContent": [
     "let a = 'foo';\nlet b = \"foo\";\nlet c = `foo`;\nlet d = '\\n\\t\\ta\\n\\t\\tb\\n\\t\\tc\\n\\t';\nlet e = \"\\n\\t\\ta\\n\\t\\tb\\n\\t\\tc\\n\\t\";\n\nlet f = `\n\t\ta\n\t\tb\n\t\tc\n\t`;"
   ],
-  "mappings": "AAAA,IAAI,AAAA,CAAC,GAAG,KAAK;AACb,IAAI,AAAA,CAAC,GAAG,KAAK;AACb,IAAI,AAAA,CAAC;AACL,IAAI,AAAA,CAAC,GAAG,2BAA2B;AACnC,IAAI,AAAA,CAAC,GAAG,2BAA2B;;AAEnC,IAAI,AAAA,CAAC;;;;"
+  "mappings": "AAAA,IAAI,CAAC,GAAG,KAAK;AACb,IAAI,CAAC,GAAG,KAAK;AACb,IAAI,CAAC;AACL,IAAI,CAAC,GAAG,2BAA2B;AACnC,IAAI,CAAC,GAAG,2BAA2B;;AAEnC,IAAI,CAAC;;;;"
 }

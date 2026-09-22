@@ -7,5 +7,5 @@
   "sourcesContent": [
     "// basic\nconst foo = bar<T>;\n"
   ],
-  "mappings": ";AACA,MAAM,AAAA,GAAG,GAAG,GAAG,CAAC,CAAC"
+  "mappings": ";AACA,MAAM,GAAG,GAAG,GAAG,CAAC,CAAC"
 }
