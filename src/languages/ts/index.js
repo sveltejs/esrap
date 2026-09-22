@@ -1312,8 +1312,10 @@ export default (options = {}) => {
 		},
 
 		ImportDeclaration(node, context) {
+			token(context, 'import', node);
+			context.write(' ');
+
 			if (node.specifiers.length === 0) {
-				context.write('import ');
 				context.visit(node.source);
 				write_import_attributes(context, node);
 				context.write(';');
@@ -1339,7 +1341,6 @@ export default (options = {}) => {
 				}
 			}
 
-			context.write('import ');
 			if (node.importKind == 'type') context.write('type ');
 
 			if (default_specifier) {

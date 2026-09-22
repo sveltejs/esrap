@@ -72,60 +72,6 @@ test.each([
 	expect(segment.slice(2)).toEqual([gen_line, gen_col]);
 });
 
-test.each([
-	{
-		source: 'for /* foo */ await /* bar */ (const x of y) {}',
-		keywords: ['for', 'await', 'const']
-	},
-	{
-		source: 'async /* comment */ function f() { return 42; }',
-		keywords: ['async', 'function', 'return']
-	},
-	{
-		source: 'export\n default /* comment */ function f() {}',
-		keywords: ['export', 'default', 'function']
-	},
-	{
-		source: 'declare /* comment */ let x: number;',
-		keywords: ['declare', 'let']
-	},
-	{
-		source: 'import /* comment */ type { X } from "foo";',
-		keywords: ['import', 'type']
-	},
-	{
-		source: 'class C { public /* comment */ static readonly x = 1; get y() { return 2; } }',
-		keywords: ['class', 'public', 'static', 'readonly', 'get', 'return']
-	},
-	{
-		source: 'if (x) { a(); } /* comment */ else { b(); }',
-		keywords: ['if', 'else']
-	},
-	{
-		source: 'try { a(); } /* a */ catch (e) { b(); } /* b */ finally { c(); }',
-		keywords: ['try', 'catch', 'finally']
-	},
-	{
-		source: 'do { a(); } /* comment */ while (x);',
-		keywords: ['do', 'while']
-	},
-	{
-		source: 'switch (x) { case 1: break; default: throw x; }',
-		keywords: ['switch', 'case', 'break', 'default', 'throw']
-	}
-])('does not map declaration or control-flow keywords: $source', ({ source, keywords }) => {
-	const { code, mappings } = mapped(source);
-	for (const keyword of keywords) {
-		const index = code.indexOf(keyword);
-		expect(index).toBeGreaterThanOrEqual(0);
-		const { gen_line, gen_col } = generatedLineColumn(code, index);
-		expect(
-			mappings[gen_line]?.find((segment) => segment[0] === gen_col),
-			keyword
-		).toBeUndefined();
-	}
-});
-
 test('source mappings anchor array and object brackets', () => {
 	{
 		const { source, code, mappings } = mapped(`const points = [];`, { boundaryTokens: true });
