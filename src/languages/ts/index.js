@@ -145,6 +145,23 @@ function write_comment(comment, context) {
 }
 
 /**
+ * @param {Context} context
+ * @param {string} token
+ * @param {TSESTree.Node} node
+ * @param {boolean} close
+ */
+function token(context, token, node, close = false) {
+	if (node.loc) {
+		const { line, column } = close ? node.loc.end : node.loc.start;
+		context.location(line, close ? column - token.length : column);
+		context.write(token);
+		context.location(line, close ? column : column + token.length);
+	} else {
+		context.write(token);
+	}
+}
+
+/**
  * @param {TSOptions} [options]
  * @returns {Visitors<TSESTree.Node>}
  */
@@ -530,14 +547,7 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'BlockStatement|ClassBody': (node, context) => {
-			if (node.loc) {
-				const { line, column } = node.loc.start;
-				context.location(line, column);
-				context.write('{');
-				context.location(line, column + 1);
-			} else {
-				context.write('{');
-			}
+			token(context, '{', node);
 
 			const child_context = context.new();
 			body(child_context, node);
@@ -550,15 +560,7 @@ export default (options = {}) => {
 				context.newline();
 			}
 
-			if (node.loc) {
-				const { line, column } = node.loc.end;
-
-				context.location(line, column - 1);
-				context.write('}');
-				context.location(line, column);
-			} else {
-				context.write('}');
-			}
+			token(context, '}', node, true);
 		},
 
 		/**
@@ -567,13 +569,13 @@ export default (options = {}) => {
 		 */
 		'CallExpression|NewExpression': (node, context) => {
 			if (node.type === 'NewExpression') {
-				// Stack traces can point to `new` rather than the callee.
-				if (node.loc) {
-					const { line, column } = node.loc.start;
-					context.location(line, column);
-				}
+				token(context, 'new', node);
+				context.write(' ');
+			}
 
-				context.write('new ');
+			if (node.callee.loc) {
+				const { line, column } = node.callee.loc.start;
+				context.location(line, column);
 			}
 
 			const wrap =
@@ -1048,25 +1050,19 @@ export default (options = {}) => {
 		},
 
 		AwaitExpression(node, context) {
-			// Thenable assimilation can throw at the await expression itself.
-			if (node.loc) {
-				const { line, column } = node.loc.start;
-				context.location(line, column);
-			}
+			token(context, 'await', node);
 
 			if (node.argument) {
 				const precedence = EXPRESSIONS_PRECEDENCE[node.argument.type];
 
 				if (precedence && precedence < EXPRESSIONS_PRECEDENCE.AwaitExpression) {
-					context.write('await (');
+					context.write(' (');
 					context.visit(node.argument);
 					context.write(')');
 				} else {
-					context.write('await ');
+					context.write(' ');
 					context.visit(node.argument);
 				}
-			} else {
-				context.write('await');
 			}
 		},
 
