@@ -13,27 +13,26 @@
 	],
 	"exports": {
 		".": {
-			"types": "./types/index.d.ts",
+			"types": "./types/public.d.ts",
 			"default": "./src/index.js"
 		},
 		"./languages/ts": {
-			"types": "./types/index.d.ts",
+			"types": "./types/languages/ts/public.d.ts",
 			"default": "./src/languages/ts/index.js"
 		},
 		"./languages/tsx": {
-			"types": "./types/index.d.ts",
+			"types": "./types/languages/tsx/public.d.ts",
 			"default": "./src/languages/tsx/index.js"
 		}
 	},
-	"types": "./types/index.d.ts",
 	"devDependencies": {
 		"@changesets/cli": "^2.27.11",
 		"@sveltejs/acorn-typescript": "^1.0.13",
 		"@types/estree": "^1.0.8",
+		"@types/node": "^20.12.14",
 		"@typescript-eslint/types": "^8.2.0",
 		"@vitest/ui": "^2.1.1",
 		"acorn": "^8.15.0",
-		"dts-buddy": "^0.6.2",
 		"oxc-parser": "^0.95.0",
 		"prettier": "^3.0.3",
 		"typescript": "^5.7.2",
@@ -43,9 +42,9 @@
 	"scripts": {
 		"changeset:version": "changeset version",
 		"changeset:publish": "changeset publish",
-		"gen": "dts-buddy -m esrap:./src/public.d.ts -m esrap/languages/ts:./src/languages/ts/public.d.ts -m esrap/languages/tsx:./src/languages/tsx/public.d.ts",
-		"check": "pnpm gen && tsc",
-		"prepublishOnly": "pnpm test && pnpm gen",
+		"build": "tsc -p tsconfig.build.json",
+		"check": "pnpm build && tsc",
+		"prepublishOnly": "pnpm check",
 		"sandbox": "node test/sandbox/index.js",
 		"test": "vitest --run",
 		"test:ui": "vitest --ui",
