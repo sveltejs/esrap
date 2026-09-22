@@ -7,5 +7,5 @@
 	"sourcesContent": [
 		"await (a || b);\nawait c;\nasync () => (await a) ** b;\n"
 	],
-	"mappings": "AAAA,OAAO,CAAC,IAAI,CAAC;AACb,MAAM,CAAC;AACP,aAAa,MAAM,CAAC,KAAK,CAAC"
+	"mappings": "AAAA,OAAO,CAAC,IAAI,CAAC;AACb,MAAM,CAAC;aACM,MAAM,CAAC,KAAK,CAAC"
 }

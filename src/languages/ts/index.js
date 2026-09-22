@@ -124,116 +124,6 @@ function track_bindings(nodes) {
 }
 
 /**
- * Writes `keyword` with a leading source map location so that breakpoints line up
- *
- * @param {import('esrap').Context} context
- * @param {number} line ESTree / acorn 1-based line
- * @param {number} column 0-based ESTree column (UTF-16 indices, same as emitted JS)
- * @param {string} keyword
- */
-function write_source_keyword(context, line, column, keyword) {
-	context.location(line, column);
-	context.write(keyword);
-}
-
-/**
- * Sequential fragments from one ESTree `loc.start`, advancing columns for source mappings.
- * Pass each printed fragment exactly (usually including trailing spaces), e.g. `declare `, `class `.
- * Usage: `const kw = create_keyword_write(context, node, predicate);`
- *
- * @param {import('esrap').Context} context
- * @param {TSESTree.Node} node
- * @param {(n: any) => boolean} [map_ok] When false or missing `loc`, writes go through `context.write` only.
- * @returns {(fragment: string) => void}
- */
-function create_keyword_write(context, node, map_ok) {
-	let cursor =
-		node.loc && (!map_ok || map_ok(node))
-			? { line: node.loc.start.line, col: node.loc.start.column }
-			: null;
-
-	return (fragment) => {
-		if (cursor) {
-			write_source_keyword(context, cursor.line, cursor.col, fragment);
-			cursor.col += fragment.length;
-		} else {
-			context.write(fragment);
-		}
-	};
-}
-
-/**
- * Map one keyword at `node.loc.start`, then append unmapped `suffix` (spaces, punctuation, etc.).
- *
- * @param {import('esrap').Context} context
- * @param {TSESTree.Node} node
- * @param {string} keyword
- * @param {string} [suffix='']
- */
-function write_keyword(context, node, keyword, suffix = '') {
-	if (node.loc) {
-		write_source_keyword(context, node.loc.start.line, node.loc.start.column, keyword);
-		context.write(suffix);
-	} else {
-		context.write(keyword + suffix);
-	}
-}
-
-/**
- * `async function` offset heuristics assume the `function` token is on the same line as `async`
- * and anchored with the function `id`/`body` ESTree locations.
- *
- * @param {TSESTree.FunctionDeclaration | TSESTree.FunctionExpression} node
- */
-function function_async_function_offset_ok(node) {
-	const line = /** @type {{ loc?: { start: { line: number } } }} */ (node).loc?.start.line;
-	if (line === undefined) return false;
-
-	return node.id?.loc?.start.line === line || node.body?.loc?.start.line === line;
-}
-
-/** @param {{ loc?: { start: { line: number }, end: { line: number } } }} node */
-function single_line_node(node) {
-	return !!(node.loc && node.loc.start.line === node.loc.end.line);
-}
-
-/**
- * @param {TSESTree.ClassDeclaration | TSESTree.ClassExpression} node
- * @returns {boolean}
- */
-function class_modifier_keywords_map_ok(node) {
-	return (
-		!!node.loc &&
-		!node.decorators?.length &&
-		(node.id
-			? node.id.loc?.start.line === node.loc.start.line
-			: node.body.loc.start.line === node.loc.start.line)
-	);
-}
-
-/**
- * @param {TSESTree.MethodDefinition | TSESTree.TSAbstractMethodDefinition} node
- * @returns {boolean}
- */
-function method_modifiers_keywords_map_ok(node) {
-	return !!(
-		node.loc &&
-		!node.decorators?.length &&
-		node.loc.start.line === node.value.loc?.start.line
-	);
-}
-
-/**
- * @param {TSESTree.PropertyDefinition | TSESTree.TSAbstractPropertyDefinition | TSESTree.AccessorProperty | TSESTree.TSAbstractAccessorProperty} node
- * @returns {boolean}
- */
-function field_modifiers_keywords_map_ok(node) {
-	if (!node.loc || node.decorators?.length) return false;
-	if (!node.value?.loc) return true;
-	return node.loc.start.line === node.value.loc.start.line;
-}
-
-/**
  * @param {BaseComment} comment
  * @param {Context} context
  */
@@ -677,7 +567,13 @@ export default (options = {}) => {
 		 */
 		'CallExpression|NewExpression': (node, context) => {
 			if (node.type === 'NewExpression') {
-				write_keyword(context, node, 'new', ' ');
+				// Stack traces can point to `new` rather than the callee.
+				if (node.loc) {
+					const { line, column } = node.loc.start;
+					context.location(line, column);
+				}
+
+				context.write('new ');
 			}
 
 			const wrap =
@@ -762,11 +658,9 @@ export default (options = {}) => {
 				}
 			}
 
-			const kw = create_keyword_write(context, node, class_modifier_keywords_map_ok);
-
-			if (node.declare) kw('declare ');
-			if (node.abstract) kw('abstract ');
-			kw('class ');
+			if (node.declare) context.write('declare ');
+			if (node.abstract) context.write('abstract ');
+			context.write('class ');
 
 			if (node.id) {
 				context.visit(node.id);
@@ -812,14 +706,8 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'ForInStatement|ForOfStatement': (node, context) => {
-			const kw = create_keyword_write(context, node);
-
-			kw('for ');
-			if (node.type === 'ForOfStatement' && node.await) {
-				if (single_line_node(node)) kw('await ');
-				else context.write('await ');
-			}
-
+			context.write('for ');
+			if (node.type === 'ForOfStatement' && node.await) context.write('await ');
 			context.write('(');
 
 			if (node.left.type === 'VariableDeclaration') {
@@ -839,30 +727,8 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'FunctionDeclaration|FunctionExpression': (node, context) => {
-			if (!node.loc?.start) {
-				if (node.async) context.write('async ');
-				context.write(node.generator ? 'function* ' : 'function ');
-			} else {
-				const { line, column } = node.loc.start;
-
-				if (node.async) {
-					if (function_async_function_offset_ok(node)) {
-						write_source_keyword(context, line, column, 'async ');
-						const col2 = column + 'async '.length;
-						write_source_keyword(context, line, col2, 'function');
-						context.write(node.generator ? '* ' : ' ');
-					} else {
-						context.write('async ');
-						context.write(node.generator ? 'function* ' : 'function ');
-					}
-				} else if (node.generator) {
-					write_source_keyword(context, line, column, 'function');
-					context.write('* ');
-				} else {
-					write_source_keyword(context, line, column, 'function');
-					context.write(' ');
-				}
-			}
+			if (node.async) context.write('async ');
+			context.write(node.generator ? 'function* ' : 'function ');
 
 			if (node.id) track_binding(node.id);
 
@@ -895,31 +761,29 @@ export default (options = {}) => {
 				}
 			}
 
-			const kw = create_keyword_write(context, node, method_modifiers_keywords_map_ok);
-
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			if (node.abstract || node.type === 'TSAbstractMethodDefinition') {
-				kw('abstract ');
+				context.write('abstract ');
 			}
 
 			if (node.accessibility) {
-				kw(node.accessibility + ' ');
+				context.write(node.accessibility + ' ');
 			}
 
 			if (node.override) {
-				kw('override ');
+				context.write('override ');
 			}
 
 			if (node.static) {
-				kw('static ');
+				context.write('static ');
 			}
 
 			if (node.kind === 'get' || node.kind === 'set') {
-				kw(node.kind + ' ');
+				context.write(node.kind + ' ');
 			}
 
 			if (node.value.async) {
-				kw('async ');
+				context.write('async ');
 			}
 
 			if (node.value.generator) context.write('*');
@@ -969,12 +833,10 @@ export default (options = {}) => {
 				}
 			}
 
-			const kw = create_keyword_write(context, node, field_modifiers_keywords_map_ok);
-
-			if (node.declare) kw('declare ');
+			if (node.declare) context.write('declare ');
 
 			if (node.accessibility) {
-				kw(node.accessibility + ' ');
+				context.write(node.accessibility + ' ');
 			}
 
 			if (
@@ -983,16 +845,16 @@ export default (options = {}) => {
 				node.type === 'TSAbstractPropertyDefinition' ||
 				node.type === 'TSAbstractAccessorProperty'
 			) {
-				kw('abstract ');
+				context.write('abstract ');
 			}
 
 			if (node.static) {
-				kw('static ');
+				context.write('static ');
 			}
 
-			if (node.override) kw('override ');
+			if (node.override) context.write('override ');
 
-			if (node.readonly) kw('readonly ');
+			if (node.readonly) context.write('readonly ');
 
 			if (
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
@@ -1000,7 +862,7 @@ export default (options = {}) => {
 				node.type === 'AccessorProperty' ||
 				node.type === 'TSAbstractAccessorProperty'
 			) {
-				kw('accessor ');
+				context.write('accessor ');
 			}
 
 			if (node.computed) {
@@ -1155,9 +1017,7 @@ export default (options = {}) => {
 		ArrayPattern: shared['ArrayExpression|ArrayPattern'],
 
 		ArrowFunctionExpression: (node, context) => {
-			if (node.async) {
-				write_keyword(context, node, 'async', ' ');
-			}
+			if (node.async) context.write('async ');
 
 			if (node.typeParameters) {
 				context.visit(node.typeParameters);
@@ -1188,19 +1048,25 @@ export default (options = {}) => {
 		},
 
 		AwaitExpression(node, context) {
+			// Thenable assimilation can throw at the await expression itself.
+			if (node.loc) {
+				const { line, column } = node.loc.start;
+				context.location(line, column);
+			}
+
 			if (node.argument) {
 				const precedence = EXPRESSIONS_PRECEDENCE[node.argument.type];
 
 				if (precedence && precedence < EXPRESSIONS_PRECEDENCE.AwaitExpression) {
-					write_keyword(context, node, 'await', ' (');
+					context.write('await (');
 					context.visit(node.argument);
 					context.write(')');
 				} else {
-					write_keyword(context, node, 'await', ' ');
+					context.write('await ');
 					context.visit(node.argument);
 				}
 			} else {
-				write_keyword(context, node, 'await', '');
+				context.write('await');
 			}
 		},
 
@@ -1210,11 +1076,11 @@ export default (options = {}) => {
 
 		BreakStatement(node, context) {
 			if (node.label) {
-				write_keyword(context, node, 'break', ' ');
+				context.write('break ');
 				context.visit(node.label);
 				context.write(';');
 			} else {
-				write_keyword(context, node, 'break', ';');
+				context.write('break;');
 			}
 		},
 
@@ -1266,11 +1132,11 @@ export default (options = {}) => {
 
 		ContinueStatement(node, context) {
 			if (node.label) {
-				write_keyword(context, node, 'continue', ' ');
+				context.write('continue ');
 				context.visit(node.label);
 				context.write(';');
 			} else {
-				write_keyword(context, node, 'continue', ';');
+				context.write('continue;');
 			}
 		},
 
@@ -1293,19 +1159,9 @@ export default (options = {}) => {
 		},
 
 		DoWhileStatement(node, context) {
-			write_keyword(context, node, 'do', ' ');
+			context.write('do ');
 			context.visit(node.body);
-
-			const test_loc = node.test.loc?.start;
-			const body_end = node.body.loc?.end;
-			if (test_loc && body_end && body_end.line === test_loc.line && test_loc.column >= 6) {
-				context.write(' ');
-				write_source_keyword(context, body_end.line, body_end.column + 1, 'while');
-				context.write(' (');
-			} else {
-				context.write(' while (');
-			}
-
+			context.write(' while (');
 			context.visit(node.test);
 			context.write(');');
 		},
@@ -1329,9 +1185,7 @@ export default (options = {}) => {
 		},
 
 		ExportDefaultDeclaration(node, context) {
-			const kw = create_keyword_write(context, node, single_line_node);
-			kw('export ');
-			kw('default ');
+			context.write('export default ');
 
 			context.visit(node.declaration);
 
@@ -1348,26 +1202,21 @@ export default (options = {}) => {
 					for (const decorator of decl.decorators) {
 						context.visit(decorator);
 					}
-					write_keyword(context, node, 'export', ' ');
+					context.write('export ');
 					// Temporarily remove decorators so ClassDeclaration doesn't print them again
 					const savedDecorators = decl.decorators;
 					decl.decorators = [];
 					context.visit(node.declaration);
 					decl.decorators = savedDecorators;
 				} else {
-					write_keyword(context, node, 'export', ' ');
+					context.write('export ');
 					context.visit(node.declaration);
 				}
 				return;
 			}
 
-			const kw = create_keyword_write(context, node);
-
-			kw('export ');
-			if (node.exportKind === 'type') {
-				if (single_line_node(node)) kw('type ');
-				else context.write('type ');
-			}
+			context.write('export ');
+			if (node.exportKind === 'type') context.write('type ');
 
 			context.write('{');
 			sequence(context, node.specifiers, node.source?.loc?.start ?? node.loc?.end ?? null, true);
@@ -1403,7 +1252,7 @@ export default (options = {}) => {
 		},
 
 		ForStatement: (node, context) => {
-			write_keyword(context, node, 'for', ' (');
+			context.write('for (');
 
 			if (node.init) {
 				if (node.init.type === 'VariableDeclaration') {
@@ -1443,7 +1292,7 @@ export default (options = {}) => {
 		},
 
 		IfStatement(node, context) {
-			write_keyword(context, node, 'if', ' (');
+			context.write('if (');
 			context.visit(node.test);
 			context.write(') ');
 
@@ -1461,23 +1310,14 @@ export default (options = {}) => {
 
 			if (node.alternate) {
 				context.space();
-
-				const alt_loc = node.alternate.loc?.start;
-				const con_end = node.consequent.loc?.end;
-				if (alt_loc && con_end && con_end.line === alt_loc.line && alt_loc.column >= 4) {
-					write_source_keyword(context, con_end.line, con_end.column + 1, 'else');
-					context.write(' ');
-				} else {
-					context.write('else ');
-				}
-
+				context.write('else ');
 				context.visit(node.alternate);
 			}
 		},
 
 		ImportDeclaration(node, context) {
 			if (node.specifiers.length === 0) {
-				write_keyword(context, node, 'import', ' ');
+				context.write('import ');
 				context.visit(node.source);
 				write_import_attributes(context, node);
 				context.write(';');
@@ -1503,13 +1343,8 @@ export default (options = {}) => {
 				}
 			}
 
-			const kw = create_keyword_write(context, node);
-
-			kw('import ');
-			if (node.importKind == 'type') {
-				if (single_line_node(node)) kw('type ');
-				else context.write('type ');
-			}
+			context.write('import ');
+			if (node.importKind == 'type') context.write('type ');
 
 			if (default_specifier) {
 				context.write(default_specifier.local.name, default_specifier);
@@ -1533,7 +1368,13 @@ export default (options = {}) => {
 		},
 
 		ImportExpression(node, context) {
-			write_keyword(context, node, 'import', '(');
+			// Dynamic import has no callee identifier to provide a call-site mapping.
+			if (node.loc) {
+				const { line, column } = node.loc.start;
+				context.location(line, column);
+			}
+
+			context.write('import(');
 			context.visit(node.source);
 			//@ts-expect-error for some reason the types haven't been updated
 			if (node.arguments) {
@@ -1672,10 +1513,8 @@ export default (options = {}) => {
 				node.value.type === 'FunctionExpression' &&
 				(node.method || node.kind === 'get' || node.kind === 'set')
 			) {
-				const kw = create_keyword_write(context, node);
-
-				if (node.kind !== 'init') kw(node.kind + ' ');
-				if (node.value.async) kw('async ');
+				if (node.kind !== 'init') context.write(node.kind + ' ');
+				if (node.value.async) context.write('async ');
 				if (node.value.generator) context.write('*');
 				if (node.computed) context.write('[', token_before(node.key.loc?.start));
 				context.visit(node.key);
@@ -1698,7 +1537,7 @@ export default (options = {}) => {
 			} else {
 				if (node.computed) context.write('[', token_before(node.key.loc?.start));
 				if (node.kind === 'get' || node.kind === 'set') {
-					write_keyword(context, node, node.kind, ' ');
+					context.write(node.kind + ' ');
 				}
 				context.visit(node.key);
 				if (node.computed) {
@@ -1726,11 +1565,11 @@ export default (options = {}) => {
 					node.argument.loc &&
 					before(comments[comment_index].loc.start, node.argument.loc.start);
 
-				write_keyword(context, node, 'return', contains_comment ? ' (' : ' ');
+				context.write(contains_comment ? 'return (' : 'return ');
 				context.visit(node.argument);
 				context.write(contains_comment ? ');' : ';');
 			} else {
-				write_keyword(context, node, 'return', ';');
+				context.write('return;');
 			}
 		},
 
@@ -1743,7 +1582,7 @@ export default (options = {}) => {
 		SpreadElement: shared['RestElement|SpreadElement'],
 
 		StaticBlock(node, context) {
-			write_keyword(context, node, 'static', ' {');
+			context.write('static {');
 			context.indent();
 			context.newline();
 
@@ -1759,7 +1598,7 @@ export default (options = {}) => {
 		},
 
 		SwitchStatement(node, context) {
-			write_keyword(context, node, 'switch', ' (');
+			context.write('switch (');
 			context.visit(node.discriminant);
 			context.write(') {');
 			context.indent();
@@ -1775,12 +1614,12 @@ export default (options = {}) => {
 
 				if (block.test) {
 					context.newline();
-					write_keyword(context, block, 'case', ' ');
+					context.write('case ');
 					context.visit(block.test);
 					context.write(':');
 				} else {
 					context.newline();
-					write_keyword(context, block, 'default', ':');
+					context.write('default:');
 				}
 
 				context.indent();
@@ -1835,41 +1674,30 @@ export default (options = {}) => {
 		},
 
 		ThrowStatement(node, context) {
-			write_keyword(context, node, 'throw', ' ');
+			context.write('throw ');
 			if (node.argument) context.visit(node.argument);
 			context.write(';');
 		},
 
 		TryStatement(node, context) {
-			write_keyword(context, node, 'try', ' ');
+			context.write('try ');
 			context.visit(node.block);
 
 			if (node.handler) {
-				context.write(' ');
-
 				if (node.handler.param) {
-					write_keyword(context, node.handler, 'catch', '(');
+					context.write(' catch(');
 					track_binding(node.handler.param);
 					context.visit(node.handler.param);
 					context.write(') ');
 				} else {
-					write_keyword(context, node.handler, 'catch', ' ');
+					context.write(' catch ');
 				}
 
 				context.visit(node.handler.body);
 			}
 
 			if (node.finalizer) {
-				const fin_loc = node.finalizer.loc?.start;
-				const prev_end = node.handler ? node.handler.loc?.end : node.block.loc?.end;
-				if (fin_loc && prev_end && prev_end.line === fin_loc.line && fin_loc.column >= 7) {
-					context.write(' ');
-					write_source_keyword(context, prev_end.line, prev_end.column + 1, 'finally');
-					context.write(' ');
-				} else {
-					context.write(' finally ');
-				}
-
+				context.write(' finally ');
 				context.visit(node.finalizer);
 			}
 		},
@@ -1914,27 +1742,31 @@ export default (options = {}) => {
 		},
 
 		WhileStatement(node, context) {
-			write_keyword(context, node, 'while', ' (');
+			context.write('while (');
 			context.visit(node.test);
 			context.write(') ');
 			context.visit(node.body);
 		},
 
 		WithStatement(node, context) {
-			write_keyword(context, node, 'with', ' (');
+			context.write('with (');
 			context.visit(node.object);
 			context.write(') ');
 			context.visit(node.body);
 		},
 
 		YieldExpression(node, context) {
-			const word = node.delegate ? 'yield*' : 'yield';
+			// Map generator suspension points and errors from delegated iterators.
+			if (node.loc) {
+				const { line, column } = node.loc.start;
+				context.location(line, column);
+			}
 
 			if (node.argument) {
-				write_keyword(context, node, word, ' ');
+				context.write(node.delegate ? 'yield* ' : 'yield ');
 				context.visit(node.argument);
 			} else {
-				write_keyword(context, node, word, '');
+				context.write(node.delegate ? 'yield*' : 'yield');
 			}
 		},
 
@@ -1951,17 +1783,15 @@ export default (options = {}) => {
 			],
 
 		TSDeclareFunction(node, context) {
-			const kw = create_keyword_write(context, node);
-
 			// bodyless functions are either ambient declarations or overload
 			// signatures — only the former are written with `declare`
-			if (node.declare) kw('declare ');
+			if (node.declare) context.write('declare ');
 
 			if (node.async) {
-				kw('async ');
+				context.write('async ');
 			}
 
-			kw('function');
+			context.write('function');
 
 			if (node.generator) {
 				context.write('*');
@@ -2293,7 +2123,7 @@ export default (options = {}) => {
 		TSMethodSignature(node, context) {
 			// accessor signatures (`get x(): string`, `set x(value: string)`)
 			if (node.kind === 'get' || node.kind === 'set') {
-				write_keyword(context, node, node.kind, ' ');
+				context.write(node.kind + ' ');
 			}
 
 			if (node.computed) context.write('[', token_before(node.key.loc?.start));
@@ -2846,10 +2676,8 @@ function handle_var_declaration(node, context, no_in = false) {
 
 	context.append(child_context);
 
-	const kw = create_keyword_write(child_context, node);
-
-	if (node.declare) kw('declare ');
-	kw(node.kind + ' ');
+	if (node.declare) child_context.write('declare ');
+	child_context.write(`${node.kind} `);
 
 	child_context.append(open);
 

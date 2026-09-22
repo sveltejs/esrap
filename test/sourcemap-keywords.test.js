@@ -58,142 +58,94 @@ function mapped(source, opts = {}) {
 	return { source, code, mappings };
 }
 
-test('source mappings land on keywords (let / function / async / export)', () => {
-	{
-		const { source, code, mappings } = mapped(`let alpha = 1;`);
-		const segment = mappingAtSubstring(code, 'let', mappings);
-		expect(segment[2]).toBe(0);
-		expect(segment[3]).toBe(source.indexOf('let'));
-	}
-
-	{
-		const { source, code, mappings } = mapped(`async function bar() {}`);
-		const seg_async = mappingAtSubstring(code, 'async', mappings);
-		expect(seg_async[2]).toBe(0);
-		expect(seg_async[3]).toBe(source.indexOf('async'));
-
-		const seg_fn = mappingAtSubstring(code, 'function', mappings);
-		expect(seg_fn[2]).toBe(0);
-		expect(seg_fn[3]).toBe(source.indexOf('function'));
-	}
-
-	{
-		const { source, code, mappings } = mapped(`export default function qux() {}`);
-		const seg_export = mappingAtSubstring(code, 'export', mappings);
-		expect(seg_export[2]).toBe(0);
-		expect(seg_export[3]).toBe(source.indexOf('export'));
-
-		const seg_default = mappingAtSubstring(code, 'default', mappings);
-		expect(seg_default[2]).toBe(0);
-		expect(seg_default[3]).toBe(source.indexOf('default'));
-
-		const seg_fn = mappingAtSubstring(code, 'function', mappings);
-		expect(seg_fn[2]).toBe(0);
-		expect(seg_fn[3]).toBe(source.indexOf('function'));
-	}
-});
-
-test('declare let maps declare and let separately', () => {
-	const { source, code, mappings } = mapped(`declare let beta: number;`);
-
-	const seg_declare = mappingAtSubstring(code, 'declare', mappings);
-	expect(seg_declare[2]).toBe(0);
-	expect(seg_declare[3]).toBe(source.indexOf('declare'));
-
-	const seg_let = mappingAtSubstring(code, 'let', mappings);
-	expect(seg_let[2]).toBe(0);
-	expect(seg_let[3]).toBe(source.indexOf('let'));
-});
-
-test('class static and get map to source keywords', () => {
-	{
-		const { source, code, mappings } = mapped(`class C { static meth() {} }`);
-
-		const seg_static = mappingAtSubstring(code, 'static', mappings);
-		expect(seg_static[3]).toBe(source.indexOf('static'));
-	}
-
-	{
-		const { source, code, mappings } = mapped(`class D { get x() { return 1; } }`);
-
-		const seg_get = mappingAtSubstring(code, 'get', mappings);
-		expect(seg_get[3]).toBe(source.indexOf('get'));
-	}
-});
-
-test('throw / return / await map to source keywords', () => {
-	{
-		const { source, code, mappings } = mapped(`function f() { throw new Error('x'); }`);
-		const seg = mappingAtSubstring(code, 'throw', mappings);
-		expect(seg[3]).toBe(source.indexOf('throw'));
-	}
-
-	{
-		const { source, code, mappings } = mapped(`function f() { return 42; }`);
-		const seg = mappingAtSubstring(code, 'return', mappings);
-		expect(seg[3]).toBe(source.indexOf('return'));
-	}
-
-	{
-		const { source, code, mappings } = mapped(`async function f() { await thing(); }`);
-		const seg = mappingAtSubstring(code, 'await', mappings);
-		expect(seg[3]).toBe(source.indexOf('await'));
-	}
-});
-
-test('if / else map to source keywords', () => {
-	const { source, code, mappings } = mapped(`if (x) { a(); } else { b(); }`);
-
-	const seg_if = mappingAtSubstring(code, 'if', mappings);
-	expect(seg_if[3]).toBe(source.indexOf('if'));
-
-	const seg_else = mappingAtSubstring(code, 'else', mappings);
-	expect(seg_else[3]).toBe(source.indexOf('else'));
-});
-
-test('try / catch / finally map to source keywords', () => {
-	const { source, code, mappings } = mapped(`try { a(); } catch (e) { b(); } finally { c(); }`);
-
-	const seg_try = mappingAtSubstring(code, 'try', mappings);
-	expect(seg_try[3]).toBe(source.indexOf('try'));
-
-	const seg_catch = mappingAtSubstring(code, 'catch', mappings);
-	expect(seg_catch[3]).toBe(source.indexOf('catch'));
-
-	const seg_finally = mappingAtSubstring(code, 'finally', mappings);
-	expect(seg_finally[3]).toBe(source.indexOf('finally'));
-});
-
-test('do / while map to source keywords', () => {
-	const { source, code, mappings } = mapped(`do { a(); } while (cond);`);
-
-	const seg_do = mappingAtSubstring(code, 'do', mappings);
-	expect(seg_do[3]).toBe(source.indexOf('do'));
-
-	const seg_while = mappingAtSubstring(code, 'while', mappings);
-	expect(seg_while[3]).toBe(source.indexOf('while'));
-});
-
-test('switch / case / default map to source keywords', () => {
-	const { source, code, mappings } = mapped(`switch (x) { case 1: a(); break; default: b(); }`);
-
-	const seg_switch = mappingAtSubstring(code, 'switch', mappings);
-	expect(seg_switch[3]).toBe(source.indexOf('switch'));
-
-	const seg_case = mappingAtSubstring(code, 'case', mappings);
-	expect(seg_case[3]).toBe(source.indexOf('case'));
-
-	const seg_default = mappingAtSubstring(code, 'default', mappings);
-	expect(seg_default[3]).toBe(source.indexOf('default'));
-});
-
-test('decorator-prefixed class falls back gracefully', () => {
-	const source = `@dec\nclass D {}`;
+test.each([
+	['function f() {\n\tthrow new /* comment */\nError("x");\n}', 'new'],
+	['async function f() {\n\tawait /* comment */\nvalue;\n}', 'await'],
+	['async function f() {\n\tawait (a || b);\n}', 'await'],
+	['function* f() {\n\tyield /* comment */ *\nvalues;\n}', 'yield'],
+	['function* f() {\n\tyield;\n}', 'yield'],
+	['const p =\n\timport /* comment */\n("foo");', 'import']
+])('maps runtime expression starts: %s', (source, keyword) => {
 	const { code, mappings } = mapped(source);
-
-	expect(code).toContain('class');
-	expect(mappings.length).toBeGreaterThan(0);
+	const segment = mappingAtSubstring(code, keyword, mappings);
+	const { gen_line, gen_col } = generatedLineColumn(source, source.indexOf(keyword));
+	expect(segment.slice(2)).toEqual([gen_line, gen_col]);
 });
+
+test.each([
+	{
+		source: 'for /* foo */ await /* bar */ (const x of y) {}',
+		keywords: ['for', 'await', 'const']
+	},
+	{
+		source: 'async /* comment */ function f() { return 42; }',
+		keywords: ['async', 'function', 'return']
+	},
+	{
+		source: 'export\n default /* comment */ function f() {}',
+		keywords: ['export', 'default', 'function']
+	},
+	{
+		source: 'declare /* comment */ let x: number;',
+		keywords: ['declare', 'let']
+	},
+	{
+		source: 'import /* comment */ type { X } from "foo";',
+		keywords: ['import', 'type']
+	},
+	{
+		source: 'class C { public /* comment */ static readonly x = 1; get y() { return 2; } }',
+		keywords: ['class', 'public', 'static', 'readonly', 'get', 'return']
+	},
+	{
+		source: 'if (x) { a(); } /* comment */ else { b(); }',
+		keywords: ['if', 'else']
+	},
+	{
+		source: 'try { a(); } /* a */ catch (e) { b(); } /* b */ finally { c(); }',
+		keywords: ['try', 'catch', 'finally']
+	},
+	{
+		source: 'do { a(); } /* comment */ while (x);',
+		keywords: ['do', 'while']
+	},
+	{
+		source: 'switch (x) { case 1: break; default: throw x; }',
+		keywords: ['switch', 'case', 'break', 'default', 'throw']
+	}
+])('does not map declaration or control-flow keywords: $source', ({ source, keywords }) => {
+	const { code, mappings } = mapped(source);
+	for (const keyword of keywords) {
+		const index = code.indexOf(keyword);
+		expect(index).toBeGreaterThanOrEqual(0);
+		const { gen_line, gen_col } = generatedLineColumn(code, index);
+		expect(
+			mappings[gen_line]?.find((segment) => segment[0] === gen_col),
+			keyword
+		).toBeUndefined();
+	}
+});
+
+test('comments between loop keywords do not affect identifier mappings', () => {
+	const source = 'for /* foo */ await /* bar */ (const x of y) {}';
+	const { code, mappings } = mapped(source);
+	for (const name of ['x', 'y']) {
+		expect(mappingAtSubstring(code, name, mappings).slice(2)).toEqual([0, source.indexOf(name)]);
+	}
+});
+
+test.each(['new Thing();', 'await value;', 'function* f() { yield* values; }', 'import("foo");'])(
+	'prints runtime expressions without locations: %s',
+	(source) => {
+		const { ast } = acornParse(source);
+		const without_locations = JSON.parse(
+			JSON.stringify(ast, (key, value) => (key === 'loc' ? undefined : value))
+		);
+		const { code, map } = print(without_locations, ts(), { sourceMapEncodeMappings: false });
+		expect(code).toBe(print(ast, ts()).code);
+		expect(map.mappings.flat()).toEqual([]);
+	}
+);
 
 test('no positive whitespace mapping directly after keyword', () => {
 	// Positive source-map segment at gen_col == keyword_end (e.g. space after
@@ -203,11 +155,23 @@ test('no positive whitespace mapping directly after keyword', () => {
 		`function f() {\n\treturn x ?? 1;\n}`,
 		`function g() {\n\treturn a || b;\n}`,
 		`async function h() {\n\tawait p();\n}`,
+		`function f() { throw new Error(); }`,
+		`function* g() { yield* values; }`,
+		`import /* comment */ ("foo");`,
 		`const k = 1;`,
 		`let m = 1;`
 	]) {
 		const { code, mappings } = mapped(source);
-		for (const keyword of ['return', 'await', 'const', 'let', 'function']) {
+		for (const keyword of [
+			'return',
+			'await',
+			'const',
+			'let',
+			'function',
+			'new',
+			'yield',
+			'import'
+		]) {
 			const idx = code.indexOf(keyword);
 			if (idx < 0) continue;
 			const end_idx = idx + keyword.length;

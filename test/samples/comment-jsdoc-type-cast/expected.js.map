@@ -7,5 +7,5 @@
 	"sourcesContent": [
 		"const foo = /** @type {number} */ (1);\n\nconst bar = /** @type {number} */ (/** @type {number} */ (1));\n"
 	],
-	"mappings": "AAAA,MAAM,GAAG,0BAA0B,CAAC;AAEpC,MAAM,GAAG,iDAAiD,CAAC"
+	"mappings": "MAAM,GAAG,0BAA0B,CAAC;MAE9B,GAAG,iDAAiD,CAAC"
 }

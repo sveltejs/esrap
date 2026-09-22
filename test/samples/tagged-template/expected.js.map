@@ -7,5 +7,5 @@
 	"sourcesContent": [
 		"foo`bar`;\nconst a = (x || y)`tpl`;\nconst b = a.b`t`;\nconst c = f()`t`;\n"
 	],
-	"mappings": "AAAA,GAAG;;AACH,MAAM,CAAC,IAAI,CAAC,IAAI,CAAC;AACjB,MAAM,CAAC,GAAG,CAAC,CAAC,CAAC;AACb,MAAM,CAAC,GAAG,CAAC"
+	"mappings": "AAAA,GAAG;;MACG,CAAC,IAAI,CAAC,IAAI,CAAC;MACX,CAAC,GAAG,CAAC,CAAC,CAAC;MACP,CAAC,GAAG,CAAC"
 }

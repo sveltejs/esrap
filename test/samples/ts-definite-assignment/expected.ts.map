@@ -7,5 +7,5 @@
 	"sourcesContent": [
 		"let value!: number;\n\nclass Container {\n\tfield!: number;\n\taccessor other!: string;\n}\n\nexport { value, Container };\n"
 	],
-	"mappings": "AAAA,IAAI,KAAc,GAAN,MAAM;;AAElB,MAAM,SAAS,CAAC,CAAC;CAChB,KAAK,GAAG,MAAM;CACd,SAAS,KAAK,GAAG,MAAM;AACxB,CAAC;;AAED,SAAS,KAAK,EAAE,SAAS"
+	"mappings": "IAAI,KAAc,GAAN,MAAM;;MAEZ,SAAS,CAAC,CAAC;CAChB,KAAK,GAAG,MAAM;UACL,KAAK,GAAG,MAAM;AACxB,CAAC;;SAEQ,KAAK,EAAE,SAAS"
 }
