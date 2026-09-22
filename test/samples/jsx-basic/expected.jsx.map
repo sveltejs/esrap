@@ -1,11 +1,11 @@
 {
-  "version": 3,
-  "names": [],
-  "sources": [
-    "input.js"
-  ],
-  "sourcesContent": [
-    "console.log(\n\t<>\n\t\t<div>\n\t\t\t<img src=\"cat.png\" alt={'An image of a flying cat'} />\n\t\t\tTime since last cat incident: {'5 days'}\n\t\t</div>\n\t</>\n);\n"
-  ],
-  "mappings": "AAAA,OAAO,CAAC,GAAG,GACR;EACD,CAAC,GAAG,CAAC;GACJ,CAAC,GAAG,CAAC,GAAG,CAAC,SAAS,CAAC,GAAG,EAAE,0BAA0B,IAAI;iCACxB,CAAC,QAAQ,CAAC;EACzC,EAAE,GAAG,CAAC;CACP"
+	"version": 3,
+	"names": [],
+	"sources": [
+		"input.js"
+	],
+	"sourcesContent": [
+		"console.log(\n\t<>\n\t\t<div>\n\t\t\t<img src=\"cat.png\" alt={'An image of a flying cat'} />\n\t\t\tTime since last cat incident: {'5 days'}\n\t\t</div>\n\t</>\n);\n"
+	],
+	"mappings": "AAAA,OAAO,CAAC,GAAG,GACR;EACD,CAAC,GAAG,CAAC;GACJ,CAAC,GAAG,CAAC,GAAG,CAAC,SAAS,CAAC,GAAG,EAAE,0BAA0B,IAAI;iCACxB,CAAC,QAAQ,CAAC;EACzC,EAAE,GAAG,CAAC;CACP"
 }

@@ -75,9 +75,57 @@ const OPERATOR_PRECEDENCE = {
 };
 
 /**
- * Writes `keyword` with a source map location at its start, so breakpoints
- * line up on keywords (not only identifiers and braces). No end marker; the
- * keyword's mapping naturally yields to the following expression.
+ * Nodes in binding positions (variable declarator ids, function parameters,
+ * catch clause params, etc). A JSDoc `@type` comment attached to one of these
+ * is an annotation on the binding, not a type cast, so it must not be wrapped
+ * in parentheses (see https://github.com/sveltejs/esrap/issues/164).
+ * @type {WeakSet<object>}
+ */
+const BINDINGS = new WeakSet();
+
+/**
+ * Marks a binding pattern and all of its nested binding targets.
+ * @param {object | null | undefined} node
+ * @returns {void}
+ */
+function track_binding(node) {
+	if (!node || typeof node !== 'object') return;
+
+	BINDINGS.add(node);
+
+	switch (/** @type {any} */ (node).type) {
+		case 'AssignmentPattern':
+			track_binding(/** @type {any} */(node).left);
+			break;
+		case 'RestElement':
+			track_binding(/** @type {any} */(node).argument);
+			break;
+		case 'ArrayPattern':
+			track_bindings(/** @type {any} */(node).elements);
+			break;
+		case 'ObjectPattern':
+			for (const property of /** @type {any} */ (node).properties) {
+				track_binding(property.type === 'Property' ? property.value : property);
+			}
+			break;
+		case 'TSParameterProperty':
+			track_binding(/** @type {any} */(node).parameter);
+			break;
+	}
+}
+
+/**
+ * Marks an array of nodes (e.g. function params) as binding positions.
+ * @param {(object | null | undefined)[] | null | undefined} nodes
+ * @returns {void}
+ */
+function track_bindings(nodes) {
+	if (nodes) for (const node of nodes) track_binding(node);
+}
+
+/**
+ * Writes `keyword` bounded by source map locations for the exact character span,
+ * so breakpoints line up on keywords (not only identifiers and braces).
  *
  * @param {import('esrap').Context} context
  * @param {number} line ESTree / acorn 1-based line
@@ -315,9 +363,11 @@ export default (options = {}) => {
 	 * @param {{ line: number, column: number } | null} from
 	 * @param {{ line: number, column: number }} to
 	 * @param {boolean} pad
+	 * @param {boolean} [is_next_to_expression]
 	 */
-	function flush_comments_until(context, from, to, pad) {
+	function flush_comments_until(context, from, to, pad, is_next_to_expression = false) {
 		let first = true;
+		let jsdoc_type_casts = 0;
 
 		while (comment_index < comments.length) {
 			const comment = comments[comment_index];
@@ -331,10 +381,24 @@ export default (options = {}) => {
 				first = false;
 
 				write_comment(comment, context);
+				// Acorn removes the parentheses that give a JSDoc `@type` comment cast semantics.
+				// We have to do a best guess (because we don't have access to the original source)
+				// to detect it based on the comment starting with `* @type {`, and only when
+				// it's an expression (e.g. `const foo = /** @type {number} */ (1);`), not something
+				// else like a statement (e.g. `/** @type {number} */ let foo;`).
+				const is_jsdoc_type_cast =
+					is_next_to_expression &&
+					comment.type === 'Block' &&
+					/(?:^|\n)\s*\*\s*@type\s*{/.test(comment.value);
+
+				if (is_jsdoc_type_cast) {
+					context.write(' (');
+					jsdoc_type_casts += 1;
+				}
 
 				if (comment.loc.end.line < to.line) {
 					context.newline();
-				} else if (pad) {
+				} else if (pad && !is_jsdoc_type_cast) {
 					context.write(' ');
 				}
 
@@ -343,6 +407,8 @@ export default (options = {}) => {
 				break;
 			}
 		}
+
+		return jsdoc_type_casts;
 	}
 
 	/**
@@ -353,6 +419,27 @@ export default (options = {}) => {
 		if (!node || node.type !== 'Property') return false;
 		const value = node.value?.type === 'AssignmentPattern' ? node.value.left : node.value;
 		return value?.type === 'ObjectExpression' || value?.type === 'ArrayExpression';
+	}
+
+	/**
+	 * @param {Context} context
+	 * @param {{ attributes?: TSESTree.ImportAttribute[], assertions?: TSESTree.ImportAttribute[] }} node
+	 */
+	function write_import_attributes(context, node) {
+		const attributes = node.attributes ?? node.assertions;
+		if (!attributes || attributes.length === 0) return;
+
+		context.write(node.attributes ? ' with { ' : ' assert { ');
+
+		for (let i = 0; i < attributes.length; i += 1) {
+			const { key, value } = attributes[i];
+			context.visit(key);
+			context.write(': ');
+			context.visit(value);
+			if (i < attributes.length - 1) context.write(', ');
+		}
+
+		context.write(' }');
 	}
 
 	/**
@@ -484,20 +571,51 @@ export default (options = {}) => {
 		}
 	}
 
+	const boundary_tokens = options.boundaryTokens === true;
+
+	/**
+	 * A one-character synthetic token node so structural tokens (`(`, `[`, `{`,
+	 * unary operators, …) written where a node's SOURCE span begins or ends get a
+	 * sourcemap anchor. Without it, everything up to the next mapped token is
+	 * attributed to the PREVIOUS token's source position — `write(content, node)`
+	 * only maps tokens written with a node, and these boundary characters belong
+	 * to no written token. Opt-in (`boundaryTokens`): denser maps, byte-identical
+	 * output.
+	 * @param {{ line: number, column: number } | undefined} pos
+	 * @param {number} [length]
+	 */
+	function token_at(pos, length = 1) {
+		if (!boundary_tokens) return undefined;
+		if (!pos) return undefined;
+		return /** @type {any} */ ({
+			loc: { start: pos, end: { line: pos.line, column: pos.column + length } }
+		});
+	}
+
+	/** @param {{ line: number, column: number } | undefined} pos */
+	function token_before(pos) {
+		if (!boundary_tokens) return undefined;
+		if (!pos || pos.column === 0) return undefined;
+		return /** @type {any} */ ({
+			loc: { start: { line: pos.line, column: pos.column - 1 }, end: pos }
+		});
+	}
+
 	const shared = {
 		/**
 		 * @param {TSESTree.ArrayExpression | TSESTree.ArrayPattern} node
 		 * @param {Context} context
 		 */
 		'ArrayExpression|ArrayPattern': (node, context) => {
-			context.write('[');
+			context.write('[', token_at(node.loc?.start));
 			sequence(
 				context,
-				/** @type {TSESTree.Node[]} */ (node.elements),
+				/** @type {TSESTree.Node[]} */(node.elements),
 				node.loc?.end ?? null,
 				false
 			);
-			context.write(']');
+			context.write(']', token_before(node.loc?.end));
+			if ('typeAnnotation' in node && node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
 
 		/**
@@ -511,23 +629,11 @@ export default (options = {}) => {
 			// 	// Avoids confusion in `for` loops initializers
 			// 	chunks.write('(');
 			// }
-			if (needs_parens(node.left, node, false)) {
-				context.write('(');
-				context.visit(node.left);
-				context.write(')');
-			} else {
-				context.visit(node.left);
-			}
+			maybe_wrap(context, node.left, operand_needs_wrap(node.left, node, false));
 
 			context.write(` ${node.operator} `);
 
-			if (needs_parens(node.right, node, true)) {
-				context.write('(');
-				context.visit(node.right);
-				context.write(')');
-			} else {
-				context.visit(node.right);
-			}
+			maybe_wrap(context, node.right, operand_needs_wrap(node.right, node, true));
 		},
 
 		/**
@@ -575,17 +681,11 @@ export default (options = {}) => {
 				write_keyword(context, node, 'new', ' ');
 			}
 
-			const needs_parens =
+			const wrap =
+				node.callee.type === 'ChainExpression' ||
 				EXPRESSIONS_PRECEDENCE[node.callee.type] < EXPRESSIONS_PRECEDENCE.CallExpression ||
 				(node.type === 'NewExpression' && has_call_expression(node.callee));
-
-			if (needs_parens) {
-				context.write('(');
-				context.visit(node.callee);
-				context.write(')');
-			} else {
-				context.visit(node.callee);
-			}
+			maybe_wrap(context, node.callee, wrap);
 
 			if (/** @type {TSESTree.CallExpression} */ (node).optional) {
 				context.write('?.');
@@ -649,7 +749,7 @@ export default (options = {}) => {
 				join.write(' ');
 			}
 
-			context.write(')');
+			context.write(')', token_before(node.loc?.end));
 		},
 
 		/**
@@ -671,12 +771,25 @@ export default (options = {}) => {
 
 			if (node.id) {
 				context.visit(node.id);
+			}
+
+			if (node.typeParameters) {
+				context.visit(node.typeParameters);
+			}
+
+			if (node.id || node.typeParameters) {
 				context.write(' ');
 			}
 
 			if (node.superClass) {
 				context.write('extends ');
+				// the `extends` clause is a LeftHandSideExpression; anything lower (a
+				// logical/binary/conditional/etc.) must be parenthesized
+				const wrap_super =
+					EXPRESSIONS_PRECEDENCE[node.superClass.type] < EXPRESSIONS_PRECEDENCE.NewExpression;
+				if (wrap_super) context.write('(');
 				context.visit(node.superClass);
+				if (wrap_super) context.write(')');
 
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				var type_arguments = node.superTypeParameters ?? node.superTypeArguments;
@@ -752,12 +865,15 @@ export default (options = {}) => {
 				}
 			}
 
+			if (node.id) track_binding(node.id);
+
 			if (node.id) context.visit(node.id);
 
 			if (node.typeParameters) {
 				context.visit(node.typeParameters);
 			}
 
+			track_bindings(node.params);
 			context.write('(');
 			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
 			context.write(')');
@@ -809,10 +925,17 @@ export default (options = {}) => {
 
 			if (node.value.generator) context.write('*');
 
-			if (node.computed) context.write('[');
+			if (node.computed) context.write('[', token_before(node.key.loc?.start));
 			context.visit(node.key);
-			if (node.computed) context.write(']');
+			if (node.computed) context.write(']', token_at(node.key.loc?.end));
 
+			// optional method (`m?()`)
+			if (node.optional) context.write('?');
+
+			// @ts-expect-error `typeParameters` lives on the method node, not its value
+			if (node.typeParameters) context.visit(node.typeParameters);
+
+			track_bindings(node.value.params);
 			context.write('(');
 			sequence(
 				context,
@@ -824,9 +947,13 @@ export default (options = {}) => {
 
 			if (node.value.returnType) context.visit(node.value.returnType);
 
-			context.write(' ');
-
-			if (node.value.body) context.visit(node.value.body);
+			if (node.value.body) {
+				context.write(' ');
+				context.visit(node.value.body);
+			} else {
+				// abstract methods and overload signatures
+				context.write(';');
+			}
 		},
 
 		/**
@@ -845,6 +972,8 @@ export default (options = {}) => {
 
 			const kw = create_keyword_write(context, node, field_modifiers_keywords_map_ok);
 
+			if (node.declare) kw('declare ');
+
 			if (node.accessibility) {
 				kw(node.accessibility + ' ');
 			}
@@ -862,6 +991,10 @@ export default (options = {}) => {
 				kw('static ');
 			}
 
+			if (node.override) kw('override ');
+
+			if (node.readonly) kw('readonly ');
+
 			if (
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.accessor ||
@@ -872,12 +1005,16 @@ export default (options = {}) => {
 			}
 
 			if (node.computed) {
-				context.write('[');
+				context.write('[', token_before(node.key.loc?.start));
 				context.visit(node.key);
-				context.write(']');
+				context.write(']', token_at(node.key.loc?.end));
 			} else {
 				context.visit(node.key);
 			}
+
+			// `x?: T` (optional) / `x!: T` (definite assignment)
+			if (node.optional) context.write('?');
+			else if (node.definite) context.write('!');
 
 			if (node.typeAnnotation) {
 				if (node.type === 'AccessorProperty' || node.type === 'TSAbstractAccessorProperty') {
@@ -925,14 +1062,15 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			track_bindings(node.parameters ?? node.params);
 			context.write('(');
-
 			sequence(
 				context,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
 				false
 			);
 			context.write(')');
@@ -949,23 +1087,26 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'TSFunctionType|TSConstructorType': (node, context) => {
-			if (node.type === 'TSConstructorType') context.write('new ');
+			if (node.type === 'TSConstructorType') {
+				if (node.abstract) context.write('abstract ');
+				context.write('new ');
+			}
 			if (node.typeParameters) context.visit(node.typeParameters);
 
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			track_bindings(node.parameters ?? node.params);
 			context.write('(');
-
 			sequence(
 				context,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				node.typeAnnotation?.typeAnnotation?.loc?.start ??
-					node.returnType?.typeAnnotation?.loc?.start ??
-					null,
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
 				false
 			);
+			context.write(')');
 
-			context.write(') => ');
+			context.write(' => ');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			context.visit(node.typeAnnotation?.typeAnnotation ?? node.returnType?.typeAnnotation);
@@ -976,18 +1117,38 @@ export default (options = {}) => {
 		_(node, context, visit) {
 			write_additional_comments(context, options.getLeadingComments?.(node), 'leading');
 
+			let jsdoc_type_casts = 0;
+
 			if (node.loc) {
-				flush_comments_until(context, null, node.loc.start, true);
+				jsdoc_type_casts = flush_comments_until(
+					context,
+					null,
+					node.loc.start,
+					true,
+					node.type in EXPRESSIONS_PRECEDENCE && !BINDINGS.has(node)
+				);
 			}
 
 			visit(node);
+
+			if (jsdoc_type_casts > 0) {
+				context.write(')'.repeat(jsdoc_type_casts));
+			}
+
+			// a JSX empty expression prints nothing and exists only to hold the
+			// comments inside `{...}`. Flush them here, otherwise they are written
+			// by whichever node comes next — after the closing brace, where they
+			// are JSX text rather than a comment
+			if (node.type === 'JSXEmptyExpression' && node.loc) {
+				flush_comments_until(context, null, node.loc.end, false);
+			}
 
 			write_additional_comments(context, options.getTrailingComments?.(node), 'trailing');
 		},
 
 		AccessorProperty:
 			shared[
-				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+			'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
 			],
 
 		ArrayExpression: shared['ArrayExpression|ArrayPattern'],
@@ -1003,6 +1164,7 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			track_bindings(node.params);
 			context.write('(');
 			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
 			context.write(')');
@@ -1011,13 +1173,7 @@ export default (options = {}) => {
 
 			context.write(' => ');
 
-			if (arrow_concise_body_needs_wrap(node.body)) {
-				context.write('(');
-				context.visit(node.body);
-				context.write(')');
-			} else {
-				context.visit(node.body);
-			}
+			maybe_wrap(context, node.body, arrow_concise_body_needs_wrap(node.body));
 		},
 
 		AssignmentExpression(node, context) {
@@ -1076,13 +1232,9 @@ export default (options = {}) => {
 		ClassExpression: shared['ClassDeclaration|ClassExpression'],
 
 		ConditionalExpression(node, context) {
-			if (EXPRESSIONS_PRECEDENCE[node.test.type] > EXPRESSIONS_PRECEDENCE.ConditionalExpression) {
-				context.visit(node.test);
-			} else {
-				context.write('(');
-				context.visit(node.test);
-				context.write(')');
-			}
+			const wrap =
+				EXPRESSIONS_PRECEDENCE[node.test.type] <= EXPRESSIONS_PRECEDENCE.ConditionalExpression;
+			maybe_wrap(context, node.test, wrap);
 
 			const consequent = context.new();
 			const alternate = context.new();
@@ -1130,7 +1282,14 @@ export default (options = {}) => {
 
 		Decorator(node, context) {
 			context.write('@');
+			// a decorator must be an identifier/member/call (or parenthesized); anything
+			// else (ternary, logical, assignment, unary, `as`, optional chain…) needs wrapping
+			const wrap =
+				/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
+				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
+			if (wrap) context.write('(');
 			context.visit(node.expression);
+			if (wrap) context.write(')');
 			context.newline();
 		},
 
@@ -1166,6 +1325,7 @@ export default (options = {}) => {
 
 			context.write(' from ');
 			context.visit(node.source);
+			write_import_attributes(context, node);
 			context.write(';');
 		},
 
@@ -1217,6 +1377,7 @@ export default (options = {}) => {
 			if (node.source) {
 				context.write(' from ');
 				context.visit(node.source);
+				write_import_attributes(context, node);
 			}
 
 			context.write(';');
@@ -1229,31 +1390,16 @@ export default (options = {}) => {
 
 			context.visit(node.local);
 
-			if (
-				node.local.type === 'Identifier' &&
-				node.exported.type === 'Identifier' &&
-				node.local.name !== node.exported.name
-			) {
+			if (!same_module_name(node.local, node.exported)) {
 				context.write(' as ');
 				context.visit(node.exported);
 			}
 		},
 
 		ExpressionStatement(node, context) {
-			if (
-				node.expression.type === 'ObjectExpression' ||
-				(node.expression.type === 'AssignmentExpression' &&
-					node.expression.left.type === 'ObjectPattern') ||
-				node.expression.type === 'FunctionExpression'
-			) {
-				// is an AssignmentExpression to an ObjectPattern
-				context.write('(');
-				context.visit(node.expression);
-				context.write(');');
-				return;
-			}
-
-			context.visit(node.expression);
+			// would otherwise be parsed as a block / function / class declaration
+			const wrap = leads_with_curly_or_keyword(node.expression);
+			maybe_wrap(context, node.expression, wrap);
 			context.write(';');
 		},
 
@@ -1262,9 +1408,9 @@ export default (options = {}) => {
 
 			if (node.init) {
 				if (node.init.type === 'VariableDeclaration') {
-					handle_var_declaration(node.init, context);
+					handle_var_declaration(node.init, context, true);
 				} else {
-					context.visit(node.init);
+					maybe_wrap(context, node.init, contains_in_operator(node.init));
 				}
 			}
 
@@ -1289,6 +1435,11 @@ export default (options = {}) => {
 			let name = node.name;
 			context.write(name, node);
 
+			// optional parameters (`a?: T`) carry `optional` on the identifier
+			if (node.optional) context.write('?');
+			// definite assignment (`let x!: T`) — see `handle_var_declarator`
+			else if (/** @type {any} */ (node).definite) context.write('!');
+
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
 
@@ -1296,7 +1447,18 @@ export default (options = {}) => {
 			write_keyword(context, node, 'if', ' (');
 			context.visit(node.test);
 			context.write(') ');
-			context.visit(node.consequent);
+
+			if (node.alternate && statement_ends_with_unmatched_if(node.consequent)) {
+				context.write('{');
+				context.indent();
+				context.newline();
+				context.visit(node.consequent);
+				context.dedent();
+				context.newline();
+				context.write('}');
+			} else {
+				context.visit(node.consequent);
+			}
 
 			if (node.alternate) {
 				context.space();
@@ -1318,6 +1480,7 @@ export default (options = {}) => {
 			if (node.specifiers.length === 0) {
 				write_keyword(context, node, 'import', ' ');
 				context.visit(node.source);
+				write_import_attributes(context, node);
 				context.write(';');
 				return;
 			}
@@ -1366,19 +1529,7 @@ export default (options = {}) => {
 
 			context.write(' from ');
 			context.visit(node.source);
-			if (node.attributes && node.attributes.length > 0) {
-				context.write(' with { ');
-				for (let index = 0; index < node.attributes.length; index++) {
-					const { key, value } = node.attributes[index];
-					context.visit(key);
-					context.write(': ');
-					context.visit(value);
-					if (index + 1 !== node.attributes.length) {
-						context.write(', ');
-					}
-				}
-				context.write(' }');
-			}
+			write_import_attributes(context, node);
 			context.write(';');
 		},
 
@@ -1404,16 +1555,13 @@ export default (options = {}) => {
 		ImportSpecifier(node, context) {
 			if (node.importKind == 'type') context.write('type ');
 
-			if (
-				node.local.type === 'Identifier' &&
-				node.imported.type === 'Identifier' &&
-				node.local.name !== node.imported.name
-			) {
+			if (!same_module_name(node.imported, node.local)) {
 				context.visit(node.imported);
 				context.write(' as ');
+				context.visit(node.local);
+			} else {
+				context.visit(node.local);
 			}
-
-			context.visit(node.local);
 		},
 
 		LabeledStatement(node, context) {
@@ -1426,9 +1574,16 @@ export default (options = {}) => {
 			// TODO do we need to handle weird unicode characters somehow?
 			// str.replace(/\\u(\d{4})/g, (m, n) => String.fromCharCode(+n))
 
+			const bigint = /** @type {any} */ (node).bigint;
 			const value =
 				node.raw ||
-				(typeof node.value === 'string' ? quote(node.value, quote_char) : String(node.value));
+				(typeof node.value === 'bigint'
+					? `${node.value}n`
+					: bigint !== undefined
+						? `${bigint}n`
+						: typeof node.value === 'string'
+							? quote(node.value, quote_char)
+							: String(node.value));
 
 			context.write(value, node);
 		},
@@ -1436,13 +1591,10 @@ export default (options = {}) => {
 		LogicalExpression: shared['BinaryExpression|LogicalExpression'],
 
 		MemberExpression(node, context) {
-			if (EXPRESSIONS_PRECEDENCE[node.object.type] < EXPRESSIONS_PRECEDENCE.MemberExpression) {
-				context.write('(');
-				context.visit(node.object);
-				context.write(')');
-			} else {
-				context.visit(node.object);
-			}
+			const wrap =
+				node.object.type === 'ChainExpression' ||
+				EXPRESSIONS_PRECEDENCE[node.object.type] < EXPRESSIONS_PRECEDENCE.MemberExpression;
+			maybe_wrap(context, node.object, wrap);
 
 			if (node.computed) {
 				if (node.optional) {
@@ -1450,7 +1602,7 @@ export default (options = {}) => {
 				}
 				context.write('[');
 				context.visit(node.property);
-				context.write(']');
+				context.write(']', token_before(node.loc?.end));
 			} else {
 				context.write(node.optional ? '?.' : '.');
 				context.visit(node.property);
@@ -1468,24 +1620,28 @@ export default (options = {}) => {
 		NewExpression: shared['CallExpression|NewExpression'],
 
 		ObjectExpression(node, context) {
-			context.write('{');
+			context.write('{', token_at(node.loc?.start));
 			sequence(context, node.properties, node.loc?.end ?? null, true);
-			context.write('}');
+			context.write('}', token_before(node.loc?.end));
 		},
 
 		ObjectPattern(node, context) {
-			context.write('{');
+			context.write('{', token_at(node.loc?.start));
 			sequence(context, node.properties, node.loc?.end ?? null, true);
-			context.write('}');
+			context.write('}', token_before(node.loc?.end));
 
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
 
 		// @ts-expect-error this isn't a real node type, but Acorn produces it
 		ParenthesizedExpression(node, context) {
-			context.write('(');
-			context.visit(node.expression);
-			context.write(')');
+			if (node.loc) {
+				context.write('(', token_at(node.loc.start));
+				context.visit(node.expression);
+				context.write(')', token_before(node.loc.end));
+			} else {
+				maybe_wrap(context, node.expression, true);
+			}
 		},
 
 		PrivateIdentifier(node, context) {
@@ -1512,16 +1668,21 @@ export default (options = {}) => {
 				return;
 			}
 
-			// shorthand methods
-			if (node.value.type === 'FunctionExpression') {
+			// concise methods, getters and setters
+			if (
+				node.value.type === 'FunctionExpression' &&
+				(node.method || node.kind === 'get' || node.kind === 'set')
+			) {
 				const kw = create_keyword_write(context, node);
 
 				if (node.kind !== 'init') kw(node.kind + ' ');
 				if (node.value.async) kw('async ');
 				if (node.value.generator) context.write('*');
-				if (node.computed) context.write('[');
+				if (node.computed) context.write('[', token_before(node.key.loc?.start));
 				context.visit(node.key);
-				if (node.computed) context.write(']');
+				if (node.computed) context.write(']', token_at(node.key.loc?.end));
+				if (node.value.typeParameters) context.visit(node.value.typeParameters);
+				track_bindings(node.value.params);
 				context.write('(');
 				sequence(
 					context,
@@ -1536,19 +1697,24 @@ export default (options = {}) => {
 				context.write(' ');
 				context.visit(node.value.body);
 			} else {
-				if (node.computed) context.write('[');
+				if (node.computed) context.write('[', token_before(node.key.loc?.start));
 				if (node.kind === 'get' || node.kind === 'set') {
 					write_keyword(context, node, node.kind, ' ');
 				}
 				context.visit(node.key);
-				context.write(node.computed ? ']: ' : ': ');
+				if (node.computed) {
+					context.write(']', token_at(node.key.loc?.end));
+					context.write(': ');
+				} else {
+					context.write(': ');
+				}
 				context.visit(node.value);
 			}
 		},
 
 		PropertyDefinition:
 			shared[
-				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+			'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
 			],
 
 		RestElement: shared['RestElement|SpreadElement'],
@@ -1634,7 +1800,13 @@ export default (options = {}) => {
 		},
 
 		TaggedTemplateExpression(node, context) {
-			context.visit(node.tag);
+			// the tag is a LeftHandSideExpression; a lower-precedence tag (logical,
+			// conditional, arrow, `as`, unary…) or an optional chain must be wrapped
+			const wrap =
+				/** @type {string} */ (node.tag.type) === 'ChainExpression' ||
+				EXPRESSIONS_PRECEDENCE[node.tag.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
+			maybe_wrap(context, node.tag, wrap);
+			if (node.typeArguments) context.visit(node.typeArguments);
 			context.visit(node.quasi);
 		},
 
@@ -1678,6 +1850,7 @@ export default (options = {}) => {
 
 				if (node.handler.param) {
 					write_keyword(context, node.handler, 'catch', '(');
+					track_binding(node.handler.param);
 					context.visit(node.handler.param);
 					context.write(') ');
 				} else {
@@ -1703,19 +1876,23 @@ export default (options = {}) => {
 		},
 
 		UnaryExpression(node, context) {
-			context.write(node.operator);
+			context.write(node.operator, token_at(node.loc?.start, node.operator.length));
 
 			if (node.operator.length > 1) {
 				context.write(' ');
+			} else if (
+				(node.operator === '+' || node.operator === '-') &&
+				((node.argument.type === 'UnaryExpression' && node.argument.operator === node.operator) ||
+					(node.argument.type === 'UpdateExpression' &&
+						node.argument.prefix &&
+						node.argument.operator[0] === node.operator))
+			) {
+				context.write(' ');
 			}
 
-			if (EXPRESSIONS_PRECEDENCE[node.argument.type] < EXPRESSIONS_PRECEDENCE.UnaryExpression) {
-				context.write('(');
-				context.visit(node.argument);
-				context.write(')');
-			} else {
-				context.visit(node.argument);
-			}
+			const wrap =
+				EXPRESSIONS_PRECEDENCE[node.argument.type] < EXPRESSIONS_PRECEDENCE.UnaryExpression;
+			maybe_wrap(context, node.argument, wrap);
 		},
 
 		UpdateExpression(node, context) {
@@ -1734,12 +1911,7 @@ export default (options = {}) => {
 		},
 
 		VariableDeclarator(node, context) {
-			context.visit(node.id);
-
-			if (node.init) {
-				context.write(' = ');
-				context.visit(node.init);
-			}
+			handle_var_declarator(node, context, false);
 		},
 
 		WhileStatement(node, context) {
@@ -1771,18 +1943,20 @@ export default (options = {}) => {
 
 		TSAbstractAccessorProperty:
 			shared[
-				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+			'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
 			],
 
 		TSAbstractPropertyDefinition:
 			shared[
-				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+			'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
 			],
 
 		TSDeclareFunction(node, context) {
 			const kw = create_keyword_write(context, node);
 
-			kw('declare ');
+			// bodyless functions are either ambient declarations or overload
+			// signatures — only the former are written with `declare`
+			if (node.declare) kw('declare ');
 
 			if (node.async) {
 				kw('async ');
@@ -1796,6 +1970,7 @@ export default (options = {}) => {
 
 			if (node.id) {
 				context.write(' ');
+				track_binding(node.id);
 				context.visit(node.id);
 			}
 
@@ -1803,6 +1978,7 @@ export default (options = {}) => {
 				context.visit(node.typeParameters);
 			}
 
+			track_bindings(node.params);
 			context.write('(');
 			sequence(context, node.params, node.returnType?.loc?.start ?? node.loc?.end ?? null, false);
 			context.write(')');
@@ -1883,7 +2059,10 @@ export default (options = {}) => {
 		},
 
 		TSPropertySignature(node, context) {
+			if (node.readonly) context.write('readonly ');
+			if (node.computed) context.write('[', token_before(node.key.loc?.start));
 			context.visit(node.key);
+			if (node.computed) context.write(']', token_at(node.key.loc?.end));
 			if (node.optional) context.write('?');
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
@@ -1915,7 +2094,16 @@ export default (options = {}) => {
 
 				if (/\n/.test(raw)) context.multiline = true;
 			}
-			context.write('`');
+			const raw = quasis[quasis.length - 1].value.raw;
+			context.write(raw + '`');
+			if (/\n/.test(raw)) context.multiline = true;
+		},
+
+		// @ts-expect-error not in TSESTree types
+		TSJSDocNullableType(node, context) {
+			if (!node.postfix) context.write('?');
+			context.visit(node.typeAnnotation);
+			if (node.postfix) context.write('?');
 		},
 
 		TSParameterProperty(node, context) {
@@ -1945,19 +2133,19 @@ export default (options = {}) => {
 		//@ts-expect-error I don't know why, but this is relied upon in the tests, but doesn't exist in the TSESTree types
 		TSExpressionWithTypeArguments(node, context) {
 			context.visit(node.expression);
+
+			if (node.typeArguments || node.typeParameters) {
+				context.visit(node.typeArguments ?? node.typeParameters);
+			}
 		},
 
 		TSTypeAssertion(node, context) {
 			context.write('<');
 			context.visit(node.typeAnnotation);
 			context.write('>');
-			if (EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSTypeAssertion) {
-				context.write('(');
-				context.visit(node.expression);
-				context.write(')');
-			} else {
-				context.visit(node.expression);
-			}
+			const wrap =
+				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSTypeAssertion;
+			maybe_wrap(context, node.expression, wrap);
 		},
 
 		TSTypeParameterInstantiation(node, context) {
@@ -1979,6 +2167,11 @@ export default (options = {}) => {
 		},
 
 		TSTypeParameter(node, context) {
+			// modifiers: `const T`, `in T` / `out T` (variance)
+			if (node.const) context.write('const ');
+			if (node.in) context.write('in ');
+			if (node.out) context.write('out ');
+
 			if (node.name && node.name.type) context.visit(node.name);
 			// @ts-expect-error type mismatch TSESTree and acorn-typescript?
 			else context.write(node.name, node);
@@ -1995,19 +2188,14 @@ export default (options = {}) => {
 		},
 
 		TSTypePredicate(node, context) {
-			if (node.parameterName) {
-				context.visit(node.parameterName);
-			} else if (node.typeAnnotation) {
-				context.visit(node.typeAnnotation);
-			}
+			// `asserts` precedes the parameter name; `is <type>` follows it. Forms:
+			// `x is T`, `asserts x is T`, `asserts x`
+			if (node.asserts) context.write('asserts ');
 
-			if (node.asserts) {
-				context.write(' asserts ');
-			} else {
-				context.write(' is ');
-			}
+			if (node.parameterName) context.visit(node.parameterName);
 
 			if (node.typeAnnotation) {
+				context.write(' is ');
 				context.visit(node.typeAnnotation.typeAnnotation);
 			}
 		},
@@ -2015,11 +2203,20 @@ export default (options = {}) => {
 		TSTypeQuery(node, context) {
 			context.write('typeof ');
 			context.visit(node.exprName);
+
+			// instantiation expression (`typeof foo<string>`)
+			if (node.typeArguments) {
+				context.visit(node.typeArguments);
+			}
 		},
 
 		TSClassImplements(node, context) {
 			if (node.expression) {
 				context.visit(node.expression);
+			}
+
+			if (node.typeArguments) {
+				context.visit(node.typeArguments);
 			}
 		},
 
@@ -2034,8 +2231,10 @@ export default (options = {}) => {
 		TSFunctionType: shared['TSFunctionType|TSConstructorType'],
 
 		TSIndexSignature(node, context) {
+			if (node.readonly) context.write('readonly ');
 			context.write('[');
 
+			track_bindings(node.parameters);
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			sequence(context, node.parameters, node.typeAnnotation?.loc?.start ?? null, false);
 			context.write(']');
@@ -2045,7 +2244,16 @@ export default (options = {}) => {
 		},
 
 		TSMappedType(node, context) {
-			context.write('{[');
+			context.write('{');
+
+			// `readonly` / `+readonly` / `-readonly` modifier
+			if (node.readonly) {
+				context.write(
+					node.readonly === '-' ? '-readonly ' : node.readonly === '+' ? '+readonly ' : 'readonly '
+				);
+			}
+
+			context.write('[');
 
 			const legacy_type_parameter = node.typeParameter;
 			const key = node.key ?? legacy_type_parameter?.name;
@@ -2062,7 +2270,18 @@ export default (options = {}) => {
 				context.visit(constraint);
 			}
 
+			// `as` key remapping
+			if (node.nameType) {
+				context.write(' as ');
+				context.visit(node.nameType);
+			}
+
 			context.write(']');
+
+			// `?` / `+?` / `-?` optionality modifier
+			if (node.optional) {
+				context.write(node.optional === '-' ? '-?' : node.optional === '+' ? '+?' : '?');
+			}
 
 			if (node.typeAnnotation) {
 				context.write(': ');
@@ -2073,16 +2292,29 @@ export default (options = {}) => {
 		},
 
 		TSMethodSignature(node, context) {
+			// accessor signatures (`get x(): string`, `set x(value: string)`)
+			if (node.kind === 'get' || node.kind === 'set') {
+				write_keyword(context, node, node.kind, ' ');
+			}
+
+			if (node.computed) context.write('[', token_before(node.key.loc?.start));
 			context.visit(node.key);
+			if (node.computed) context.write(']', token_at(node.key.loc?.end));
+			if (node.optional) context.write('?');
 
+			if (node.typeParameters) {
+				context.visit(node.typeParameters);
+			}
+
+			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+			track_bindings(node.parameters ?? node.params);
 			context.write('(');
-
 			sequence(
 				context,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				node.parameters ?? node.params,
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? null,
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
 				false
 			);
 			context.write(')');
@@ -2102,6 +2334,8 @@ export default (options = {}) => {
 
 		TSNamedTupleMember(node, context) {
 			context.visit(node.label);
+			// optional element (`[a?: string]`)
+			if (node.optional) context.write('?');
 			context.write(': ');
 			context.visit(node.elementType);
 		},
@@ -2158,6 +2392,7 @@ export default (options = {}) => {
 
 		TSImportEqualsDeclaration(node, context) {
 			context.write('import ');
+			if (node.importKind === 'type') context.write('type ');
 			context.visit(node.id);
 			context.write(' = ');
 			context.visit(node.moduleReference);
@@ -2171,6 +2406,10 @@ export default (options = {}) => {
 			if (node.qualifier) {
 				context.write('.');
 				context.visit(node.qualifier);
+			}
+
+			if (node.typeArguments) {
+				context.visit(node.typeArguments);
 			}
 		},
 
@@ -2190,22 +2429,17 @@ export default (options = {}) => {
 
 		TSAsExpression(node, context) {
 			if (node.expression) {
-				const needs_parens =
+				const wrap =
 					EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSAsExpression;
-
-				if (needs_parens) {
-					context.write('(');
-					context.visit(node.expression);
-					context.write(')');
-				} else {
-					context.visit(node.expression);
-				}
+				maybe_wrap(context, node.expression, wrap);
 			}
 			context.write(' as ');
 			context.visit(node.typeAnnotation);
 		},
 
 		TSEnumDeclaration(node, context) {
+			if (node.declare) context.write('declare ');
+			if (node.const) context.write('const ');
 			context.write('enum ');
 			context.visit(node.id);
 			context.write(' {');
@@ -2239,21 +2473,24 @@ export default (options = {}) => {
 				context.visit(node.id);
 			}
 
-			if (!node.body) return;
-			context.visit(node.body);
+			// a qualified name (`namespace A.B.C`) is represented as nested
+			// `TSModuleDeclaration`s whose body is the next name part, not a block
+			let body = /** @type {any} */ (node.body);
+			while (body && body.type === 'TSModuleDeclaration') {
+				context.write('.');
+				context.visit(body.id);
+				body = body.body;
+			}
+
+			if (!body) return;
+			context.visit(body);
 		},
 
 		TSNonNullExpression(node, context) {
 			// operator expressions can't take a postfix `!` directly: `(0 as number)!`, `(await x)!`
-			if (
-				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSNonNullExpression
-			) {
-				context.write('(');
-				context.visit(node.expression);
-				context.write(')');
-			} else {
-				context.visit(node.expression);
-			}
+			const wrap =
+				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSNonNullExpression;
+			maybe_wrap(context, node.expression, wrap);
 			context.write('!');
 		},
 
@@ -2262,6 +2499,7 @@ export default (options = {}) => {
 		},
 
 		TSInterfaceDeclaration(node, context) {
+			if (node.declare) context.write('declare ');
 			context.write('interface ');
 			context.visit(node.id);
 			if (node.typeParameters) context.visit(node.typeParameters);
@@ -2283,34 +2521,30 @@ export default (options = {}) => {
 			if (node.expression) {
 				context.visit(node.expression);
 			}
+
+			if (node.typeArguments) {
+				context.visit(node.typeArguments);
+			}
 		},
 
 		//@ts-expect-error I don't know why, but this is relied upon in the tests, but doesn't exist in the TSESTree types
 		TSParenthesizedType(node, context) {
-			context.write('(');
-			context.visit(node.typeAnnotation);
-			context.write(')');
+			maybe_wrap(context, node.typeAnnotation, true);
 		},
 
 		TSSatisfiesExpression(node, context) {
 			if (node.expression) {
-				const needs_parens =
+				const wrap =
 					EXPRESSIONS_PRECEDENCE[node.expression.type] <
 					EXPRESSIONS_PRECEDENCE.TSSatisfiesExpression;
-
-				if (needs_parens) {
-					context.write('(');
-					context.visit(node.expression);
-					context.write(')');
-				} else {
-					context.visit(node.expression);
-				}
+				maybe_wrap(context, node.expression, wrap);
 			}
 			context.write(' satisfies ');
 			context.visit(node.typeAnnotation);
 		},
 
 		TSTypeAliasDeclaration(node, context) {
+			if (node.declare) context.write('declare ');
 			context.write('type ');
 			context.visit(node.id);
 			if (node.typeParameters) context.visit(node.typeParameters);
@@ -2364,7 +2598,7 @@ function arrow_concise_body_needs_wrap(body) {
  * @param {boolean} is_right
  * @returns
  */
-function needs_parens(node, parent, is_right) {
+function operand_needs_wrap(node, parent, is_right) {
 	if (node.type === 'PrivateIdentifier') return false;
 
 	if (!is_right && (node.type === 'TSAsExpression' || node.type === 'TSSatisfiesExpression')) {
@@ -2383,42 +2617,46 @@ function needs_parens(node, parent, is_right) {
 		return true;
 	}
 
+	// `**` can't take a unary/await/assertion left operand: `-2 ** 2`, `await x ** 2`,
+	// `<T>x ** 2` are syntax errors
+	const unary_base_of_pow =
+		!is_right &&
+		parent.operator === '**' &&
+		(node.type === 'UnaryExpression' ||
+			node.type === 'AwaitExpression' ||
+			node.type === 'TSTypeAssertion');
+	if (unary_base_of_pow) return true;
+
 	const precedence = EXPRESSIONS_PRECEDENCE[node.type];
 	const parent_precedence = EXPRESSIONS_PRECEDENCE[parent.type];
-
-	if (precedence !== parent_precedence) {
-		// Different node types
-		return (
-			(!is_right && precedence === 15 && parent_precedence === 14 && parent.operator === '**') ||
-			precedence < parent_precedence
-		);
-	}
-
-	if (precedence !== 13 && precedence !== 14) {
-		// Not a `LogicalExpression` or `BinaryExpression`
-		return false;
-	}
-
-	if (
-		/** @type {TSESTree.BinaryExpression} */ (node).operator === '**' &&
-		parent.operator === '**'
-	) {
-		// Exponentiation operator has right-to-left associativity
+	if (precedence !== parent_precedence) return precedence < parent_precedence;
+	const operator = /** @type {TSESTree.BinaryExpression} */ (node).operator;
+	if (operator === '**' && parent.operator === '**') {
+		// exponentiation is right-associative
 		return !is_right;
 	}
 
 	if (is_right) {
-		// Parenthesis are used if both operators have the same precedence
-		return (
-			OPERATOR_PRECEDENCE[/** @type {TSESTree.BinaryExpression} */ (node).operator] <=
-			OPERATOR_PRECEDENCE[parent.operator]
-		);
+		// parentheses are needed when both operators have the same precedence
+		return OPERATOR_PRECEDENCE[operator] <= OPERATOR_PRECEDENCE[parent.operator];
 	}
 
-	return (
-		OPERATOR_PRECEDENCE[/** @type {TSESTree.BinaryExpression} */ (node).operator] <
-		OPERATOR_PRECEDENCE[parent.operator]
-	);
+	return OPERATOR_PRECEDENCE[operator] < OPERATOR_PRECEDENCE[parent.operator];
+}
+
+/**
+ * @param {Context} context
+ * @param {TSESTree.Node} node
+ * @param {boolean} wrap
+ */
+function maybe_wrap(context, node, wrap) {
+	if (wrap) {
+		context.write('(');
+		context.visit(node);
+		context.write(')');
+	} else {
+		context.visit(node);
+	}
 }
 
 /** @param {TSESTree.Node} node */
@@ -2432,13 +2670,177 @@ function has_call_expression(node) {
 			return false;
 		}
 	}
+	return false;
+}
+
+/**
+ * True when printing `node` as an expression statement would begin with `{`,
+ * `function`, or `class` — which the parser would misread as a block, function
+ * declaration, or class declaration. Walks the left spine following the same
+ * parenthesization the visitors apply, so it stops as soon as a child position
+ * would already be wrapped.
+ * @param {TSESTree.Node} node
+ * @returns {boolean}
+ */
+function leads_with_curly_or_keyword(node) {
+	while (node) {
+		switch (node.type) {
+			case 'ObjectExpression':
+			case 'ObjectPattern':
+			case 'FunctionExpression':
+			case 'ClassExpression':
+				return true;
+
+			case 'BinaryExpression':
+			case 'LogicalExpression':
+				if (operand_needs_wrap(node.left, node, false)) return false;
+				node = node.left;
+				continue;
+
+			case 'AssignmentExpression':
+				node = node.left;
+				continue;
+
+			case 'ConditionalExpression':
+				if (
+					EXPRESSIONS_PRECEDENCE[node.test.type] <= EXPRESSIONS_PRECEDENCE.ConditionalExpression
+				) {
+					return false;
+				}
+				node = node.test;
+				continue;
+
+			case 'MemberExpression':
+				if (
+					/** @type {string} */ (node.object.type) === 'ChainExpression' ||
+					EXPRESSIONS_PRECEDENCE[node.object.type] < EXPRESSIONS_PRECEDENCE.MemberExpression
+				) {
+					return false;
+				}
+				node = node.object;
+				continue;
+
+			case 'CallExpression':
+				if (
+					/** @type {string} */ (node.callee.type) === 'ChainExpression' ||
+					EXPRESSIONS_PRECEDENCE[node.callee.type] < EXPRESSIONS_PRECEDENCE.CallExpression
+				) {
+					return false;
+				}
+				node = node.callee;
+				continue;
+
+			case 'TaggedTemplateExpression':
+				if (
+					/** @type {string} */ (node.tag.type) === 'ChainExpression' ||
+					EXPRESSIONS_PRECEDENCE[node.tag.type] < EXPRESSIONS_PRECEDENCE.CallExpression
+				) {
+					return false;
+				}
+				node = node.tag;
+				continue;
+
+			case 'UpdateExpression':
+				if (node.prefix) return false;
+				node = node.argument;
+				continue;
+
+			case 'TSAsExpression':
+			case 'TSSatisfiesExpression':
+			case 'TSNonNullExpression':
+				node = node.expression;
+				continue;
+
+			// a sequence expression always prints its own wrapping parens
+			case 'SequenceExpression':
+				return false;
+
+			default:
+				return false;
+		}
+	}
+	return false;
+}
+
+/**
+ * Whether printing a statement directly before an `else` would allow that `else`
+ * to bind to a nested, unmatched `if` instead.
+ * @param {TSESTree.Statement} node
+ * @returns {boolean}
+ */
+function statement_ends_with_unmatched_if(node) {
+	switch (node.type) {
+		case 'IfStatement':
+			return node.alternate === null || statement_ends_with_unmatched_if(node.alternate);
+		case 'ForStatement':
+		case 'ForInStatement':
+		case 'ForOfStatement':
+		case 'LabeledStatement':
+		case 'WhileStatement':
+		case 'WithStatement':
+			return statement_ends_with_unmatched_if(node.body);
+		default:
+			return false;
+	}
+}
+
+/**
+ * `in` expressions are forbidden by the `ExpressionNoIn` grammar used for
+ * classic `for` initializers unless a containing expression is parenthesized.
+ * @param {any} value
+ * @param {WeakSet<object>} [seen]
+ */
+function contains_in_operator(value, seen = new WeakSet()) {
+	if (!value || typeof value !== 'object') return false;
+	if (seen.has(value)) return false;
+	seen.add(value);
+
+	if (value.type === 'BinaryExpression' && value.operator === 'in') return true;
+
+	for (const key in value) {
+		if (key === 'loc') continue;
+		if (contains_in_operator(value[key], seen)) return true;
+	}
+
+	return false;
+}
+
+/**
+ * Module export names can be identifiers or string literals. Preserve the
+ * explicit `as` form whenever their AST representations differ.
+ * @param {any} a
+ * @param {any} b
+ */
+function same_module_name(a, b) {
+	if (a.type !== b.type) return false;
+	if (a.type === 'Identifier') return a.name === b.name;
+	return a.type === 'Literal' && a.value === b.value;
+}
+
+/**
+ * @param {TSESTree.VariableDeclarator} node
+ * @param {Context} context
+ * @param {boolean} no_in
+ */
+function handle_var_declarator(node, context, no_in) {
+	// `definite` sits on the declarator, but `!` belongs between the name and the
+	// type annotation — both of which are written by the identifier's own visitor
+	const id = node.definite ? /** @type {any} */ ({ ...node.id, definite: true }) : node.id;
+	track_binding(id);
+	context.visit(id);
+
+	if (node.init) {
+		context.write(' = ');
+		maybe_wrap(context, node.init, no_in && contains_in_operator(node.init));
+	}
 }
 
 /**
  * @param {TSESTree.VariableDeclaration} node
  * @param {Context} context
+ * @param {boolean} [no_in]
  */
-function handle_var_declaration(node, context) {
+function handle_var_declaration(node, context, no_in = false) {
 	const open = context.new();
 	const join = context.new();
 	const child_context = context.new();
@@ -2458,7 +2860,7 @@ function handle_var_declaration(node, context) {
 		if (!first) child_context.append(join);
 		first = false;
 
-		child_context.visit(d);
+		handle_var_declarator(d, child_context, no_in);
 	}
 
 	const length = child_context.measure() + 2 * (node.declarations.length - 1);

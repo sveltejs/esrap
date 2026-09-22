@@ -1,11 +1,11 @@
 {
-  "version": 3,
-  "names": [],
-  "sources": [
-    "input.js"
-  ],
-  "sourcesContent": [
-    "a = b + c;\n"
-  ],
-  "mappings": "AAAA,CAAC,GAAG,CAAC,GAAG,CAAC"
+	"version": 3,
+	"names": [],
+	"sources": [
+		"input.js"
+	],
+	"sourcesContent": [
+		"a = b + c;\n"
+	],
+	"mappings": "AAAA,CAAC,GAAG,CAAC,GAAG,CAAC"
 }

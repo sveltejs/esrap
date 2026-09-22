@@ -6,6 +6,7 @@ import { expect, test } from 'vitest';
 import { walk } from 'zimmerframe';
 import { print } from '../src/index.js';
 import { acornParse, oxcParse } from './common.js';
+import ts from '../src/languages/ts/index.js';
 import tsx from '../src/languages/tsx/index.js';
 import { describe } from 'node:test';
 
@@ -27,6 +28,35 @@ function clean(ast) {
 		},
 		BlockStatement(node, context) {
 			node.body = node.body.filter((node) => node.type !== 'EmptyStatement');
+			context.next();
+		},
+		IfStatement(node, context) {
+			if (
+				node.alternate &&
+				node.consequent.type === 'IfStatement' &&
+				node.consequent.alternate === null
+			) {
+				node.consequent = /** @type {any} */ ({
+					type: 'BlockStatement',
+					body: [node.consequent]
+				});
+			}
+
+			context.next();
+		},
+		Literal(node, context) {
+			const literal = /** @type {any} */ (node);
+			if (literal.bigint !== undefined) {
+				literal.value = literal.bigint;
+				delete literal.raw;
+			}
+
+			context.next();
+		},
+		TSTypeParameterDeclaration(node, context) {
+			// Acorn records the trailing comma's source offset as extra metadata.
+			// @ts-expect-error parser-specific metadata
+			delete node.extra;
 			context.next();
 		},
 		Property(node, context) {
@@ -105,6 +135,21 @@ test('should have 1 baseline', () => {
 	expect(numberOfBaseLine).toBe(1);
 });
 
+test('preserves JSDoc type casts from Acorn parenthesized expressions', () => {
+	const source = `const foo = /** @type {number} */ (1);
+const bar = /** @type {number} */ (/** @type {number} */ (1));`;
+	const { ast, comments } = acornParse(source, {
+		sourceType: 'module',
+		jsxMode: false,
+		fileExtension: 'js',
+		preserveParens: true
+	});
+	const type_cast = /** @type {any} */ (ast.body[0]).declarations[0].init;
+
+	expect(type_cast.type).toBe('ParenthesizedExpression');
+	expect(print(ast, tsx({ comments })).code).toBe(source);
+});
+
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	if (dir.includes('large-file')) continue;
 
@@ -118,10 +163,10 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		let input_json = '';
 		try {
 			input_js = fs.readFileSync(`${__dirname}/samples/${dir}/input.${fileExtension}`, 'utf-8');
-		} catch (error) {}
+		} catch (error) { }
 		try {
 			input_json = fs.readFileSync(`${__dirname}/samples/${dir}/input.json`).toString();
-		} catch (error) {}
+		} catch (error) { }
 
 		for (const [parserName, { skip, parse, isBaseline, skipSnapshot, skipMap }] of Object.entries(
 			parsers
@@ -145,7 +190,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					opts = { sourceMapSource: 'input.js', sourceMapContent: input_js };
 				}
 
-				const { code, map } = print(ast, tsx({ comments }), opts);
+				const { code, map } = print(ast, (jsxMode ? tsx : ts)({ comments }), opts);
 
 				const pDir = `${__dirname}/samples/${dir}/${parserName}`;
 				if (!fs.existsSync(pDir)) fs.mkdirSync(pDir, { recursive: true });
@@ -174,13 +219,13 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 				}
 
 				if (!skipMap) {
-					expect(JSON.stringify(map, null, '  ').replaceAll('\\r', '')).toMatchFileSnapshot(
+					expect(JSON.stringify(map, null, '\t').replaceAll('\\r', '')).toMatchFileSnapshot(
 						`${__dirname}/samples/${dir}/expected.${fileExtension}.map`
 					);
 				}
 
 				if (isBaseline) {
-					expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsedAst)))).toEqual(
+					expect(clean(/** @type {TSESTree.Node} */(/** @type {any} */ (parsedAst)))).toEqual(
 						clean(ast)
 					);
 				}

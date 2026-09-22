@@ -1,11 +1,11 @@
 {
-  "version": 3,
-  "names": [],
-  "sources": [
-    "input.js"
-  ],
-  "sourcesContent": [
-    "await (a || b);\nawait c;"
-  ],
-  "mappings": "AAAA,OAAO,CAAC,IAAI,CAAC;AACb,MAAM,CAAC"
+	"version": 3,
+	"names": [],
+	"sources": [
+		"input.js"
+	],
+	"sourcesContent": [
+		"await (a || b);\nawait c;\nasync () => (await a) ** b;\n"
+	],
+	"mappings": "AAAA,OAAO,CAAC,IAAI,CAAC;AACb,MAAM,CAAC;AACP,aAAa,MAAM,CAAC,KAAK,CAAC"
 }

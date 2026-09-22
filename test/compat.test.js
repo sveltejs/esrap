@@ -36,3 +36,34 @@ test('acorn TS printer preserves module and mapped-type keywords', () => {
 
 	expect(code).toBe('declare module "svelte" {\n}\n\ntype M = {[K in keyof JSON]: K};');
 });
+
+test('TSJSDocNullableType prefix and postfix', () => {
+	/** @type {any} */
+	const ast = {
+		type: 'Program',
+		body: [
+			{
+				type: 'TSTypeAliasDeclaration',
+				id: { type: 'Identifier', name: 'A' },
+				typeAnnotation: {
+					type: 'TSJSDocNullableType',
+					typeAnnotation: { type: 'TSNumberKeyword' },
+					postfix: false
+				}
+			},
+			{
+				type: 'TSTypeAliasDeclaration',
+				id: { type: 'Identifier', name: 'B' },
+				typeAnnotation: {
+					type: 'TSJSDocNullableType',
+					typeAnnotation: { type: 'TSNumberKeyword' },
+					postfix: true
+				}
+			}
+		],
+		sourceType: 'module'
+	};
+
+	const { code } = print(ast, ts());
+	expect(code).toBe('type A = ?number;\ntype B = number?;');
+});

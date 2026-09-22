@@ -1,11 +1,11 @@
 {
-  "version": 3,
-  "names": [],
-  "sources": [
-    "input.js"
-  ],
-  "sourcesContent": [
-    "class Foo {\n\tstatic {\n\t\tthis.abc = 1;\n\t}\n}"
-  ],
-  "mappings": "AAAA,MAAM,GAAG,CAAC,CAAC;CACV;EACC,IAAI,CAAC,GAAG,GAAG,CAAC;;AAEd,CAAC"
+	"version": 3,
+	"names": [],
+	"sources": [
+		"input.js"
+	],
+	"sourcesContent": [
+		"class Foo {\n\tstatic {\n\t\tthis.abc = 1;\n\t}\n}"
+	],
+	"mappings": "AAAA,MAAM,GAAG,CAAC,CAAC;CACV;EACC,IAAI,CAAC,GAAG,GAAG,CAAC;;AAEd,CAAC"
 }

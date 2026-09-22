@@ -1,5 +1,99 @@
 # esrap changelog
 
+## 2.3.8
+
+### Patch Changes
+
+- 4a0bb7f: fix: add trailing commas to single type parameter declarations in the TSX printer so generic arrow functions remain valid TSX
+
+## 2.3.7
+
+### Patch Changes
+
+- 17f34a4: fix: print a semicolon after body-less class methods (abstract methods and overload signatures)
+- f332286: fix: don't treat JSDoc `@type` comments re-anchored to parameter defaults or named function ids as type casts
+- ba2b98b: fix: print type parameters of object-literal methods
+- 2e4485b: fix: keep comments that follow a signature's `=>` or closing parenthesis in place
+
+## 2.3.6
+
+### Patch Changes
+
+- a46e8a2: fix: preserve type arguments on tagged templates, array pattern annotations, and template literal type quasis
+
+## 2.3.5
+
+### Patch Changes
+
+- 51da035: fix: re-introduce JSDoc type cast support, but don't treat JSDoc `@type` comments on binding identifiers (variable declarator ids, function parameters, catch params) as type casts
+
+## 2.3.4
+
+### Patch Changes
+
+- e51f38f: fix: revert jsdoc type cast support (for now)
+
+## 2.3.3
+
+### Patch Changes
+
+- 3cbb677: fix: preserve parantheses of jsdoc type casts
+
+## 2.3.2
+
+### Patch Changes
+
+- d58be54: fix: preserve definite assignment assertions on variable declarations
+- ecb1725: fix: preserve character entities in JSX text
+- ebe96df: fix: don't drop newlines when `indent` is an empty string
+- 593d9b8: fix: only print `declare` on ambient function declarations
+- 60dd87f: fix: keep JSX comments inside their expression container
+- 74bf5d7: fix: print `declare` on ambient interfaces and type aliases
+- b7749d1: fix: preserve type-level syntax that was being dropped when printing
+
+## 2.3.1
+
+### Patch Changes
+
+- 9f349d1: fix: preserve JavaScript grammar and module semantics, along with TypeScript modifiers and generic arguments
+- 8990d22: fix: respect the ESTree `method` flag when printing object properties whose values are function expressions
+
+## 2.3.0
+
+### Minor Changes
+
+- b7e623d: Add a `boundaryTokens` language option that anchors structural tokens (array/object brackets and braces, preserved parentheses, unary operators, and the closing tokens of calls and computed member access) with one-character source locations, so node-boundary positions resolve through the source map instead of being attributed to the previous token. Off by default; output is byte-identical either way
+
+## 2.2.13
+
+### Patch Changes
+
+- 9b35c04: fix: preserve required parentheses in three more cases that changed meaning or produced invalid output
+- 9b35c04: chore: derive `needs_parens` precedence checks from the precedence table instead of hard-coded numbers
+- 61c8f1f: fix: preserve more TypeScript markers when printing
+- 9b35c04: fix: add parentheses required by specific grammar positions
+- 79dea45: fix: print valid TypeScript for `asserts` predicates, qualified namespaces, and computed signature keys
+
+## 2.2.12
+
+### Patch Changes
+
+- 6aef4e0: fix: preserve `?` on optional identifiers (e.g. optional parameters)
+- a990517: fix: preserve required parentheses that were being dropped, changing meaning or producing invalid output (nested unary operators, parenthesized optional chains, and `await` as the left operand of `**`)
+
+## 2.2.11
+
+### Patch Changes
+
+- 16e353d: fix: keep required parentheses for mixed `&&`/`||` logical expressions
+
+## 2.2.10
+
+### Patch Changes
+
+- 8fa143f: fix: keep `=>` on same line when return type annotation wraps onto multiple lines
+- 39554cc: fix: add parentheses for `as`/`satisfies` expressions inside unary and `**`/binary operands
+
 ## 2.2.9
 
 ### Patch Changes

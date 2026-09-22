@@ -1,0 +1,4 @@
+interface Example {
+	readonly property?: string;
+	readonly [key: string]: number;
+}

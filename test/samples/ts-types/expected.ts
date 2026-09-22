@@ -11,6 +11,13 @@ type H = this;
 
 type I = `Hello, ${keyof C}`;
 type J = () => this is string;
+type P = (x: unknown) => asserts x is string;
+
+function assertsString(x): asserts x is string {}
+function assertsValue(x): asserts x {}
+function assertsThis(x): asserts this is Foo {}
+function isString(x): x is string {}
+
 type Bird = { legs: 2 };
 type Dog = { legs: 4 };
 type Wolf = { legs: 4 };

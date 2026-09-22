@@ -10,6 +10,19 @@ import ts from '../ts/index.js';
 export default (options) => ({
 	...ts(options),
 
+	TSTypeParameterDeclaration(node, context) {
+		context.write('<');
+
+		for (let i = 0; i < node.params.length; i++) {
+			if (i > 0) context.write(', ');
+			context.visit(node.params[i]);
+		}
+
+		// Keep single-parameter declarations unambiguous with JSX.
+		if (node.params.length === 1) context.write(',');
+		context.write('>');
+	},
+
 	JSXElement(node, context) {
 		context.visit(node.openingElement);
 
@@ -34,6 +47,11 @@ export default (options) => ({
 		context.write('<');
 
 		context.visit(node.name);
+
+		// explicit type arguments (`<Comp<string> ... />`)
+		if (node.typeArguments) {
+			context.visit(node.typeArguments);
+		}
 
 		for (const attribute of node.attributes) {
 			context.write(' ');
@@ -72,7 +90,9 @@ export default (options) => ({
 	},
 
 	JSXText(node, context) {
-		context.write(node.value, node);
+		// `value` is decoded — re-emitting it would turn `&lt;`, `&gt;`, `&#123;`
+		// and `&#125;` back into characters that can't appear in JSX text
+		context.write(node.raw ?? node.value, node);
 	},
 
 	JSXAttribute(node, context) {

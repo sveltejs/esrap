@@ -1,11 +1,11 @@
 {
-  "version": 3,
-  "names": [],
-  "sources": [
-    "input.js"
-  ],
-  "sourcesContent": [
-    "function foo() {\n\t// hey1\n\t/*\n\they2\n\t*/\n}\n"
-  ],
-  "mappings": "AAAA,SAAS,GAAG,GAAG,CAAC;;;;;AAKhB,CAAC"
+	"version": 3,
+	"names": [],
+	"sources": [
+		"input.js"
+	],
+	"sourcesContent": [
+		"function foo() {\n\t// hey1\n\t/*\n\they2\n\t*/\n}\n"
+	],
+	"mappings": "AAAA,SAAS,GAAG,GAAG,CAAC;;;;;AAKhB,CAAC"
 }
