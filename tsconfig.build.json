@@ -5,7 +5,7 @@
 		"declaration": true,
 		"emitDeclarationOnly": true,
 		"declarationDir": "./types",
-		"sourceMap": true,
+		"declarationMap": true,
 		"rootDir": "./src",
 		"paths": {
 			"esrap": ["./src/public.ts"]
