@@ -5,14 +5,14 @@ export class Entity {
 	) {}
 }
 
-export @Entity('users', { info: true })
-class User {}
+@Entity('users', { info: true })
+export class User {}
 
 @Entity('categories', { info: false })
 class Category {}
 
-export @Entity('tasks', { info: true })
-class Task {}
+@Entity('tasks', { info: true })
+export class Task {}
 
 const u = new User();
 const c = new Category();

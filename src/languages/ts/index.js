@@ -1197,9 +1197,6 @@ export default (options = {}) => {
 		},
 
 		ExportNamedDeclaration(node, context) {
-			token(context, 'export', node);
-			context.write(' ');
-
 			if (node.declaration) {
 				// Check if declaration has decorators (ClassDeclaration, ClassExpression can have them)
 				const decl = /** @type {any} */ (node.declaration);
@@ -1207,16 +1204,23 @@ export default (options = {}) => {
 					for (const decorator of decl.decorators) {
 						context.visit(decorator);
 					}
+					token(context, 'export', node);
+					context.write(' ');
 					// Temporarily remove decorators so ClassDeclaration doesn't print them again
 					const savedDecorators = decl.decorators;
 					decl.decorators = [];
 					context.visit(node.declaration);
 					decl.decorators = savedDecorators;
 				} else {
+					token(context, 'export', node);
+					context.write(' ');
 					context.visit(node.declaration);
 				}
 				return;
 			}
+
+			token(context, 'export', node);
+			context.write(' ');
 
 			if (node.exportKind === 'type') context.write('type ');
 
