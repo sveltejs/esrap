@@ -708,7 +708,8 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'ForInStatement|ForOfStatement': (node, context) => {
-			context.write('for ');
+			token(context, 'for', node);
+			context.write(' ');
 			if (node.type === 'ForOfStatement' && node.await) context.write('await ');
 			context.write('(');
 
