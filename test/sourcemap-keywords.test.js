@@ -141,6 +141,28 @@ test('throw / return / await map to source keywords', () => {
 	}
 });
 
+test('generated parentheses map to the wrapped await expression', () => {
+	const source = 'const loaded = await load();';
+	const { ast } = acornParse(source);
+	const declaration = /** @type {any} */ (ast.body[0]).declarations[0];
+
+	// Model a transform that calls the result of the original await expression.
+	declaration.init = {
+		type: 'CallExpression',
+		callee: declaration.init,
+		arguments: [],
+		optional: false
+	};
+
+	const { code, map } = print(ast, ts(), { sourceMapEncodeMappings: false });
+	expect(code).toBe('const loaded = (await load())();');
+
+	// Coverage starts at `(`, so it must resolve to `await`, not the end of `loaded`.
+	const segment = mappingAtSubstring(code, '(await', map.mappings);
+	expect(segment.slice(2)).toEqual([0, source.indexOf('await')]);
+	expect(mappingAtSubstring(code, 'await', map.mappings).slice(2)).toEqual(segment.slice(2));
+});
+
 test('if / else map to source keywords', () => {
 	const { source, code, mappings } = mapped(`if (x) { a(); } else { b(); }`);
 

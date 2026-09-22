@@ -2650,6 +2650,11 @@ function operand_needs_wrap(node, parent, is_right) {
  */
 function maybe_wrap(context, node, wrap) {
 	if (wrap) {
+		// Keep the start of the generated expression mapped to the wrapped node.
+		if (node.loc) {
+			context.location(node.loc.start.line, node.loc.start.column);
+		}
+
 		context.write('(');
 		context.visit(node);
 		context.write(')');
