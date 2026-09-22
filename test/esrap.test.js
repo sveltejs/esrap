@@ -163,10 +163,10 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		let input_json = '';
 		try {
 			input_js = fs.readFileSync(`${__dirname}/samples/${dir}/input.${fileExtension}`, 'utf-8');
-		} catch (error) { }
+		} catch (error) {}
 		try {
 			input_json = fs.readFileSync(`${__dirname}/samples/${dir}/input.json`).toString();
-		} catch (error) { }
+		} catch (error) {}
 
 		for (const [parserName, { skip, parse, isBaseline, skipSnapshot, skipMap }] of Object.entries(
 			parsers
@@ -225,7 +225,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 				}
 
 				if (isBaseline) {
-					expect(clean(/** @type {TSESTree.Node} */(/** @type {any} */ (parsedAst)))).toEqual(
+					expect(clean(/** @type {TSESTree.Node} */ (/** @type {any} */ (parsedAst)))).toEqual(
 						clean(ast)
 					);
 				}

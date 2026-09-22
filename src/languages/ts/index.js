@@ -95,13 +95,13 @@ function track_binding(node) {
 
 	switch (/** @type {any} */ (node).type) {
 		case 'AssignmentPattern':
-			track_binding(/** @type {any} */(node).left);
+			track_binding(/** @type {any} */ (node).left);
 			break;
 		case 'RestElement':
-			track_binding(/** @type {any} */(node).argument);
+			track_binding(/** @type {any} */ (node).argument);
 			break;
 		case 'ArrayPattern':
-			track_bindings(/** @type {any} */(node).elements);
+			track_bindings(/** @type {any} */ (node).elements);
 			break;
 		case 'ObjectPattern':
 			for (const property of /** @type {any} */ (node).properties) {
@@ -109,7 +109,7 @@ function track_binding(node) {
 			}
 			break;
 		case 'TSParameterProperty':
-			track_binding(/** @type {any} */(node).parameter);
+			track_binding(/** @type {any} */ (node).parameter);
 			break;
 	}
 }
@@ -610,7 +610,7 @@ export default (options = {}) => {
 			context.write('[', token_at(node.loc?.start));
 			sequence(
 				context,
-				/** @type {TSESTree.Node[]} */(node.elements),
+				/** @type {TSESTree.Node[]} */ (node.elements),
 				node.loc?.end ?? null,
 				false
 			);
@@ -1148,7 +1148,7 @@ export default (options = {}) => {
 
 		AccessorProperty:
 			shared[
-			'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
 			],
 
 		ArrayExpression: shared['ArrayExpression|ArrayPattern'],
@@ -1714,7 +1714,7 @@ export default (options = {}) => {
 
 		PropertyDefinition:
 			shared[
-			'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
 			],
 
 		RestElement: shared['RestElement|SpreadElement'],
@@ -1943,12 +1943,12 @@ export default (options = {}) => {
 
 		TSAbstractAccessorProperty:
 			shared[
-			'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
 			],
 
 		TSAbstractPropertyDefinition:
 			shared[
-			'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
+				'PropertyDefinition|TSAbstractPropertyDefinition|AccessorProperty|TSAbstractAccessorProperty'
 			],
 
 		TSDeclareFunction(node, context) {
