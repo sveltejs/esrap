@@ -1258,7 +1258,8 @@ export default (options = {}) => {
 		},
 
 		ForStatement: (node, context) => {
-			context.write('for (');
+			token(context, 'for', node);
+			context.write(' (');
 
 			if (node.init) {
 				if (node.init.type === 'VariableDeclaration') {
@@ -1694,15 +1695,17 @@ export default (options = {}) => {
 			context.visit(node.block);
 
 			if (node.handler) {
+				context.write(' ');
+				token(context, 'catch', node.handler);
+
 				if (node.handler.param) {
-					context.write(' catch(');
+					context.write('(');
 					track_binding(node.handler.param);
 					context.visit(node.handler.param);
-					context.write(') ');
-				} else {
-					context.write(' catch ');
+					context.write(')');
 				}
 
+				context.write(' ');
 				context.visit(node.handler.body);
 			}
 
