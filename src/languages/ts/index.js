@@ -1,5 +1,5 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Visitors } from '../../types.js' */
+/** @import { BaseNode, Visitors } from '../../types.js' */
 /** @import { TSOptions, BaseComment } from '../types.js' */
 import { Context } from 'esrap';
 
@@ -160,7 +160,7 @@ function token(context, token, node) {
 
 /**
  * @param {TSOptions} [options]
- * @returns {Visitors<TSESTree.Node>}
+ * @returns {Visitors<BaseNode>}
  */
 export default (options = {}) => {
 	const quote_char = options.quotes === 'double' ? '"' : "'";
@@ -474,50 +474,21 @@ export default (options = {}) => {
 		}
 	}
 
-	const boundary_tokens = options.boundaryTokens === true;
-
-	/**
-	 * A one-character synthetic token node so structural tokens (`(`, `[`, `{`,
-	 * unary operators, …) written where a node's SOURCE span begins or ends get a
-	 * sourcemap anchor. Without it, everything up to the next mapped token is
-	 * attributed to the PREVIOUS token's source position — `write(content, node)`
-	 * only maps tokens written with a node, and these boundary characters belong
-	 * to no written token. Opt-in (`boundaryTokens`): denser maps, byte-identical
-	 * output.
-	 * @param {{ line: number, column: number } | undefined} pos
-	 * @param {number} [length]
-	 */
-	function token_at(pos, length = 1) {
-		if (!boundary_tokens) return undefined;
-		if (!pos) return undefined;
-		return /** @type {any} */ ({
-			loc: { start: pos, end: { line: pos.line, column: pos.column + length } }
-		});
-	}
-
-	/** @param {{ line: number, column: number } | undefined} pos */
-	function token_before(pos) {
-		if (!boundary_tokens) return undefined;
-		if (!pos || pos.column === 0) return undefined;
-		return /** @type {any} */ ({
-			loc: { start: { line: pos.line, column: pos.column - 1 }, end: pos }
-		});
-	}
-
 	const shared = {
 		/**
 		 * @param {TSESTree.ArrayExpression | TSESTree.ArrayPattern} node
 		 * @param {Context} context
 		 */
 		'ArrayExpression|ArrayPattern': (node, context) => {
-			context.write('[', token_at(node.loc?.start));
+			if ('decorators' in node) write_parameter_decorators(context, node.decorators);
+			context.write('[');
 			sequence(
 				context,
 				/** @type {TSESTree.Node[]} */ (node.elements),
 				node.loc?.end ?? null,
 				false
 			);
-			context.write(']', token_before(node.loc?.end));
+			context.write(']');
 			if ('typeAnnotation' in node && node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
 
@@ -648,7 +619,7 @@ export default (options = {}) => {
 				join.write(' ');
 			}
 
-			context.write(')', token_before(node.loc?.end));
+			context.write(')');
 		},
 
 		/**
@@ -793,9 +764,9 @@ export default (options = {}) => {
 
 			if (node.value.generator) context.write('*');
 
-			if (node.computed) context.write('[', token_before(node.key.loc?.start));
+			if (node.computed) context.write('[');
 			context.visit(node.key);
-			if (node.computed) context.write(']', token_at(node.key.loc?.end));
+			if (node.computed) context.write(']');
 
 			// optional method (`m?()`)
 			if (node.optional) context.write('?');
@@ -871,9 +842,9 @@ export default (options = {}) => {
 			}
 
 			if (node.computed) {
-				context.write('[', token_before(node.key.loc?.start));
+				context.write('[');
 				context.visit(node.key);
-				context.write(']', token_at(node.key.loc?.end));
+				context.write(']');
 			} else {
 				context.visit(node.key);
 			}
@@ -979,7 +950,8 @@ export default (options = {}) => {
 		}
 	};
 
-	return {
+	/** @type {Visitors<TSESTree.Node>} */
+	const visitors = {
 		_(node, context, visit) {
 			write_additional_comments(context, options.getLeadingComments?.(node), 'leading');
 
@@ -1053,6 +1025,7 @@ export default (options = {}) => {
 		},
 
 		AssignmentPattern(node, context) {
+			write_parameter_decorators(context, node.decorators);
 			context.visit(node.left);
 			context.write(' = ');
 			context.visit(node.right);
@@ -1153,15 +1126,7 @@ export default (options = {}) => {
 		},
 
 		Decorator(node, context) {
-			context.write('@');
-			// a decorator must be an identifier/member/call (or parenthesized); anything
-			// else (ternary, logical, assignment, unary, `as`, optional chain…) needs wrapping
-			const wrap =
-				/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
-				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
-			if (wrap) context.write('(');
-			context.visit(node.expression);
-			if (wrap) context.write(')');
+			write_decorator(context, node);
 			context.newline();
 		},
 
@@ -1296,6 +1261,7 @@ export default (options = {}) => {
 		FunctionExpression: shared['FunctionDeclaration|FunctionExpression'],
 
 		Identifier(node, context) {
+			write_parameter_decorators(context, node.decorators);
 			let name = node.name;
 			context.write(name, node);
 
@@ -1456,7 +1422,7 @@ export default (options = {}) => {
 				}
 				context.write('[');
 				context.visit(node.property);
-				context.write(']', token_before(node.loc?.end));
+				context.write(']');
 			} else {
 				context.write(node.optional ? '?.' : '.');
 				context.visit(node.property);
@@ -1474,15 +1440,16 @@ export default (options = {}) => {
 		NewExpression: shared['CallExpression|NewExpression'],
 
 		ObjectExpression(node, context) {
-			context.write('{', token_at(node.loc?.start));
+			context.write('{');
 			sequence(context, node.properties, node.loc?.end ?? null, true);
-			context.write('}', token_before(node.loc?.end));
+			context.write('}');
 		},
 
 		ObjectPattern(node, context) {
-			context.write('{', token_at(node.loc?.start));
+			write_parameter_decorators(context, node.decorators);
+			context.write('{');
 			sequence(context, node.properties, node.loc?.end ?? null, true);
-			context.write('}', token_before(node.loc?.end));
+			context.write('}');
 
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
@@ -1490,9 +1457,9 @@ export default (options = {}) => {
 		// @ts-expect-error this isn't a real node type, but Acorn produces it
 		ParenthesizedExpression(node, context) {
 			if (node.loc) {
-				context.write('(', token_at(node.loc.start));
+				context.write('(');
 				context.visit(node.expression);
-				context.write(')', token_before(node.loc.end));
+				context.write(')');
 			} else {
 				maybe_wrap(context, node.expression, true);
 			}
@@ -1530,9 +1497,9 @@ export default (options = {}) => {
 				if (node.kind !== 'init') context.write(node.kind + ' ');
 				if (node.value.async) context.write('async ');
 				if (node.value.generator) context.write('*');
-				if (node.computed) context.write('[', token_before(node.key.loc?.start));
+				if (node.computed) context.write('[');
 				context.visit(node.key);
-				if (node.computed) context.write(']', token_at(node.key.loc?.end));
+				if (node.computed) context.write(']');
 				if (node.value.typeParameters) context.visit(node.value.typeParameters);
 				track_bindings(node.value.params);
 				context.write('(');
@@ -1549,13 +1516,13 @@ export default (options = {}) => {
 				context.write(' ');
 				context.visit(node.value.body);
 			} else {
-				if (node.computed) context.write('[', token_before(node.key.loc?.start));
+				if (node.computed) context.write('[');
 				if (node.kind === 'get' || node.kind === 'set') {
 					context.write(node.kind + ' ');
 				}
 				context.visit(node.key);
 				if (node.computed) {
-					context.write(']', token_at(node.key.loc?.end));
+					context.write(']');
 					context.write(': ');
 				} else {
 					context.write(': ');
@@ -1907,9 +1874,9 @@ export default (options = {}) => {
 
 		TSPropertySignature(node, context) {
 			if (node.readonly) context.write('readonly ');
-			if (node.computed) context.write('[', token_before(node.key.loc?.start));
+			if (node.computed) context.write('[');
 			context.visit(node.key);
-			if (node.computed) context.write(']', token_at(node.key.loc?.end));
+			if (node.computed) context.write(']');
 			if (node.optional) context.write('?');
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
@@ -1954,15 +1921,33 @@ export default (options = {}) => {
 		},
 
 		TSParameterProperty(node, context) {
+			// typescript-eslint and oxc attach the decorators to the parameter
+			// property, Acorn to its parameter. Either way they precede the modifiers
+			const parameter = node.parameter;
+			const parameter_decorators = parameter.decorators;
+			write_parameter_decorators(context, node.decorators);
+			write_parameter_decorators(context, parameter_decorators);
+
 			if (node.accessibility) {
 				context.write(node.accessibility + ' ');
+			}
+
+			if (node.override) {
+				context.write('override ');
 			}
 
 			if (node.readonly) {
 				context.write('readonly ');
 			}
 
-			context.visit(node.parameter);
+			if (parameter_decorators?.length) {
+				// already written above, so the parameter mustn't print them again
+				parameter.decorators = [];
+				context.visit(parameter);
+				parameter.decorators = parameter_decorators;
+			} else {
+				context.visit(parameter);
+			}
 		},
 
 		TSExportAssignment(node, context) {
@@ -2145,9 +2130,9 @@ export default (options = {}) => {
 				context.write(node.kind + ' ');
 			}
 
-			if (node.computed) context.write('[', token_before(node.key.loc?.start));
+			if (node.computed) context.write('[');
 			context.visit(node.key);
-			if (node.computed) context.write(']', token_at(node.key.loc?.end));
+			if (node.computed) context.write(']');
 			if (node.optional) context.write('?');
 
 			if (node.typeParameters) {
@@ -2409,6 +2394,9 @@ export default (options = {}) => {
 			context.visit(node.right);
 		}
 	};
+
+	// Accept compatible ASTs from other parsers at the public boundary.
+	return /** @type {Visitors<BaseNode>} */ (visitors);
 };
 
 /** @satisfies {Visitors} */
@@ -2506,6 +2494,37 @@ function maybe_wrap(context, node, wrap) {
 		context.write(')');
 	} else {
 		context.visit(node);
+	}
+}
+
+/**
+ * @param {Context} context
+ * @param {TSESTree.Decorator} node
+ */
+function write_decorator(context, node) {
+	context.write('@');
+	// a decorator must be an identifier/member/call (or parenthesized); anything
+	// else (ternary, logical, assignment, unary, `as`, optional chain…) needs wrapping
+	const wrap =
+		/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
+		EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
+	if (wrap) context.write('(');
+	context.visit(node.expression);
+	if (wrap) context.write(')');
+}
+
+/**
+ * Parameter decorators (`@dec x`) stay on the parameter's line, unlike class
+ * and member decorators, which the `Decorator` visitor puts on their own line
+ * @param {Context} context
+ * @param {TSESTree.Decorator[] | undefined} decorators
+ */
+function write_parameter_decorators(context, decorators) {
+	if (!decorators) return;
+
+	for (const decorator of decorators) {
+		write_decorator(context, decorator);
+		context.write(' ');
 	}
 }
 

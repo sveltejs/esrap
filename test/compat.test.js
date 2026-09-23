@@ -8,22 +8,28 @@
 import { expect, test } from 'vitest';
 import { parse } from 'acorn';
 import { print } from 'esrap';
-// we use ts from esrap/languages/ts instead source in purpose
+// Import through the package exports to check the public types.
 import ts from 'esrap/languages/ts';
+import tsx from 'esrap/languages/tsx';
 import { acornParse } from './common.js';
 
-test('estree nodes with ts() visitors', () => {
+const languages = [
+	{ name: 'ts', visitors: ts },
+	{ name: 'tsx', visitors: tsx }
+];
+
+test.each(languages)('estree nodes with $name() visitors', ({ visitors }) => {
 	const ast = parse('const x = 1;', { ecmaVersion: 'latest', sourceType: 'module' });
 
-	const { code } = print(ast, ts());
+	const { code } = print(ast, visitors());
 
 	expect(code).toBe('const x = 1;');
 });
 
-test('@typescript-eslint/types nodes with ts() visitors', () => {
+test.each(languages)('@typescript-eslint/types nodes with $name() visitors', ({ visitors }) => {
 	const { ast } = acornParse('const x: number = 1;');
 
-	const { code } = print(ast, ts());
+	const { code } = print(ast, visitors());
 
 	expect(code).toBe('const x: number = 1;');
 });
