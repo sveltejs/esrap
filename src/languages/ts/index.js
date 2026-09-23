@@ -1950,6 +1950,10 @@ export default (options = {}) => {
 				context.write(node.accessibility + ' ');
 			}
 
+			if (node.override) {
+				context.write('override ');
+			}
+
 			if (node.readonly) {
 				context.write('readonly ');
 			}
