@@ -891,6 +891,10 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'MethodDefinition|TSAbstractMethodDefinition': (node, context) => {
+			if (node.loc) {
+				context.location(node.loc.start.line, node.loc.start.column);
+			}
+
 			if (node.decorators) {
 				for (const decorator of node.decorators) {
 					context.visit(decorator);
@@ -1655,6 +1659,10 @@ export default (options = {}) => {
 		},
 
 		Property(node, context) {
+			if (node.loc) {
+				context.location(node.loc.start.line, node.loc.start.column);
+			}
+
 			const value = node.value.type === 'AssignmentPattern' ? node.value.left : node.value;
 
 			const shorthand =
@@ -2060,6 +2068,10 @@ export default (options = {}) => {
 		},
 
 		TSPropertySignature(node, context) {
+			if (node.loc) {
+				context.location(node.loc.start.line, node.loc.start.column);
+			}
+
 			if (node.readonly) context.write('readonly ');
 			if (node.computed) context.write('[', token_before(node.key.loc?.start));
 			context.visit(node.key);
