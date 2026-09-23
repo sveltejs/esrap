@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class A {\n\tconstructor(\n\t\tpublic a: number,\n\t\tprotected b: string,\n\t\treadonly c?: boolean,\n\t\tpublic d = 1\n\t) {}\n}\n\nclass B extends A {\n\tconstructor(\n\t\tpublic override readonly a: number,\n\t\tprotected override b: string,\n\t\toverride readonly c?: boolean,\n\t\toverride d = 2\n\t) {\n\t\tsuper(a, b, c, d);\n\t}\n}\n"
+  ],
+  "mappings": "MAAM,CAAC,CAAC,CAAC;CACR,WAAW;SACH,CAAS,EAAN,MAAM;YACN,CAAS,EAAN,MAAM;WACV,CAAW,GAAP,OAAO;SACb,CAAC,GAAG,CAAC;GACX,CAAC,CAAC;AACL,CAAC;;MAEK,CAAC,SAAS,CAAC,CAAC,CAAC;CAClB,WAAW;2BACe,CAAS,EAAN,MAAM;qBACf,CAAS,EAAN,MAAM;oBACV,CAAW,GAAP,OAAO;WACpB,CAAC,GAAG,CAAC;GACb,CAAC;EACF,KAAK,CAAC,CAAC,EAAE,CAAC,EAAE,CAAC,EAAE,CAAC;CACjB,CAAC;AACF,CAAC"
+}
