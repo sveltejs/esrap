@@ -477,36 +477,6 @@ export default (options = {}) => {
 		}
 	}
 
-	const boundary_tokens = options.boundaryTokens === true;
-
-	/**
-	 * A one-character synthetic token node so structural tokens (`(`, `[`, `{`,
-	 * unary operators, …) written where a node's SOURCE span begins or ends get a
-	 * sourcemap anchor. Without it, everything up to the next mapped token is
-	 * attributed to the PREVIOUS token's source position — `write(content, node)`
-	 * only maps tokens written with a node, and these boundary characters belong
-	 * to no written token. Opt-in (`boundaryTokens`): denser maps, byte-identical
-	 * output.
-	 * @param {{ line: number, column: number } | undefined} pos
-	 * @param {number} [length]
-	 */
-	function token_at(pos, length = 1) {
-		if (!boundary_tokens) return undefined;
-		if (!pos) return undefined;
-		return /** @type {any} */ ({
-			loc: { start: pos, end: { line: pos.line, column: pos.column + length } }
-		});
-	}
-
-	/** @param {{ line: number, column: number } | undefined} pos */
-	function token_before(pos) {
-		if (!boundary_tokens) return undefined;
-		if (!pos || pos.column === 0) return undefined;
-		return /** @type {any} */ ({
-			loc: { start: { line: pos.line, column: pos.column - 1 }, end: pos }
-		});
-	}
-
 	const shared = {
 		/**
 		 * @param {TSESTree.ArrayExpression | TSESTree.ArrayPattern} node
@@ -514,14 +484,14 @@ export default (options = {}) => {
 		 */
 		'ArrayExpression|ArrayPattern': (node, context) => {
 			if ('decorators' in node) write_parameter_decorators(context, node.decorators);
-			context.write('[', token_at(node.loc?.start));
+			context.write('[');
 			sequence(
 				context,
 				/** @type {TSESTree.Node[]} */ (node.elements),
 				node.loc?.end ?? null,
 				false
 			);
-			context.write(']', token_before(node.loc?.end));
+			context.write(']');
 			if ('typeAnnotation' in node && node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
 
@@ -647,7 +617,7 @@ export default (options = {}) => {
 				join.write(' ');
 			}
 
-			context.write(')', token_before(node.loc?.end));
+			context.write(')');
 		},
 
 		/**
@@ -792,9 +762,9 @@ export default (options = {}) => {
 
 			if (node.value.generator) context.write('*');
 
-			if (node.computed) context.write('[', token_before(node.key.loc?.start));
+			if (node.computed) context.write('[');
 			context.visit(node.key);
-			if (node.computed) context.write(']', token_at(node.key.loc?.end));
+			if (node.computed) context.write(']');
 
 			// optional method (`m?()`)
 			if (node.optional) context.write('?');
@@ -870,9 +840,9 @@ export default (options = {}) => {
 			}
 
 			if (node.computed) {
-				context.write('[', token_before(node.key.loc?.start));
+				context.write('[');
 				context.visit(node.key);
-				context.write(']', token_at(node.key.loc?.end));
+				context.write(']');
 			} else {
 				context.visit(node.key);
 			}
@@ -1444,7 +1414,7 @@ export default (options = {}) => {
 				}
 				context.write('[');
 				context.visit(node.property);
-				context.write(']', token_before(node.loc?.end));
+				context.write(']');
 			} else {
 				context.write(node.optional ? '?.' : '.');
 				context.visit(node.property);
@@ -1462,16 +1432,16 @@ export default (options = {}) => {
 		NewExpression: shared['CallExpression|NewExpression'],
 
 		ObjectExpression(node, context) {
-			context.write('{', token_at(node.loc?.start));
+			context.write('{');
 			sequence(context, node.properties, node.loc?.end ?? null, true);
-			context.write('}', token_before(node.loc?.end));
+			context.write('}');
 		},
 
 		ObjectPattern(node, context) {
 			write_parameter_decorators(context, node.decorators);
-			context.write('{', token_at(node.loc?.start));
+			context.write('{');
 			sequence(context, node.properties, node.loc?.end ?? null, true);
-			context.write('}', token_before(node.loc?.end));
+			context.write('}');
 
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
@@ -1479,9 +1449,9 @@ export default (options = {}) => {
 		// @ts-expect-error this isn't a real node type, but Acorn produces it
 		ParenthesizedExpression(node, context) {
 			if (node.loc) {
-				context.write('(', token_at(node.loc.start));
+				context.write('(');
 				context.visit(node.expression);
-				context.write(')', token_before(node.loc.end));
+				context.write(')');
 			} else {
 				maybe_wrap(context, node.expression, true);
 			}
@@ -1519,9 +1489,9 @@ export default (options = {}) => {
 				if (node.kind !== 'init') context.write(node.kind + ' ');
 				if (node.value.async) context.write('async ');
 				if (node.value.generator) context.write('*');
-				if (node.computed) context.write('[', token_before(node.key.loc?.start));
+				if (node.computed) context.write('[');
 				context.visit(node.key);
-				if (node.computed) context.write(']', token_at(node.key.loc?.end));
+				if (node.computed) context.write(']');
 				if (node.value.typeParameters) context.visit(node.value.typeParameters);
 				track_bindings(node.value.params);
 				context.write('(');
@@ -1538,13 +1508,13 @@ export default (options = {}) => {
 				context.write(' ');
 				context.visit(node.value.body);
 			} else {
-				if (node.computed) context.write('[', token_before(node.key.loc?.start));
+				if (node.computed) context.write('[');
 				if (node.kind === 'get' || node.kind === 'set') {
 					context.write(node.kind + ' ');
 				}
 				context.visit(node.key);
 				if (node.computed) {
-					context.write(']', token_at(node.key.loc?.end));
+					context.write(']');
 					context.write(': ');
 				} else {
 					context.write(': ');
@@ -1896,9 +1866,9 @@ export default (options = {}) => {
 
 		TSPropertySignature(node, context) {
 			if (node.readonly) context.write('readonly ');
-			if (node.computed) context.write('[', token_before(node.key.loc?.start));
+			if (node.computed) context.write('[');
 			context.visit(node.key);
-			if (node.computed) context.write(']', token_at(node.key.loc?.end));
+			if (node.computed) context.write(']');
 			if (node.optional) context.write('?');
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
@@ -2152,9 +2122,9 @@ export default (options = {}) => {
 				context.write(node.kind + ' ');
 			}
 
-			if (node.computed) context.write('[', token_before(node.key.loc?.start));
+			if (node.computed) context.write('[');
 			context.visit(node.key);
-			if (node.computed) context.write(']', token_at(node.key.loc?.end));
+			if (node.computed) context.write(']');
 			if (node.optional) context.write('?');
 
 			if (node.typeParameters) {
