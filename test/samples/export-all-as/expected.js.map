@@ -7,5 +7,5 @@
   "sourcesContent": [
     "export * as direct from './direct.js';\nimport * as indirect from './indirect.js';\nexport { indirect };\n"
   ],
-  "mappings": "YAAY,MAAM,MAAM,aAAa;;AACrC,OAAO,aAAa,MAAM,eAAe;;AACzC,OAAO,EAAE,QAAQ"
+  "mappings": "AAAA,MAAM,MAAM,MAAM,MAAM,aAAa;;AACrC,MAAM,CAAC,aAAa,MAAM,eAAe;;AACzC,MAAM,GAAG,QAAQ"
 }
