@@ -1,4 +1,4 @@
-import type { BaseNode } from '../types';
+import type { BaseNode } from '../types.js';
 
 export type TSOptions = {
 	quotes?: 'double' | 'single';

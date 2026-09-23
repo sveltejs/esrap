@@ -9,7 +9,9 @@
 		"rootDir": "./src",
 		"paths": {
 			"esrap": ["./src/public.ts"]
-		}
+		},
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
 	},
 	"include": ["./src"]
 }
