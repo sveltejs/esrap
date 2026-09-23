@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "class Controller {\n\tconstructor(\n\t\t@Inject(CONFIG) private readonly config: Config,\n\t\t@Optional() @Inject(LOGGER) protected logger?: Logger,\n\t\t@Inject(CACHE) public cache = new Map(),\n\t\t@Self() service: Service\n\t) {}\n\n\tfind(@Param('id') id: string, @Query() { limit, offset }: Paging, @Body() [first]: Item[]) {}\n\n\tupdate(\n\t\t@Param('id') id: string,\n\t\t@Body(validation.pipe) body: Item,\n\t\t@(flags ?? defaults) force = false\n\t) {}\n}\n"
+  ],
+  "mappings": "MAAM,UAAU,CAAC,CAAC;CACjB,WAAW;GACT,MAAM,CAAC,MAAM,mBAAmB,MAAc,EAAN,MAAM;GAC9C,QAAQ,IAAI,MAAM,CAAC,MAAM,YAAY,MAAe,GAAN,MAAM;GACpD,MAAM,CAAC,KAAK,SAAS,KAAK,GAAG,GAAG,CAAC,GAAG;GACpC,IAAI,GAAG,OAAgB,EAAP,OAAO;GACvB,CAAC,CAAC;;CAEJ,IAAI;GAAE,KAAK,CAAC,IAAI,EAAE,EAAU,EAAN,MAAM;GAAG,KAAK,KAAK,KAAK,EAAE,MAAM,IAAI,MAAM;GAAG,IAAI,IAAI,KAAK,GAAG,IAAI;GAAI,CAAC,CAAC;;CAE7F,MAAM;GACJ,KAAK,CAAC,IAAI,EAAE,EAAU,EAAN,MAAM;GACtB,IAAI,CAAC,UAAU,CAAC,IAAI,EAAE,IAAU,EAAJ,IAAI;IAC/B,KAAK,IAAI,QAAQ,EAAE,KAAK,GAAG,KAAK;GACjC,CAAC,CAAC;AACL,CAAC"
+}
