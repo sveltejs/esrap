@@ -1,4 +1,4 @@
-/** @import { BaseNode, Command, Visitors, PrintOptions } from './types' */
+/** @import { BaseNode, Command, Visitors, PrintOptions } from './types.js' */
 import { encode } from '@jridgewell/sourcemap-codec';
 import { Context, dedent, indent, margin, newline, space } from './context.js';
 
@@ -55,7 +55,7 @@ export function print(node, visitors, opts = {}) {
 	/** @type {Command[]} */
 	const commands = [];
 
-	// @ts-expect-error some nonsense I don't understand
+	// @ts-ignore some nonsense I don't understand
 	const context = new Context(visitors, commands);
 
 	context.visit(node);

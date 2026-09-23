@@ -1,8 +1,8 @@
 // @ts-check
 
 import { test } from 'vitest';
-import { acornParse } from './common';
-import { print } from '../src';
+import { acornParse } from './common.js';
+import { print } from '../src/index.js';
 import { expect } from 'vitest';
 import ts from '../src/languages/ts/index.js';
 
