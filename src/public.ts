@@ -1,2 +1,2 @@
-export type { PrintOptions, Visitors } from './types';
-export * from './index';
+export type { PrintOptions, Visitors } from './types.js';
+export * from './index.js';

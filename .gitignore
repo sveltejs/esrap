@@ -5,4 +5,5 @@
 /test/samples/*/oxc/*
 /test/samples/*/_actual.*
 /test/sandbox/_input.ts
-/test/sandbox/_output.ts
+/test/sandbox/_output.js
+/test/sandbox/_output.js.map

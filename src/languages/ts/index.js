@@ -1,5 +1,5 @@
 /** @import { TSESTree } from '@typescript-eslint/types' */
-/** @import { Visitors } from '../../types.js' */
+/** @import { BaseNode, Visitors } from '../../types.js' */
 /** @import { TSOptions, BaseComment } from '../types.js' */
 import { Context } from 'esrap';
 
@@ -163,7 +163,7 @@ function token(context, token, node, close = false) {
 
 /**
  * @param {TSOptions} [options]
- * @returns {Visitors<TSESTree.Node>}
+ * @returns {Visitors<BaseNode>}
  */
 export default (options = {}) => {
 	const quote_char = options.quotes === 'double' ? '"' : "'";
@@ -483,6 +483,7 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'ArrayExpression|ArrayPattern': (node, context) => {
+			if ('decorators' in node) write_parameter_decorators(context, node.decorators);
 			context.write('[');
 			sequence(
 				context,
@@ -947,7 +948,8 @@ export default (options = {}) => {
 		}
 	};
 
-	return {
+	/** @type {Visitors<TSESTree.Node>} */
+	const visitors = {
 		_(node, context, visit) {
 			write_additional_comments(context, options.getLeadingComments?.(node), 'leading');
 
@@ -1015,6 +1017,7 @@ export default (options = {}) => {
 		},
 
 		AssignmentPattern(node, context) {
+			write_parameter_decorators(context, node.decorators);
 			context.visit(node.left);
 			context.write(' = ');
 			context.visit(node.right);
@@ -1115,15 +1118,7 @@ export default (options = {}) => {
 		},
 
 		Decorator(node, context) {
-			context.write('@');
-			// a decorator must be an identifier/member/call (or parenthesized); anything
-			// else (ternary, logical, assignment, unary, `as`, optional chain…) needs wrapping
-			const wrap =
-				/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
-				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
-			if (wrap) context.write('(');
-			context.visit(node.expression);
-			if (wrap) context.write(')');
+			write_decorator(context, node);
 			context.newline();
 		},
 
@@ -1258,6 +1253,7 @@ export default (options = {}) => {
 		FunctionExpression: shared['FunctionDeclaration|FunctionExpression'],
 
 		Identifier(node, context) {
+			write_parameter_decorators(context, node.decorators);
 			let name = node.name;
 			context.write(name, node);
 
@@ -1442,6 +1438,7 @@ export default (options = {}) => {
 		},
 
 		ObjectPattern(node, context) {
+			write_parameter_decorators(context, node.decorators);
 			context.write('{');
 			sequence(context, node.properties, node.loc?.end ?? null, true);
 			context.write('}');
@@ -1916,15 +1913,33 @@ export default (options = {}) => {
 		},
 
 		TSParameterProperty(node, context) {
+			// typescript-eslint and oxc attach the decorators to the parameter
+			// property, Acorn to its parameter. Either way they precede the modifiers
+			const parameter = node.parameter;
+			const parameter_decorators = parameter.decorators;
+			write_parameter_decorators(context, node.decorators);
+			write_parameter_decorators(context, parameter_decorators);
+
 			if (node.accessibility) {
 				context.write(node.accessibility + ' ');
+			}
+
+			if (node.override) {
+				context.write('override ');
 			}
 
 			if (node.readonly) {
 				context.write('readonly ');
 			}
 
-			context.visit(node.parameter);
+			if (parameter_decorators?.length) {
+				// already written above, so the parameter mustn't print them again
+				parameter.decorators = [];
+				context.visit(parameter);
+				parameter.decorators = parameter_decorators;
+			} else {
+				context.visit(parameter);
+			}
 		},
 
 		TSExportAssignment(node, context) {
@@ -2371,6 +2386,9 @@ export default (options = {}) => {
 			context.visit(node.right);
 		}
 	};
+
+	// Accept compatible ASTs from other parsers at the public boundary.
+	return /** @type {Visitors<BaseNode>} */ (visitors);
 };
 
 /** @satisfies {Visitors} */
@@ -2468,6 +2486,37 @@ function maybe_wrap(context, node, wrap) {
 		context.write(')');
 	} else {
 		context.visit(node);
+	}
+}
+
+/**
+ * @param {Context} context
+ * @param {TSESTree.Decorator} node
+ */
+function write_decorator(context, node) {
+	context.write('@');
+	// a decorator must be an identifier/member/call (or parenthesized); anything
+	// else (ternary, logical, assignment, unary, `as`, optional chain…) needs wrapping
+	const wrap =
+		/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
+		EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
+	if (wrap) context.write('(');
+	context.visit(node.expression);
+	if (wrap) context.write(')');
+}
+
+/**
+ * Parameter decorators (`@dec x`) stay on the parameter's line, unlike class
+ * and member decorators, which the `Decorator` visitor puts on their own line
+ * @param {Context} context
+ * @param {TSESTree.Decorator[] | undefined} decorators
+ */
+function write_parameter_decorators(context, decorators) {
+	if (!decorators) return;
+
+	for (const decorator of decorators) {
+		write_decorator(context, decorator);
+		context.write(' ');
 	}
 }
 
