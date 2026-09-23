@@ -7,5 +7,5 @@
   "sourcesContent": [
     "let a: string | null = null;\n"
   ],
-  "mappings": "AAAA,IAAI,CAAgB,AAAf,EAAE,MAAM,GAAG,IAAI,GAAG,IAAI,CAAC,AAC5B"
+  "mappings": "AAAA,GAAG,CAAC,CAAgB,AAAf,EAAE,MAAM,GAAG,IAAI,GAAG,IAAI,CAAC,AAC5B"
 }

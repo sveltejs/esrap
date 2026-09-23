@@ -7,5 +7,5 @@
   "sourcesContent": [
     "import { foo } from 'x';\nimport { bar } from 'y';\nimport('baz').then(blah);"
   ],
-  "mappings": "AAAA,OAAO,EAAE,GAAG,QAAQ,GAAG,CAAC;AACxB,OAAO,EAAE,GAAG,QAAQ,GAAG,CAAC;;AACxB,MAAM,CAAC,KAAK,CAAC,CAAC,IAAI,CAAC,IAAI,CAAC,CAAC"
+  "mappings": "AAAA,MAAM,GAAG,GAAG,QAAQ,GAAG,CAAC;AACxB,MAAM,GAAG,GAAG,QAAQ,GAAG,CAAC;;AACxB,MAAM,CAAC,KAAK,CAAC,CAAC,IAAI,CAAC,IAAI,CAAC,CAAC"
 }

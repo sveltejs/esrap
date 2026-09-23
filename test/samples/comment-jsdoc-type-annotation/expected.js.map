@@ -7,5 +7,5 @@
   "sourcesContent": [
     "let /** @type {number | undefined} */ computed;\n\nlet /** @type {number | undefined} */ a, /** @type {string} */ b;\n\nfunction foo(/** @type {number} */ x, /** @type {string} */ y) {}\n\nconst fn = (/** @type {number} */ z) => z;\n\ntry {\n\tfoo(1, '');\n} catch (/** @type {any} */ e) {}\n\nconst value = /** @type {number} */ (computed);\n"
   ],
-  "mappings": "AAAA,IAAI,kCAAkC,QAAQ,CAAC;;AAE/C,IAAI,kCAAkC,CAAC;uBAAwB,CAAC,CAAC;;AAEjE,QAAQ,CAAC,GAAG,uBAAuB,CAAC,wBAAwB,CAAC,EAAE,CAAC,CAAC;;AAEjE,MAAM,EAAE,GAAG,uBAAuB,CAAC,KAAK,CAAC,CAAC;;AAE1C,GAAG,CAAC,CAAC;CACJ,GAAG,CAAC,CAAC,EAAE,EAAE,CAAC,CAAC;AACZ,CAAC,CAAC,KAAK,oBAAqB,CAAC,EAAE,CAAC,CAAC;;AAEjC,MAAM,KAAK,0BAA0B,QAAQ,EAAE,AAC/C"
+  "mappings": "AAAA,GAAG,mCAAmC,QAAQ,CAAC;;AAE/C,GAAG,mCAAmC,CAAC;uBAAwB,CAAC,CAAC;;AAEjE,SAAS,GAAG,uBAAuB,CAAC,wBAAwB,CAAC,EAAE,CAAC,CAAC;;AAEjE,KAAK,CAAC,EAAE,GAAG,uBAAuB,CAAC,KAAK,CAAC,CAAC;;AAE1C,GAAG,CAAC,CAAC;CACJ,GAAG,CAAC,CAAC,EAAE,EAAE,CAAC,CAAC;AACZ,CAAC,MAAM,oBAAqB,CAAC,EAAE,CAAC,CAAC;;AAEjC,KAAK,CAAC,KAAK,0BAA0B,QAAQ,EAAE,AAC/C"
 }
