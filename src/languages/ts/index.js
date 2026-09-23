@@ -1132,9 +1132,15 @@ export default (options = {}) => {
 					true,
 					node.type in EXPRESSIONS_PRECEDENCE && !BINDINGS.has(node)
 				);
+
+				context.location(node.loc.start.line, node.loc.start.column);
 			}
 
 			visit(node);
+
+			if (node.loc) {
+				context.location(node.loc.end.line, node.loc.end.column);
+			}
 
 			if (jsdoc_type_casts > 0) {
 				context.write(')'.repeat(jsdoc_type_casts));

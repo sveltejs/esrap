@@ -7,5 +7,5 @@
   "sourcesContent": [
     "const comparison = <p>1 &lt; 2 &amp;&amp; 3 &gt; 2</p>;\nconst braces = <p>&#123;not an expression&#125;</p>;\n"
   ],
-  "mappings": "AAAA,MAAM,UAAU,IAAI,CAAC,CAAC,4BAA4B,EAAE,CAAC;AACrD,MAAM,MAAM,IAAI,CAAC,CAAC,6BAA6B,EAAE,CAAC"
+  "mappings": "AAAA,MAAM,UAAU,GAAG,CAAC,CAAC,CAAC,4BAA4B,EAAE,CAAC,CAAC,CAAC;AACvD,MAAM,MAAM,GAAG,CAAC,CAAC,CAAC,6BAA6B,EAAE,CAAC,CAAC,CAAC,AACpD"
 }

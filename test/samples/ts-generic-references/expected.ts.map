@@ -7,5 +7,5 @@
   "sourcesContent": [
     "type Imported = import('pkg').Value<string>;\n\ninterface Derived extends Base<string> {}\n\nclass Implementation implements Contract<string> {}\n"
   ],
-  "mappings": "KAAK,QAAQ,UAAU,KAAK,EAAE,KAAK,CAAC,MAAM;;UAEhC,OAAO,SAAS,IAAI,CAAC,MAAM;;AAErC,MAAM,cAAc,YAAY,QAAQ,CAAC,MAAM,EAAE,CAAC,CAAC"
+  "mappings": "AAAA,KAAK,QAAQ,GAAG,OAAO,KAAK,EAAE,KAAK,CAAC,MAAM,CAAC,CAAC;;AAE5C,UAAU,OAAO,SAAS,IAAI,CAAC,MAAM,CAAC,EAAC,AAAE,CAAA;;AAEzC,MAAM,cAAc,YAAY,QAAQ,CAAC,MAAM,CAAC,CAAC,CAAC,CAAC,AACnD"
 }

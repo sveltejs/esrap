@@ -7,5 +7,5 @@
   "sourcesContent": [
     "class Foo extends Bar<X> {}\n"
   ],
-  "mappings": "AAAA,MAAM,GAAG,SAAS,GAAG,CAAC,CAAC,EAAE,CAAC,CAAC"
+  "mappings": "AAAA,MAAM,GAAG,SAAS,GAAG,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,AAC3B"
 }

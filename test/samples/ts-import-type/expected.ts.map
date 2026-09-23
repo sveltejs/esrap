@@ -7,5 +7,5 @@
   "sourcesContent": [
     "import baz = require('baz');\n\nconst foo: import('foo/bar') = 123;\nconst bar: import('foo/bar').baz = 234;\n"
   ],
-  "mappings": "OAAO,GAAG,WAAW,KAAK;;AAE1B,MAAM,GAAsB,SAAV,SAAS,IAAI,GAAG;AAClC,MAAM,GAA0B,SAAd,SAAS,EAAE,GAAG,GAAG,GAAG"
+  "mappings": "AAAA,OAAO,GAAG,GAAG,QAAQ,KAAK,EAAC,AAAC;;AAE5B,MAAM,GAAsB,AAAnB,EAAE,OAAO,SAAS,CAAC,GAAG,GAAG,CAAC;AACnC,MAAM,GAA0B,AAAvB,EAAE,OAAO,SAAS,EAAE,GAAG,GAAG,GAAG,CAAC,AACvC"
 }

@@ -7,5 +7,5 @@
   "sourcesContent": [
     "sql<string[]>`SELECT * FROM table`;\nconst res = tag<A, B>`hello ${world}`;\n"
   ],
-  "mappings": "AAAA,GAAG,CAAC,MAAM;;AACV,MAAM,GAAG,GAAG,GAAG,CAAC,CAAC,EAAE,CAAC,UAAU,KAAK"
+  "mappings": "AAAA,GAAG,CAAC,MAAM,EAAE,CAAC,qBAAqB,CAAC;;AACnC,MAAM,GAAG,GAAG,GAAG,CAAC,CAAC,EAAE,CAAC,CAAC,SAAS,KAAK,EAAE,CAAC,AACtC"
 }
