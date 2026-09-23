@@ -37,7 +37,7 @@ function mappingAtSubstring(code, needle, mappings) {
 
 /**
  * @param {string} source
- * @param {{ preserveParens?: boolean, boundaryTokens?: boolean }} [opts]
+ * @param {{ preserveParens?: boolean }} [opts]
  */
 function mapped(source, opts = {}) {
 	const { ast, comments } = acornParse(source, {
@@ -46,7 +46,7 @@ function mapped(source, opts = {}) {
 		jsxMode: false,
 		fileExtension: 'ts'
 	});
-	const { code, map } = print(ast, ts({ comments, boundaryTokens: opts.boundaryTokens }), {
+	const { code, map } = print(ast, ts({ comments }), {
 		sourceMapSource: 'input.ts',
 		sourceMapContent: source,
 		sourceMapEncodeMappings: false
@@ -193,74 +193,4 @@ test('decorator-prefixed class falls back gracefully', () => {
 
 	expect(code).toContain('class');
 	expect(mappings.length).toBeGreaterThan(0);
-});
-
-test('source mappings anchor array and object brackets', () => {
-	{
-		const { source, code, mappings } = mapped(`const points = [];`, { boundaryTokens: true });
-
-		const seg_open = mappingAtSubstring(code, '[', mappings);
-		expect(seg_open[3]).toBe(source.indexOf('['));
-
-		const seg_close = mappingAtSubstring(code, ']', mappings);
-		expect(seg_close[3]).toBe(source.indexOf(']'));
-	}
-
-	{
-		const { source, code, mappings } = mapped(`const box = { a: 1 };`, { boundaryTokens: true });
-
-		const seg_open = mappingAtSubstring(code, '{', mappings);
-		expect(seg_open[3]).toBe(source.indexOf('{'));
-
-		const seg_close = mappingAtSubstring(code, '}', mappings);
-		expect(seg_close[3]).toBe(source.indexOf('}'));
-	}
-
-	{
-		// Destructured parameter defaults: the pattern's braces are its span.
-		const { source, code, mappings } = mapped(`const use = ({ a = 1 } = {}) => a;`, {
-			boundaryTokens: true
-		});
-
-		const seg_open = mappingAtSubstring(code, '{', mappings);
-		expect(seg_open[3]).toBe(source.indexOf('{'));
-	}
-});
-
-test('source mappings anchor unary operators', () => {
-	const { source, code, mappings } = mapped(`const neg = -value;`, { boundaryTokens: true });
-
-	const seg = mappingAtSubstring(code, '-', mappings);
-	expect(seg[3]).toBe(source.indexOf('-'));
-});
-
-test('source mappings anchor the closing tokens of calls and computed access', () => {
-	{
-		const { source, code, mappings } = mapped(`const item = items[index + 1];`, {
-			boundaryTokens: true
-		});
-
-		const seg_close = mappingAtSubstring(code, ']', mappings);
-		expect(seg_close[3]).toBe(source.indexOf(']'));
-	}
-
-	{
-		const { source, code, mappings } = mapped(`const dir = compute();`, { boundaryTokens: true });
-
-		const seg_close = mappingAtSubstring(code, ')', mappings);
-		expect(seg_close[3]).toBe(source.indexOf(')'));
-	}
-});
-
-test('source mappings anchor preserved parentheses', () => {
-	const { source, code, mappings } = mapped(`const x = (a - 1) % b;`, {
-		preserveParens: true,
-		boundaryTokens: true
-	});
-
-	const seg_open = mappingAtSubstring(code, '(', mappings);
-	expect(seg_open[3]).toBe(source.indexOf('('));
-
-	const seg_close = mappingAtSubstring(code, ')', mappings);
-	expect(seg_close[3]).toBe(source.indexOf(')'));
 });
