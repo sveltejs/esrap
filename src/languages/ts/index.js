@@ -3,9 +3,11 @@
 /** @import { TSOptions, BaseComment } from '../types.js' */
 import { Context } from 'esrap';
 
-/** @typedef {TSESTree.Node} Node */
-
-/** @type {Record<TSESTree.Expression['type'] | 'Super' | 'RestElement', number>} */
+// Keep the public type parser-independent while checking all expression kinds.
+/**
+ * @type {Record<string, number>}
+ * @satisfies {Record<TSESTree.Expression['type'] | 'Super' | 'RestElement', number>}
+ */
 export const EXPRESSIONS_PRECEDENCE = {
 	JSXFragment: 20,
 	JSXElement: 20,
