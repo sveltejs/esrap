@@ -1,5 +1,12 @@
 # esrap changelog
 
+## 2.3.9
+
+### Patch Changes
+
+- cc1e996: fix: remove duplicate sourcemap mappings
+- c0b3a7f: chore: remove dts-buddy
+
 ## 2.3.8
 
 ### Patch Changes

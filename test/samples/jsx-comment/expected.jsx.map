@@ -7,5 +7,5 @@
   "sourcesContent": [
     "const list = (\n\t<ul>\n\t\t{/* items go here */}\n\t\t{items}\n\t\t{/* nothing after this */}\n\t</ul>\n);\n"
   ],
-  "mappings": "AAAA,MAAM,IAAI,IACR,EAAE,CAAC;EACH,qBAAqB;EACrB,CAAC,KAAK,CAAC;EACP,0BAA0B;CAC3B,EAAE,EAAE"
+  "mappings": "AAAA,KAAK,CAAC,IAAI,IACR,EAAE,CAAC;EACH,qBAAqB;EACrB,CAAC,KAAK,CAAC;EACP,0BAA0B;CAC3B,EAAE,EAAE"
 }
