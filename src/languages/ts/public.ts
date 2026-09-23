@@ -1,5 +1,5 @@
-import type { Visitors, BaseNode } from '../../types';
-import type { TSOptions, BaseComment, Comment } from '../types';
+import type { Visitors, BaseNode } from '../../types.js';
+import type { TSOptions, BaseComment, Comment } from '../types.js';
 export type { BaseComment, Comment };
 export type Node = BaseNode;
 declare function ts(options?: TSOptions): Visitors<BaseNode>;

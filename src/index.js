@@ -1,4 +1,4 @@
-/** @import { BaseNode, Command, Visitors, PrintOptions } from './types' */
+/** @import { BaseNode, Command, Visitors, PrintOptions } from './types.js' */
 import { encode } from '@jridgewell/sourcemap-codec';
 import { Context, dedent, indent, margin, newline, space } from './context.js';
 

@@ -5,8 +5,8 @@
 		"noEmit": true,
 		"strict": true,
 		"target": "esnext",
-		"module": "esnext",
-		"moduleResolution": "bundler",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
 		"lib": ["esnext", "dom"],
 		"skipLibCheck": true
 	},

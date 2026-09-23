@@ -1,7 +1,6 @@
 import { expect, test } from 'vitest';
-import { print } from '../src';
+import { print } from '../src/index.js';
 
-/** @import { Visitors } from '../types' */
 test('custom printers work', () => {
 	const { code } = print(
 		{
