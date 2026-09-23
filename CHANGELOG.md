@@ -1,5 +1,14 @@
 # esrap changelog
 
+## 2.3.10
+
+### Patch Changes
+
+- ff809ba: fix: remove estimated sourcemap locations
+- 900c6ea: fix: make go to definition work for language exports
+- bafc01b: fix: print parameter decorators
+- a6646b5: fix: print the `override` modifier on constructor parameter properties
+
 ## 2.3.9
 
 ### Patch Changes
