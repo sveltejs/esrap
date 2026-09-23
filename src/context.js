@@ -1,4 +1,4 @@
-/** @import { BaseNode, Command, Visitors } from './types' */
+/** @import { BaseNode, Command, Visitors } from './types.js' */
 
 export const margin = 0;
 export const newline = 1;
