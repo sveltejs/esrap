@@ -7,5 +7,5 @@
   "sourcesContent": [
     "import { 'not-an-identifier' as binding } from 'pkg';\nexport { binding as 'not-an-identifier' };\nexport { 'not-an-identifier' as 'another-name' } from 'pkg';\n"
   ],
-  "mappings": "AAAA,OAAO,EAAE,mBAAmB,IAAI,OAAO,QAAQ,KAAK;;AACpD,OAAO,EAAE,OAAO,IAAI,mBAAmB;AACvC,OAAO,EAAE,mBAAmB,IAAI,cAAc,QAAQ,KAAK"
+  "mappings": "AAAA,MAAM,GAAG,mBAAmB,IAAI,OAAO,QAAQ,KAAK;;AACpD,MAAM,GAAG,OAAO,IAAI,mBAAmB;AACvC,MAAM,GAAG,mBAAmB,IAAI,cAAc,QAAQ,KAAK"
 }
