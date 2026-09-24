@@ -632,6 +632,7 @@ export default (options = {}) => {
 			if (node.decorators) {
 				for (const decorator of node.decorators) {
 					context.visit(decorator);
+					context.newline();
 				}
 			}
 
@@ -734,6 +735,7 @@ export default (options = {}) => {
 			if (node.decorators) {
 				for (const decorator of node.decorators) {
 					context.visit(decorator);
+					context.newline();
 				}
 			}
 
@@ -806,6 +808,7 @@ export default (options = {}) => {
 			if (node.decorators) {
 				for (const decorator of node.decorators) {
 					context.visit(decorator);
+					context.newline();
 				}
 			}
 
@@ -966,8 +969,9 @@ export default (options = {}) => {
 					node.type in EXPRESSIONS_PRECEDENCE && !BINDINGS.has(node)
 				);
 
-				const start = printed_start(node);
-				context.location(start.line, start.column);
+				if (!has_preceding_decorator(node)) {
+					context.location(node.loc.start.line, node.loc.start.column);
+				}
 			}
 
 			visit(node);
@@ -1127,7 +1131,6 @@ export default (options = {}) => {
 
 		Decorator(node, context) {
 			write_decorator(context, node);
-			context.newline();
 		},
 
 		DoWhileStatement(node, context) {
@@ -1177,18 +1180,24 @@ export default (options = {}) => {
 				if (decl.decorators && decl.decorators.length > 0) {
 					for (const decorator of decl.decorators) {
 						context.visit(decorator);
+						context.newline();
 					}
 					token(context, 'export', node);
 					context.write(' ');
 					// Temporarily remove decorators so ClassDeclaration doesn't print them again
 					const savedDecorators = decl.decorators;
+					const loc = decl.loc;
 					decl.decorators = [];
-					context.visit(node.declaration);
+					decl.loc = null;
+					context.visit(decl);
 					decl.decorators = savedDecorators;
+					decl.loc = loc;
+
+					if (loc) context.location(loc.end.line, loc.end.column);
 				} else {
 					token(context, 'export', node);
 					context.write(' ');
-					context.visit(node.declaration);
+					context.visit(decl);
 				}
 				return;
 			}
@@ -2726,10 +2735,20 @@ function handle_var_declarator(node, context, no_in) {
  * decorators (Acorn, typescript-estree), but they are printed first.
  * @param {TSESTree.Node} node
  */
-function printed_start(node) {
-	const start = /** @type {TSESTree.SourceLocation} */ (node.loc).start;
-	const first = 'decorators' in node ? node.decorators?.[0]?.loc?.start : undefined;
-	return first && before(first, start) ? first : start;
+function has_preceding_decorator(node) {
+	const node_start = node.loc.start;
+	let start = node_start;
+	let n = node;
+
+	if (node.type === 'ExportNamedDeclaration' && node.declaration) {
+		n = node.declaration;
+	}
+
+	if ('decorators' in n) {
+		start = n.decorators?.[0]?.loc?.start ?? node_start;
+	}
+
+	return before(start, node_start);
 }
 
 /**
