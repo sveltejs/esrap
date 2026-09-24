@@ -14,6 +14,9 @@ class Category {}
 @Entity('tasks', { info: true })
 export class Task {}
 
+@Entity('default', { info: true })
+export default class Default {}
+
 const u = new User();
 const c = new Category();
 const t = new Task();

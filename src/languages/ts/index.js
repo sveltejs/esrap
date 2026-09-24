@@ -1154,10 +1154,28 @@ export default (options = {}) => {
 		},
 
 		ExportDefaultDeclaration(node, context) {
+			// Check if declaration has decorators (ClassDeclaration, ClassExpression can have them)
+			const d = /** @type {any} */ (node.declaration);
+
+			block_decorators(context, d.decorators);
+
 			token(context, 'export', node);
 			context.write(' default ');
 
-			context.visit(node.declaration);
+			if (d.decorators && d.decorators.length > 0) {
+				const { decorators, loc } = d;
+
+				// Temporarily remove decorators so ClassDeclaration doesn't print them again
+				d.decorators = [];
+				d.loc = null;
+				context.visit(d);
+				d.decorators = decorators;
+				d.loc = loc;
+
+				if (loc) context.location(loc.end.line, loc.end.column);
+			} else {
+				context.visit(d);
+			}
 
 			if (node.declaration.type !== 'FunctionDeclaration') {
 				context.write(';');
