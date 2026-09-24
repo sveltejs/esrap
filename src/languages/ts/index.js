@@ -2731,8 +2731,8 @@ function handle_var_declarator(node, context, no_in) {
 }
 
 /**
- * Where a node's printed output starts. A parameter's `loc` starts after its
- * decorators (Acorn, typescript-estree), but they are printed first.
+ * Whether a node has a decorator whose `start` location precedes that of
+ * the node itself, in which case we should not emit a mapping yet
  * @param {TSESTree.Node} node
  */
 function has_preceding_decorator(node) {
