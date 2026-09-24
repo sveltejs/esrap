@@ -1,5 +1,14 @@
 # esrap changelog
 
+## 2.3.11
+
+### Patch Changes
+
+- 6027cc6: fix: restore missing import, prevent private types leaking into public types
+- 25bc28c: fix: add missing file extensions to type imports
+- 24b36f3: chore: get rid of boundaryTokens option
+- 45a97b2: fix: add sourcemap mappings at start/end of each node
+
 ## 2.3.10
 
 ### Patch Changes
