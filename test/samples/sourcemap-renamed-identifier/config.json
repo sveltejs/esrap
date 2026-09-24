@@ -1,0 +1,7 @@
+{
+	"printOptions": {
+		"sourceMapSource": "input.js",
+		"sourceMapContent": "original;",
+		"sourceMapEncodeMappings": false
+	}
+}

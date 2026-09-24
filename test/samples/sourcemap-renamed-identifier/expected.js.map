@@ -1,0 +1,29 @@
+{
+  "version": 3,
+  "names": [
+    "original"
+  ],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "original;"
+  ],
+  "mappings": [
+    [
+      [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        7,
+        0,
+        0,
+        8
+      ]
+    ]
+  ]
+}
