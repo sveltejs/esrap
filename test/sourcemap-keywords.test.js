@@ -72,6 +72,22 @@ test.each([
 	expect(segment.slice(2)).toEqual([gen_line, gen_col]);
 });
 
+test.each([
+	['switch (n) {\n\tcase 1:\n\t\tbreak;\n\tdefault:\n\t\tbreak;\n}', 'case'],
+	['switch (n) {\n\tcase 1:\n\t\tbreak;\n\tdefault:\n\t\tbreak;\n}', 'default'],
+	['try {\n\tf();\n} catch (e) {\n\tg(e);\n}', 'catch'],
+	['try {\n\tf();\n} catch {\n\tg();\n}', 'catch'],
+	['for (const k in o) {\n\tf(k);\n}', 'const k'],
+	['for (let i = 0; i < n; i++) {\n\tf(i);\n}', 'let i'],
+	['for await (const v of s) {\n\tf(v);\n}', 'const v'],
+	['class A {\n\tm(@dec x: number) {}\n}', '@dec']
+])('maps the start of nodes printed inline: %s', (source, needle) => {
+	const { code, mappings } = mapped(source);
+	const segment = mappingAtSubstring(code, needle, mappings);
+	const { gen_line, gen_col } = generatedLineColumn(source, source.indexOf(needle));
+	expect(segment.slice(2)).toEqual([gen_line, gen_col]);
+});
+
 /**
  * @param {string} code
  * @param {string} needle
