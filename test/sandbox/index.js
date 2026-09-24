@@ -14,5 +14,6 @@ const { code, map } = print(ast, ts({ comments }), {
 	sourceMapSource: '_output.js',
 	sourceMapContent: content
 });
+fs.writeFileSync(`${dir}/_input.json`, JSON.stringify(ast, null, '\t'));
 fs.writeFileSync(`${dir}/_output.js`, code);
 fs.writeFileSync(`${dir}/_output.js.map`, map.toString());
