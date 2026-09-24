@@ -150,16 +150,13 @@ function write_comment(comment, context) {
  * @param {Context} context
  * @param {string} token
  * @param {TSESTree.Node} node
- * @param {boolean} close
  */
-function token(context, token, node, close = false) {
+function token(context, token, node) {
+	context.write(token);
+
 	if (node.loc) {
-		const { line, column } = close ? node.loc.end : node.loc.start;
-		context.location(line, close ? column - token.length : column);
-		context.write(token);
-		context.location(line, close ? column : column + token.length);
-	} else {
-		context.write(token);
+		const { line, column } = node.loc.start;
+		context.location(line, column + token.length);
 	}
 }
 
@@ -533,7 +530,12 @@ export default (options = {}) => {
 				context.newline();
 			}
 
-			token(context, '}', node, true);
+			if (node.loc) {
+				const { line, column } = node.loc.end;
+				context.location(line, column - 1);
+			}
+
+			context.write('}');
 		},
 
 		/**
@@ -965,9 +967,15 @@ export default (options = {}) => {
 					true,
 					node.type in EXPRESSIONS_PRECEDENCE && !BINDINGS.has(node)
 				);
+
+				context.location(node.loc.start.line, node.loc.start.column);
 			}
 
 			visit(node);
+
+			if (node.loc) {
+				context.location(node.loc.end.line, node.loc.end.column);
+			}
 
 			if (jsdoc_type_casts > 0) {
 				context.write(')'.repeat(jsdoc_type_casts));

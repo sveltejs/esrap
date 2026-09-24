@@ -7,5 +7,5 @@
   "sourcesContent": [
     "import a, * as b from 'x';\n"
   ],
-  "mappings": "AAAA,MAAM,CAAC,CAAC,EAAE,MAAM,MAAM,GAAG"
+  "mappings": "AAAA,MAAM,CAAC,CAAC,EAAE,MAAM,MAAM,GAAG,CAAC,AAC1B"
 }

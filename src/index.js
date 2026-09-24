@@ -1,4 +1,4 @@
-/** @import { BaseNode, Command, Visitors, PrintOptions } from './types.js' */
+/** @import { BaseNode, Command, Location, Visitors, PrintOptions } from './types.js' */
 import { encode } from '@jridgewell/sourcemap-codec';
 import { Context, dedent, indent, margin, newline, space } from './context.js';
 
@@ -60,7 +60,7 @@ export function print(node, visitors, opts = {}) {
 
 	context.visit(node);
 
-	/** @typedef {[number, number, number, number]} Segment */
+	/** @typedef {[generatedColumn: number, sourceIndex: number, originalLine: number, originalColumn: number]} Segment */
 
 	let code = '';
 	let current_column = 0;
@@ -93,6 +93,34 @@ export function print(node, visitors, opts = {}) {
 	let needs_margin = false;
 	let needs_space = false;
 
+	/** @type {Location[]} */
+	const pending_locations = [];
+
+	/** @param {Location} location */
+	function add_location(location) {
+		const prev = current_line[current_line.length - 1];
+
+		/** @type {Segment} */
+		const segment = [
+			current_column,
+			0, // source index is always zero
+			location.line - 1,
+			location.column
+		];
+
+		if (!prev || prev[0] !== segment[0] || prev[2] !== segment[2] || prev[3] !== segment[3]) {
+			current_line.push(segment);
+		}
+	}
+
+	function flush_locations() {
+		for (const location of pending_locations) {
+			add_location(location);
+		}
+
+		pending_locations.length = 0;
+	}
+
 	/** @param {Command} command */
 	function run(command) {
 		if (Array.isArray(command)) {
@@ -119,32 +147,26 @@ export function print(node, visitors, opts = {}) {
 			return;
 		}
 
-		if (needs_newline) {
-			append(needs_margin ? '\n' + current_newline : current_newline);
-		} else if (needs_space) {
-			append(' ');
-		}
-
-		needs_margin = needs_newline = needs_space = false;
-
 		if (typeof command === 'string') {
+			if (needs_newline) {
+				append(needs_margin ? '\n' + current_newline : current_newline);
+			} else if (needs_space) {
+				append(' ');
+			}
+
+			needs_margin = needs_newline = needs_space = false;
+
+			flush_locations();
 			append(command);
 			return;
 		}
 
 		if (command.type === 'Location') {
-			const prev = current_line[current_line.length - 1];
-
-			/** @type {Segment} */
-			const segment = [
-				current_column,
-				0, // source index is always zero
-				command.line - 1,
-				command.column
-			];
-
-			if (!prev || prev[0] !== segment[0] || prev[2] !== segment[2] || prev[3] !== segment[3]) {
-				current_line.push(segment);
+			// Locations must not flush whitespace, but should follow it if more text is written.
+			if (needs_newline || needs_space) {
+				pending_locations.push(command);
+			} else {
+				add_location(command);
 			}
 		}
 	}
@@ -153,6 +175,8 @@ export function print(node, visitors, opts = {}) {
 		run(commands[i]);
 	}
 
+	// Preserve trailing mappings without emitting trailing whitespace.
+	flush_locations();
 	mappings.push(current_line);
 
 	/** @type {SourceMap} */

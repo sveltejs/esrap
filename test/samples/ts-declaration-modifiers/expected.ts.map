@@ -7,5 +7,5 @@
   "sourcesContent": [
     "const enum Constant {\n\tvalue\n}\n\ndeclare enum Ambient {\n\tvalue\n}\n\nimport type Imported = require('pkg');\n\ntype Constructor = abstract new <T>(value: T) => T;\n"
   ],
-  "mappings": "WAAW,QAAQ;CAClB,KAAK;;;aAGO,OAAO;CACnB,KAAK;;;AAGN,MAAM,MAAM,QAAQ,WAAW,KAAK;;KAE/B,WAAW,iBAAiB,CAAC,EAAE,KAAQ,EAAD,CAAC,KAAK,CAAC"
+  "mappings": "AAAA,WAAW,QAAQ;CAClB,KAAK;CACL;;AAED,aAAa,OAAO;CACnB,KAAK;CACL;;AAED,MAAM,MAAM,QAAQ,GAAG,QAAQ,KAAK,EAAC,AAAC;;AAEtC,KAAK,WAAW,GAAG,aAAa,CAAC,CAAC,CAAC,CAAC,KAAQ,AAAH,EAAE,CAAC,KAAK,CAAC,CAAC,AACnD"
 }

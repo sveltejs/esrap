@@ -7,5 +7,5 @@
   "sourcesContent": [
     "declare module 'svelte' {}\n"
   ],
-  "mappings": "eAAe,QAAQ;"
+  "mappings": "AAAA,eAAe,QAAQ,AAAC;CAAE,AAC1B"
 }

@@ -7,5 +7,5 @@
   "sourcesContent": [
     "export * from 'data.json' with { type: 'json' };\nexport { value } from 'data.json' with { type: 'json' };\n"
   ],
-  "mappings": "AAAA,MAAM,SAAQ,WAAW,QAAQ,IAAI,EAAE,MAAM;;AAC7C,MAAM,GAAG,KAAK,QAAQ,WAAW,QAAQ,IAAI,EAAE,MAAM"
+  "mappings": "AAAA,MAAM,SAAQ,WAAW,QAAQ,IAAI,EAAE,MAAM,GAAG;;AAChD,MAAM,GAAG,KAAK,QAAQ,WAAW,QAAQ,IAAI,EAAE,MAAM,GAAG,AACxD"
 }

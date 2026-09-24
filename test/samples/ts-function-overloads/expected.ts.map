@@ -7,5 +7,5 @@
   "sourcesContent": [
     "export function overloaded(value: string): string;\nexport function overloaded(value: number): number;\nexport function overloaded(value: any) {\n\treturn value;\n}\n\ndeclare function ambient(value: string): void;\n"
   ],
-  "mappings": "AAAA,MAAM,UAAU,UAAU,CAAC,KAAa,EAAN,MAAM,GAAG,MAAM;AACjD,MAAM,UAAU,UAAU,CAAC,KAAa,EAAN,MAAM,GAAG,MAAM;;AACjD,MAAM,UAAU,UAAU,CAAC,KAAU,EAAH,GAAG,EAAE,CAAC;CACvC,MAAM,CAAC,KAAK;AACb,CAAC;;iBAEgB,OAAO,CAAC,KAAa,EAAN,MAAM,GAAG,IAAI"
+  "mappings": "AAAA,MAAM,CAAC,SAAS,UAAU,CAAC,KAAa,AAAR,EAAE,MAAM,CAAC,EAAE,MAAM,CAAC;AAClD,MAAM,CAAC,SAAS,UAAU,CAAC,KAAa,AAAR,EAAE,MAAM,CAAC,EAAE,MAAM,CAAC;;AAClD,MAAM,CAAC,SAAS,UAAU,CAAC,KAAU,AAAL,EAAE,GAAG,EAAE,CAAC;CACvC,MAAM,CAAC,KAAK,CAAC;AACd,CAAC;;AAED,iBAAiB,OAAO,CAAC,KAAa,AAAR,EAAE,MAAM,CAAC,EAAE,IAAI,CAAC,AAC9C"
 }
