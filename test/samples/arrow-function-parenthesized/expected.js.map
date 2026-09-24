@@ -7,5 +7,5 @@
   "sourcesContent": [
     "foo || (bar => bar);"
   ],
-  "mappings": "AAAA,GAAG,KAAK,CAAA,GAAG,KAAI,GAAG,CAAC,CAAC"
+  "mappings": "AAAA,GAAG,IAAK,CAAA,CAAA,GAAG,KAAI,GAAG,CAAA,AAAC,CAAC"
 }
