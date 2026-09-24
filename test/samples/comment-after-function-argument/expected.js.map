@@ -1,11 +1,14 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "foo",
+    "bar"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "foo(function bar() {\n\t// logic goes here\n}, true); // trailing comment\n"
   ],
-  "mappings": "AAAA,GAAG;CAAC,SAAS,GAAG,GAAG,CAAC;;CAEpB,CAAC;CAAE,IAAI;CAAC,CAAC,oBACT"
+  "mappings": "AAAAA,GAAG;CAAC,SAASC,GAAG,GAAG,CAAC;;CAEpB,CAAC;CAAE,IAAI;CAAC,CAAC,oBACT"
 }

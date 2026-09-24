@@ -1,11 +1,13 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "a"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "-(-a);\n+(+a);\n-(--a);\n"
   ],
-  "mappings": "AAAA,CAAC,CAAC,CAAC,CAAC,AAAC,CAAC;AACN,CAAC,CAAC,CAAC,CAAC,AAAC,CAAC;AACN,CAAC,CAAC,EAAE,CAAC,AAAC,CAAC,AACP"
+  "mappings": "AAAA,CAAC,CAAC,CAACA,CAAC,AAAC,CAAC;AACN,CAAC,CAAC,CAACA,CAAC,AAAC,CAAC;AACN,CAAC,CAAC,EAAEA,CAAC,AAAC,CAAC,AACP"
 }

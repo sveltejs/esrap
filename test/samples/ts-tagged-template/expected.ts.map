@@ -1,11 +1,18 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "sql",
+    "res",
+    "tag",
+    "A",
+    "B",
+    "world"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "sql<string[]>`SELECT * FROM table`;\nconst res = tag<A, B>`hello ${world}`;\n"
   ],
-  "mappings": "AAAA,GAAG,CAAC,MAAM,EAAE,CAAC,qBAAqB,CAAC;;AACnC,KAAK,CAAC,GAAG,GAAG,GAAG,CAAC,CAAC,EAAE,CAAC,CAAC,SAAS,KAAK,EAAE,CAAC,AACtC"
+  "mappings": "AAAAA,GAAG,CAAC,MAAM,EAAE,CAAC,qBAAqB,CAAC;;AACnC,KAAK,CAACC,GAAG,GAAGC,GAAG,CAACC,CAAC,EAAEC,CAAC,CAAC,SAASC,KAAK,EAAE,CAAC,AACtC"
 }

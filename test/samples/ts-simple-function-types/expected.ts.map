@@ -1,11 +1,16 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "foo",
+    "n",
+    "s",
+    "a"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "function foo(n: number, s: string, a: any): number {\n\treturn 1;\n}\n"
   ],
-  "mappings": "AAAA,SAAS,GAAG,CAAC,CAAS,AAAR,EAAE,MAAM,EAAE,CAAS,AAAR,EAAE,MAAM,EAAE,CAAM,AAAL,EAAE,GAAG,CAAC,EAAE,MAAM,CAAC,CAAC;CACnD,MAAM,CAAC,CAAC,CAAC;AACV,CAAC,AACD"
+  "mappings": "AAAA,SAASA,GAAG,CAACC,CAAS,AAAR,EAAE,MAAM,EAAEC,CAAS,AAAR,EAAE,MAAM,EAAEC,CAAM,AAAL,EAAE,GAAG,CAAC,EAAE,MAAM,CAAC,CAAC;CACnD,MAAM,CAAC,CAAC,CAAC;AACV,CAAC,AACD"
 }

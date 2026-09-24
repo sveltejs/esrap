@@ -1,11 +1,13 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "x"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "if (false) {\n\n}\n\nfunction x() {\n\n}\n"
   ],
-  "mappings": "AAAA,EAAE,EAAE,KAAK,EAAE,CAAC,AAEZ,CAAC;;AAED,SAAS,CAAC,GAAG,CAAC,AAEd,CAAC,AACD"
+  "mappings": "AAAA,EAAE,EAAE,KAAK,EAAE,CAAC,AAEZ,CAAC;;AAED,SAASA,CAAC,GAAG,CAAC,AAEd,CAAC,AACD"
 }

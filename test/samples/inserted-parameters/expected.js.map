@@ -1,11 +1,15 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "foo",
+    "bar",
+    "baz"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "function foo(bar, baz) {\n\treturn bar * baz;\n}"
   ],
-  "mappings": "AAAA,SAAS,GAAG,CAAC,GAAG,EAAE,GAAG,EAAE,CAAC;CACvB,MAAM,CAAC,GAAG,GAAG,GAAG,CAAC;AAClB,CAAC"
+  "mappings": "AAAA,SAASA,GAAG,CAACC,GAAG,EAAEC,GAAG,EAAE,CAAC;CACvB,MAAM,CAACD,GAAG,GAAGC,GAAG,CAAC;AAClB,CAAC"
 }

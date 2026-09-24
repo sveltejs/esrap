@@ -1,11 +1,15 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "list",
+    "ul",
+    "items"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "const list = (\n\t<ul>\n\t\t{/* items go here */}\n\t\t{items}\n\t\t{/* nothing after this */}\n\t</ul>\n);\n"
   ],
-  "mappings": "AAAA,KAAK,CAAC,IAAI,GACT,CAAC,EAAE,CAAC;EACH,CAAC,AAAmB,oBAAC;EACrB,CAAC,KAAK,CAAC;EACP,CAAC,AAAwB,yBAAC;CAC3B,EAAE,EAAE,CAAC,CACJ,AACF"
+  "mappings": "AAAA,KAAK,CAACA,IAAI,GACT,CAACC,EAAE,CAAC;EACH,CAAC,AAAmB,oBAAC;EACrB,CAACC,KAAK,CAAC;EACP,CAAC,AAAwB,yBAAC;CAC3B,EAAED,EAAE,CAAC,CACJ,AACF"
 }

@@ -1,11 +1,23 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "list",
+    "List",
+    "items",
+    "nested",
+    "Table",
+    "Row",
+    "Column",
+    "children",
+    "plain",
+    "div",
+    "className"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "const list = <List<string> items={items} />;\nconst nested = <Table<Row, Column>>{children}</Table>;\nconst plain = <div className=\"x\" />;\n"
   ],
-  "mappings": "AAAA,KAAK,CAAC,IAAI,GAAG,CAAC,IAAI,CAAC,MAAM,CAAC,CAAC,KAAK,CAAC,CAAC,KAAK,CAAC,GAAG,CAAC;AAC5C,KAAK,CAAC,MAAM,GAAG,CAAC,KAAK,CAAC,GAAG,EAAE,MAAM,CAAC,CAAC,CAAC,QAAQ,CAAC,EAAE,KAAK,CAAC,CAAC;AACtD,KAAK,CAAC,KAAK,GAAG,CAAC,GAAG,CAAC,SAAS,CAAC,GAAG,GAAG,CAAC,AACpC"
+  "mappings": "AAAA,KAAK,CAACA,IAAI,GAAG,CAACC,IAAI,CAAC,MAAM,CAAC,CAACC,KAAK,CAAC,CAACA,KAAK,CAAC,GAAG,CAAC;AAC5C,KAAK,CAACC,MAAM,GAAG,CAACC,KAAK,CAACC,GAAG,EAAEC,MAAM,CAAC,CAAC,CAACC,QAAQ,CAAC,EAAEH,KAAK,CAAC,CAAC;AACtD,KAAK,CAACI,KAAK,GAAG,CAACC,GAAG,CAACC,SAAS,CAAC,GAAG,GAAG,CAAC,AACpC"
 }

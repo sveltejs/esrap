@@ -1,11 +1,19 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "foo",
+    "a",
+    "x",
+    "y",
+    "b",
+    "c",
+    "f"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "foo`bar`;\nconst a = (x || y)`tpl`;\nconst b = a.b`t`;\nconst c = f()`t`;\n"
   ],
-  "mappings": "AAAA,GAAG,KAAK,CAAC;;AACT,KAAK,CAAC,CAAC,GAAG,CAAC,CAAC,IAAI,CAAC,CAAC,KAAK,CAAC;AACxB,KAAK,CAAC,CAAC,GAAG,CAAC,CAAC,CAAC,GAAG,CAAC;AACjB,KAAK,CAAC,CAAC,GAAG,CAAC,EAAE,GAAG,CAAC,AACjB"
+  "mappings": "AAAAA,GAAG,KAAK,CAAC;;AACT,KAAK,CAACC,CAAC,GAAG,CAACC,CAAC,IAAIC,CAAC,CAAC,KAAK,CAAC;AACxB,KAAK,CAACC,CAAC,GAAGH,CAAC,CAACG,CAAC,GAAG,CAAC;AACjB,KAAK,CAACC,CAAC,GAAGC,CAAC,EAAE,GAAG,CAAC,AACjB"
 }

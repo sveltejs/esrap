@@ -1,11 +1,15 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "foo",
+    "bar",
+    "T"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "// basic\nconst foo = bar<T>;\n"
   ],
-  "mappings": "AAAA;AACA,KAAK,CAAC,GAAG,GAAG,GAAG,CAAC,CAAC,CAAC,CAAC,AACnB"
+  "mappings": "AAAA;AACA,KAAK,CAACA,GAAG,GAAGC,GAAG,CAACC,CAAC,CAAC,CAAC,AACnB"
 }

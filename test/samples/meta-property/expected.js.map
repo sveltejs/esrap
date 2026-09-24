@@ -1,11 +1,17 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "foo",
+    "console",
+    "log",
+    "new",
+    "target"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "function foo() {\n\tconsole.log(new.target);\n}"
   ],
-  "mappings": "AAAA,SAAS,GAAG,GAAG,CAAC;CACf,OAAO,CAAC,GAAG,CAAC,GAAG,CAAC,MAAM,CAAC,CAAC;AACzB,CAAC"
+  "mappings": "AAAA,SAASA,GAAG,GAAG,CAAC;CACfC,OAAO,CAACC,GAAG,CAACC,GAAG,CAACC,MAAM,CAAC,CAAC;AACzB,CAAC"
 }

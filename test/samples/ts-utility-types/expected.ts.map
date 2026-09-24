@@ -1,11 +1,32 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "A",
+    "Awaited",
+    "Promise",
+    "Todo",
+    "title",
+    "description",
+    "updateTodo",
+    "todo",
+    "fieldsToUpdate",
+    "Partial",
+    "todo2",
+    "Readonly",
+    "CatInfo",
+    "age",
+    "breed",
+    "cats",
+    "Record",
+    "miffy",
+    "boris",
+    "mordred"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "type A = Awaited<Promise<string>>;\n\ntype Todo = {\n\ttitle: string;\n\tdescription: string;\n};\n\nfunction updateTodo(todo: Todo, fieldsToUpdate: Partial<Todo>) {\n\treturn { ...todo, ...fieldsToUpdate };\n}\n\nconst todo2: Readonly<Todo> = {\n\ttitle: 'Delete inactive users',\n\tdescription: 'foo'\n};\n\ntype CatInfo = {\n\tage: number;\n\tbreed: string;\n};\n\nconst cats: Record<string, CatInfo> = {\n\tmiffy: { age: 10, breed: 'Persian' },\n\tboris: { age: 5, breed: 'Maine Coon' },\n\tmordred: { age: 16, breed: 'British Shorthair' }\n};\n"
   ],
-  "mappings": "AAAA,KAAK,CAAC,GAAG,OAAO,CAAC,OAAO,CAAC,MAAM,CAAC,CAAC,CAAC;AAElC,KAAK,IAAI,GAAG,EACX,KAAK,EAAE,MAAM,AAAC,EACd,WAAW,EAAE,MAAM,AAAC,EACpB,CAAC;;AAEF,SAAS,UAAU,CAAC,IAAU,AAAN,EAAE,IAAI,EAAE,cAA6B,AAAf,EAAE,OAAO,CAAC,IAAI,CAAC,EAAE,CAAC;CAC/D,MAAM,CAAC,EAAE,GAAG,IAAI,EAAE,GAAG,cAAc,EAAE,CAAC;AACvC,CAAC;;AAED,KAAK,CAAC,KAAqB,AAAhB,EAAE,QAAQ,CAAC,IAAI,CAAC,GAAG,EAC7B,KAAK,EAAE,uBAAuB,EAC9B,WAAW,EAAE,KAAK,EAClB,CAAC;;AAEF,KAAK,OAAO,GAAG,EACd,GAAG,EAAE,MAAM,AAAC,EACZ,KAAK,EAAE,MAAM,AAAC,EACd,CAAC;;AAEF,KAAK,CAAC,IAA6B,AAAzB,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,GAAG;CACrC,KAAK,EAAE,EAAE,GAAG,EAAE,EAAE,EAAE,KAAK,EAAE,SAAS,EAAE;CACpC,KAAK,EAAE,EAAE,GAAG,EAAE,CAAC,EAAE,KAAK,EAAE,YAAY,EAAE;CACtC,OAAO,EAAE,EAAE,GAAG,EAAE,EAAE,EAAE,KAAK,EAAE,mBAAmB,EAAE;CAChD,CAAC,AACF"
+  "mappings": "AAAA,KAAKA,CAAC,GAAGC,OAAO,CAACC,OAAO,CAAC,MAAM,CAAC,CAAC,CAAC;AAElC,KAAKC,IAAI,GAAG,EACXC,KAAK,EAAE,MAAM,AAAC,EACdC,WAAW,EAAE,MAAM,AAAC,EACpB,CAAC;;AAEF,SAASC,UAAU,CAACC,IAAU,AAAN,EAAEJ,IAAI,EAAEK,cAA6B,AAAf,EAAEC,OAAO,CAACN,IAAI,CAAC,EAAE,CAAC;CAC/D,MAAM,CAAC,EAAE,GAAGI,IAAI,EAAE,GAAGC,cAAc,EAAE,CAAC;AACvC,CAAC;;AAED,KAAK,CAACE,KAAqB,AAAhB,EAAEC,QAAQ,CAACR,IAAI,CAAC,GAAG,EAC7BC,KAAK,EAAE,uBAAuB,EAC9BC,WAAW,EAAE,KAAK,EAClB,CAAC;;AAEF,KAAKO,OAAO,GAAG,EACdC,GAAG,EAAE,MAAM,AAAC,EACZC,KAAK,EAAE,MAAM,AAAC,EACd,CAAC;;AAEF,KAAK,CAACC,IAA6B,AAAzB,EAAEC,MAAM,CAAC,MAAM,EAAEJ,OAAO,CAAC,GAAG;CACrCK,KAAK,EAAE,EAAEJ,GAAG,EAAE,EAAE,EAAEC,KAAK,EAAE,SAAS,EAAE;CACpCI,KAAK,EAAE,EAAEL,GAAG,EAAE,CAAC,EAAEC,KAAK,EAAE,YAAY,EAAE;CACtCK,OAAO,EAAE,EAAEN,GAAG,EAAE,EAAE,EAAEC,KAAK,EAAE,mBAAmB,EAAE;CAChD,CAAC,AACF"
 }

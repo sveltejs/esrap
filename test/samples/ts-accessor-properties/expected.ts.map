@@ -1,11 +1,24 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "Example",
+    "count",
+    "privateCount",
+    "publicCount",
+    "protectedCount",
+    "AbstractExample",
+    "abstractCount",
+    "protectedAbstractCount",
+    "MyClass",
+    "constructor",
+    "x",
+    "y"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "class Example {\n\taccessor count: number = 0;\n\tprivate accessor privateCount: number;\n\tpublic accessor publicCount: number = 5;\n\tprotected accessor protectedCount: number;\n}\n\nabstract class AbstractExample {\n\tabstract accessor abstractCount: number;\n\tprotected abstract accessor protectedAbstractCount: number;\n}\n\nclass MyClass {\n\tconstructor(\n\t\tprotected x: number,\n\t\tprivate y: string\n\t) {}\n}\n"
   ],
-  "mappings": "AAAA,MAAM,OAAO,CAAC,CAAC;CACd,SAAS,KAAK,EAAE,MAAM,GAAG,CAAC,CAAC;CAC3B,iBAAiB,YAAY,EAAE,MAAM,CAAC;CACtC,gBAAgB,WAAW,EAAE,MAAM,GAAG,CAAC,CAAC;CACxC,mBAAmB,cAAc,EAAE,MAAM,CAAC;AAC3C,CAAC;;AAED,eAAe,eAAe,CAAC,CAAC;CAC/B,kBAAkB,aAAa,EAAE,MAAM,CAAC;CACxC,4BAA4B,sBAAsB,EAAE,MAAM,CAAC;AAC5D,CAAC;;AAED,MAAM,OAAO,CAAC,CAAC;CACd,WAAW,CACV,UAAU,CAAS,AAAR,EAAE,MAAM,EACnB,QAAQ,CAAS,AAAR,EAAE,MAAM,EAChB,CAAC,CAAC;AACL,CAAC,AACD"
+  "mappings": "AAAA,MAAMA,OAAO,CAAC,CAAC;CACd,SAASC,KAAK,EAAE,MAAM,GAAG,CAAC,CAAC;CAC3B,iBAAiBC,YAAY,EAAE,MAAM,CAAC;CACtC,gBAAgBC,WAAW,EAAE,MAAM,GAAG,CAAC,CAAC;CACxC,mBAAmBC,cAAc,EAAE,MAAM,CAAC;AAC3C,CAAC;;AAED,eAAeC,eAAe,CAAC,CAAC;CAC/B,kBAAkBC,aAAa,EAAE,MAAM,CAAC;CACxC,4BAA4BC,sBAAsB,EAAE,MAAM,CAAC;AAC5D,CAAC;;AAED,MAAMC,OAAO,CAAC,CAAC;CACdC,WAAW,CACV,UAAUC,CAAS,AAAR,EAAE,MAAM,EACnB,QAAQC,CAAS,AAAR,EAAE,MAAM,EAChB,CAAC,CAAC;AACL,CAAC,AACD"
 }

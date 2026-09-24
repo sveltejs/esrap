@@ -1,11 +1,16 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "Foo",
+    "hi",
+    "foo",
+    "KEY"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "class Foo {\n\thi; // a\n\tstatic foo = 1; // b\n\t[KEY] = 2; // c\n}\n"
   ],
-  "mappings": "AAAA,MAAM,GAAG,CAAC,CAAC;CACV,EAAE;CAAC,AACH,OAAO,GAAG,GAAG,CAAC;CAAC,AACf,CAAC,GAAG,IAAI,CAAC;AAAC,AACX,CAAC,AACD"
+  "mappings": "AAAA,MAAMA,GAAG,CAAC,CAAC;CACVC,EAAE;CAAC,AACH,OAAOC,GAAG,GAAG,CAAC;CAAC,AACf,CAACC,GAAG,IAAI,CAAC;AAAC,AACX,CAAC,AACD"
 }

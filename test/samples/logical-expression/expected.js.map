@@ -1,11 +1,15 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "a",
+    "b",
+    "c"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "a ?? (b || c);\n(a ?? b) || c;\n(a || b) && c;\na && (b || c);\na || b && c;"
   ],
-  "mappings": "AAAA,CAAC,KAAK,CAAC,IAAI,CAAC,CAAC,CAAC;AACd,CAAC,CAAC,IAAI,CAAC,KAAK,CAAC,CAAC;AACd,CAAC,CAAC,IAAI,CAAC,KAAK,CAAC,CAAC;AACd,CAAC,KAAK,CAAC,IAAI,CAAC,CAAC,CAAC;AACd,CAAC,IAAI,CAAC,IAAI,CAAC,CAAC"
+  "mappings": "AAAAA,CAAC,KAAKC,CAAC,IAAIC,CAAC,CAAC,CAAC;AACd,CAACF,CAAC,IAAIC,CAAC,KAAKC,CAAC,CAAC;AACd,CAACF,CAAC,IAAIC,CAAC,KAAKC,CAAC,CAAC;AACdF,CAAC,KAAKC,CAAC,IAAIC,CAAC,CAAC,CAAC;AACdF,CAAC,IAAIC,CAAC,IAAIC,CAAC,CAAC"
 }

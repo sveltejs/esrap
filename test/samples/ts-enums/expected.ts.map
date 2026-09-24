@@ -1,11 +1,18 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "UserResponse",
+    "No",
+    "Yes",
+    "respond",
+    "recipient",
+    "message"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "enum UserResponse {\n\tNo = 0,\n\tYes = 1\n}\n\nfunction respond(recipient: string, message: UserResponse): void {\n\t// ...\n}\n\nrespond('Princess Caroline', UserResponse.Yes);\n"
   ],
-  "mappings": "AAAA,KAAK,YAAY;CAChB,EAAE,GAAG,CAAC,EACN,GAAG,GAAG,CAAC;CACP;;AAED,SAAS,OAAO,CAAC,SAAiB,AAAR,EAAE,MAAM,EAAE,OAAqB,AAAd,EAAE,YAAY,CAAC,EAAE,IAAI,CAAC,CAAC;;AAElE,CAAC;;AAED,OAAO,CAAC,mBAAmB,EAAE,YAAY,CAAC,GAAG,CAAC,CAAC,AAC/C"
+  "mappings": "AAAA,KAAKA,YAAY;CAChBC,EAAE,GAAG,CAAC,EACNC,GAAG,GAAG,CAAC;CACP;;AAED,SAASC,OAAO,CAACC,SAAiB,AAAR,EAAE,MAAM,EAAEC,OAAqB,AAAd,EAAEL,YAAY,CAAC,EAAE,IAAI,CAAC,CAAC;;AAElE,CAAC;;AAEDG,OAAO,CAAC,mBAAmB,EAAEH,YAAY,CAACE,GAAG,CAAC,CAAC,AAC/C"
 }

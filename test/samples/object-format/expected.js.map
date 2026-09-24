@@ -1,11 +1,31 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "obj1",
+    "foo",
+    "level11",
+    "level12",
+    "hello",
+    "level21",
+    "level22",
+    "world",
+    "level31",
+    "level32",
+    "obj2",
+    "before",
+    "object",
+    "a",
+    "b",
+    "c",
+    "d",
+    "array",
+    "after"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "const obj1 = {\n\tfoo: 'bar',\n\tlevel11: { level12: { hello: 'world' } },\n\tlevel21: { level22: { world: 'hello' } },\n\thello: 'world',\n\tlevel31: { level32: { world: 'hello' } }\n};\n\nconst obj2 = {\n\tbefore: 1,\n\tobject: {\n\t\ta: 'lorem ipsum dolor sit amet',\n\t\tb: 'lorem ipsum dolor sit amet',\n\t\tc: 'lorem ipsum dolor sit amet',\n\t\td: 'lorem ipsum dolor sit amet'\n\t},\n\tarray: [\n\t\t'lorem ipsum dolor sit amet',\n\t\t'lorem ipsum dolor sit amet',\n\t\t'lorem ipsum dolor sit amet',\n\t\t'lorem ipsum dolor sit amet'\n\t],\n\tafter: 2\n};\n"
   ],
-  "mappings": "AAAA,KAAK,CAAC,IAAI,GAAG;CACZ,GAAG,EAAE,KAAK;CACV,OAAO,EAAE,EAAE,OAAO,EAAE,EAAE,KAAK,EAAE,OAAO,EAAE,EAAE;CACxC,OAAO,EAAE,EAAE,OAAO,EAAE,EAAE,KAAK,EAAE,OAAO,EAAE,EAAE;CACxC,KAAK,EAAE,OAAO;CACd,OAAO,EAAE,EAAE,OAAO,EAAE,EAAE,KAAK,EAAE,OAAO,EAAE,EAAE;CACxC,CAAC;;AAEF,KAAK,CAAC,IAAI,GAAG;CACZ,MAAM,EAAE,CAAC;CACT,MAAM,EAAE;EACP,CAAC,EAAE,4BAA4B;EAC/B,CAAC,EAAE,4BAA4B;EAC/B,CAAC,EAAE,4BAA4B;EAC/B,CAAC,EAAE,4BAA4B;EAC/B;CACD,KAAK,EAAE;EACN,4BAA4B;EAC5B,4BAA4B;EAC5B,4BAA4B;EAC5B,4BAA4B;EAC5B;CACD,KAAK,EAAE,CAAC;CACR,CAAC,AACF"
+  "mappings": "AAAA,KAAK,CAACA,IAAI,GAAG;CACZC,GAAG,EAAE,KAAK;CACVC,OAAO,EAAE,EAAEC,OAAO,EAAE,EAAEC,KAAK,EAAE,OAAO,EAAE,EAAE;CACxCC,OAAO,EAAE,EAAEC,OAAO,EAAE,EAAEC,KAAK,EAAE,OAAO,EAAE,EAAE;CACxCH,KAAK,EAAE,OAAO;CACdI,OAAO,EAAE,EAAEC,OAAO,EAAE,EAAEF,KAAK,EAAE,OAAO,EAAE,EAAE;CACxC,CAAC;;AAEF,KAAK,CAACG,IAAI,GAAG;CACZC,MAAM,EAAE,CAAC;CACTC,MAAM,EAAE;EACPC,CAAC,EAAE,4BAA4B;EAC/BC,CAAC,EAAE,4BAA4B;EAC/BC,CAAC,EAAE,4BAA4B;EAC/BC,CAAC,EAAE,4BAA4B;EAC/B;CACDC,KAAK,EAAE;EACN,4BAA4B;EAC5B,4BAA4B;EAC5B,4BAA4B;EAC5B,4BAA4B;EAC5B;CACDC,KAAK,EAAE,CAAC;CACR,CAAC,AACF"
 }

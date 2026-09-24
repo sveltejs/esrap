@@ -1,11 +1,18 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "console",
+    "log",
+    "Date",
+    "a",
+    "b",
+    "c"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "console.log(null, /* xxx */ new Date(), /** zzz */ a.b.c()); // www\n\nconsole.log(\n\tnull, // foo\n\tnew Date()\n);\n\nconsole.log(\n\tnull, // foo\n\tnew Date()\n);\n\nconsole.log(null, /* xxx */ function (a, b) {\n\t// yyy\n\treturn a + b;\n});\n\nconsole.log(\"1\");\n"
   ],
-  "mappings": "AAAA,OAAO,CAAC,GAAG,CAAC,IAAI,YAAY,GAAG,CAAC,IAAI,EAAE,aAAa,CAAC,CAAC,CAAC,CAAC,CAAC,EAAE,CAAC,CAAC;;AAE5D,OAAO,CAAC,GAAG;CACV,IAAI;CACJ,GAAG,CAAC,IAAI,EAAE;CACV,CAAC;;AAEF,OAAO,CAAC,GAAG;CACV,IAAI;CACJ,GAAG,CAAC,IAAI,EAAE;CACV,CAAC;;AAEF,OAAO,CAAC,GAAG,CAAC,IAAI,YAAY,UAAU,CAAC,EAAE,CAAC,EAAE,CAAC;;CAE5C,MAAM,CAAC,CAAC,GAAG,CAAC,CAAC;AACd,CAAC,CAAC,CAAC;;AAEH,OAAO,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC,AACjB"
+  "mappings": "AAAAA,OAAO,CAACC,GAAG,CAAC,IAAI,YAAY,GAAG,CAACC,IAAI,EAAE,aAAaC,CAAC,CAACC,CAAC,CAACC,CAAC,EAAE,CAAC,CAAC;;AAE5DL,OAAO,CAACC,GAAG;CACV,IAAI;CACJ,GAAG,CAACC,IAAI,EAAE;CACV,CAAC;;AAEFF,OAAO,CAACC,GAAG;CACV,IAAI;CACJ,GAAG,CAACC,IAAI,EAAE;CACV,CAAC;;AAEFF,OAAO,CAACC,GAAG,CAAC,IAAI,YAAY,UAAUE,CAAC,EAAEC,CAAC,EAAE,CAAC;;CAE5C,MAAM,CAACD,CAAC,GAAGC,CAAC,CAAC;AACd,CAAC,CAAC,CAAC;;AAEHJ,OAAO,CAACC,GAAG,CAAC,GAAG,CAAC,CAAC,AACjB"
 }

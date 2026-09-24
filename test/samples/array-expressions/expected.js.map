@@ -1,11 +1,16 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "a",
+    "b",
+    "sparse",
+    "sparser"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "a = [1, 2, 3];\n\nb = [\n\t'the quick brown fox jumps over the lazy dog',\n\t'the quick brown fox jumps over the lazy dog',\n\t'the quick brown fox jumps over the lazy dog',\n\t4\n];\n\nsparse = [,,,5];\nsparser = [,,,];\n"
   ],
-  "mappings": "AAAA,CAAC,GAAG,CAAC,CAAC,EAAE,CAAC,EAAE,CAAC,CAAC,CAAC;;AAEd,CAAC,GAAG;CACH,6CAA6C;CAC7C,6CAA6C;CAC7C,6CAA6C;CAC7C,CAAC;CACD,CAAC;;AAEF,MAAM,GAAG,KAAI,CAAC,CAAC,CAAC;AAChB,OAAO,GAAG,KAAK,CAAC,AAChB"
+  "mappings": "AAAAA,CAAC,GAAG,CAAC,CAAC,EAAE,CAAC,EAAE,CAAC,CAAC,CAAC;;AAEdC,CAAC,GAAG;CACH,6CAA6C;CAC7C,6CAA6C;CAC7C,6CAA6C;CAC7C,CAAC;CACD,CAAC;;AAEFC,MAAM,GAAG,KAAI,CAAC,CAAC,CAAC;AAChBC,OAAO,GAAG,KAAK,CAAC,AAChB"
 }

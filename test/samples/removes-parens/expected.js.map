@@ -1,11 +1,15 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "a",
+    "b",
+    "c"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "a = b + c;\n"
   ],
-  "mappings": "AAAA,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC,AACV"
+  "mappings": "AAAAA,CAAC,GAAGC,CAAC,GAAGC,CAAC,CAAC,AACV"
 }

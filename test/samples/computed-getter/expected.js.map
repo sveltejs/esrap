@@ -1,11 +1,15 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "obj",
+    "foo",
+    "bar"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "obj = {\n\tget [foo]() {\n\t\treturn bar;\n\t}\n}\n"
   ],
-  "mappings": "AAAA,GAAG,GAAG;CACL,KAAK,GAAG,IAAI,CAAC;EACZ,MAAM,CAAC,GAAG,CAAC;CACZ,CAAC;CACD,CAAA,AACD"
+  "mappings": "AAAAA,GAAG,GAAG;CACL,KAAKC,GAAG,IAAI,CAAC;EACZ,MAAM,CAACC,GAAG,CAAC;CACZ,CAAC;CACD,CAAA,AACD"
 }

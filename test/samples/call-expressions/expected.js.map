@@ -1,11 +1,18 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "x",
+    "a",
+    "b",
+    "c",
+    "console",
+    "log"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "x(a, b, c);\n\nx(a, b, () => {\n\tconsole.log('c');\n});\n\nx(\n\ta,\n\t() => {\n\t\tconsole.log('b');\n\t},\n\t() => {\n\t\tconsole.log('c');\n\t}\n);"
   ],
-  "mappings": "AAAA,CAAC,CAAC,CAAC,EAAE,CAAC,EAAE,CAAC,CAAC,CAAC;;AAEX,CAAC,CAAC,CAAC,EAAE,CAAC,EAAE,MAAM,CAAC;CACd,OAAO,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC;AAClB,CAAC,CAAC,CAAC;;AAEH,CAAC;CACA,CAAC;CACD,MAAM,CAAC;EACN,OAAO,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC;CAClB,CAAC;CACD,MAAM,CAAC;EACN,OAAO,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC;CAClB,CAAC;CACD,CAAC"
+  "mappings": "AAAAA,CAAC,CAACC,CAAC,EAAEC,CAAC,EAAEC,CAAC,CAAC,CAAC;;AAEXH,CAAC,CAACC,CAAC,EAAEC,CAAC,EAAE,MAAM,CAAC;CACdE,OAAO,CAACC,GAAG,CAAC,GAAG,CAAC,CAAC;AAClB,CAAC,CAAC,CAAC;;AAEHL,CAAC;CACAC,CAAC;CACD,MAAM,CAAC;EACNG,OAAO,CAACC,GAAG,CAAC,GAAG,CAAC,CAAC;CAClB,CAAC;CACD,MAAM,CAAC;EACND,OAAO,CAACC,GAAG,CAAC,GAAG,CAAC,CAAC;CAClB,CAAC;CACD,CAAC"
 }

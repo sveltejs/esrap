@@ -1,11 +1,18 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "Constant",
+    "value",
+    "Ambient",
+    "Imported",
+    "Constructor",
+    "T"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "const enum Constant {\n\tvalue\n}\n\ndeclare enum Ambient {\n\tvalue\n}\n\nimport type Imported = require('pkg');\n\ntype Constructor = abstract new <T>(value: T) => T;\n"
   ],
-  "mappings": "AAAA,WAAW,QAAQ;CAClB,KAAK;CACL;;AAED,aAAa,OAAO;CACnB,KAAK;CACL;;AAED,MAAM,MAAM,QAAQ,GAAG,QAAQ,KAAK,EAAC,AAAC;;AAEtC,KAAK,WAAW,GAAG,aAAa,CAAC,CAAC,CAAC,CAAC,KAAQ,AAAH,EAAE,CAAC,KAAK,CAAC,CAAC,AACnD"
+  "mappings": "AAAA,WAAWA,QAAQ;CAClBC,KAAK;CACL;;AAED,aAAaC,OAAO;CACnBD,KAAK;CACL;;AAED,MAAM,MAAME,QAAQ,GAAG,QAAQ,KAAK,EAAC,AAAC;;AAEtC,KAAKC,WAAW,GAAG,aAAa,CAACC,CAAC,CAAC,CAACJ,KAAQ,AAAH,EAAEI,CAAC,KAAKA,CAAC,CAAC,AACnD"
 }

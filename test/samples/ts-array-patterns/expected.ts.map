@@ -1,11 +1,17 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "a",
+    "b",
+    "fn",
+    "first",
+    "second"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "const [a, b]: string[] = ['foo', 'bar'];\n\nfunction fn([first, second]: number[]) {\n\treturn first + second;\n}\n"
   ],
-  "mappings": "AAAA,KAAK,CAAC,CAAC,CAAC,EAAE,CAAC,CAAC,EAAE,MAAM,EAAE,GAAG,CAAC,KAAK,EAAE,KAAK,CAAC,CAAC;;AAExC,SAAS,EAAE,CAAC,CAAC,KAAK,EAAE,MAAM,CAAC,EAAE,MAAM,EAAE,EAAE,CAAC;CACvC,MAAM,CAAC,KAAK,GAAG,MAAM,CAAC;AACvB,CAAC,AACD"
+  "mappings": "AAAA,KAAK,CAAC,CAACA,CAAC,EAAEC,CAAC,CAAC,EAAE,MAAM,EAAE,GAAG,CAAC,KAAK,EAAE,KAAK,CAAC,CAAC;;AAExC,SAASC,EAAE,CAAC,CAACC,KAAK,EAAEC,MAAM,CAAC,EAAE,MAAM,EAAE,EAAE,CAAC;CACvC,MAAM,CAACD,KAAK,GAAGC,MAAM,CAAC;AACvB,CAAC,AACD"
 }

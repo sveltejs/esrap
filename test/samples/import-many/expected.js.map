@@ -1,11 +1,27 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "abc",
+    "bcd",
+    "cde",
+    "def",
+    "efg",
+    "fgh",
+    "ghi",
+    "hij",
+    "ijk",
+    "jkl",
+    "klm",
+    "lmn",
+    "mno",
+    "nop",
+    "opq"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "import {\n\tabc,\n\tbcd,\n\tcde,\n\tdef,\n\tefg,\n\tfgh,\n\tghi,\n\thij,\n\tijk,\n\tjkl,\n\tklm,\n\tlmn,\n\tmno,\n\tnop,\n\topq\n} from 'x';"
   ],
-  "mappings": "AAAA,MAAM;CACL,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;CACH,GAAG;OACG,GAAG,CAAC"
+  "mappings": "AAAA,MAAM;CACLA,GAAG;CACHC,GAAG;CACHC,GAAG;CACHC,GAAG;CACHC,GAAG;CACHC,GAAG;CACHC,GAAG;CACHC,GAAG;CACHC,GAAG;CACHC,GAAG;CACHC,GAAG;CACHC,GAAG;CACHC,GAAG;CACHC,GAAG;CACHC,GAAG;OACG,GAAG,CAAC"
 }

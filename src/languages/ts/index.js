@@ -1334,12 +1334,13 @@ export default (options = {}) => {
 			if (node.importKind == 'type') context.write('type ');
 
 			if (default_specifier) {
-				context.write(default_specifier.local.name, default_specifier);
+				context.visit(default_specifier.local);
 				if (namespace_specifier || named_specifiers.length > 0) context.write(', ');
 			}
 
 			if (namespace_specifier) {
-				context.write('* as ' + namespace_specifier.local.name, namespace_specifier);
+				context.write('* as ');
+				context.visit(namespace_specifier.local);
 			}
 
 			if (named_specifiers.length > 0) {

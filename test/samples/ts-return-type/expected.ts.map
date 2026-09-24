@@ -1,11 +1,14 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "Fields",
+    "cuid"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "class Fields {\n\tstatic cuid(): string {\n\t\treturn 'random cuid...';\n\t}\n}\n"
   ],
-  "mappings": "AAAA,MAAM,MAAM,CAAC,CAAC;CACb,OAAO,IAAI,EAAE,EAAE,MAAM,CAAC,CAAC;EACtB,MAAM,CAAC,gBAAgB,CAAC;CACzB,CAAC;AACF,CAAC,AACD"
+  "mappings": "AAAA,MAAMA,MAAM,CAAC,CAAC;CACb,OAAOC,IAAI,EAAE,EAAE,MAAM,CAAC,CAAC;EACtB,MAAM,CAAC,gBAAgB,CAAC;CACzB,CAAC;AACF,CAAC,AACD"
 }

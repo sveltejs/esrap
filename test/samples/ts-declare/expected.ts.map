@@ -1,11 +1,15 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "a",
+    "b",
+    "c"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "declare function a(): void;\ndeclare const b: number;\ndeclare class c {}\n\nexport {};\n"
   ],
-  "mappings": "AAAA,iBAAiB,CAAC,EAAE,EAAE,IAAI,CAAC;;AAC3B,aAAa,CAAC,CAAS,AAAR,EAAE,MAAM,CAAC;;AACxB,cAAc,CAAC,CAAC,CAAC,CAAC;;AAElB,MAAM,IAAI,AACV"
+  "mappings": "AAAA,iBAAiBA,CAAC,EAAE,EAAE,IAAI,CAAC;;AAC3B,aAAa,CAACC,CAAS,AAAR,EAAE,MAAM,CAAC;;AACxB,cAAcC,CAAC,CAAC,CAAC,CAAC;;AAElB,MAAM,IAAI,AACV"
 }

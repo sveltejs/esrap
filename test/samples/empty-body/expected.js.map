@@ -1,11 +1,14 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "a",
+    "b"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "while (a) ;\ndo ; while (a);\nfor (; ; ) ;\nif (a) ;\nif (a) ; else ;\nif (a) ; else if (b) ; else ;"
   ],
-  "mappings": "AAAA,KAAK,EAAE,CAAC,EAAE,CAAC;;AACX,EAAE,CAAC,CAAC,QAAQ,CAAC,EAAE;;AACf,GAAG,QAAQ,CAAC;;AACZ,EAAE,EAAE,CAAC,EAAE,CAAC;AACR,EAAE,EAAE,CAAC,EAAE,CAAC,MAAM,CAAC;AACf,EAAE,EAAE,CAAC,EAAE,CAAC,MAAM,EAAE,EAAE,CAAC,EAAE,CAAC,MAAM,CAAC"
+  "mappings": "AAAA,KAAK,EAAEA,CAAC,EAAE,CAAC;;AACX,EAAE,CAAC,CAAC,QAAQA,CAAC,EAAE;;AACf,GAAG,QAAQ,CAAC;;AACZ,EAAE,EAAEA,CAAC,EAAE,CAAC;AACR,EAAE,EAAEA,CAAC,EAAE,CAAC,MAAM,CAAC;AACf,EAAE,EAAEA,CAAC,EAAE,CAAC,MAAM,EAAE,EAAEC,CAAC,EAAE,CAAC,MAAM,CAAC"
 }

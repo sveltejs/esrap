@@ -1,11 +1,19 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "A",
+    "constructor",
+    "a",
+    "b",
+    "c",
+    "d",
+    "B"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "class A {\n\tconstructor(\n\t\tpublic a: number,\n\t\tprotected b: string,\n\t\treadonly c?: boolean,\n\t\tpublic d = 1\n\t) {}\n}\n\nclass B extends A {\n\tconstructor(\n\t\tpublic override readonly a: number,\n\t\tprotected override b: string,\n\t\toverride readonly c?: boolean,\n\t\toverride d = 2\n\t) {\n\t\tsuper(a, b, c, d);\n\t}\n}\n"
   ],
-  "mappings": "AAAA,MAAM,CAAC,CAAC,CAAC;CACR,WAAW;EACV,OAAO,CAAS,AAAR,EAAE,MAAM;EAChB,UAAU,CAAS,AAAR,EAAE,MAAM;EACnB,SAAS,CAAW,CAAT,EAAE,OAAO;EACpB,OAAA,AAAO,CAAC,GAAG,CAAC;GACX,CAAC,CAAC;AACL,CAAC;;AAED,MAAM,CAAC,SAAS,CAAC,CAAC,CAAC;CAClB,WAAW;EACV,yBAAyB,CAAS,AAAR,EAAE,MAAM;EAClC,mBAAmB,CAAS,AAAR,EAAE,MAAM;EAC5B,kBAAkB,CAAW,CAAT,EAAE,OAAO;EAC7B,SAAA,AAAS,CAAC,GAAG,CAAC;GACb,CAAC;EACF,KAAK,CAAC,CAAC,EAAE,CAAC,EAAE,CAAC,EAAE,CAAC,CAAC,CAAC;CACnB,CAAC;AACF,CAAC,AACD"
+  "mappings": "AAAA,MAAMA,CAAC,CAAC,CAAC;CACRC,WAAW;EACV,OAAOC,CAAS,AAAR,EAAE,MAAM;EAChB,UAAUC,CAAS,AAAR,EAAE,MAAM;EACnB,SAASC,CAAW,CAAT,EAAE,OAAO;EACpB,OAAA,AAAOC,CAAC,GAAG,CAAC;GACX,CAAC,CAAC;AACL,CAAC;;AAED,MAAMC,CAAC,SAASN,CAAC,CAAC,CAAC;CAClBC,WAAW;EACV,yBAAyBC,CAAS,AAAR,EAAE,MAAM;EAClC,mBAAmBC,CAAS,AAAR,EAAE,MAAM;EAC5B,kBAAkBC,CAAW,CAAT,EAAE,OAAO;EAC7B,SAAA,AAASC,CAAC,GAAG,CAAC;GACb,CAAC;EACF,KAAK,CAACH,CAAC,EAAEC,CAAC,EAAEC,CAAC,EAAEC,CAAC,CAAC,CAAC;CACnB,CAAC;AACF,CAAC,AACD"
 }

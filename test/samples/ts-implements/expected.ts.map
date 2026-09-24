@@ -1,11 +1,17 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "SelectableControl",
+    "select",
+    "Scrollable",
+    "scroll",
+    "Button"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "interface SelectableControl {\n\tselect(): void;\n}\n\ninterface Scrollable {\n\tscroll(): void;\n}\n\nclass Button implements SelectableControl, Scrollable {\n\tselect() {}\n}\n"
   ],
-  "mappings": "AAAA,UAAU,iBAAiB,EAAC,CAC3B,MAAM,EAAE,EAAE,IAAI,AAAC,CACf,CAAA;AAED,UAAU,UAAU,EAAC,CACpB,MAAM,EAAE,EAAE,IAAI,AAAC,CACf,CAAA;;AAED,MAAM,MAAM,YAAY,iBAAiB,EAAE,UAAU,CAAC,CAAC;CACtD,MAAM,GAAG,CAAC,CAAC;AACZ,CAAC,AACD"
+  "mappings": "AAAA,UAAUA,iBAAiB,EAAC,CAC3BC,MAAM,EAAE,EAAE,IAAI,AAAC,CACf,CAAA;AAED,UAAUC,UAAU,EAAC,CACpBC,MAAM,EAAE,EAAE,IAAI,AAAC,CACf,CAAA;;AAED,MAAMC,MAAM,YAAYJ,iBAAiB,EAAEE,UAAU,CAAC,CAAC;CACtDD,MAAM,GAAG,CAAC,CAAC;AACZ,CAAC,AACD"
 }

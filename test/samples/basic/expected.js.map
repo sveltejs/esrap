@@ -1,11 +1,14 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "foo",
+    "a"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "foo({ a: 1 });\n"
   ],
-  "mappings": "AAAA,GAAG,CAAC,EAAE,CAAC,EAAE,CAAC,EAAE,CAAC,CAAC,AACd"
+  "mappings": "AAAAA,GAAG,CAAC,EAAEC,CAAC,EAAE,CAAC,EAAE,CAAC,CAAC,AACd"
 }

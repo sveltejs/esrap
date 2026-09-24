@@ -1,11 +1,16 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "value",
+    "Container",
+    "field",
+    "other"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "let value!: number;\n\nclass Container {\n\tfield!: number;\n\taccessor other!: string;\n}\n\nexport { value, Container };\n"
   ],
-  "mappings": "AAAA,GAAG,CAAC,KAAc,CAAR,EAAE,MAAM,CAAC;;AAEnB,MAAM,SAAS,CAAC,CAAC;CAChB,KAAK,GAAG,MAAM,CAAC;CACf,SAAS,KAAK,GAAG,MAAM,CAAC;AACzB,CAAC;;AAED,MAAM,GAAG,KAAK,EAAE,SAAS,GAAG,AAC5B"
+  "mappings": "AAAA,GAAG,CAACA,KAAc,CAAR,EAAE,MAAM,CAAC;;AAEnB,MAAMC,SAAS,CAAC,CAAC;CAChBC,KAAK,GAAG,MAAM,CAAC;CACf,SAASC,KAAK,GAAG,MAAM,CAAC;AACzB,CAAC;;AAED,MAAM,GAAGH,KAAK,EAAEC,SAAS,GAAG,AAC5B"
 }

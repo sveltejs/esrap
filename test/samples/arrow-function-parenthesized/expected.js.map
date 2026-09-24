@@ -1,11 +1,14 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "foo",
+    "bar"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "foo || (bar => bar);"
   ],
-  "mappings": "AAAA,GAAG,KAAK,CAAA,GAAG,KAAI,GAAG,CAAC,CAAC"
+  "mappings": "AAAAA,GAAG,KAAK,CAAAC,GAAG,KAAIA,GAAG,CAAC,CAAC"
 }

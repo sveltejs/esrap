@@ -1,11 +1,18 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "x",
+    "i",
+    "should_break",
+    "should_break_with_label",
+    "should_continue",
+    "should_continue_with_label"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "x: for (let i = 0; i < 10; i += 1) {\n\tif (should_break) {\n\t\tbreak;\n\t}\n\n\tif (should_break_with_label) {\n\t\tbreak x;\n\t}\n\n\tif (should_continue) {\n\t\tcontinue;\n\t}\n\n\tif (should_continue_with_label) {\n\t\tcontinue x;\n\t}\n}"
   ],
-  "mappings": "AAAA,CAAC,EAAE,GAAG,KAAK,CAAC,CAAC,GAAG,CAAC,EAAE,CAAC,GAAG,EAAE,EAAE,CAAC,IAAI,CAAC,EAAE,CAAC;CACnC,EAAE,EAAE,YAAY,EAAE,CAAC;EAClB,KAAK,CAAC;CACP,CAAC;;CAED,EAAE,EAAE,uBAAuB,EAAE,CAAC;EAC7B,KAAK,CAAC,CAAC,CAAC;CACT,CAAC;;CAED,EAAE,EAAE,eAAe,EAAE,CAAC;EACrB,QAAQ,CAAC;CACV,CAAC;;CAED,EAAE,EAAE,0BAA0B,EAAE,CAAC;EAChC,QAAQ,CAAC,CAAC,CAAC;CACZ,CAAC;AACF,CAAC"
+  "mappings": "AAAAA,CAAC,EAAE,GAAG,KAAK,CAACC,CAAC,GAAG,CAAC,EAAEA,CAAC,GAAG,EAAE,EAAEA,CAAC,IAAI,CAAC,EAAE,CAAC;CACnC,EAAE,EAAEC,YAAY,EAAE,CAAC;EAClB,KAAK,CAAC;CACP,CAAC;;CAED,EAAE,EAAEC,uBAAuB,EAAE,CAAC;EAC7B,KAAK,CAACH,CAAC,CAAC;CACT,CAAC;;CAED,EAAE,EAAEI,eAAe,EAAE,CAAC;EACrB,QAAQ,CAAC;CACV,CAAC;;CAED,EAAE,EAAEC,0BAA0B,EAAE,CAAC;EAChC,QAAQ,CAACL,CAAC,CAAC;CACZ,CAAC;AACF,CAAC"
 }

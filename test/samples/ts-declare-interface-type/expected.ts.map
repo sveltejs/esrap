@@ -1,11 +1,20 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "Ambient",
+    "value",
+    "Alias",
+    "Exported",
+    "T",
+    "other",
+    "Plain",
+    "PlainAlias"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "declare interface Ambient {\n\tvalue: string;\n}\n\ndeclare type Alias = string;\n\nexport declare interface Exported<T> extends Ambient {\n\tother: T;\n}\n\ninterface Plain {\n\tvalue: string;\n}\n\ntype PlainAlias = number;\n"
   ],
-  "mappings": "AAAA,kBAAkB,OAAO,EAAC,CACzB,KAAK,EAAE,MAAM,AAAC,CACd,CAAA;;AAED,aAAa,KAAK,GAAG,MAAM,CAAC;;AAE5B,MAAM,CAAC,kBAAkB,QAAQ,CAAC,CAAC,CAAC,SAAS,OAAO,EAAC,CACpD,KAAK,EAAE,CAAC,AAAC,CACT,CAAA;;AAED,UAAU,KAAK,EAAC,CACf,KAAK,EAAE,MAAM,AAAC,CACd,CAAA;;AAED,KAAK,UAAU,GAAG,MAAM,CAAC,AACzB"
+  "mappings": "AAAA,kBAAkBA,OAAO,EAAC,CACzBC,KAAK,EAAE,MAAM,AAAC,CACd,CAAA;;AAED,aAAaC,KAAK,GAAG,MAAM,CAAC;;AAE5B,MAAM,CAAC,kBAAkBC,QAAQ,CAACC,CAAC,CAAC,SAASJ,OAAO,EAAC,CACpDK,KAAK,EAAED,CAAC,AAAC,CACT,CAAA;;AAED,UAAUE,KAAK,EAAC,CACfL,KAAK,EAAE,MAAM,AAAC,CACd,CAAA;;AAED,KAAKM,UAAU,GAAG,MAAM,CAAC,AACzB"
 }

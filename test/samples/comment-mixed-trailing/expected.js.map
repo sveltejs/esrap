@@ -1,11 +1,13 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "foo"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "function foo() {\n\t// hey1\n\t/*\n\they2\n\t*/\n}\n"
   ],
-  "mappings": "AAAA,SAAS,GAAG,GAAG,CAAC;;;;;AAKhB,CAAC,AACD"
+  "mappings": "AAAA,SAASA,GAAG,GAAG,CAAC;;;;;AAKhB,CAAC,AACD"
 }

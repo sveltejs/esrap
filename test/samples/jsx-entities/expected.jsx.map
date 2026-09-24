@@ -1,11 +1,15 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "comparison",
+    "p",
+    "braces"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "const comparison = <p>1 &lt; 2 &amp;&amp; 3 &gt; 2</p>;\nconst braces = <p>&#123;not an expression&#125;</p>;\n"
   ],
-  "mappings": "AAAA,KAAK,CAAC,UAAU,GAAG,CAAC,CAAC,CAAC,4BAA4B,EAAE,CAAC,CAAC,CAAC;AACvD,KAAK,CAAC,MAAM,GAAG,CAAC,CAAC,CAAC,6BAA6B,EAAE,CAAC,CAAC,CAAC,AACpD"
+  "mappings": "AAAA,KAAK,CAACA,UAAU,GAAG,CAACC,CAAC,CAAC,4BAA4B,EAAEA,CAAC,CAAC,CAAC;AACvD,KAAK,CAACC,MAAM,GAAG,CAACD,CAAC,CAAC,6BAA6B,EAAEA,CAAC,CAAC,CAAC,AACpD"
 }

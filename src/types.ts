@@ -5,6 +5,8 @@ export type BaseNode = {
 	loc?: null | {
 		start: { line: number; column: number };
 		end: { line: number; column: number };
+		/** The original name, if this node has been renamed. */
+		identifierName?: string;
 	};
 };
 
@@ -31,6 +33,7 @@ export interface Location {
 	type: 'Location';
 	line: number;
 	column: number;
+	name?: string;
 }
 
 export interface IndentChange {

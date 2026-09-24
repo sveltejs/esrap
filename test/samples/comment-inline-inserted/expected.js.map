@@ -1,11 +1,13 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "foo"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "// comment before an inserted block\n\"use strict\";\n\n// comment before an inserted node\nimport { foo } from \"wherever\";"
   ],
-  "mappings": "AAAA;AACA,YAAY,CAAC;;;AAGb,MAAM,GAAG,GAAG,QAAQ,UAAU,CAAC"
+  "mappings": "AAAA;AACA,YAAY,CAAC;;;AAGb,MAAM,GAAGA,GAAG,QAAQ,UAAU,CAAC"
 }

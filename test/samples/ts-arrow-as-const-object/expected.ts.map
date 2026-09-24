@@ -1,11 +1,19 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "as_const",
+    "map",
+    "baz",
+    "const",
+    "non_null",
+    "satisfies",
+    "x"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "const as_const = [].map(() => ({ baz }) as const);\nconst non_null = [].map(() => ({ baz: 1 })!);\nconst satisfies = [].map(() => ({ x: 1 }) satisfies { x: number });\n"
   ],
-  "mappings": "AAAA,KAAK,CAAC,QAAQ,GAAG,EAAE,CAAC,GAAG,CAAC,OAAM,AAAC,EAAE,GAAG,EAAE,IAAK,KAAK,CAAA,CAAC,CAAC;AAClD,KAAK,CAAC,QAAQ,GAAG,EAAE,CAAC,GAAG,CAAC,OAAM,CAAC,EAAE,GAAG,EAAE,CAAC,EAAE,EAAE,CAAA,CAAC,CAAC;AAC7C,KAAK,CAAC,SAAS,GAAG,EAAE,CAAC,GAAG,CAAC,OAAM,AAAC,EAAE,CAAC,EAAE,CAAC,EAAE,WAAY,EAAE,CAAC,EAAE,MAAM,EAAE,CAAA,CAAC,CAAC,AACnE"
+  "mappings": "AAAA,KAAK,CAACA,QAAQ,GAAG,EAAE,CAACC,GAAG,CAAC,OAAM,AAAC,EAAEC,GAAG,EAAE,IAAKC,KAAK,CAAA,CAAC,CAAC;AAClD,KAAK,CAACC,QAAQ,GAAG,EAAE,CAACH,GAAG,CAAC,OAAM,CAAC,EAAEC,GAAG,EAAE,CAAC,EAAE,EAAE,CAAA,CAAC,CAAC;AAC7C,KAAK,CAACG,SAAS,GAAG,EAAE,CAACJ,GAAG,CAAC,OAAM,AAAC,EAAEK,CAAC,EAAE,CAAC,EAAE,WAAY,EAAEA,CAAC,EAAE,MAAM,EAAE,CAAA,CAAC,CAAC,AACnE"
 }

@@ -1,11 +1,18 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "a",
+    "x",
+    "b",
+    "bar",
+    "c",
+    "foo"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "let a = () => ({ x } = { x: 42 });\nlet b = () => ({} || bar);\nlet c = () => ({} ? foo : bar);"
   ],
-  "mappings": "AAAA,GAAG,CAAC,CAAC,GAAG,OAAO,EAAE,CAAC,EAAE,GAAG,EAAE,CAAC,EAAE,EAAE,EAAE,CAAC,CAAC;AAClC,GAAG,CAAC,CAAC,GAAG,OAAO,EAAE,IAAI,GAAG,CAAC,CAAC;AAC1B,GAAG,CAAC,CAAC,GAAG,OAAO,EAAE,GAAG,GAAG,GAAG,GAAG,CAAC,CAAC"
+  "mappings": "AAAA,GAAG,CAACA,CAAC,GAAG,OAAO,EAAEC,CAAC,EAAE,GAAG,EAAEA,CAAC,EAAE,EAAE,EAAE,CAAC,CAAC;AAClC,GAAG,CAACC,CAAC,GAAG,OAAO,EAAE,IAAIC,GAAG,CAAC,CAAC;AAC1B,GAAG,CAACC,CAAC,GAAG,OAAO,EAAE,GAAGC,GAAG,GAAGF,GAAG,CAAC,CAAC"
 }

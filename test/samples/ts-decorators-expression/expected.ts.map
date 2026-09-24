@@ -1,11 +1,34 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "Fields",
+    "uuid",
+    "target",
+    "propertyKey",
+    "Object",
+    "defineProperty",
+    "value",
+    "writable",
+    "User",
+    "id",
+    "a",
+    "b",
+    "c",
+    "Conditional",
+    "Logical",
+    "dec",
+    "Identifier",
+    "Member",
+    "Call",
+    "u",
+    "console",
+    "log"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "class Fields {\n\tstatic uuid() {\n\t\treturn function (target: any, propertyKey: string | symbol) {\n\t\t\tObject.defineProperty(target, propertyKey, { value: 'random uuid...', writable: true });\n\t\t};\n\t}\n}\n\nclass User {\n\t@Fields.uuid()\n\tid: string;\n}\n\n@(a ? b : c)\nclass Conditional {}\n\n@(a || b)\nclass Logical {}\n\n@dec\nclass Identifier {}\n\n@a.b.c\nclass Member {}\n\n@a()\nclass Call {}\n\nconst u = new User();\nconsole.log(u.id); // will print \"random uuid...\"\n"
   ],
-  "mappings": "AAAA,MAAM,MAAM,CAAC,CAAC;CACb,OAAO,IAAI,GAAG,CAAC;EACd,MAAM,CAAC,UAAU,MAAW,AAAL,EAAE,GAAG,EAAE,WAA4B,AAAjB,EAAE,MAAM,GAAG,MAAM,EAAE,CAAC;GAC5D,MAAM,CAAC,cAAc,CAAC,MAAM,EAAE,WAAW,EAAE,EAAE,KAAK,EAAE,gBAAgB,EAAE,QAAQ,EAAE,IAAI,EAAE,CAAC,CAAC;EACzF,CAAC,CAAC;CACH,CAAC;AACF,CAAC;;AAED,MAAM,IAAI,CAAC,CAAC;CACX,CAAC,MAAM,CAAC,IAAI,EAAE;CAAA,AACd,EAAE,EAAE,MAAM,CAAC;AACZ,CAAC;;AAED,EAAE,CAAC,GAAG,CAAC,GAAG,CAAC;AAAC,MACN,WAAW,CAAC,CAAC,CAAC;;AAEpB,EAAE,CAAC,IAAI,CAAC;AAAC,MACH,OAAO,CAAC,CAAC,CAAC;;AAEhB,CAAC,GAAG;AAAA,MACE,UAAU,CAAC,CAAC,CAAC;;AAEnB,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC;AAAA,MACA,MAAM,CAAC,CAAC,CAAC;;AAEf,CAAC,CAAC,EAAE;AAAA,MACE,IAAI,CAAC,CAAC,CAAC;;AAEb,KAAK,CAAC,CAAC,GAAG,GAAG,CAAC,IAAI,EAAE,CAAC;;AACrB,OAAO,CAAC,GAAG,CAAC,CAAC,CAAC,EAAE,CAAC,CAAC,+BAClB"
+  "mappings": "AAAA,MAAMA,MAAM,CAAC,CAAC;CACb,OAAOC,IAAI,GAAG,CAAC;EACd,MAAM,CAAC,UAAUC,MAAW,AAAL,EAAE,GAAG,EAAEC,WAA4B,AAAjB,EAAE,MAAM,GAAG,MAAM,EAAE,CAAC;GAC5DC,MAAM,CAACC,cAAc,CAACH,MAAM,EAAEC,WAAW,EAAE,EAAEG,KAAK,EAAE,gBAAgB,EAAEC,QAAQ,EAAE,IAAI,EAAE,CAAC,CAAC;EACzF,CAAC,CAAC;CACH,CAAC;AACF,CAAC;;AAED,MAAMC,IAAI,CAAC,CAAC;CACX,CAACR,MAAM,CAACC,IAAI,EAAE;CAAA,AACdQ,EAAE,EAAE,MAAM,CAAC;AACZ,CAAC;;AAED,EAAEC,CAAC,GAAGC,CAAC,GAAGC,CAAC;AAAC,MACNC,WAAW,CAAC,CAAC,CAAC;;AAEpB,EAAEH,CAAC,IAAIC,CAAC;AAAC,MACHG,OAAO,CAAC,CAAC,CAAC;;AAEhB,CAACC,GAAG;AAAA,MACEC,UAAU,CAAC,CAAC,CAAC;;AAEnB,CAACN,CAAC,CAACC,CAAC,CAACC,CAAC;AAAA,MACAK,MAAM,CAAC,CAAC,CAAC;;AAEf,CAACP,CAAC,EAAE;AAAA,MACEQ,IAAI,CAAC,CAAC,CAAC;;AAEb,KAAK,CAACC,CAAC,GAAG,GAAG,CAACX,IAAI,EAAE,CAAC;;AACrBY,OAAO,CAACC,GAAG,CAACF,CAAC,CAACV,EAAE,CAAC,CAAC,+BAClB"
 }

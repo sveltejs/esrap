@@ -1,11 +1,14 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "type",
+    "value"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "export * from 'data.json' with { type: 'json' };\nexport { value } from 'data.json' with { type: 'json' };\n"
   ],
-  "mappings": "AAAA,MAAM,SAAQ,WAAW,QAAQ,IAAI,EAAE,MAAM,GAAG;;AAChD,MAAM,GAAG,KAAK,QAAQ,WAAW,QAAQ,IAAI,EAAE,MAAM,GAAG,AACxD"
+  "mappings": "AAAA,MAAM,SAAQ,WAAW,QAAQA,IAAI,EAAE,MAAM,GAAG;;AAChD,MAAM,GAAGC,KAAK,QAAQ,WAAW,QAAQD,IAAI,EAAE,MAAM,GAAG,AACxD"
 }

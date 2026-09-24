@@ -1,11 +1,18 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "import type A from 'foo';\nimport type { B } from 'foo';\nimport { C, type D, type E as F } from 'foo';\n"
   ],
-  "mappings": "AAAA,MAAM,MAAM,CAAC,MAAM,KAAK,CAAC;AACzB,MAAM,QAAQ,CAAC,QAAQ,KAAK,CAAC;AAC7B,MAAM,GAAG,CAAC,EAAE,KAAK,CAAC,EAAE,KAAK,CAAC,IAAI,CAAC,QAAQ,KAAK,CAAC,AAC7C"
+  "mappings": "AAAA,MAAM,MAAMA,CAAC,MAAM,KAAK,CAAC;AACzB,MAAM,QAAQC,CAAC,QAAQ,KAAK,CAAC;AAC7B,MAAM,GAAGC,CAAC,EAAE,KAAKC,CAAC,EAAE,KAAKC,CAAC,IAAIC,CAAC,QAAQ,KAAK,CAAC,AAC7C"
 }

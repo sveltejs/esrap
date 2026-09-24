@@ -1,11 +1,21 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "F",
+    "a",
+    "A",
+    "T",
+    "G",
+    "H",
+    "m",
+    "f",
+    "g"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "type F = (a: A /* c1 */) /* c2 */ => /* c3 */ T;\n\ntype G = { (a /* c1 */) /* c2 */ };\n\ntype H = { m(a /* c1 */) /* c2 */ };\n\nfunction f(a /* c1 */) /* c2 */ {}\n\nconst g = (a /* c1 */) /* c2 */ => a;\n"
   ],
-  "mappings": "AAAA,KAAK,CAAC,GAAG,CAAC,CAAI,AAAH,EAAE,CAAC,gCAAgC,CAAC,CAAC;AAEhD,KAAK,CAAC,GAAG,EAAE,CAAC,CAAC,UAAU,WAAW,CAAC;AAEnC,KAAK,CAAC,GAAG,EAAE,CAAC,CAAC,CAAC,UAAU,WAAW,CAAC;;AAEpC,SAAS,CAAC,CAAC,CAAC,oBAAoB,CAAC,CAAC;;AAElC,KAAK,CAAC,CAAC,GAAG,CAAC,CAAC,uBAAuB,CAAC,CAAC,AACrC"
+  "mappings": "AAAA,KAAKA,CAAC,GAAG,CAACC,CAAI,AAAH,EAAEC,CAAC,gCAAgCC,CAAC,CAAC;AAEhD,KAAKC,CAAC,GAAG,EAAE,CAACH,CAAC,UAAU,WAAW,CAAC;AAEnC,KAAKI,CAAC,GAAG,EAAEC,CAAC,CAACL,CAAC,UAAU,WAAW,CAAC;;AAEpC,SAASM,CAAC,CAACN,CAAC,oBAAoB,CAAC,CAAC;;AAElC,KAAK,CAACO,CAAC,GAAG,CAACP,CAAC,uBAAuBA,CAAC,CAAC,AACrC"
 }

@@ -1,11 +1,17 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "console",
+    "log",
+    "obj",
+    "foo",
+    "bar"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "/* comment before a node\n * second line */\nconsole.log(1);\n\nconsole.log(2); /* comment on same line as node */\n\nconst obj = {\n\tfoo: 1, /* comment in middle of object */\n\tbar: 2\n};\n"
   ],
-  "mappings": "AAAA;;AAEA,OAAO,CAAC,GAAG,CAAC,CAAC,CAAC,CAAC;;AAEf,OAAO,CAAC,GAAG,CAAC,CAAC,CAAC,CAAC;;AAEf,KAAK,CAAC,GAAG,GAAG,EACX,GAAG,EAAE,CAAC,oCACN,GAAG,EAAE,CAAC,EACN,CAAC,AACF"
+  "mappings": "AAAA;;AAEAA,OAAO,CAACC,GAAG,CAAC,CAAC,CAAC,CAAC;;AAEfD,OAAO,CAACC,GAAG,CAAC,CAAC,CAAC,CAAC;;AAEf,KAAK,CAACC,GAAG,GAAG,EACXC,GAAG,EAAE,CAAC,oCACNC,GAAG,EAAE,CAAC,EACN,CAAC,AACF"
 }

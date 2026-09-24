@@ -1,11 +1,13 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "a"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "a = /* the answer */ 42;\n"
   ],
-  "mappings": "AAAA,CAAC,oBAAoB,EAAE,CAAC,AACxB"
+  "mappings": "AAAAA,CAAC,oBAAoB,EAAE,CAAC,AACxB"
 }

@@ -36,6 +36,8 @@ console.log(code); // alert('hello world!');
 
 If the nodes of the input AST have `loc` properties (e.g. the AST was generated with [`acorn`](https://github.com/acornjs/acorn/tree/master/acorn/#interface) with the `locations` option set), sourcemap mappings will be created.
 
+Identifier mappings include their names in the sourcemap's `names` array. If you rename an identifier, preserve its original name in `node.loc.identifierName` before changing `node.name` so debuggers can recover it.
+
 ## Built-in languages
 
 `esrap` ships with two built-in languages — `ts()` and `tsx()` (considered experimental at present!) — which can print ASTs conforming to [`@typescript-eslint/types`](https://www.npmjs.com/package/@typescript-eslint/types) (which extends [ESTree](https://github.com/estree/estree)):
@@ -109,14 +111,14 @@ code; // `[[foo][bar]]`
 
 The `context` API has several methods:
 
-- `context.write(data: string, node?: BaseNode)` — add a string. If `node` is provided and has a standard `loc` property (with `start` and `end` properties each with a `line` and `column`), a sourcemap mapping will be created
+- `context.write(data: string, node?: BaseNode)` — add a string. If `node` is provided and has a standard `loc` property (with `start` and `end` properties each with a `line` and `column`), a sourcemap mapping will be created. The start mapping records `node.loc.identifierName`, or `node.name` if it is a string
 - `context.indent()` — increase the indentation level, typically before adding a newline
 - `context.newline()` — self-explanatory
 - `context.space()` — adds a space character, if it doesn't immediately follow a newline
 - `context.margin()` — causes the next newline to be repeated (consecutive newlines are otherwise merged into one)
 - `context.dedent()` — decrease the indentation level (again, typically before adding a newline)
 - `context.visit(node: BaseNode)` — calls the visitor corresponding to `node.type`
-- `context.location(line: number, column: number)` — insert a sourcemap mapping _without_ calling `context.write(...)`
+- `context.location(line: number, column: number, name?: string)` — insert a sourcemap mapping _without_ calling `context.write(...)`, optionally recording an original name
 - `context.measure()` — returns the number of characters contained in `context`
 - `context.empty()` — returns true if the context has no content
 - `context.new()` — creates a child context

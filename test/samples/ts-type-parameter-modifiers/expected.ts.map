@@ -1,11 +1,17 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "f",
+    "T",
+    "a",
+    "A",
+    "U"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "function f<const T>(a: T): T {\n\treturn a;\n}\nclass A<in T, out U> {}\n"
   ],
-  "mappings": "AAAA,SAAS,CAAC,CAAC,MAAA,CAAO,CAAC,CAAC,CAAI,AAAH,EAAE,CAAC,CAAC,EAAE,CAAC,CAAC,CAAC;CAC7B,MAAM,CAAC,CAAC,CAAC;AACV,CAAC;;AACD,MAAM,CAAC,CAAC,GAAA,CAAI,EAAE,IAAA,CAAK,CAAC,CAAC,CAAC,CAAC,AACvB"
+  "mappings": "AAAA,SAASA,CAAC,CAAC,MAAAC,CAAO,CAAC,CAACC,CAAI,AAAH,EAAED,CAAC,CAAC,EAAEA,CAAC,CAAC,CAAC;CAC7B,MAAM,CAACC,CAAC,CAAC;AACV,CAAC;;AACD,MAAMC,CAAC,CAAC,GAAAF,CAAI,EAAE,IAAAG,CAAK,CAAC,CAAC,CAAC,CAAC,AACvB"
 }

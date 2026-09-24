@@ -1,11 +1,15 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "overloaded",
+    "value",
+    "ambient"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "export function overloaded(value: string): string;\nexport function overloaded(value: number): number;\nexport function overloaded(value: any) {\n\treturn value;\n}\n\ndeclare function ambient(value: string): void;\n"
   ],
-  "mappings": "AAAA,MAAM,CAAC,SAAS,UAAU,CAAC,KAAa,AAAR,EAAE,MAAM,CAAC,EAAE,MAAM,CAAC;AAClD,MAAM,CAAC,SAAS,UAAU,CAAC,KAAa,AAAR,EAAE,MAAM,CAAC,EAAE,MAAM,CAAC;;AAClD,MAAM,CAAC,SAAS,UAAU,CAAC,KAAU,AAAL,EAAE,GAAG,EAAE,CAAC;CACvC,MAAM,CAAC,KAAK,CAAC;AACd,CAAC;;AAED,iBAAiB,OAAO,CAAC,KAAa,AAAR,EAAE,MAAM,CAAC,EAAE,IAAI,CAAC,AAC9C"
+  "mappings": "AAAA,MAAM,CAAC,SAASA,UAAU,CAACC,KAAa,AAAR,EAAE,MAAM,CAAC,EAAE,MAAM,CAAC;AAClD,MAAM,CAAC,SAASD,UAAU,CAACC,KAAa,AAAR,EAAE,MAAM,CAAC,EAAE,MAAM,CAAC;;AAClD,MAAM,CAAC,SAASD,UAAU,CAACC,KAAU,AAAL,EAAE,GAAG,EAAE,CAAC;CACvC,MAAM,CAACA,KAAK,CAAC;AACd,CAAC;;AAED,iBAAiBC,OAAO,CAACD,KAAa,AAAR,EAAE,MAAM,CAAC,EAAE,IAAI,CAAC,AAC9C"
 }

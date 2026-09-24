@@ -1,11 +1,16 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "Example",
+    "optional",
+    "T",
+    "value"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "interface Example {\n\toptional?<T>(value: T): T;\n}\n"
   ],
-  "mappings": "AAAA,UAAU,OAAO,EAAC,CACjB,QAAQ,CAAC,CAAC,CAAC,CAAC,CAAC,KAAQ,AAAH,EAAE,CAAC,CAAC,EAAE,CAAC,AAAC,CAC1B,CAAA,AACD"
+  "mappings": "AAAA,UAAUA,OAAO,EAAC,CACjBC,QAAQ,CAAC,CAACC,CAAC,CAAC,CAACC,KAAQ,AAAH,EAAED,CAAC,CAAC,EAAEA,CAAC,AAAC,CAC1B,CAAA,AACD"
 }

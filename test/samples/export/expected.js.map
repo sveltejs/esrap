@@ -1,11 +1,13 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "foo"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "const foo = 42;\nexport { foo };"
   ],
-  "mappings": "AAAA,KAAK,CAAC,GAAG,GAAG,EAAE,CAAC;;AACf,MAAM,GAAG,GAAG,GAAG"
+  "mappings": "AAAA,KAAK,CAACA,GAAG,GAAG,EAAE,CAAC;;AACf,MAAM,GAAGA,GAAG,GAAG"
 }

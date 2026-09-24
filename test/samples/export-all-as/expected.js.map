@@ -1,11 +1,14 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "direct",
+    "indirect"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "export * as direct from './direct.js';\nimport * as indirect from './indirect.js';\nexport { indirect };\n"
   ],
-  "mappings": "AAAA,MAAM,MAAM,MAAM,MAAM,aAAa,CAAC;;AACtC,MAAM,CAAC,aAAa,MAAM,eAAe,CAAC;;AAC1C,MAAM,GAAG,QAAQ,GAAG,AACpB"
+  "mappings": "AAAA,MAAM,MAAMA,MAAM,MAAM,aAAa,CAAC;;AACtC,MAAM,MAAMC,QAAQ,MAAM,eAAe,CAAC;;AAC1C,MAAM,GAAGA,QAAQ,GAAG,AACpB"
 }

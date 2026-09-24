@@ -1,11 +1,18 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "console",
+    "log",
+    "one",
+    "two",
+    "three",
+    "four"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "console.log(one);\nconsole.log(two);\nconsole.log(three);\nconsole.log(four);"
   ],
-  "mappings": "AAAA,OAAO,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC;AACjB,OAAO,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC;AACjB,OAAO,CAAC,GAAG,CAAC,KAAK,CAAC,CAAC;AACnB,OAAO,CAAC,GAAG,CAAC,IAAI,CAAC,CAAC"
+  "mappings": "AAAAA,OAAO,CAACC,GAAG,CAACC,GAAG,CAAC,CAAC;AACjBF,OAAO,CAACC,GAAG,CAACE,GAAG,CAAC,CAAC;AACjBH,OAAO,CAACC,GAAG,CAACG,KAAK,CAAC,CAAC;AACnBJ,OAAO,CAACC,GAAG,CAACI,IAAI,CAAC,CAAC"
 }

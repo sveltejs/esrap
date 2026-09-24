@@ -62,7 +62,10 @@ export class Context {
 	 */
 	write(content, node) {
 		if (node?.loc) {
-			this.location(node.loc.start.line, node.loc.start.column);
+			const name =
+				node.loc.identifierName ??
+				('name' in node && typeof node.name === 'string' ? node.name : undefined);
+			this.location(node.loc.start.line, node.loc.start.column, name);
 			this.#commands.push(content);
 			this.location(node.loc.end.line, node.loc.end.column);
 		} else {
@@ -78,9 +81,10 @@ export class Context {
 	 *
 	 * @param {number} line
 	 * @param {number} column
+	 * @param {string} [name]
 	 */
-	location(line, column) {
-		this.#commands.push({ type: 'Location', line, column });
+	location(line, column, name) {
+		this.#commands.push({ type: 'Location', line, column, name });
 	}
 
 	/**

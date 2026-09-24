@@ -2,6 +2,8 @@
 import { encode } from '@jridgewell/sourcemap-codec';
 import { Context, dedent, indent, margin, newline, space } from './context.js';
 
+/** @typedef {[number, number, number, number] | [number, number, number, number, number]} Segment */
+
 /** @type {(str: string) => string} str */
 let btoa = () => {
 	throw new Error('Unsupported environment: `window.btoa` or `Buffer` should be supported.');
@@ -16,14 +18,13 @@ if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
 class SourceMap {
 	version = 3;
 
-	/** @type {string[]} */
-	names = [];
-
 	/**
-	 * @param {[number, number, number, number][][]} mappings
+	 * @param {Segment[][]} mappings
+	 * @param {string[]} names
 	 * @param {PrintOptions} opts
 	 */
-	constructor(mappings, opts) {
+	constructor(mappings, names, opts) {
+		this.names = names;
 		this.sources = [opts.sourceMapSource || null];
 		this.sourcesContent = [opts.sourceMapContent || null];
 		this.mappings = opts.sourceMapEncodeMappings === false ? mappings : encode(mappings);
@@ -60,10 +61,13 @@ export function print(node, visitors, opts = {}) {
 
 	context.visit(node);
 
-	/** @typedef {[generatedColumn: number, sourceIndex: number, originalLine: number, originalColumn: number]} Segment */
-
 	let code = '';
 	let current_column = 0;
+
+	/** @type {string[]} */
+	const names = [];
+	/** @type {Map<string, number>} */
+	const name_indexes = new Map();
 
 	/** @type {Segment[][]} */
 	let mappings = [];
@@ -108,8 +112,22 @@ export function print(node, visitors, opts = {}) {
 			location.column
 		];
 
+		if (location.name !== undefined) {
+			let index = name_indexes.get(location.name);
+			if (index === undefined) {
+				index = names.length;
+				name_indexes.set(location.name, index);
+				names.push(location.name);
+			}
+			segment.push(index);
+		}
+
 		if (!prev || prev[0] !== segment[0] || prev[2] !== segment[2] || prev[3] !== segment[3]) {
 			current_line.push(segment);
+		} else if (location.name !== undefined) {
+			// Upgrade an existing boundary mapping without duplicating it. A later
+			// unnamed boundary at the same position must not discard the name.
+			current_line[current_line.length - 1] = segment;
 		}
 	}
 
@@ -186,7 +204,7 @@ export function print(node, visitors, opts = {}) {
 		code,
 		// create sourcemap lazily in case we don't need it
 		get map() {
-			return (map ??= new SourceMap(mappings, opts));
+			return (map ??= new SourceMap(mappings, names, opts));
 		}
 	};
 }

@@ -1,11 +1,15 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "Example",
+    "property",
+    "key"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "interface Example {\n\treadonly property?: string;\n\treadonly [key: string]: number;\n}\n"
   ],
-  "mappings": "AAAA,UAAU,OAAO,EAAC,CACjB,SAAS,QAAQ,CAAC,EAAE,MAAM,AAAC,EAC3B,UAAU,GAAW,AAAR,EAAE,MAAM,CAAC,EAAE,MAAM,AAAC,CAC/B,CAAA,AACD"
+  "mappings": "AAAA,UAAUA,OAAO,EAAC,CACjB,SAASC,QAAQ,CAAC,EAAE,MAAM,AAAC,EAC3B,UAAUC,GAAW,AAAR,EAAE,MAAM,CAAC,EAAE,MAAM,AAAC,CAC/B,CAAA,AACD"
 }

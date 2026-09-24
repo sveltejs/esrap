@@ -1,11 +1,22 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "Tuple",
+    "required",
+    "optional",
+    "rest",
+    "Accessors",
+    "value",
+    "next",
+    "method",
+    "Instantiated",
+    "identity"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "type Tuple = [required: string, optional?: number, ...rest: boolean[]];\n\ninterface Accessors {\n\tget value(): string;\n\tset value(next: string);\n\tmethod(): void;\n}\n\ntype Instantiated = typeof identity<string>;\n"
   ],
-  "mappings": "AAAA,KAAK,KAAK,GAAG,CAAC,QAAQ,EAAE,MAAM,EAAE,QAAQ,GAAG,MAAM,EAAE,GAAG,IAAI,EAAE,OAAO,EAAE,CAAC,CAAC;;AAEvE,UAAU,SAAS,EAAC,CACnB,IAAI,KAAK,EAAE,EAAE,MAAM,AAAC,EACpB,IAAI,KAAK,CAAC,IAAY,AAAR,EAAE,MAAM,CAAE,EACxB,MAAM,EAAE,EAAE,IAAI,AAAC,CACf,CAAA;;AAED,KAAK,YAAY,GAAG,OAAO,QAAQ,CAAC,MAAM,CAAC,CAAC,AAC5C"
+  "mappings": "AAAA,KAAKA,KAAK,GAAG,CAACC,QAAQ,EAAE,MAAM,EAAEC,QAAQ,GAAG,MAAM,EAAE,GAAGC,IAAI,EAAE,OAAO,EAAE,CAAC,CAAC;;AAEvE,UAAUC,SAAS,EAAC,CACnB,IAAIC,KAAK,EAAE,EAAE,MAAM,AAAC,EACpB,IAAIA,KAAK,CAACC,IAAY,AAAR,EAAE,MAAM,CAAE,EACxBC,MAAM,EAAE,EAAE,IAAI,AAAC,CACf,CAAA;;AAED,KAAKC,YAAY,GAAG,OAAOC,QAAQ,CAAC,MAAM,CAAC,CAAC,AAC5C"
 }

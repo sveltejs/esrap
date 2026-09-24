@@ -1,11 +1,19 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "Event",
+    "Path",
+    "T",
+    "Plain",
+    "Multi",
+    "A",
+    "B"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "type Event = `on${string}`;\ntype Path<T extends string> = `/${T}/index.html`;\ntype Plain = `static_string`;\ntype Multi<A extends string, B extends string> = `prefix_${A}_middle_${B}_suffix`;\n"
   ],
-  "mappings": "AAAA,KAAK,KAAK,GAAG,KAAK,MAAM,EAAE,CAAC;AAC3B,KAAK,IAAI,CAAC,CAAgB,SAAN,MAAM,CAAC,GAAG,IAAI,CAAC,aAAa,CAAC;AACjD,KAAK,KAAK,GAAG,eAAe,CAAC;AAC7B,KAAK,KAAK,CAAC,CAAgB,SAAN,MAAM,EAAE,CAAgB,SAAN,MAAM,CAAC,GAAG,UAAU,CAAC,WAAW,CAAC,SAAS,CAAC,AAClF"
+  "mappings": "AAAA,KAAKA,KAAK,GAAG,KAAK,MAAM,EAAE,CAAC;AAC3B,KAAKC,IAAI,CAACC,CAAgB,SAAN,MAAM,CAAC,GAAG,IAAIA,CAAC,aAAa,CAAC;AACjD,KAAKC,KAAK,GAAG,eAAe,CAAC;AAC7B,KAAKC,KAAK,CAACC,CAAgB,SAAN,MAAM,EAAEC,CAAgB,SAAN,MAAM,CAAC,GAAG,UAAUD,CAAC,WAAWC,CAAC,SAAS,CAAC,AAClF"
 }

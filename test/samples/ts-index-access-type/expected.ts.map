@@ -1,11 +1,17 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "A",
+    "a",
+    "b",
+    "B",
+    "c"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "type A = { a: string; b: number };\ntype B = A['b'];\n\nconst c: A['b'] = 1;\n"
   ],
-  "mappings": "AAAA,KAAK,CAAC,GAAG,EAAE,CAAC,EAAE,MAAM,AAAC,EAAC,CAAC,EAAE,MAAM,EAAE,CAAC;AAClC,KAAK,CAAC,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC;;AAEhB,KAAK,CAAC,CAAS,AAAR,EAAE,CAAC,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC,AACpB"
+  "mappings": "AAAA,KAAKA,CAAC,GAAG,EAAEC,CAAC,EAAE,MAAM,AAAC,EAACC,CAAC,EAAE,MAAM,EAAE,CAAC;AAClC,KAAKC,CAAC,GAAGH,CAAC,CAAC,GAAG,CAAC,CAAC;;AAEhB,KAAK,CAACI,CAAS,AAAR,EAAEJ,CAAC,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC,AACpB"
 }

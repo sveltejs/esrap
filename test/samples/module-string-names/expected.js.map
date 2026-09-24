@@ -1,11 +1,13 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "binding"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "import { 'not-an-identifier' as binding } from 'pkg';\nexport { binding as 'not-an-identifier' };\nexport { 'not-an-identifier' as 'another-name' } from 'pkg';\n"
   ],
-  "mappings": "AAAA,MAAM,GAAG,mBAAmB,IAAI,OAAO,QAAQ,KAAK,CAAC;;AACrD,MAAM,GAAG,OAAO,IAAI,mBAAmB,GAAG;AAC1C,MAAM,GAAG,mBAAmB,IAAI,cAAc,QAAQ,KAAK,CAAC,AAC5D"
+  "mappings": "AAAA,MAAM,GAAG,mBAAmB,IAAIA,OAAO,QAAQ,KAAK,CAAC;;AACrD,MAAM,GAAGA,OAAO,IAAI,mBAAmB,GAAG;AAC1C,MAAM,GAAG,mBAAmB,IAAI,cAAc,QAAQ,KAAK,CAAC,AAC5D"
 }

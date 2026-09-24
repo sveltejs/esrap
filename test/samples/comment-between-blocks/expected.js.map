@@ -1,11 +1,15 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "condition",
+    "console",
+    "log"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "// if true, yep\nif (condition) {\n\tconsole.log('yep');\n} // otherwise nope\nelse {\n\tconsole.log('nope');\n}\n"
   ],
-  "mappings": "AAAA;AACA,EAAE,EAAE,SAAS,EAAE,CAAC;CACf,OAAO,CAAC,GAAG,CAAC,KAAK,CAAC,CAAC;AACpB,CAAC;AACI,CAAC;CACL,OAAO,CAAC,GAAG,CAAC,MAAM,CAAC,CAAC;AACrB,CAAC,AACD"
+  "mappings": "AAAA;AACA,EAAE,EAAEA,SAAS,EAAE,CAAC;CACfC,OAAO,CAACC,GAAG,CAAC,KAAK,CAAC,CAAC;AACpB,CAAC;AACI,CAAC;CACLD,OAAO,CAACC,GAAG,CAAC,MAAM,CAAC,CAAC;AACrB,CAAC,AACD"
 }

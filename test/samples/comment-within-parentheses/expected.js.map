@@ -1,11 +1,15 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "foo",
+    "abc",
+    "bar"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "function foo() {\n\treturn (// hey\n\tabc);\n}\n\nfunction bar() {\n\treturn (/* hey */\n\tabc);\n}"
   ],
-  "mappings": "AAAA,SAAS,GAAG,GAAG,CAAC;CACf,MAAM;CACN,GAAG,EAAE;AACN,CAAC;;AAED,SAAS,GAAG,GAAG,CAAC;CACf,MAAM;CACN,GAAG,EAAE;AACN,CAAC"
+  "mappings": "AAAA,SAASA,GAAG,GAAG,CAAC;CACf,MAAM;CACNC,GAAG,EAAE;AACN,CAAC;;AAED,SAASC,GAAG,GAAG,CAAC;CACf,MAAM;CACND,GAAG,EAAE;AACN,CAAC"
 }

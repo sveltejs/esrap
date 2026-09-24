@@ -1,11 +1,18 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "User",
+    "firstName",
+    "lastName",
+    "a",
+    "console",
+    "log"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "type User = {\n\tfirstName: string;\n\tlastName: string;\n};\n\nfunction a({ firstName, lastName }: User) {\n\tconsole.log(firstName, lastName);\n}\n"
   ],
-  "mappings": "AAAA,KAAK,IAAI,GAAG,EACX,SAAS,EAAE,MAAM,AAAC,EAClB,QAAQ,EAAE,MAAM,AAAC,EACjB,CAAC;;AAEF,SAAS,CAAC,CAAC,EAAE,SAAS,EAAE,QAAQ,EAAE,EAAE,IAAI,EAAE,CAAC;CAC1C,OAAO,CAAC,GAAG,CAAC,SAAS,EAAE,QAAQ,CAAC,CAAC;AAClC,CAAC,AACD"
+  "mappings": "AAAA,KAAKA,IAAI,GAAG,EACXC,SAAS,EAAE,MAAM,AAAC,EAClBC,QAAQ,EAAE,MAAM,AAAC,EACjB,CAAC;;AAEF,SAASC,CAAC,CAAC,EAAEF,SAAS,EAAEC,QAAQ,EAAE,EAAEF,IAAI,EAAE,CAAC;CAC1CI,OAAO,CAACC,GAAG,CAACJ,SAAS,EAAEC,QAAQ,CAAC,CAAC;AAClC,CAAC,AACD"
 }

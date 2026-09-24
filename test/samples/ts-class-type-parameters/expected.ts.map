@@ -1,11 +1,17 @@
 {
   "version": 3,
-  "names": [],
+  "names": [
+    "A",
+    "T",
+    "B",
+    "C",
+    "D"
+  ],
   "sources": [
     "input.js"
   ],
   "sourcesContent": [
     "class A<T> {}\nclass B<T extends string = number> extends C<T> {}\nconst D = class A<T> {};\n"
   ],
-  "mappings": "AAAA,MAAM,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC;AACb,MAAM,CAAC,CAAC,CAAyB,SAAf,MAAM,GAAG,MAAM,CAAC,SAAS,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC;;AAClD,KAAK,CAAC,CAAC,GAAG,MAAM,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,AACxB"
+  "mappings": "AAAA,MAAMA,CAAC,CAACC,CAAC,CAAC,CAAC,CAAC,CAAC;AACb,MAAMC,CAAC,CAACD,CAAyB,SAAf,MAAM,GAAG,MAAM,CAAC,SAASE,CAAC,CAACF,CAAC,CAAC,CAAC,CAAC,CAAC;;AAClD,KAAK,CAACG,CAAC,GAAG,MAAMJ,CAAC,CAACC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,AACxB"
 }
