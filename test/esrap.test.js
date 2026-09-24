@@ -158,6 +158,14 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	const jsxMode = dir.startsWith('jsx-') || dir.startsWith('tsx-');
 	const fileExtension = (tsMode ? 'ts' : 'js') + (jsxMode ? 'x' : '');
 
+	// Switching branches can leave directories containing only ignored test output.
+	if (
+		!fs.existsSync(`${__dirname}/samples/${dir}/input.${fileExtension}`) &&
+		!fs.existsSync(`${__dirname}/samples/${dir}/input.json`)
+	) {
+		continue;
+	}
+
 	describe(dir, async () => {
 		let input_js = '';
 		let input_json = '';
