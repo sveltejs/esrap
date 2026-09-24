@@ -657,9 +657,7 @@ export default (options = {}) => {
 				// logical/binary/conditional/etc.) must be parenthesized
 				const wrap_super =
 					EXPRESSIONS_PRECEDENCE[node.superClass.type] < EXPRESSIONS_PRECEDENCE.NewExpression;
-				if (wrap_super) context.write('(');
-				context.visit(node.superClass);
-				if (wrap_super) context.write(')');
+				maybe_wrap(context, node.superClass, wrap_super);
 
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				var type_arguments = node.superTypeParameters ?? node.superTypeArguments;
@@ -689,7 +687,7 @@ export default (options = {}) => {
 			context.write('(');
 
 			if (node.left.type === 'VariableDeclaration') {
-				handle_var_declaration(node.left, context);
+				write_for_head_declaration(node.left, context);
 			} else {
 				context.visit(node.left);
 			}
@@ -968,7 +966,8 @@ export default (options = {}) => {
 					node.type in EXPRESSIONS_PRECEDENCE && !BINDINGS.has(node)
 				);
 
-				context.location(node.loc.start.line, node.loc.start.column);
+				const start = printed_start(node);
+				context.location(start.line, start.column);
 			}
 
 			visit(node);
@@ -1040,9 +1039,8 @@ export default (options = {}) => {
 				const precedence = EXPRESSIONS_PRECEDENCE[node.argument.type];
 
 				if (precedence && precedence < EXPRESSIONS_PRECEDENCE.AwaitExpression) {
-					context.write(' (');
-					context.visit(node.argument);
-					context.write(')');
+					context.write(' ');
+					maybe_wrap(context, node.argument, true);
 				} else {
 					context.write(' ');
 					context.visit(node.argument);
@@ -1239,7 +1237,7 @@ export default (options = {}) => {
 
 			if (node.init) {
 				if (node.init.type === 'VariableDeclaration') {
-					handle_var_declaration(node.init, context, true);
+					write_for_head_declaration(node.init, context, true);
 				} else {
 					maybe_wrap(context, node.init, contains_in_operator(node.init));
 				}
@@ -1283,6 +1281,9 @@ export default (options = {}) => {
 			context.write(') ');
 
 			if (node.alternate && statement_ends_with_unmatched_if(node.consequent)) {
+				// braces the source doesn't have map to the statement they wrap
+				const loc = node.consequent.loc;
+				if (loc) context.location(loc.start.line, loc.start.column);
 				context.write('{');
 				context.indent();
 				context.newline();
@@ -1290,6 +1291,7 @@ export default (options = {}) => {
 				context.dedent();
 				context.newline();
 				context.write('}');
+				if (loc) context.location(loc.end.line, loc.end.column);
 			} else {
 				context.visit(node.consequent);
 			}
@@ -1582,6 +1584,27 @@ export default (options = {}) => {
 			context.write('super', node);
 		},
 
+		SwitchCase(node, context) {
+			if (node.test) {
+				token(context, 'case', node);
+				context.write(' ');
+				context.visit(node.test);
+				context.write(':');
+			} else {
+				token(context, 'default', node);
+				context.write(':');
+			}
+
+			context.indent();
+
+			for (const statement of node.consequent) {
+				context.newline();
+				context.visit(statement);
+			}
+
+			context.dedent();
+		},
+
 		SwitchStatement(node, context) {
 			token(context, 'switch', node);
 
@@ -1599,24 +1622,8 @@ export default (options = {}) => {
 
 				first = false;
 
-				if (block.test) {
-					context.newline();
-					context.write('case ');
-					context.visit(block.test);
-					context.write(':');
-				} else {
-					context.newline();
-					context.write('default:');
-				}
-
-				context.indent();
-
-				for (const statement of block.consequent) {
-					context.newline();
-					context.visit(statement);
-				}
-
-				context.dedent();
+				context.newline();
+				context.visit(block);
 			}
 
 			context.dedent();
@@ -1667,6 +1674,20 @@ export default (options = {}) => {
 			context.write(';');
 		},
 
+		CatchClause(node, context) {
+			token(context, 'catch', node);
+
+			if (node.param) {
+				context.write('(');
+				track_binding(node.param);
+				context.visit(node.param);
+				context.write(')');
+			}
+
+			context.write(' ');
+			context.visit(node.body);
+		},
+
 		TryStatement(node, context) {
 			token(context, 'try', node);
 			context.write(' ');
@@ -1674,17 +1695,7 @@ export default (options = {}) => {
 
 			if (node.handler) {
 				context.write(' ');
-				token(context, 'catch', node.handler);
-
-				if (node.handler.param) {
-					context.write('(');
-					track_binding(node.handler.param);
-					context.visit(node.handler.param);
-					context.write(')');
-				}
-
-				context.write(' ');
-				context.visit(node.handler.body);
+				context.visit(node.handler);
 			}
 
 			if (node.finalizer) {
@@ -2492,9 +2503,12 @@ function operand_needs_wrap(node, parent, is_right) {
  */
 function maybe_wrap(context, node, wrap) {
 	if (wrap) {
+		// parentheses the source doesn't have map to the expression they wrap
+		if (node.loc) context.location(node.loc.start.line, node.loc.start.column);
 		context.write('(');
 		context.visit(node);
 		context.write(')');
+		if (node.loc) context.location(node.loc.end.line, node.loc.end.column);
 	} else {
 		context.visit(node);
 	}
@@ -2511,9 +2525,7 @@ function write_decorator(context, node) {
 	const wrap =
 		/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
 		EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
-	if (wrap) context.write('(');
-	context.visit(node.expression);
-	if (wrap) context.write(')');
+	maybe_wrap(context, node.expression, wrap);
 }
 
 /**
@@ -2526,7 +2538,10 @@ function write_parameter_decorators(context, decorators) {
 	if (!decorators) return;
 
 	for (const decorator of decorators) {
+		// not visited through the root visitor, so map the node's span here
+		if (decorator.loc) context.location(decorator.loc.start.line, decorator.loc.start.column);
 		write_decorator(context, decorator);
+		if (decorator.loc) context.location(decorator.loc.end.line, decorator.loc.end.column);
 		context.write(' ');
 	}
 }
@@ -2705,6 +2720,31 @@ function handle_var_declarator(node, context, no_in) {
 		context.write(' = ');
 		maybe_wrap(context, node.init, no_in && contains_in_operator(node.init));
 	}
+}
+
+/**
+ * Where a node's printed output starts. A parameter's `loc` starts after its
+ * decorators (Acorn, typescript-estree), but they are printed first.
+ * @param {TSESTree.Node} node
+ */
+function printed_start(node) {
+	const start = /** @type {TSESTree.SourceLocation} */ (node.loc).start;
+	const first = 'decorators' in node ? node.decorators?.[0]?.loc?.start : undefined;
+	return first && before(first, start) ? first : start;
+}
+
+/**
+ * A `for` head's declaration. It can't go through `context.visit`, because the
+ * `VariableDeclaration` visitor ends with a semicolon, so the node's start and
+ * end are mapped here the way the root visitor would.
+ * @param {TSESTree.VariableDeclaration} node
+ * @param {Context} context
+ * @param {boolean} [no_in]
+ */
+function write_for_head_declaration(node, context, no_in = false) {
+	if (node.loc) context.location(node.loc.start.line, node.loc.start.column);
+	handle_var_declaration(node, context, no_in);
+	if (node.loc) context.location(node.loc.end.line, node.loc.end.column);
 }
 
 /**
