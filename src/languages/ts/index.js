@@ -657,9 +657,7 @@ export default (options = {}) => {
 				// logical/binary/conditional/etc.) must be parenthesized
 				const wrap_super =
 					EXPRESSIONS_PRECEDENCE[node.superClass.type] < EXPRESSIONS_PRECEDENCE.NewExpression;
-				if (wrap_super) context.write('(');
-				context.visit(node.superClass);
-				if (wrap_super) context.write(')');
+				maybe_wrap(context, node.superClass, wrap_super);
 
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				var type_arguments = node.superTypeParameters ?? node.superTypeArguments;
@@ -1040,9 +1038,8 @@ export default (options = {}) => {
 				const precedence = EXPRESSIONS_PRECEDENCE[node.argument.type];
 
 				if (precedence && precedence < EXPRESSIONS_PRECEDENCE.AwaitExpression) {
-					context.write(' (');
-					context.visit(node.argument);
-					context.write(')');
+					context.write(' ');
+					maybe_wrap(context, node.argument, true);
 				} else {
 					context.write(' ');
 					context.visit(node.argument);
@@ -1283,6 +1280,9 @@ export default (options = {}) => {
 			context.write(') ');
 
 			if (node.alternate && statement_ends_with_unmatched_if(node.consequent)) {
+				// braces the source doesn't have map to the statement they wrap
+				const loc = node.consequent.loc;
+				if (loc) context.location(loc.start.line, loc.start.column);
 				context.write('{');
 				context.indent();
 				context.newline();
@@ -1290,6 +1290,7 @@ export default (options = {}) => {
 				context.dedent();
 				context.newline();
 				context.write('}');
+				if (loc) context.location(loc.end.line, loc.end.column);
 			} else {
 				context.visit(node.consequent);
 			}
@@ -2491,9 +2492,12 @@ function operand_needs_wrap(node, parent, is_right) {
  */
 function maybe_wrap(context, node, wrap) {
 	if (wrap) {
+		// parentheses the source doesn't have map to the expression they wrap
+		if (node.loc) context.location(node.loc.start.line, node.loc.start.column);
 		context.write('(');
 		context.visit(node);
 		context.write(')');
+		if (node.loc) context.location(node.loc.end.line, node.loc.end.column);
 	} else {
 		context.visit(node);
 	}
@@ -2510,9 +2514,7 @@ function write_decorator(context, node) {
 	const wrap =
 		/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
 		EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
-	if (wrap) context.write('(');
-	context.visit(node.expression);
-	if (wrap) context.write(')');
+	maybe_wrap(context, node.expression, wrap);
 }
 
 /**

@@ -7,5 +7,5 @@
   "sourcesContent": [
     "(function(){\n\n})\nlet object = {\n    foo() {\n        \n    }\n}"
   ],
-  "mappings": "AAAA,CAAC,YAAU,CAAC,AAEZ,CAAC,EAAC;;AACF,GAAG,CAAC,MAAM,GAAG,EACT,GAAG,GAAG,CAAC,AAEP,CAAC,EACJ,CAAA"
+  "mappings": "AAAA,AAAC,CAAA,YAAU,CAAC,AAEZ,CAAC,CAAA,CAAC;;AACF,GAAG,CAAC,MAAM,GAAG,EACT,GAAG,GAAG,CAAC,AAEP,CAAC,EACJ,CAAA"
 }
