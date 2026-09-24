@@ -59,6 +59,13 @@ function clean(ast) {
 			delete node.extra;
 			context.next();
 		},
+		TSImportType(node, context) {
+			// Acorn still uses the deprecated `argument` field.
+			const import_type = /** @type {any} */ (node);
+			import_type.source ??= import_type.argument;
+			delete import_type.argument;
+			context.next();
+		},
 		Property(node, context) {
 			if (node.kind === 'init') {
 				if (node.value.type === 'FunctionExpression') {
@@ -157,6 +164,14 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	const tsMode = dir.startsWith('ts-') || dir.startsWith('tsx-');
 	const jsxMode = dir.startsWith('jsx-') || dir.startsWith('tsx-');
 	const fileExtension = (tsMode ? 'ts' : 'js') + (jsxMode ? 'x' : '');
+
+	// Switching branches can leave directories containing only ignored test output.
+	if (
+		!fs.existsSync(`${__dirname}/samples/${dir}/input.${fileExtension}`) &&
+		!fs.existsSync(`${__dirname}/samples/${dir}/input.json`)
+	) {
+		continue;
+	}
 
 	describe(dir, async () => {
 		let input_js = '';
