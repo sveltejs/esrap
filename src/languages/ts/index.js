@@ -1130,7 +1130,13 @@ export default (options = {}) => {
 		},
 
 		Decorator(node, context) {
-			write_decorator(context, node);
+			context.write('@');
+			// a decorator must be an identifier/member/call (or parenthesized); anything
+			// else (ternary, logical, assignment, unary, `as`, optional chain…) needs wrapping
+			const wrap =
+				/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
+				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
+			maybe_wrap(context, node.expression, wrap);
 		},
 
 		DoWhileStatement(node, context) {
@@ -2523,20 +2529,6 @@ function maybe_wrap(context, node, wrap) {
 }
 
 /**
- * @param {Context} context
- * @param {TSESTree.Decorator} node
- */
-function write_decorator(context, node) {
-	context.write('@');
-	// a decorator must be an identifier/member/call (or parenthesized); anything
-	// else (ternary, logical, assignment, unary, `as`, optional chain…) needs wrapping
-	const wrap =
-		/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
-		EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
-	maybe_wrap(context, node.expression, wrap);
-}
-
-/**
  * Parameter decorators (`@dec x`) stay on the parameter's line, unlike class
  * and member decorators, which the `Decorator` visitor puts on their own line
  * @param {Context} context
@@ -2546,10 +2538,7 @@ function write_parameter_decorators(context, decorators) {
 	if (!decorators) return;
 
 	for (const decorator of decorators) {
-		// not visited through the root visitor, so map the node's span here
-		if (decorator.loc) context.location(decorator.loc.start.line, decorator.loc.start.column);
-		write_decorator(context, decorator);
-		if (decorator.loc) context.location(decorator.loc.end.line, decorator.loc.end.column);
+		context.visit(decorator);
 		context.write(' ');
 	}
 }
