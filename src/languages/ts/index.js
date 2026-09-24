@@ -2656,9 +2656,10 @@ function statement_ends_with_unmatched_if(node) {
 }
 
 /**
- * Whether an expression exposes an `in` to the `ExpressionNoIn` grammar used
+ * Whether an expression exposes an `in` to the `Expression[~In]` grammar used
  * for classic `for` initializers. Stop where the grammar allows `in` or the
  * printer already adds parentheses.
+ * @see https://tc39.es/ecma262/#sec-for-statement
  * @param {TSESTree.Node} node
  * @returns {boolean}
  */
@@ -2673,7 +2674,7 @@ function contains_in_operator(node) {
 			);
 
 		case 'ConditionalExpression':
-			// The middle operand allows `in`, even in an ExpressionNoIn.
+			// The middle operand allows `in`, even in an Expression[~In].
 			return (
 				(EXPRESSIONS_PRECEDENCE[node.test.type] > EXPRESSIONS_PRECEDENCE.ConditionalExpression &&
 					contains_in_operator(node.test)) ||
