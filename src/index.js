@@ -60,7 +60,7 @@ export function print(node, visitors, opts = {}) {
 
 	context.visit(node);
 
-	/** @typedef {[number, number, number, number]} Segment */
+	/** @typedef {[generatedColumn: number, sourceIndex: number, originalLine: number, originalColumn: number]} Segment */
 
 	let code = '';
 	let current_column = 0;
