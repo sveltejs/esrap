@@ -2736,19 +2736,14 @@ function handle_var_declarator(node, context, no_in) {
  * @param {TSESTree.Node} node
  */
 function has_preceding_decorator(node) {
-	const node_start = node.loc.start;
-	let start = node_start;
-	let n = node;
-
-	if (node.type === 'ExportNamedDeclaration' && node.declaration) {
-		n = node.declaration;
-	}
+	const n = (node.type === 'ExportNamedDeclaration' && node.declaration) || node;
 
 	if ('decorators' in n) {
-		start = n.decorators?.[0]?.loc?.start ?? node_start;
+		const loc = n.decorators?.[0]?.loc;
+		return loc ? before(loc.start, node.loc.start) : false;
 	}
 
-	return before(start, node_start);
+	return false;
 }
 
 /**
