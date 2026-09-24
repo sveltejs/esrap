@@ -2720,11 +2720,6 @@ function handle_var_declarator(node, context, no_in) {
 }
 
 /**
- * @param {TSESTree.VariableDeclaration} node
- * @param {Context} context
- * @param {boolean} [no_in]
- */
-/**
  * Where a node's printed output starts. A parameter's `loc` starts after its
  * decorators (Acorn, typescript-estree), but they are printed first.
  * @param {TSESTree.Node} node
