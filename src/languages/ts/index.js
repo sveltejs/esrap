@@ -1458,7 +1458,10 @@ export default (options = {}) => {
 
 		// @ts-expect-error this isn't a real node type, but Acorn produces it
 		ParenthesizedExpression(node, context) {
-			if (node.loc) {
+			if (node.expression.type === 'SequenceExpression') {
+				// The sequence printer already supplies this pair of parentheses.
+				context.visit(node.expression);
+			} else if (node.loc) {
 				context.write('(');
 				context.visit(node.expression);
 				context.write(')');
