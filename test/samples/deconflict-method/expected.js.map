@@ -7,5 +7,5 @@
   "sourcesContent": [
     "obj = {\n\ta(foo) {\n\n\t}\n};\n"
   ],
-  "mappings": "AAAA,GAAG,GAAG,EACL,CAAC,CAAC,GAAG,EAAE,CAAC,AAER,CAAC,EACD,CAAC,AACF"
+  "mappings": "AAAA,GAAG,GAAG,EACL,CAAC,CAAC,GAAG,EAAE,CAAC,AAER,CAAC,CACF,CAAC,CAAC,AACF"
 }

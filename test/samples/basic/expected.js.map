@@ -7,5 +7,5 @@
   "sourcesContent": [
     "foo({ a: 1 });\n"
   ],
-  "mappings": "AAAA,GAAG,CAAC,EAAE,CAAC,EAAE,CAAC,EAAE,CAAC,CAAC,AACd"
+  "mappings": "AAAA,GAAG,CAAC,EAAE,CAAC,EAAE,CAAC,CAAC,CAAC,CAAC,CAAC,AACd"
 }
