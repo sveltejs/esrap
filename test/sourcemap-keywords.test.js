@@ -102,3 +102,29 @@ test.each([
 	const { gen_line, gen_col } = generatedLineColumn(source, source.indexOf(needle));
 	expect(segment.slice(2)).toEqual([gen_line, gen_col]);
 });
+
+/**
+ * @param {string} code
+ * @param {string} needle
+ * @param {[number, number, number, number][][]} mappings
+ */
+function sourcePositionsAt(code, needle, mappings) {
+	const index = code.indexOf(needle);
+	expect(index >= 0, `needle not in output: ${JSON.stringify(needle)}`).toBe(true);
+	const { gen_line, gen_col } = generatedLineColumn(code, index);
+	return (mappings[gen_line] ?? []).filter((s) => s[0] === gen_col).map((s) => s.slice(2));
+}
+
+test.each([
+	['class heritage', `class B extends function () {} {}`, '(function', 'function'],
+	['call of a dropped parenthesized expression', `(a || b)();`, '(a', 'a'],
+	['await argument', `async function f() {\n\tawait (x || y);\n}`, '(x', 'x'],
+	['decorator expression', `@(a || b)\nclass C {}`, '(a', 'a']
+])(
+	'parentheses and braces added by the printer map to what they wrap: %s',
+	(_name, source, needle, wrapped) => {
+		const { code, mappings } = mapped(source);
+		const { gen_line, gen_col } = generatedLineColumn(source, source.indexOf(wrapped));
+		expect(sourcePositionsAt(code, needle, mappings)).toContainEqual([gen_line, gen_col]);
+	}
+);
