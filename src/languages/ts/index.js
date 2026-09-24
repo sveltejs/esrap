@@ -2237,7 +2237,8 @@ export default (options = {}) => {
 		TSImportType(node, context) {
 			token(context, 'import', node);
 			context.write('(');
-			context.visit(node.argument);
+			// @ts-expect-error Newer TS-ESTree versions use `source` instead of `argument`
+			context.visit(node.source ?? node.argument);
 			context.write(')');
 
 			if (node.qualifier) {
