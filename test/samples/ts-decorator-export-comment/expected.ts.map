@@ -7,5 +7,5 @@
   "sourcesContent": [
     "@dec\nexport /* c */ declare class X {}\n"
   ],
-  "mappings": "AAAA,CAAC,GAAG;MACE,uBAAuB,CAAC,CAAC,CAAC,CAAC,AACjC"
+  "mappings": "AAAA,CAAC,GAAG;AACJ,MAAM,SAAS,cAAc,CAAC,CAAC,CAAC,CAAC,AACjC"
 }

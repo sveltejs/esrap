@@ -1088,7 +1088,11 @@ export default (options = {}) => {
 					node.type in EXPRESSIONS_PRECEDENCE && !BINDINGS.has(node)
 				);
 
-				if (!has_preceding_decorator(node)) {
+				// the node starts here unless its decorators are printed later (they
+				// precede `loc.start`) or were printed already and `loc.start` is
+				// one of them (Acorn ranges a class from decorators written before
+				// its `export`; typescript-estree from `class`, which then starts here)
+				if (has_preceding_decorator(node) === printed_decorators.has(node)) {
 					context.location(node.loc.start.line, node.loc.start.column);
 				}
 			}
@@ -1316,6 +1320,8 @@ export default (options = {}) => {
 				});
 			}
 
+			// the declaration's decorators came first, so the node's start is written here
+			if (node.loc) context.location(node.loc.start.line, node.loc.start.column);
 			token(context, 'export', node);
 			context.write(' ');
 			write_keyword(context, node, 'default');
@@ -1345,6 +1351,8 @@ export default (options = {}) => {
 					});
 				}
 
+				// the declaration's decorators came first, so the node's start is written here
+				if (node.loc) context.location(node.loc.start.line, node.loc.start.column);
 				token(context, 'export', node);
 				context.write(' ');
 
@@ -2767,7 +2775,7 @@ function maybe_wrap(context, node, wrap) {
  * @param {TSESTree.Node & { decorators: TSESTree.Decorator[] | undefined }} node
  */
 function block_decorators(context, node) {
-	if (!node.decorators) return;
+	if (!node.decorators || printed_decorators.has(node)) return;
 
 	for (const decorator of node.decorators) {
 		context.visit(decorator);
@@ -2797,24 +2805,23 @@ function inline_decorators(context, node) {
 }
 
 /**
+ * Declarations whose decorators an export visitor has already printed. Their
+ * `loc.start` is the first decorator, so the root visitor must not map it where
+ * the keywords are written; the keywords themselves are located from `tokens`.
+ * @type {WeakSet<TSESTree.Node>}
+ */
+const printed_decorators = new WeakSet();
+
+/**
  * Visit an exported declaration minus its decorators, which have already been printed
  * @param {Context} context
  * @param {TSESTree.Node} node
  */
 function visit_without_decorators(context, node) {
 	if ('decorators' in node && node.decorators && node.decorators.length > 0) {
-		const { decorators, loc } = node;
-
-		// Temporarily remove decorators so ClassDeclaration doesn't print them again
-		node.decorators = [];
-		// @ts-expect-error
-		node.loc = null;
-
+		printed_decorators.add(node);
 		context.visit(node);
-		node.decorators = decorators;
-		node.loc = loc;
-
-		if (loc) context.location(loc.end.line, loc.end.column);
+		printed_decorators.delete(node);
 	} else {
 		context.visit(node);
 	}
@@ -3033,10 +3040,14 @@ function handle_var_declarator(node, context, no_in) {
  * @param {TSESTree.Node} node
  */
 function has_preceding_decorator(node) {
-	let n =
-		((node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration') &&
-			node.declaration) ||
-		node;
+	if (node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration') {
+		// the declaration's decorators are printed before `export`, whichever
+		// side of it they were written on
+		const d = node.declaration;
+		return !!(d && 'decorators' in d && d.decorators && d.decorators.length > 0);
+	}
+
+	let n = node;
 
 	if ('parameter' in n && 'decorators' in n.parameter) {
 		n = n.parameter;

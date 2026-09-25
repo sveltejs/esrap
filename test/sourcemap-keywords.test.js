@@ -496,3 +496,31 @@ test.each([
 ])('tokens map keywords after a node start for %s', (_name, source, words) => {
 	expectExactKeywordMappings(source, words);
 });
+
+test.each([
+	['decorator before export', `@dec export class K {}`],
+	['decorator after export', `export @dec class K {}`],
+	['decorator before export default', `@dec export default class {}`],
+	['decorator after export default', `export default @dec class {}`]
+])('`export` of a decorated class maps to its source position: %s', (_name, statement) => {
+	// a leading statement keeps the Program's own start mapping off the tested line
+	const source = `let a;\n${statement}`;
+	const { code, mappings } = mapped(source);
+	const segment = mappingAtSubstring(code, 'export', mappings);
+	expect(segment.slice(2)).toEqual([1, statement.indexOf('export')]);
+	// the printed decorator maps to itself, not to `export`
+	expect(sourcePositionsAt(code, '@dec', mappings)).toEqual([[1, statement.indexOf('@dec')]]);
+});
+
+test.each([
+	['decorator before export', `@dec /* c */ export /* c */ class K {}`, ['class']],
+	['decorator after export', `export /* c */ @dec /* c */ class K {}`, ['class']],
+	[
+		'decorator before export default',
+		`@dec export /* c */ default /* c */ class {}`,
+		['default', 'class']
+	],
+	['decorated member', `class K { @dec /* c */ static /* c */ m() {} }`, ['static']]
+])('tokens map the keywords of a decorated declaration: %s', (_name, source, words) => {
+	expectExactKeywordMappings(source, words);
+});
