@@ -1123,12 +1123,7 @@ export default (options = {}) => {
 
 		Decorator(node, context) {
 			context.write('@');
-			// a decorator must be an identifier/member/call (or parenthesized); anything
-			// else (ternary, logical, assignment, unary, `as`, optional chain…) needs wrapping
-			const wrap =
-				/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
-				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
-			maybe_wrap(context, node.expression, wrap);
+			maybe_wrap(context, node.expression, !is_decorator_expression(node.expression));
 		},
 
 		DoWhileStatement(node, context) {
@@ -2547,6 +2542,26 @@ function maybe_wrap(context, node, wrap) {
 	} else {
 		context.visit(node);
 	}
+}
+
+/**
+ * The decorator grammar only allows an identifier, a chain of `.name` accesses,
+ * or one call on such a chain without parentheses (or an explicitly parenthesized expression)
+ * @param {TSESTree.Node} node
+ */
+function is_decorator_expression(node) {
+	if (/** @type {string} */ (node.type) === 'ParenthesizedExpression') return true;
+	if (node.type === 'CallExpression') node = node.callee;
+
+	while (
+		node.type === 'MemberExpression' &&
+		!node.computed &&
+		node.property.type === 'Identifier'
+	) {
+		node = node.object;
+	}
+
+	return node.type === 'Identifier';
 }
 
 /**
