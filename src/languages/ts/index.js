@@ -1157,7 +1157,13 @@ export default (options = {}) => {
 			const d = node.declaration;
 
 			// ClassDeclaration/ClassExpression decorators should be printed before `export`
-			if ('decorators' in d) block_decorators(context, { ...d, loc: null });
+			if ('decorators' in d) {
+				block_decorators(context, {
+					...d,
+					// @ts-expect-error we need to prevent a mapping being added for the end of the declaration
+					loc: null
+				});
+			}
 
 			token(context, 'export', node);
 			context.write(' default ');
@@ -1178,7 +1184,13 @@ export default (options = {}) => {
 
 			if (d) {
 				// ClassDeclaration/ClassExpression decorators should be printed before `export`
-				if ('decorators' in d) block_decorators(context, { ...d, loc: null });
+				if ('decorators' in d) {
+					block_decorators(context, {
+						...d,
+						// @ts-expect-error we need to prevent a mapping being added for the end of the declaration
+						loc: null
+					});
+				}
 
 				token(context, 'export', node);
 				context.write(' ');
