@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "import type A from 'foo';\nimport type { B } from 'foo';\nimport { C, type D, type E as F } from 'foo';\n"
+    "import type A from 'foo';\nimport type { B } from 'foo';\nimport { C, type D, type E as F } from 'foo';\nimport type {} from 'foo';\nimport 'foo';\n"
   ],
-  "mappings": "AAAA,MAAM,MAAM,CAAC,MAAM,KAAK,CAAC;AACzB,MAAM,QAAQ,CAAC,QAAQ,KAAK,CAAC;AAC7B,MAAM,GAAG,CAAC,EAAE,KAAK,CAAC,EAAE,KAAK,CAAC,IAAI,CAAC,QAAQ,KAAK,CAAC,AAC7C"
+  "mappings": "AAAA,MAAM,MAAM,CAAC,MAAM,KAAK,CAAC;AACzB,MAAM,QAAQ,CAAC,QAAQ,KAAK,CAAC;AAC7B,MAAM,GAAG,CAAC,EAAE,KAAK,CAAC,EAAE,KAAK,CAAC,IAAI,CAAC,QAAQ,KAAK,CAAC;AAC7C,MAAM,cAAc,KAAK,CAAC;AAC1B,MAAM,CAAC,KAAK,CAAC,AACb"
 }

@@ -1317,6 +1317,7 @@ export default (options = {}) => {
 			context.write(' ');
 
 			if (node.specifiers.length === 0) {
+				if (node.importKind === 'type') context.write('type {} from ');
 				context.visit(node.source);
 				write_import_attributes(context, node);
 				context.write(';');
