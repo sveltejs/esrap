@@ -5,7 +5,7 @@
     "input.js"
   ],
   "sourcesContent": [
-    "// comment before a node\n// second line\nconsole.log(1);\nconsole.log(2); // comment on same line as node\n\nconst obj = {\n\tfoo: 1, // comment in middle of object\n\tbar: 2 // comment in middle of object\n};\n\nfunction bar() {\n\treturn /*result*/ foo;\n}\n"
+    "// comment before a node\n// second line\nconsole.log(1);\nconsole.log(2); // comment on same line as node\n\nconst obj = {\n\tfoo: 1, // comment in middle of object\n\tbar: 2 // comment in middle of object\n};\n\nfunction bar() {\n\treturn /*result*/ foo;\n}\n\nconsole.log(3); // eslint-disable-line\n"
   ],
-  "mappings": "AAAA;;AAEA,OAAO,CAAC,GAAG,CAAC,CAAC,CAAC,CAAC;;AACf,OAAO,CAAC,GAAG,CAAC,CAAC,CAAC,CAAC;;AAEf,KAAK,CAAC,GAAG,GAAG;CACX,GAAG,EAAE,CAAC;CACN,GAAG,EAAE,CAAC;CACN,CAAC;;AAEF,SAAS,GAAG,GAAG,CAAC;CACf,MAAM,aAAY,GAAG,EAAC;AACvB,CAAC,AACD"
+  "mappings": "AAAA;;AAEA,OAAO,CAAC,GAAG,CAAC,CAAC,CAAC,CAAC;;AACf,OAAO,CAAC,GAAG,CAAC,CAAC,CAAC,CAAC;;AAEf,KAAK,CAAC,GAAG,GAAG;CACX,GAAG,EAAE,CAAC;CACN,GAAG,EAAE,CAAC;CACN,CAAC;;AAEF,SAAS,GAAG,GAAG,CAAC;CACf,MAAM,aAAY,GAAG,EAAC;AACvB,CAAC;;AAED,OAAO,CAAC,GAAG,CAAC,CAAC,CAAC,CAAC,uBACf"
 }
