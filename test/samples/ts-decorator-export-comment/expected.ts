@@ -1,3 +1,2 @@
-/* c */
 @dec
-export declare class X {}
+export /* c */ declare class X {}
