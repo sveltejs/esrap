@@ -59,6 +59,13 @@ function clean(ast) {
 			delete node.extra;
 			context.next();
 		},
+		TSImportType(node, context) {
+			// Acorn still uses the deprecated `argument` field.
+			const import_type = /** @type {any} */ (node);
+			import_type.source ??= import_type.argument;
+			delete import_type.argument;
+			context.next();
+		},
 		Property(node, context) {
 			if (node.kind === 'init') {
 				if (node.value.type === 'FunctionExpression') {
