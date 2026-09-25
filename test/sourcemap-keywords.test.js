@@ -165,11 +165,12 @@ function mappedWithTokens(source, opts = {}) {
 		fileExtension: 'ts',
 		tokens
 	});
-	const { code, map } = print(
-		ast,
-		ts({ comments, tokens: opts.tokens === true ? tokens : opts.tokens || undefined }),
-		{ sourceMapSource: 'input.ts', sourceMapContent: source, sourceMapEncodeMappings: false }
-	);
+	const { code, map } = print(ast, ts({ comments }), {
+		sourceMapSource: 'input.ts',
+		sourceMapContent: source,
+		sourceMapEncodeMappings: false,
+		tokens: opts.tokens === true ? tokens : opts.tokens || undefined
+	});
 	const mappings = /** @type {[number, number, number, number][][]} */ (
 		/** @type {unknown} */ (map.mappings)
 	);

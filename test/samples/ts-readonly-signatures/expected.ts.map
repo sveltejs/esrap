@@ -7,5 +7,5 @@
   "sourcesContent": [
     "interface Example {\n\treadonly property?: string;\n\treadonly [key: string]: number;\n}\n"
   ],
-  "mappings": "AAAA,UAAU,OAAO,CAAC,CAAA,CACjB,SAAS,QAAQ,CAAC,EAAE,MAAM,AAAC,EAC3B,UAAU,GAAG,EAAE,MAAM,CAAC,EAAE,MAAM,AAAC,CAC/B,AAAD,CAAC,AACD"
+  "mappings": "AAAA,UAAU,OAAO,EAAC,CACjB,SAAS,QAAQ,CAAC,EAAE,MAAM,AAAC,EAC3B,UAAU,GAAG,EAAE,MAAM,CAAC,EAAE,MAAM,AAAC,CAC/B,CAAA,AACD"
 }

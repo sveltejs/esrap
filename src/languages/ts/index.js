@@ -3,9 +3,6 @@
 /** @import { TSOptions, BaseComment } from '../types.js' */
 import { Context } from 'esrap';
 
-/** @typedef {{ line: number, column: number }} Position */
-import { token_locator } from './tokens.js';
-
 // Keep the public type parser-independent while checking all expression kinds.
 /**
  * @type {Record<string, number>}
@@ -136,56 +133,18 @@ function write_comment(comment, context) {
 	if (comment.type === 'Line') {
 		context.write(`//${comment.value}`);
 	} else {
-		context.write('/*');
 		const lines = comment.value.split('\n');
 
+		// write the delimiters with the first and last lines, so that the content
+		// of a one-line comment can't be mistaken for a source token (e.g. `/* ( */`)
 		for (let i = 0; i < lines.length; i += 1) {
 			if (i > 0) context.newline();
-			context.write(lines[i]);
+			const line = (i === 0 ? '/*' : '') + lines[i] + (i === lines.length - 1 ? '*/' : '');
+			context.write(line);
 		}
 
-		context.write('*/');
 		if (lines.length > 1) context.newline();
 	}
-}
-
-/**
- * Where a node's keywords start: after its decorators, if any
- * @param {TSESTree.Node & { decorators?: TSESTree.Decorator[] }} node
- */
-function after_decorators(node) {
-	return node.decorators?.at(-1)?.loc?.end ?? node.loc?.start;
-}
-
-/**
- * Writes a token at a known source position (its start, or its whole location
- * when the end is known too), or unmapped without one
- * @param {Context} context
- * @param {string} text
- * @param {Position | { start: Position, end: Position } | undefined} at
- */
-function write_at(context, text, at) {
-	if (!at) {
-		context.write(text);
-		return;
-	}
-
-	const start = 'start' in at ? at.start : at;
-	context.location(start.line, start.column);
-	context.write(text);
-	if ('start' in at) context.location(at.end.line, at.end.column);
-}
-
-/**
- * Writes a closing delimiter that ends at `end` — the last character of a node
- * whose grammar ends with it
- * @param {Context} context
- * @param {string} text
- * @param {{ line: number, column: number } | undefined} end
- */
-function write_before(context, text, end) {
-	if (end) context.location(end.line, end.column - text.length);
-	context.write(text);
 }
 
 /**
@@ -371,15 +330,14 @@ export default (options = {}) => {
 
 	/**
 	 * @param {Context} context
-	 * @param {TSESTree.Node & { attributes?: TSESTree.ImportAttribute[], assertions?: TSESTree.ImportAttribute[] }} node
+	 * @param {{ attributes?: TSESTree.ImportAttribute[], assertions?: TSESTree.ImportAttribute[] }} node
 	 */
 	function write_import_attributes(context, node) {
 		const attributes = node.attributes ?? node.assertions;
 		if (!attributes || attributes.length === 0) return;
 
 		context.write(node.attributes ? ' with ' : ' assert ');
-		write_at(context, '{', enclosing(node, attributes[0], '{'));
-		context.write(' ');
+		context.write('{ ');
 
 		for (let i = 0; i < attributes.length; i += 1) {
 			const { key, value } = attributes[i];
@@ -389,8 +347,7 @@ export default (options = {}) => {
 			if (i < attributes.length - 1) context.write(', ');
 		}
 
-		context.write(' ');
-		write_at(context, '}', enclosing(node, attributes[attributes.length - 1], '}'));
+		context.write(' }');
 	}
 
 	/**
@@ -522,39 +479,6 @@ export default (options = {}) => {
 		}
 	}
 
-	const { locate, enclosing } = token_locator(options);
-
-	/**
-	 * A parenthesised parameter list. `(` is the first one after `prefix` (the
-	 * type parameters, name or key before the list) or, without one, in the
-	 * node; `)` is the last one before `suffix` (the return type or body after
-	 * the list) or the node's end. Both are looked up in `tokens`.
-	 * @param {Context} context
-	 * @param {TSESTree.Node} node
-	 * @param {TSESTree.Node[]} params
-	 * @param {TSESTree.Node | null | undefined} prefix
-	 * @param {TSESTree.Node | null | undefined} suffix
-	 */
-	function write_params(context, node, params, prefix, suffix) {
-		const until = suffix?.loc?.start ?? node.loc?.end;
-		write_at(context, '(', locate(node, '(', prefix?.loc?.end ?? node.loc?.start, 'after'));
-		sequence(context, params, until ?? null, false);
-		write_at(context, ')', locate(node, ')', until, 'before'));
-	}
-
-	/**
-	 * A keyword that is not the first token of `node`, so only the tokens locate
-	 * it: the first `word` after `from` (the node's start, or the end of what
-	 * precedes the keyword) within the node.
-	 * @param {Context} context
-	 * @param {TSESTree.Node} node
-	 * @param {string} word
-	 * @param {Position | undefined} [from]
-	 */
-	function write_keyword(context, node, word, from = node.loc?.start) {
-		write_at(context, word, locate(node, word, from, 'after'));
-	}
-
 	const shared = {
 		/**
 		 * @param {TSESTree.ArrayExpression | TSESTree.ArrayPattern} node
@@ -569,7 +493,7 @@ export default (options = {}) => {
 				node.loc?.end ?? null,
 				false
 			);
-			write_before(context, ']', node.loc?.end);
+			context.write(']');
 			if ('typeAnnotation' in node && node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
 
@@ -647,11 +571,7 @@ export default (options = {}) => {
 			const open = context.new();
 			const join = context.new();
 
-			write_at(
-				context,
-				'(',
-				locate(node, '(', (node.typeArguments ?? node.callee).loc?.end, 'after')
-			);
+			context.write('(');
 			context.append(open);
 
 			// if the final argument is multiline, it doesn't need to force all the
@@ -704,9 +624,7 @@ export default (options = {}) => {
 				join.write(' ');
 			}
 
-			// a `new` expression may have no parentheses in the source
-			if (node.type === 'CallExpression') write_before(context, ')', node.loc?.end);
-			else write_at(context, ')', locate(node, ')', node.loc?.end, 'before'));
+			context.write(')');
 		},
 
 		/**
@@ -716,17 +634,9 @@ export default (options = {}) => {
 		'ClassDeclaration|ClassExpression': (node, context) => {
 			block_decorators(context, node);
 
-			const from = after_decorators(node);
-			if (node.declare) {
-				write_keyword(context, node, 'declare', from);
-				context.write(' ');
-			}
-			if (node.abstract) {
-				write_keyword(context, node, 'abstract', from);
-				context.write(' ');
-			}
-			write_keyword(context, node, 'class', from);
-			context.write(' ');
+			if (node.declare) context.write('declare ');
+			if (node.abstract) context.write('abstract ');
+			context.write('class ');
 
 			if (node.id) {
 				context.visit(node.id);
@@ -741,8 +651,7 @@ export default (options = {}) => {
 			}
 
 			if (node.superClass) {
-				write_keyword(context, node, 'extends', (node.typeParameters ?? node.id)?.loc?.end);
-				context.write(' ');
+				context.write('extends ');
 				// the `extends` clause is a LeftHandSideExpression; anything lower (a
 				// logical/binary/conditional/etc.) must be parenthesized
 				const wrap_super =
@@ -759,12 +668,7 @@ export default (options = {}) => {
 			}
 
 			if (node.implements && node.implements.length > 0) {
-				write_keyword(
-					context,
-					node,
-					'implements',
-					(node.superClass ?? node.typeParameters ?? node.id)?.loc?.end
-				);
+				context.write('implements');
 				sequence(context, node.implements, node.body.loc?.start ?? null, true);
 			}
 
@@ -778,29 +682,18 @@ export default (options = {}) => {
 		'ForInStatement|ForOfStatement': (node, context) => {
 			token(context, 'for', node);
 			context.write(' ');
-			if (node.type === 'ForOfStatement' && node.await) {
-				write_keyword(context, node, 'await');
-				context.write(' ');
-			}
-			write_at(context, '(', locate(node, '(', node.loc?.start, 'after'));
+			if (node.type === 'ForOfStatement' && node.await) context.write('await ');
+			context.write('(');
 
 			if (node.left.type === 'VariableDeclaration') {
-				write_for_head_declaration(node.left, context, false, write_keyword);
+				write_for_head_declaration(node.left, context);
 			} else {
 				context.visit(node.left);
 			}
 
-			context.write(' ');
-			write_keyword(
-				context,
-				node,
-				node.type === 'ForInStatement' ? 'in' : 'of',
-				node.left.loc?.end
-			);
-			context.write(' ');
+			context.write(node.type === 'ForInStatement' ? ' in ' : ' of ');
 			context.visit(node.right);
-			write_at(context, ')', locate(node, ')', node.body.loc?.start, 'before'));
-			context.write(' ');
+			context.write(') ');
 			context.visit(node.body);
 		},
 
@@ -809,11 +702,8 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'FunctionDeclaration|FunctionExpression': (node, context) => {
-			if (node.async) {
-				write_keyword(context, node, 'async');
-				context.write(' ');
-			}
-			write_keyword(context, node, 'function');
+			if (node.async) context.write('async ');
+			context.write('function');
 			context.write(node.generator ? '* ' : ' ');
 
 			if (node.id) track_binding(node.id);
@@ -825,13 +715,9 @@ export default (options = {}) => {
 			}
 
 			track_bindings(node.params);
-			write_params(
-				context,
-				node,
-				node.params,
-				node.typeParameters ?? node.id,
-				node.returnType ?? node.body
-			);
+			context.write('(');
+			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
+			context.write(')');
 
 			if (node.returnType) context.visit(node.returnType);
 
@@ -847,44 +733,36 @@ export default (options = {}) => {
 		'MethodDefinition|TSAbstractMethodDefinition': (node, context) => {
 			block_decorators(context, node);
 
-			const from = after_decorators(node);
-
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			if (node.abstract || node.type === 'TSAbstractMethodDefinition') {
-				write_keyword(context, node, 'abstract', from);
-				context.write(' ');
+				context.write('abstract ');
 			}
 
 			if (node.accessibility) {
-				write_keyword(context, node, node.accessibility, from);
-				context.write(' ');
+				context.write(node.accessibility + ' ');
 			}
 
 			if (node.override) {
-				write_keyword(context, node, 'override', from);
-				context.write(' ');
+				context.write('override ');
 			}
 
 			if (node.static) {
-				write_keyword(context, node, 'static', from);
-				context.write(' ');
+				context.write('static ');
 			}
 
 			if (node.kind === 'get' || node.kind === 'set') {
-				write_keyword(context, node, node.kind, from);
-				context.write(' ');
+				context.write(node.kind + ' ');
 			}
 
 			if (node.value.async) {
-				write_keyword(context, node, 'async', from);
-				context.write(' ');
+				context.write('async ');
 			}
 
 			if (node.value.generator) context.write('*');
 
-			if (node.computed) write_at(context, '[', enclosing(node, node.key, '['));
+			if (node.computed) context.write('[');
 			context.visit(node.key);
-			if (node.computed) write_at(context, ']', enclosing(node, node.key, ']'));
+			if (node.computed) context.write(']');
 
 			// optional method (`m?()`)
 			if (node.optional) context.write('?');
@@ -894,13 +772,14 @@ export default (options = {}) => {
 			if (type_parameters) context.visit(type_parameters);
 
 			track_bindings(node.value.params);
-			write_params(
+			context.write('(');
+			sequence(
 				context,
-				node,
 				node.value.params,
-				type_parameters ?? node.key,
-				node.value.returnType ?? node.value.body
+				(node.value.returnType ?? node.value.body)?.loc?.start ?? node.loc?.end ?? null,
+				false
 			);
+			context.write(')');
 
 			if (node.value.returnType) context.visit(node.value.returnType);
 
@@ -923,16 +802,10 @@ export default (options = {}) => {
 		) => {
 			block_decorators(context, node);
 
-			const from = after_decorators(node);
-
-			if (node.declare) {
-				write_keyword(context, node, 'declare', from);
-				context.write(' ');
-			}
+			if (node.declare) context.write('declare ');
 
 			if (node.accessibility) {
-				write_keyword(context, node, node.accessibility, from);
-				context.write(' ');
+				context.write(node.accessibility + ' ');
 			}
 
 			if (
@@ -941,24 +814,16 @@ export default (options = {}) => {
 				node.type === 'TSAbstractPropertyDefinition' ||
 				node.type === 'TSAbstractAccessorProperty'
 			) {
-				write_keyword(context, node, 'abstract', from);
-				context.write(' ');
+				context.write('abstract ');
 			}
 
 			if (node.static) {
-				write_keyword(context, node, 'static', from);
-				context.write(' ');
+				context.write('static ');
 			}
 
-			if (node.override) {
-				write_keyword(context, node, 'override', from);
-				context.write(' ');
-			}
+			if (node.override) context.write('override ');
 
-			if (node.readonly) {
-				write_keyword(context, node, 'readonly', from);
-				context.write(' ');
-			}
+			if (node.readonly) context.write('readonly ');
 
 			if (
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
@@ -966,14 +831,13 @@ export default (options = {}) => {
 				node.type === 'AccessorProperty' ||
 				node.type === 'TSAbstractAccessorProperty'
 			) {
-				write_keyword(context, node, 'accessor', from);
-				context.write(' ');
+				context.write('accessor ');
 			}
 
 			if (node.computed) {
-				write_at(context, '[', enclosing(node, node.key, '['));
+				context.write('[');
 				context.visit(node.key);
-				write_at(context, ']', enclosing(node, node.key, ']'));
+				context.write(']');
 			} else {
 				context.visit(node.key);
 			}
@@ -1029,11 +893,17 @@ export default (options = {}) => {
 			}
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			const parameters = node.parameters ?? node.params;
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			const return_type = node.typeAnnotation ?? node.returnType;
-			track_bindings(parameters);
-			write_params(context, node, parameters, node.typeParameters, return_type);
+			track_bindings(node.parameters ?? node.params);
+			context.write('(');
+			sequence(
+				context,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				node.parameters ?? node.params,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
+				false
+			);
+			context.write(')');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			if (node.typeAnnotation || node.returnType) {
@@ -1048,21 +918,23 @@ export default (options = {}) => {
 		 */
 		'TSFunctionType|TSConstructorType': (node, context) => {
 			if (node.type === 'TSConstructorType') {
-				if (node.abstract) {
-					write_keyword(context, node, 'abstract');
-					context.write(' ');
-				}
-				write_keyword(context, node, 'new');
-				context.write(' ');
+				if (node.abstract) context.write('abstract ');
+				context.write('new ');
 			}
 			if (node.typeParameters) context.visit(node.typeParameters);
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			const parameters = node.parameters ?? node.params;
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			const return_type = node.typeAnnotation ?? node.returnType;
-			track_bindings(parameters);
-			write_params(context, node, parameters, node.typeParameters, return_type);
+			track_bindings(node.parameters ?? node.params);
+			context.write('(');
+			sequence(
+				context,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				node.parameters ?? node.params,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
+				false
+			);
+			context.write(')');
 
 			context.write(' => ');
 
@@ -1127,23 +999,16 @@ export default (options = {}) => {
 		ArrayPattern: shared['ArrayExpression|ArrayPattern'],
 
 		ArrowFunctionExpression: (node, context) => {
-			if (node.async) {
-				write_keyword(context, node, 'async');
-				context.write(' ');
-			}
+			if (node.async) context.write('async ');
 
 			if (node.typeParameters) {
 				context.visit(node.typeParameters);
 			}
 
 			track_bindings(node.params);
-			write_params(
-				context,
-				node,
-				node.params,
-				node.typeParameters ?? node.id,
-				node.returnType ?? node.body
-			);
+			context.write('(');
+			sequence(context, node.params, (node.returnType ?? node.body).loc?.start ?? null, false);
+			context.write(')');
 
 			if (node.returnType) context.visit(node.returnType);
 
@@ -1272,12 +1137,10 @@ export default (options = {}) => {
 			token(context, 'do', node);
 			context.write(' ');
 			context.visit(node.body);
-			context.write(' ');
-			write_keyword(context, node, 'while', node.body.loc?.end);
-			context.write(' ');
-			write_at(context, '(', locate(node, '(', node.body.loc?.end, 'after'));
+			context.write(' while ');
+			context.write('(');
 			context.visit(node.test);
-			write_at(context, ')', locate(node, ')', node.loc?.end, 'before'));
+			context.write(')');
 			context.write(';');
 		},
 
@@ -1288,16 +1151,11 @@ export default (options = {}) => {
 		ExportAllDeclaration(node, context) {
 			token(context, 'export', node);
 
-			context.write(' ');
-			if (node.exportKind === 'type') {
-				write_keyword(context, node, 'type');
-				context.write(' ');
-			}
-			context.write('* ');
+			if (node.exportKind === 'type') context.write(' type');
+			context.write(' * ');
 
 			if (node.exported) {
-				write_keyword(context, node, 'as');
-				context.write(' ');
+				context.write('as ');
 				context.visit(node.exported);
 			}
 
@@ -1322,9 +1180,7 @@ export default (options = {}) => {
 			// the declaration's decorators came first, so the node's start is written here
 			if (node.loc) context.location(node.loc.start.line, node.loc.start.column);
 			token(context, 'export', node);
-			context.write(' ');
-			write_keyword(context, node, 'default');
-			context.write(' ');
+			context.write(' default ');
 
 			if (d.loc) {
 				flush_comments_until(context, null, d.loc.start, true, false);
@@ -1366,14 +1222,11 @@ export default (options = {}) => {
 			token(context, 'export', node);
 			context.write(' ');
 
-			if (node.exportKind === 'type') {
-				write_keyword(context, node, 'type');
-				context.write(' ');
-			}
+			if (node.exportKind === 'type') context.write('type ');
 
-			write_at(context, '{', locate(node, '{', node.loc?.start, 'after'));
+			context.write('{');
 			sequence(context, node.specifiers, node.source?.loc?.start ?? node.loc?.end ?? null, true);
-			write_at(context, '}', locate(node, '}', node.source?.loc?.start ?? node.loc?.end, 'before'));
+			context.write('}');
 
 			if (node.source) {
 				context.write(' from ');
@@ -1386,16 +1239,13 @@ export default (options = {}) => {
 
 		ExportSpecifier(node, context) {
 			if (node.exportKind === 'type') {
-				write_keyword(context, node, 'type');
-				context.write(' ');
+				context.write('type ');
 			}
 
 			context.visit(node.local);
 
 			if (!same_module_name(node.local, node.exported)) {
-				context.write(' ');
-				write_keyword(context, node, 'as', node.local.loc?.end);
-				context.write(' ');
+				context.write(' as ');
 				context.visit(node.exported);
 			}
 		},
@@ -1409,12 +1259,11 @@ export default (options = {}) => {
 
 		ForStatement: (node, context) => {
 			token(context, 'for', node);
-			context.write(' ');
-			write_at(context, '(', locate(node, '(', node.loc?.start, 'after'));
+			context.write(' (');
 
 			if (node.init) {
 				if (node.init.type === 'VariableDeclaration') {
-					write_for_head_declaration(node.init, context, true, write_keyword);
+					write_for_head_declaration(node.init, context, true);
 				} else {
 					maybe_wrap(context, node.init, contains_in_operator(node.init));
 				}
@@ -1425,8 +1274,7 @@ export default (options = {}) => {
 			context.write('; ');
 			if (node.update) context.visit(node.update);
 
-			write_at(context, ')', locate(node, ')', node.body.loc?.start, 'before'));
-			context.write(' ');
+			context.write(') ');
 			context.visit(node.body);
 		},
 
@@ -1453,11 +1301,9 @@ export default (options = {}) => {
 		IfStatement(node, context) {
 			token(context, 'if', node);
 
-			context.write(' ');
-			write_at(context, '(', locate(node, '(', node.loc?.start, 'after'));
+			context.write(' (');
 			context.visit(node.test);
-			write_at(context, ')', locate(node, ')', node.consequent.loc?.start, 'before'));
-			context.write(' ');
+			context.write(') ');
 
 			if (node.alternate && statement_ends_with_unmatched_if(node.consequent)) {
 				// braces the source doesn't have map to the statement they wrap
@@ -1477,8 +1323,7 @@ export default (options = {}) => {
 
 			if (node.alternate) {
 				context.space();
-				write_keyword(context, node, 'else', node.consequent.loc?.end);
-				context.write(' ');
+				context.write('else ');
 				context.visit(node.alternate);
 			}
 		},
@@ -1514,10 +1359,7 @@ export default (options = {}) => {
 				}
 			}
 
-			if (node.importKind == 'type') {
-				write_keyword(context, node, 'type');
-				context.write(' ');
-			}
+			if (node.importKind == 'type') context.write('type ');
 
 			if (default_specifier) {
 				context.write(default_specifier.local.name, default_specifier);
@@ -1529,9 +1371,9 @@ export default (options = {}) => {
 			}
 
 			if (named_specifiers.length > 0) {
-				write_at(context, '{', locate(node, '{', node.loc?.start, 'after'));
+				context.write('{');
 				sequence(context, named_specifiers, node.source.loc?.start ?? null, true);
-				write_at(context, '}', locate(node, '}', node.source.loc?.start, 'before'));
+				context.write('}');
 			}
 
 			context.write(' from ');
@@ -1542,7 +1384,7 @@ export default (options = {}) => {
 
 		ImportExpression(node, context) {
 			token(context, 'import', node);
-			write_at(context, '(', locate(node, '(', node.loc?.start, 'after'));
+			context.write('(');
 			context.visit(node.source);
 			//@ts-expect-error for some reason the types haven't been updated
 			if (node.arguments) {
@@ -1557,20 +1399,15 @@ export default (options = {}) => {
 				context.write(', ');
 				context.visit(node.options);
 			}
-			write_before(context, ')', node.loc?.end);
+			context.write(')');
 		},
 
 		ImportSpecifier(node, context) {
-			if (node.importKind == 'type') {
-				write_keyword(context, node, 'type');
-				context.write(' ');
-			}
+			if (node.importKind == 'type') context.write('type ');
 
 			if (!same_module_name(node.imported, node.local)) {
 				context.visit(node.imported);
-				context.write(' ');
-				write_keyword(context, node, 'as', node.imported.loc?.end);
-				context.write(' ');
+				context.write(' as ');
 				context.visit(node.local);
 			} else {
 				context.visit(node.local);
@@ -1613,9 +1450,9 @@ export default (options = {}) => {
 				if (node.optional) {
 					context.write('?.');
 				}
-				write_at(context, '[', enclosing(node, node.property, '['));
+				context.write('[');
 				context.visit(node.property);
-				write_before(context, ']', node.loc?.end);
+				context.write(']');
 			} else {
 				context.write(node.optional ? '?.' : '.');
 				context.visit(node.property);
@@ -1635,14 +1472,14 @@ export default (options = {}) => {
 		ObjectExpression(node, context) {
 			context.write('{');
 			sequence(context, node.properties, node.loc?.end ?? null, true);
-			write_before(context, '}', node.loc?.end);
+			context.write('}');
 		},
 
 		ObjectPattern(node, context) {
 			inline_decorators(context, node);
 			context.write('{');
 			sequence(context, node.properties, node.loc?.end ?? null, true);
-			write_before(context, '}', node.loc?.end);
+			context.write('}');
 
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
@@ -1696,41 +1533,35 @@ export default (options = {}) => {
 				node.value.type === 'FunctionExpression' &&
 				(node.method || node.kind === 'get' || node.kind === 'set')
 			) {
-				if (node.kind !== 'init') {
-					write_keyword(context, node, node.kind);
-					context.write(' ');
-				}
-				if (node.value.async) {
-					write_keyword(context, node, 'async');
-					context.write(' ');
-				}
+				if (node.kind !== 'init') context.write(node.kind + ' ');
+				if (node.value.async) context.write('async ');
 				if (node.value.generator) context.write('*');
-				if (node.computed) write_at(context, '[', enclosing(node, node.key, '['));
+				if (node.computed) context.write('[');
 				context.visit(node.key);
-				if (node.computed) write_at(context, ']', enclosing(node, node.key, ']'));
+				if (node.computed) context.write(']');
 				if (node.value.typeParameters) context.visit(node.value.typeParameters);
 				track_bindings(node.value.params);
-				write_params(
+				context.write('(');
+				sequence(
 					context,
-					node,
 					node.value.params,
-					node.value.typeParameters ?? node.key,
-					node.value.returnType ?? node.value.body
+					(node.value.returnType ?? node.value.body).loc?.start ?? null,
+					false
 				);
+				context.write(')');
 
 				if (node.value.returnType) context.visit(node.value.returnType);
 
 				context.write(' ');
 				context.visit(node.value.body);
 			} else {
-				if (node.computed) write_at(context, '[', enclosing(node, node.key, '['));
+				if (node.computed) context.write('[');
 				if (node.kind === 'get' || node.kind === 'set') {
-					write_keyword(context, node, node.kind);
-					context.write(' ');
+					context.write(node.kind + ' ');
 				}
 				context.visit(node.key);
 				if (node.computed) {
-					write_at(context, ']', enclosing(node, node.key, ']'));
+					context.write(']');
 					context.write(': ');
 				} else {
 					context.write(': ');
@@ -1775,7 +1606,7 @@ export default (options = {}) => {
 
 		StaticBlock(node, context) {
 			context.write('static ');
-			write_at(context, '{', locate(node, '{', node.loc?.start, 'after'));
+			context.write('{');
 			context.indent();
 			context.newline();
 
@@ -1783,7 +1614,7 @@ export default (options = {}) => {
 
 			context.dedent();
 			context.newline();
-			write_before(context, '}', node.loc?.end);
+			context.write('}');
 		},
 
 		Super(node, context) {
@@ -1814,16 +1645,10 @@ export default (options = {}) => {
 		SwitchStatement(node, context) {
 			token(context, 'switch', node);
 
-			context.write(' ');
-			write_at(context, '(', locate(node, '(', node.loc?.start, 'after'));
+			context.write(' (');
 			context.visit(node.discriminant);
-			write_at(
-				context,
-				')',
-				locate(node, ')', node.cases[0]?.loc?.start ?? node.loc?.end, 'before')
-			);
-			context.write(' ');
-			write_at(context, '{', locate(node, '{', node.discriminant.loc?.end, 'after'));
+			context.write(') ');
+			context.write('{');
 			context.indent();
 
 			let first = true;
@@ -1841,7 +1666,7 @@ export default (options = {}) => {
 
 			context.dedent();
 			context.newline();
-			write_before(context, '}', node.loc?.end);
+			context.write('}');
 		},
 
 		TaggedTemplateExpression(node, context) {
@@ -1864,16 +1689,17 @@ export default (options = {}) => {
 				const raw = quasis[i].value.raw;
 
 				context.write(raw);
-				write_at(context, '${', enclosing(node, expressions[i], '${'));
+				context.write('${');
 				context.visit(expressions[i]);
-				write_at(context, '}', enclosing(node, expressions[i], '}'));
+				context.write('}');
 
 				if (/\n/.test(raw)) context.multiline = true;
 			}
 
 			const raw = quasis[quasis.length - 1].value.raw;
 
-			context.write(raw + '`');
+			context.write(raw);
+			context.write('`');
 			if (/\n/.test(raw)) context.multiline = true;
 		},
 
@@ -1892,10 +1718,10 @@ export default (options = {}) => {
 			token(context, 'catch', node);
 
 			if (node.param) {
-				write_at(context, '(', locate(node, '(', node.loc?.start, 'after'));
+				context.write('(');
 				track_binding(node.param);
 				context.visit(node.param);
-				write_at(context, ')', locate(node, ')', node.body.loc?.start, 'before'));
+				context.write(')');
 			}
 
 			context.write(' ');
@@ -1913,9 +1739,7 @@ export default (options = {}) => {
 			}
 
 			if (node.finalizer) {
-				context.write(' ');
-				write_keyword(context, node, 'finally', (node.handler ?? node.block).loc?.end);
-				context.write(' ');
+				context.write(' finally ');
 				context.visit(node.finalizer);
 			}
 		},
@@ -1950,7 +1774,7 @@ export default (options = {}) => {
 		},
 
 		VariableDeclaration(node, context) {
-			handle_var_declaration(node, context, false, write_keyword);
+			handle_var_declaration(node, context);
 			context.write(';');
 		},
 
@@ -1960,21 +1784,17 @@ export default (options = {}) => {
 
 		WhileStatement(node, context) {
 			token(context, 'while', node);
-			context.write(' ');
-			write_at(context, '(', locate(node, '(', node.loc?.start, 'after'));
+			context.write(' (');
 			context.visit(node.test);
-			write_at(context, ')', locate(node, ')', node.body.loc?.start, 'before'));
-			context.write(' ');
+			context.write(') ');
 			context.visit(node.body);
 		},
 
 		WithStatement(node, context) {
 			token(context, 'with', node);
-			context.write(' ');
-			write_at(context, '(', locate(node, '(', node.loc?.start, 'after'));
+			context.write(' (');
 			context.visit(node.object);
-			write_at(context, ')', locate(node, ')', node.body.loc?.start, 'before'));
-			context.write(' ');
+			context.write(') ');
 			context.visit(node.body);
 		},
 
@@ -2002,17 +1822,13 @@ export default (options = {}) => {
 		TSDeclareFunction(node, context) {
 			// bodyless functions are either ambient declarations or overload
 			// signatures — only the former are written with `declare`
-			if (node.declare) {
-				write_keyword(context, node, 'declare');
-				context.write(' ');
-			}
+			if (node.declare) context.write('declare ');
 
 			if (node.async) {
-				write_keyword(context, node, 'async');
-				context.write(' ');
+				context.write('async ');
 			}
 
-			write_keyword(context, node, 'function');
+			context.write('function');
 
 			if (node.generator) {
 				context.write('*');
@@ -2029,7 +1845,9 @@ export default (options = {}) => {
 			}
 
 			track_bindings(node.params);
-			write_params(context, node, node.params, node.typeParameters ?? node.id, node.returnType);
+			context.write('(');
+			sequence(context, node.params, node.returnType?.loc?.start ?? node.loc?.end ?? null, false);
+			context.write(')');
 
 			if (node.returnType) {
 				context.visit(node.returnType);
@@ -2092,8 +1910,8 @@ export default (options = {}) => {
 
 		TSArrayType(node, context) {
 			context.visit(node.elementType);
-			write_at(context, '[', locate(node, '[', node.elementType.loc?.end, 'after'));
-			write_before(context, ']', node.loc?.end);
+			context.write('[');
+			context.write(']');
 		},
 
 		TSTypeAnnotation(node, context) {
@@ -2104,15 +1922,14 @@ export default (options = {}) => {
 		TSTypeLiteral(node, context) {
 			context.write('{ ');
 			sequence(context, node.members, node.loc?.end ?? null, false, ';');
-			context.write(' ');
-			write_before(context, '}', node.loc?.end);
+			context.write(' }');
 		},
 
 		TSPropertySignature(node, context) {
 			if (node.readonly) context.write('readonly ');
-			if (node.computed) write_at(context, '[', enclosing(node, node.key, '['));
+			if (node.computed) context.write('[');
 			context.visit(node.key);
-			if (node.computed) write_at(context, ']', enclosing(node, node.key, ']'));
+			if (node.computed) context.write(']');
 			if (node.optional) context.write('?');
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
@@ -2139,14 +1956,15 @@ export default (options = {}) => {
 				const raw = quasis[i].value.raw;
 
 				context.write(raw);
-				write_at(context, '${', enclosing(node, types[i], '${'));
+				context.write('${');
 				context.visit(types[i]);
-				write_at(context, '}', enclosing(node, types[i], '}'));
+				context.write('}');
 
 				if (/\n/.test(raw)) context.multiline = true;
 			}
 			const raw = quasis[quasis.length - 1].value.raw;
-			context.write(raw + '`');
+			context.write(raw);
+			context.write('`');
 			if (/\n/.test(raw)) context.multiline = true;
 		},
 
@@ -2167,21 +1985,17 @@ export default (options = {}) => {
 				context,
 				parameter.decorators ? { ...node, decorators: parameter.decorators } : node
 			);
-			const from = (parameter.decorators ?? node.decorators)?.at(-1)?.loc?.end ?? node.loc?.start;
 
 			if (node.accessibility) {
-				write_keyword(context, node, node.accessibility, from);
-				context.write(' ');
+				context.write(node.accessibility + ' ');
 			}
 
 			if (node.override) {
-				write_keyword(context, node, 'override', from);
-				context.write(' ');
+				context.write('override ');
 			}
 
 			if (node.readonly) {
-				write_keyword(context, node, 'readonly', from);
-				context.write(' ');
+				context.write('readonly ');
 			}
 
 			if (parameter_decorators?.length) {
@@ -2195,14 +2009,16 @@ export default (options = {}) => {
 		},
 
 		TSExportAssignment(node, context) {
-			context.write('export = ');
+			context.write('export ');
+			context.write('= ');
 			context.visit(node.expression);
 			context.write(';');
 		},
 
 		TSNamespaceExportDeclaration(node, context) {
 			token(context, 'export', node);
-			context.write(' as namespace ');
+			context.write(' as ');
+			context.write('namespace ');
 			context.visit(node.id);
 			context.write(';');
 		},
@@ -2309,14 +2125,12 @@ export default (options = {}) => {
 
 		TSIndexSignature(node, context) {
 			if (node.readonly) context.write('readonly ');
-			const first_parameter = node.parameters[0];
-			const last_parameter = node.parameters[node.parameters.length - 1];
-			write_at(context, '[', enclosing(node, first_parameter, '['));
+			context.write('[');
 
 			track_bindings(node.parameters);
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			sequence(context, node.parameters, node.typeAnnotation?.loc?.start ?? null, false);
-			write_at(context, ']', enclosing(node, last_parameter, ']'));
+			context.write(']');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			context.visit(node.typeAnnotation);
@@ -2328,17 +2142,14 @@ export default (options = {}) => {
 			// `readonly` / `+readonly` / `-readonly` modifier
 			if (node.readonly) {
 				if (node.readonly === '-' || node.readonly === '+') context.write(node.readonly);
-				write_keyword(context, node, 'readonly');
-				context.write(' ');
+				context.write('readonly ');
 			}
+
+			context.write('[');
 
 			const legacy_type_parameter = node.typeParameter;
 			const key = node.key ?? legacy_type_parameter?.name;
 			const constraint = node.constraint ?? legacy_type_parameter?.constraint;
-			const first_bracket_child = key && typeof key === 'object' ? key : legacy_type_parameter;
-			const last_bracket_child = node.nameType ?? constraint ?? first_bracket_child;
-
-			write_at(context, '[', enclosing(node, first_bracket_child, '['));
 
 			if (key && typeof key === 'object') {
 				context.visit(key);
@@ -2347,21 +2158,17 @@ export default (options = {}) => {
 			}
 
 			if (constraint) {
-				context.write(' ');
-				write_keyword(context, node, 'in');
-				context.write(' ');
+				context.write(' in ');
 				context.visit(constraint);
 			}
 
 			// `as` key remapping
 			if (node.nameType) {
-				context.write(' ');
-				write_keyword(context, node, 'as');
-				context.write(' ');
+				context.write(' as ');
 				context.visit(node.nameType);
 			}
 
-			write_at(context, ']', enclosing(node, last_bracket_child, ']'));
+			context.write(']');
 
 			// `?` / `+?` / `-?` optionality modifier
 			if (node.optional) {
@@ -2373,7 +2180,7 @@ export default (options = {}) => {
 				context.visit(node.typeAnnotation);
 			}
 
-			write_before(context, '}', node.loc?.end);
+			context.write('}');
 		},
 
 		TSMethodSignature(node, context) {
@@ -2382,9 +2189,9 @@ export default (options = {}) => {
 				context.write(node.kind + ' ');
 			}
 
-			if (node.computed) write_at(context, '[', enclosing(node, node.key, '['));
+			if (node.computed) context.write('[');
 			context.visit(node.key);
-			if (node.computed) write_at(context, ']', enclosing(node, node.key, ']'));
+			if (node.computed) context.write(']');
 			if (node.optional) context.write('?');
 
 			if (node.typeParameters) {
@@ -2392,11 +2199,17 @@ export default (options = {}) => {
 			}
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			const parameters = node.parameters ?? node.params;
-			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
-			const return_type = node.typeAnnotation ?? node.returnType;
-			track_bindings(parameters);
-			write_params(context, node, parameters, node.typeParameters ?? node.key, return_type);
+			track_bindings(node.parameters ?? node.params);
+			context.write('(');
+			sequence(
+				context,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				node.parameters ?? node.params,
+				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
+				(node.typeAnnotation ?? node.returnType)?.loc?.start ?? node.loc?.end ?? null,
+				false
+			);
+			context.write(')');
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			if (node.typeAnnotation || node.returnType) {
@@ -2408,7 +2221,7 @@ export default (options = {}) => {
 		TSTupleType(node, context) {
 			context.write('[');
 			sequence(context, node.elementTypes, node.loc?.end ?? null, false);
-			write_before(context, ']', node.loc?.end);
+			context.write(']');
 		},
 
 		TSNamedTupleMember(node, context) {
@@ -2458,39 +2271,34 @@ export default (options = {}) => {
 
 		TSExternalModuleReference(node, context) {
 			context.write('require');
-			write_at(context, '(', locate(node, '(', node.loc?.start, 'after'));
+			context.write('(');
 			context.visit(node.expression);
-			write_before(context, ')', node.loc?.end);
+			context.write(')');
 			context.write(';');
 		},
 
 		TSIndexedAccessType(node, context) {
 			context.visit(node.objectType);
-			write_at(context, '[', enclosing(node, node.indexType, '['));
+			context.write('[');
 			context.visit(node.indexType);
-			write_before(context, ']', node.loc?.end);
+			context.write(']');
 		},
 
 		TSImportEqualsDeclaration(node, context) {
 			token(context, 'import', node);
 			context.write(' ');
-			if (node.importKind === 'type') {
-				write_keyword(context, node, 'type');
-				context.write(' ');
-			}
+			if (node.importKind === 'type') context.write('type ');
 			context.visit(node.id);
 			context.write(' = ');
 			context.visit(node.moduleReference);
 		},
 
 		TSImportType(node, context) {
-			// @ts-expect-error Newer TS-ESTree versions use `source` instead of `argument`
-			const source = node.source ?? node.argument;
-
 			token(context, 'import', node);
-			write_at(context, '(', locate(node, '(', node.loc?.start, 'after'));
-			context.visit(source);
-			write_at(context, ')', locate(node, ')', source.loc?.end, 'after'));
+			context.write('(');
+			// @ts-expect-error Newer TS-ESTree versions use `source` instead of `argument`
+			context.visit(node.source ?? node.argument);
+			context.write(')');
 
 			if (node.qualifier) {
 				context.write('.');
@@ -2522,58 +2330,43 @@ export default (options = {}) => {
 					EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSAsExpression;
 				maybe_wrap(context, node.expression, wrap);
 			}
-			context.write(' ');
-			write_keyword(context, node, 'as', node.expression.loc?.end);
-			context.write(' ');
+			context.write(' as ');
 			context.visit(node.typeAnnotation);
 		},
 
 		TSEnumDeclaration(node, context) {
-			if (node.declare) {
-				write_keyword(context, node, 'declare');
-				context.write(' ');
-			}
-			if (node.const) {
-				write_keyword(context, node, 'const');
-				context.write(' ');
-			}
-			write_keyword(context, node, 'enum');
-			context.write(' ');
+			if (node.declare) context.write('declare ');
+			if (node.const) context.write('const ');
+			context.write('enum ');
 			context.visit(node.id);
-			context.write(' ');
-			write_at(context, '{', locate(node, '{', node.id.loc?.end, 'after'));
+			context.write(' {');
 			context.indent();
 			context.newline();
 			sequence(context, node.members ?? node.body.members, node.loc?.end ?? null, false);
 			context.dedent();
 			context.newline();
-			write_before(context, '}', node.loc?.end);
+			context.write('}');
 		},
 
 		TSModuleBlock(node, context) {
-			context.write(' ');
-			write_at(context, '{', node.loc?.start);
+			context.write(' {');
 			context.indent();
 			context.newline();
 			body(context, node);
 			context.dedent();
 			context.newline();
-			write_before(context, '}', node.loc?.end);
+			context.write('}');
 		},
 
 		TSModuleDeclaration(node, context) {
-			if (node.declare) {
-				write_keyword(context, node, 'declare');
-				context.write(' ');
-			}
+			if (node.declare) context.write('declare ');
 
 			if (node.global) {
 				context.write('global', node.id);
 			} else {
 				// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 				const kind = node.kind ?? (node.id.type === 'Literal' ? 'module' : 'namespace');
-				write_keyword(context, node, kind);
-				context.write(' ');
+				context.write(kind + ' ');
 				context.visit(node.id);
 			}
 
@@ -2604,24 +2397,17 @@ export default (options = {}) => {
 		},
 
 		TSInterfaceDeclaration(node, context) {
-			if (node.declare) {
-				write_keyword(context, node, 'declare');
-				context.write(' ');
-			}
-			write_keyword(context, node, 'interface');
-			context.write(' ');
+			if (node.declare) context.write('declare ');
+			context.write('interface ');
 			context.visit(node.id);
 			if (node.typeParameters) context.visit(node.typeParameters);
 			if (node.extends && node.extends.length > 0) {
-				context.write(' ');
-				write_keyword(context, node, 'extends', (node.typeParameters ?? node.id).loc?.end);
-				context.write(' ');
+				context.write(' extends ');
 				sequence(context, node.extends, node.body.loc?.start ?? null, false);
 			}
-			context.write(' ');
-			write_at(context, '{', node.body.loc?.start);
+			context.write(' {');
 			context.visit(node.body);
-			write_before(context, '}', node.body.loc?.end);
+			context.write('}');
 		},
 
 		TSInstantiationExpression(node, context) {
@@ -2656,19 +2442,13 @@ export default (options = {}) => {
 					EXPRESSIONS_PRECEDENCE.TSSatisfiesExpression;
 				maybe_wrap(context, node.expression, wrap);
 			}
-			context.write(' ');
-			write_keyword(context, node, 'satisfies', node.expression.loc?.end);
-			context.write(' ');
+			context.write(' satisfies ');
 			context.visit(node.typeAnnotation);
 		},
 
 		TSTypeAliasDeclaration(node, context) {
-			if (node.declare) {
-				write_keyword(context, node, 'declare');
-				context.write(' ');
-			}
-			write_keyword(context, node, 'type');
-			context.write(' ');
+			if (node.declare) context.write('declare ');
+			context.write('type ');
 			context.visit(node.id);
 			if (node.typeParameters) context.visit(node.typeParameters);
 			context.write(' = ');
@@ -2843,9 +2623,7 @@ function inline_decorators(context, node) {
 }
 
 /**
- * Declarations whose decorators an export visitor has already printed. Their
- * `loc.start` is the first decorator, so the root visitor must not map it where
- * the keywords are written; the keywords themselves are located from `tokens`.
+ * Declarations whose decorators an export visitor has already printed
  * @type {WeakSet<TSESTree.Node>}
  */
 const printed_decorators = new WeakSet();
@@ -3105,22 +2883,20 @@ function has_preceding_decorator(node) {
  * end are mapped here the way the root visitor would.
  * @param {TSESTree.VariableDeclaration} node
  * @param {Context} context
- * @param {boolean} no_in
- * @param {(context: Context, node: TSESTree.Node, word: string) => void} keyword
+ * @param {boolean} [no_in]
  */
-function write_for_head_declaration(node, context, no_in, keyword) {
+function write_for_head_declaration(node, context, no_in = false) {
 	if (node.loc) context.location(node.loc.start.line, node.loc.start.column);
-	handle_var_declaration(node, context, no_in, keyword);
+	handle_var_declaration(node, context, no_in);
 	if (node.loc) context.location(node.loc.end.line, node.loc.end.column);
 }
 
 /**
  * @param {TSESTree.VariableDeclaration} node
  * @param {Context} context
- * @param {boolean} no_in
- * @param {(context: Context, node: TSESTree.Node, word: string) => void} keyword writes a keyword after the node's first token
+ * @param {boolean} [no_in]
  */
-function handle_var_declaration(node, context, no_in, keyword) {
+function handle_var_declaration(node, context, no_in = false) {
 	const open = context.new();
 	const join = context.new();
 	const child_context = context.new();
@@ -3130,7 +2906,7 @@ function handle_var_declaration(node, context, no_in, keyword) {
 	if (node.declare) {
 		token(child_context, 'declare', node);
 		child_context.write(' ');
-		keyword(child_context, node, node.kind);
+		child_context.write(node.kind);
 	} else {
 		token(child_context, node.kind, node);
 	}
