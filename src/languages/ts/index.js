@@ -1929,7 +1929,10 @@ export default (options = {}) => {
 			const parameter = node.parameter;
 			const parameter_decorators = parameter.decorators;
 
-			inline_decorators(context, parameter.decorators ? { ...node, decorators: parameter.decorators } : node);
+			inline_decorators(
+				context,
+				parameter.decorators ? { ...node, decorators: parameter.decorators } : node
+			);
 
 			if (node.accessibility) {
 				context.write(node.accessibility + ' ');
