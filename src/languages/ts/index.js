@@ -245,9 +245,9 @@ export default (options = {}) => {
 				comment &&
 				prev &&
 				comment.loc.start.line === prev.line &&
-				(next === null || before(comment.loc.end, next))
+				(next === null || !before(next, comment.loc.end))
 			) {
-				context.write(' ');
+				context.space();
 				write_comment(comment, context);
 
 				comment_index += 1;
@@ -301,10 +301,10 @@ export default (options = {}) => {
 					jsdoc_type_casts += 1;
 				}
 
-				if (comment.loc.end.line < to.line) {
+				if (comment.type === 'Line' || comment.loc.end.line < to.line) {
 					context.newline();
 				} else if (pad && !is_jsdoc_type_cast) {
-					context.write(' ');
+					context.space();
 				}
 
 				comment_index += 1;
@@ -466,7 +466,7 @@ export default (options = {}) => {
 		}
 
 		if (node.loc) {
-			context.newline();
+			if (!context.empty()) context.newline();
 			flush_comments_until(
 				context,
 				node.body[node.body.length - 1]?.loc?.end ?? null,

@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "console.log(1); /* keep me */\n"
+  ],
+  "mappings": "AAAA,OAAO,CAAC,GAAG,CAAC,CAAC,CAAC,CAAC,cACf"
+}
