@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const x = /** @type {number} */ (0, value);\n"
+  ],
+  "mappings": "AAAA,KAAK,CAAC,CAAC,yBAAyB,AAAC,CAAA,CAAC,EAAE,KAAK,CAAA,AAAC,CAAC,AAC3C"
+}

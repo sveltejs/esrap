@@ -1,0 +1,19 @@
+{
+	"type": "Program",
+	"sourceType": "script",
+	"body": [
+		{
+			"type": "TSTypeAliasDeclaration",
+			"id": { "type": "Identifier", "name": "T" },
+			"typeAnnotation": {
+				"type": "TSImportType",
+				"source": { "type": "Literal", "value": "x", "raw": "\"x\"" },
+				"qualifier": { "type": "Identifier", "name": "Foo" },
+				"typeArguments": {
+					"type": "TSTypeParameterInstantiation",
+					"params": [{ "type": "TSStringKeyword" }]
+				}
+			}
+		}
+	]
+}

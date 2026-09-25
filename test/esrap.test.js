@@ -59,6 +59,13 @@ function clean(ast) {
 			delete node.extra;
 			context.next();
 		},
+		TSImportType(node, context) {
+			// Acorn still uses the deprecated `argument` field.
+			const import_type = /** @type {any} */ (node);
+			import_type.source ??= import_type.argument;
+			delete import_type.argument;
+			context.next();
+		},
 		Property(node, context) {
 			if (node.kind === 'init') {
 				if (node.value.type === 'FunctionExpression') {
@@ -97,6 +104,7 @@ function clean(ast) {
  *         sourceType: 'module' | 'script',
  *         jsxMode: boolean,
  *         fileExtension: string
+ *         preserveParens?: boolean
  *       }
  *     ) => {
  *       ast: TSESTree.Program,
@@ -150,6 +158,16 @@ const bar = /** @type {number} */ (/** @type {number} */ (1));`;
 	expect(print(ast, tsx({ comments })).code).toBe(source);
 });
 
+test('preserves comments inside parenthesized sequence expressions', () => {
+	const source = '(/* marker */ 0, f)();';
+	const { ast, comments } = acornParse(source, {
+		fileExtension: 'js',
+		preserveParens: true
+	});
+
+	expect(print(ast, ts({ comments })).code).toBe(source);
+});
+
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	if (dir.includes('large-file')) continue;
 
@@ -199,7 +217,12 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					comments = [];
 					opts = {};
 				} else {
-					({ ast, comments } = parse(input_js, { sourceType: 'module', jsxMode, fileExtension }));
+					({ ast, comments } = parse(input_js, {
+						sourceType: 'module',
+						jsxMode,
+						fileExtension,
+						preserveParens: config.preserveParens
+					}));
 					opts = { sourceMapSource: 'input.js', sourceMapContent: input_js };
 				}
 
@@ -213,7 +236,8 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 				const { ast: parsedAst, comments: parsedComments } = parse(code, {
 					sourceType: input_json.length > 0 ? 'script' : 'module',
 					jsxMode,
-					fileExtension
+					fileExtension,
+					preserveParens: config.preserveParens
 				});
 
 				fs.writeFileSync(
