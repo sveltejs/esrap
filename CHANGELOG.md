@@ -1,5 +1,15 @@
 # esrap changelog
 
+## 2.3.13
+
+### Patch Changes
+
+- 9edf6ef: fix: preserve empty type-only imports without introducing runtime side effects
+- 386fb39: fix: read class method type parameters from the value function on ESTree-compatible ASTs
+- 6fedb93: fix: preserve optional-chain boundaries around TypeScript non-null assertions
+- 8a1552c: fix: preserve trailing comments at EOF and avoid comment padding artifacts
+- f8a2e17: fix: parenthesize TypeScript casts in assignment, update and instantiation expressions
+
 ## 2.3.12
 
 ### Patch Changes
