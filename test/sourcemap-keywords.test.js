@@ -73,6 +73,21 @@ test.each([
 });
 
 test.each([
+	['typed parameter', `function f(id: string) {}`, 'id'],
+	['optional parameter', `function f(id?: string) {}`, 'id'],
+	['typed declaration', `let x: number = 1;`, 'x'],
+	['definite declaration', `let x!: number;`, 'x'],
+	['untyped name', `let x = 1;`, 'x']
+])('the end of a typed name maps to the end of the name: %s', (_name, source, name) => {
+	const { code, mappings } = mapped(source);
+	const index = code.indexOf(name) + name.length;
+	const { gen_line, gen_col } = generatedLineColumn(code, index);
+	const at_end = (mappings[gen_line] ?? []).filter((s) => s[0] === gen_col).map((s) => s.slice(2));
+	expect(at_end).toContainEqual([0, source.indexOf(name) + name.length]);
+	expect(at_end).not.toContainEqual([0, source.indexOf(name) + name.length + 1]);
+});
+
+test.each([
 	['switch (n) {\n\tcase 1:\n\t\tbreak;\n\tdefault:\n\t\tbreak;\n}', 'case'],
 	['switch (n) {\n\tcase 1:\n\t\tbreak;\n\tdefault:\n\t\tbreak;\n}', 'default'],
 	['try {\n\tf();\n} catch (e) {\n\tg(e);\n}', 'catch'],

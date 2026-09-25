@@ -1,5 +1,4 @@
 {
 	"preserveParens": true,
-	"snapshotParsers": ["oxc"],
-	"reprint": true
+	"snapshotParsers": ["oxc"]
 }
