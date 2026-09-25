@@ -2671,24 +2671,55 @@ function statement_ends_with_unmatched_if(node) {
 }
 
 /**
- * `in` expressions are forbidden by the `ExpressionNoIn` grammar used for
- * classic `for` initializers unless a containing expression is parenthesized.
- * @param {any} value
- * @param {WeakSet<object>} [seen]
+ * Whether an expression exposes an `in` to the `Expression[~In]` grammar used
+ * for classic `for` initializers. Stop where the grammar allows `in` or the
+ * printer already adds parentheses.
+ * @see https://tc39.es/ecma262/#sec-for-statement
+ * @param {TSESTree.Node} node
+ * @returns {boolean}
  */
-function contains_in_operator(value, seen = new WeakSet()) {
-	if (!value || typeof value !== 'object') return false;
-	if (seen.has(value)) return false;
-	seen.add(value);
+function contains_in_operator(node) {
+	switch (node.type) {
+		case 'BinaryExpression':
+		case 'LogicalExpression':
+			return (
+				node.operator === 'in' ||
+				(!operand_needs_wrap(node.left, node, false) && contains_in_operator(node.left)) ||
+				(!operand_needs_wrap(node.right, node, true) && contains_in_operator(node.right))
+			);
 
-	if (value.type === 'BinaryExpression' && value.operator === 'in') return true;
+		case 'ConditionalExpression':
+			// The middle operand allows `in`, even in an Expression[~In].
+			return (
+				(EXPRESSIONS_PRECEDENCE[node.test.type] > EXPRESSIONS_PRECEDENCE.ConditionalExpression &&
+					contains_in_operator(node.test)) ||
+				contains_in_operator(node.alternate)
+			);
 
-	for (const key in value) {
-		if (key === 'loc') continue;
-		if (contains_in_operator(value[key], seen)) return true;
+		case 'AssignmentExpression':
+			return contains_in_operator(node.right);
+
+		case 'ArrowFunctionExpression':
+			return !arrow_concise_body_needs_wrap(node.body) && contains_in_operator(node.body);
+
+		case 'YieldExpression':
+			return !!node.argument && contains_in_operator(node.argument);
+
+		case 'TSAsExpression':
+		case 'TSSatisfiesExpression':
+			return (
+				EXPRESSIONS_PRECEDENCE[node.expression.type] >= EXPRESSIONS_PRECEDENCE[node.type] &&
+				contains_in_operator(node.expression)
+			);
+
+		case 'TSInstantiationExpression':
+			return contains_in_operator(node.expression);
+
+		default:
+			// Other expressions either allow `in` in their children (calls, arrays,
+			// functions, etc.) or already parenthesize it (unary, sequence, etc.).
+			return false;
 	}
-
-	return false;
 }
 
 /**
