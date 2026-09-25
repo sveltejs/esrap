@@ -1,6 +1,7 @@
 pnpm-lock.yaml
 
 test/samples/*/*.js
+test/samples/*/*.ts
 test/sandbox/_input.js
 test/sandbox/_output.js
 
