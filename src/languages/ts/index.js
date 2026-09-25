@@ -1272,8 +1272,7 @@ export default (options = {}) => {
 
 		Identifier(node, context) {
 			inline_decorators(context, node);
-			let name = node.name;
-			context.write(name, node);
+			token(context, node.name, node);
 
 			// optional parameters (`a?: T`) carry `optional` on the identifier
 			if (node.optional) context.write('?');
