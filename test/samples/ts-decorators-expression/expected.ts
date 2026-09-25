@@ -26,6 +26,15 @@ class Member {}
 @a()
 class Call {}
 
+@(a[0])
+class Computed {}
+
+@(a().b)
+class MemberOfCall {}
+
+@(this.x)
+class This {}
+
 const u = new User();
 
 console.log(u.id); // will print "random uuid..."

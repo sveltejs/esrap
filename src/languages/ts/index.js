@@ -210,6 +210,7 @@ export default (options = {}) => {
 	const quote_char = options.quotes === 'double' ? '"' : "'";
 
 	const comments = options.comments ?? [];
+	const parenthesized_sequences = new Set();
 
 	let comment_index = 0;
 
@@ -1264,12 +1265,7 @@ export default (options = {}) => {
 
 		Decorator(node, context) {
 			context.write('@');
-			// a decorator must be an identifier/member/call (or parenthesized); anything
-			// else (ternary, logical, assignment, unary, `as`, optional chain…) needs wrapping
-			const wrap =
-				/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
-				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
-			maybe_wrap(context, node.expression, wrap);
+			maybe_wrap(context, node.expression, !is_decorator_expression(node.expression));
 		},
 
 		DoWhileStatement(node, context) {
@@ -1653,7 +1649,16 @@ export default (options = {}) => {
 
 		// @ts-expect-error this isn't a real node type, but Acorn produces it
 		ParenthesizedExpression(node, context) {
-			if (node.loc) {
+			if (node.expression.type === 'SequenceExpression') {
+				// Emit the opening parenthesis before the child visitor flushes comments.
+				if (node.expression.loc) {
+					context.location(node.expression.loc.start.line, node.expression.loc.start.column);
+				}
+				context.write('(');
+				parenthesized_sequences.add(node.expression);
+				context.visit(node.expression);
+				parenthesized_sequences.delete(node.expression);
+			} else if (node.loc) {
 				context.write('(');
 				context.visit(node.expression);
 				context.write(')');
@@ -1760,7 +1765,8 @@ export default (options = {}) => {
 		},
 
 		SequenceExpression(node, context) {
-			context.write('(');
+			const wrap = !parenthesized_sequences.has(node);
+			if (wrap) context.write('(');
 			sequence(context, node.expressions, node.loc?.end ?? null, false);
 			context.write(')');
 		},
@@ -2478,10 +2484,13 @@ export default (options = {}) => {
 		},
 
 		TSImportType(node, context) {
+			// @ts-expect-error Newer TS-ESTree versions use `source` instead of `argument`
+			const source = node.source ?? node.argument;
+
 			token(context, 'import', node);
 			write_at(context, '(', locate(node, '(', node.loc?.start, 'after'));
-			context.visit(node.argument);
-			write_at(context, ')', locate(node, ')', node.argument.loc?.end, 'after'));
+			context.visit(source);
+			write_at(context, ')', locate(node, ')', source.loc?.end, 'after'));
 
 			if (node.qualifier) {
 				context.write('.');
@@ -2777,6 +2786,26 @@ function maybe_wrap(context, node, wrap) {
 	} else {
 		context.visit(node);
 	}
+}
+
+/**
+ * The decorator grammar only allows an identifier, a chain of `.name` accesses,
+ * or one call on such a chain without parentheses (or an explicitly parenthesized expression)
+ * @param {TSESTree.Node} node
+ */
+function is_decorator_expression(node) {
+	if (/** @type {string} */ (node.type) === 'ParenthesizedExpression') return true;
+	if (node.type === 'CallExpression') node = node.callee;
+
+	while (
+		node.type === 'MemberExpression' &&
+		!node.computed &&
+		node.property.type === 'Identifier'
+	) {
+		node = node.object;
+	}
+
+	return node.type === 'Identifier';
 }
 
 /**

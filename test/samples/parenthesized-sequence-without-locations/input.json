@@ -1,0 +1,24 @@
+{
+	"type": "Program",
+	"sourceType": "script",
+	"body": [
+		{
+			"type": "ExpressionStatement",
+			"expression": {
+				"type": "CallExpression",
+				"callee": {
+					"type": "ParenthesizedExpression",
+					"expression": {
+						"type": "SequenceExpression",
+						"expressions": [
+							{ "type": "Literal", "value": 0, "raw": "0" },
+							{ "type": "Identifier", "name": "f" }
+						]
+					}
+				},
+				"arguments": [],
+				"optional": false
+			}
+		}
+	]
+}
