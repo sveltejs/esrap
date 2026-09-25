@@ -166,6 +166,11 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		continue;
 	}
 
+	const config_path = `${__dirname}/samples/${dir}/config.json`;
+	const config = fs.existsSync(config_path)
+		? JSON.parse(fs.readFileSync(config_path, 'utf-8'))
+		: {};
+
 	describe(dir, async () => {
 		let input_js = '';
 		let input_json = '';
@@ -205,7 +210,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 				fs.writeFileSync(`${pDir}/_actual.${fileExtension}`, code);
 				fs.writeFileSync(`${pDir}/_actual.${fileExtension}.map`, JSON.stringify(map, null, '\t'));
 
-				const { ast: parsedAst } = parse(code, {
+				const { ast: parsedAst, comments: parsedComments } = parse(code, {
 					sourceType: input_json.length > 0 ? 'script' : 'module',
 					jsxMode,
 					fileExtension
@@ -220,9 +225,14 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					)
 				);
 
-				if (!skipSnapshot) {
-					expect(code.trim().replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
+				if (!skipSnapshot || config.snapshotParsers?.includes(parserName)) {
+					const actual = config.trimOutput === false ? code : code.trim();
+					expect(actual.replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
 						`${__dirname}/samples/${dir}/expected.${fileExtension}`
+					);
+
+					expect(print(parsedAst, (jsxMode ? tsx : ts)({ comments: parsedComments })).code).toBe(
+						code
 					);
 				}
 

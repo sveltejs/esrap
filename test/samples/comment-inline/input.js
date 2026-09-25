@@ -11,3 +11,5 @@ const obj = {
 function bar() {
 	return /*result*/ foo;
 }
+
+console.log(3); // eslint-disable-line

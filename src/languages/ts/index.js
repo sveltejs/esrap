@@ -29,9 +29,9 @@ export const EXPRESSIONS_PRECEDENCE = {
 	ChainExpression: 19,
 	ImportExpression: 19,
 	NewExpression: 19,
+	TSNonNullExpression: 19,
 	Literal: 18,
 	TSInstantiationExpression: 18,
-	TSNonNullExpression: 18,
 	TSTypeAssertion: 18,
 	AwaitExpression: 17,
 	ClassExpression: 17,
@@ -287,9 +287,9 @@ export default (options = {}) => {
 				comment &&
 				prev &&
 				comment.loc.start.line === prev.line &&
-				(next === null || before(comment.loc.end, next))
+				(next === null || !before(next, comment.loc.end))
 			) {
-				context.write(' ');
+				context.space();
 				write_comment(comment, context);
 
 				comment_index += 1;
@@ -343,10 +343,10 @@ export default (options = {}) => {
 					jsdoc_type_casts += 1;
 				}
 
-				if (comment.loc.end.line < to.line) {
+				if (comment.type === 'Line' || comment.loc.end.line < to.line) {
 					context.newline();
 				} else if (pad && !is_jsdoc_type_cast) {
-					context.write(' ');
+					context.space();
 				}
 
 				comment_index += 1;
@@ -511,7 +511,7 @@ export default (options = {}) => {
 		}
 
 		if (node.loc) {
-			context.newline();
+			if (!context.empty()) context.newline();
 			flush_comments_until(
 				context,
 				node.body[node.body.length - 1]?.loc?.end ?? null,
@@ -888,18 +888,16 @@ export default (options = {}) => {
 			// optional method (`m?()`)
 			if (node.optional) context.write('?');
 
-			// `typeParameters` lives on the method node, not its value
-			const method_type_parameters =
-				/** @type {{ typeParameters?: TSESTree.TSTypeParameterDeclaration }} */ (node)
-					.typeParameters;
-			if (method_type_parameters) context.visit(method_type_parameters);
+			// @ts-expect-error Acorn stores `typeParameters` on the method rather than its value
+			const type_parameters = node.value.typeParameters ?? node.typeParameters;
+			if (type_parameters) context.visit(type_parameters);
 
 			track_bindings(node.value.params);
 			write_params(
 				context,
 				node,
 				node.value.params,
-				method_type_parameters ?? node.key,
+				type_parameters ?? node.key,
 				node.value.returnType ?? node.value.body
 			);
 
@@ -1154,7 +1152,12 @@ export default (options = {}) => {
 		},
 
 		AssignmentExpression(node, context) {
-			context.visit(node.left);
+			// TypeScript casts are only valid assignment targets inside parentheses.
+			const wrap =
+				node.left.type === 'TSAsExpression' ||
+				node.left.type === 'TSSatisfiesExpression' ||
+				node.left.type === 'TSTypeAssertion';
+			maybe_wrap(context, node.left, wrap);
 			context.write(` ${node.operator} `);
 			context.visit(node.right);
 		},
@@ -1489,6 +1492,7 @@ export default (options = {}) => {
 			context.write(' ');
 
 			if (node.specifiers.length === 0) {
+				if (node.importKind === 'type') context.write('type {} from ');
 				context.visit(node.source);
 				write_import_attributes(context, node);
 				context.write(';');
@@ -1931,13 +1935,12 @@ export default (options = {}) => {
 		},
 
 		UpdateExpression(node, context) {
-			if (node.prefix) {
-				context.write(node.operator);
-				context.visit(node.argument);
-			} else {
-				context.visit(node.argument);
-				context.write(node.operator);
-			}
+			const wrap =
+				node.argument.type === 'TSTypeAssertion' ||
+				EXPRESSIONS_PRECEDENCE[node.argument.type] < EXPRESSIONS_PRECEDENCE.UpdateExpression;
+			if (node.prefix) context.write(node.operator);
+			maybe_wrap(context, node.argument, wrap);
+			if (!node.prefix) context.write(node.operator);
 		},
 
 		VariableDeclaration(node, context) {
@@ -2581,6 +2584,7 @@ export default (options = {}) => {
 		TSNonNullExpression(node, context) {
 			// operator expressions can't take a postfix `!` directly: `(0 as number)!`, `(await x)!`
 			const wrap =
+				node.expression.type === 'ChainExpression' ||
 				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSNonNullExpression;
 			maybe_wrap(context, node.expression, wrap);
 			context.write('!');
@@ -2612,7 +2616,12 @@ export default (options = {}) => {
 		},
 
 		TSInstantiationExpression(node, context) {
-			context.visit(node.expression);
+			const wrap =
+				node.expression.type === 'ChainExpression' ||
+				node.expression.type === 'TSTypeAssertion' ||
+				EXPRESSIONS_PRECEDENCE[node.expression.type] <
+					EXPRESSIONS_PRECEDENCE.TSInstantiationExpression;
+			maybe_wrap(context, node.expression, wrap);
 			context.visit(node.typeArguments);
 		},
 
