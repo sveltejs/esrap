@@ -5,10 +5,12 @@ export type TSOptions = {
 	comments?: Comment[];
 	/**
 	 * The parser's tokens, with locations — Acorn's `onToken` array, Babel's
-	 * `tokens`, or an ESLint-style `ast.tokens`. Used to map delimiters that
-	 * sit inside a node (the brackets of a computed key, the parentheses of a
-	 * call or an `if`, the braces of an import list), which no node boundary
-	 * locates. Without it those delimiters are left unmapped.
+	 * `tokens`, or an ESLint-style `ast.tokens`. Used to map what sits inside
+	 * a node and no node boundary locates: the brackets of a computed key, the
+	 * parentheses of a call or an `if`, the braces of an import list, and the
+	 * keywords after a node's first token (`function` after `async`, `else`,
+	 * `finally`, a class member's second modifier). Without it those are left
+	 * unmapped.
 	 */
 	tokens?: readonly SourceToken[];
 	getLeadingComments?: (node: BaseNode) => BaseComment[] | undefined;

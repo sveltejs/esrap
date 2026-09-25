@@ -316,6 +316,7 @@ test.each([
 
 test.each([
 	['named import', `import { /* before */ value /* after */ } from 'module';`],
+	['empty type-only import', `import type /* before */ { /* inside */ } from 'module';`],
 	['named export', `const value = 1;\nexport { /* before */ value /* after */ };`],
 	['empty named export', `export { /* inside */ };`],
 	['import attributes', `import value from 'module' with { type: 'json' };`],
@@ -473,6 +474,7 @@ test.each([
 	],
 	['for in', `for (const k /* c */ in o) {}`, ['in']],
 	['import type', `import /* c */ type { T } from 'm';`, ['type']],
+	['empty import type', `import /* c */ type {} from 'm';`, ['type']],
 	['import type specifier', `import { type /* c */ T, a as /* c */ b } from 'm';`, ['type', 'as']],
 	['export type', `type T = 1;\nexport /* c */ type { T };`, ['type']],
 	['export star as', `export * as /* c */ ns from 'm';`, ['as']],

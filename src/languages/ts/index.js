@@ -1488,7 +1488,13 @@ export default (options = {}) => {
 			context.write(' ');
 
 			if (node.specifiers.length === 0) {
-				if (node.importKind === 'type') context.write('type {} from ');
+				if (node.importKind === 'type') {
+					write_keyword(context, node, 'type');
+					context.write(' ');
+					write_at(context, '{', locate(node, '{', node.loc?.start, 'after'));
+					write_at(context, '}', locate(node, '}', node.source.loc?.start, 'before'));
+					context.write(' from ');
+				}
 				context.visit(node.source);
 				write_import_attributes(context, node);
 				context.write(';');
