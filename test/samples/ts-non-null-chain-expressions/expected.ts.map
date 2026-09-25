@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "x?.a!.b;\n(x?.a)!.b;\nx?.a!();\n(x?.a)!();\nx?.a![key];\n(x?.a)![key];\nx?.a!!.b;\n"
+  ],
+  "mappings": "AAAA,CAAC,EAAE,CAAC,CAAC,CAAC,CAAC,CAAC;AACR,AAAC,CAAA,CAAC,EAAE,CAAC,CAAA,CAAE,CAAC,CAAC,CAAC;AACV,CAAC,EAAE,CAAC,CAAC,EAAE,CAAC;AACR,AAAC,CAAA,CAAC,EAAE,CAAC,CAAA,CAAE,EAAE,CAAC;AACV,CAAC,EAAE,CAAC,CAAC,CAAC,GAAG,CAAC,CAAC;AACX,AAAC,CAAA,CAAC,EAAE,CAAC,CAAA,CAAE,CAAC,GAAG,CAAC,CAAC;AACb,CAAC,EAAE,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,AACT"
+}

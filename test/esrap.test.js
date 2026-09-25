@@ -225,7 +225,7 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 					)
 				);
 
-				if (!skipSnapshot) {
+				if (!skipSnapshot || config.snapshotParsers?.includes(parserName)) {
 					const actual = config.trimOutput === false ? code : code.trim();
 					expect(actual.replace(/^\t+$/gm, '').replaceAll('\r', '')).toMatchFileSnapshot(
 						`${__dirname}/samples/${dir}/expected.${fileExtension}`
