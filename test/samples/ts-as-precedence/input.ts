@@ -28,6 +28,7 @@ a && (b as C);
 (<any>w)++;
 ++(<any>w);
 ((M.g as any)<any>)([1]);
+((fn?.method)<T>)();
 const f1 = (M.g satisfies any)<any>;
 const f2 = (<any>M.g)<any>;
 const f3 = (a ? b : c)<any>;
