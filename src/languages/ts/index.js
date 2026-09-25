@@ -1928,8 +1928,8 @@ export default (options = {}) => {
 			// property, Acorn to its parameter. Either way they precede the modifiers
 			const parameter = node.parameter;
 			const parameter_decorators = parameter.decorators;
-			inline_decorators(context, node);
-			inline_decorators(context, parameter);
+
+			inline_decorators(context, parameter.decorators ? { ...node, decorators: parameter.decorators } : node);
 
 			if (node.accessibility) {
 				context.write(node.accessibility + ' ');
