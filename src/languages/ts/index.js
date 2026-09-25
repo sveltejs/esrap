@@ -763,8 +763,9 @@ export default (options = {}) => {
 			// optional method (`m?()`)
 			if (node.optional) context.write('?');
 
-			// @ts-expect-error `typeParameters` lives on the method node, not its value
-			if (node.typeParameters) context.visit(node.typeParameters);
+			// @ts-expect-error Acorn stores `typeParameters` on the method rather than its value
+			const type_parameters = node.value.typeParameters ?? node.typeParameters;
+			if (type_parameters) context.visit(type_parameters);
 
 			track_bindings(node.value.params);
 			context.write('(');
