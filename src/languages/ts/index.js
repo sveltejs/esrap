@@ -1154,9 +1154,9 @@ export default (options = {}) => {
 		},
 
 		ExportDefaultDeclaration(node, context) {
-			// Check if declaration has decorators (ClassDeclaration, ClassExpression can have them)
 			const d = node.declaration;
 
+			// ClassDeclaration/ClassExpression decorators should be printed before `export`
 			if ('decorators' in d) block_decorators(context, d);
 
 			token(context, 'export', node);
@@ -1173,15 +1173,13 @@ export default (options = {}) => {
 			const d = node.declaration;
 
 			if (d) {
-				// Check if declaration has decorators (ClassDeclaration, ClassExpression can have them)
-
+				// ClassDeclaration/ClassExpression decorators should be printed before `export`
 				if ('decorators' in d) block_decorators(context, d);
 
 				token(context, 'export', node);
 				context.write(' ');
 
 				visit_without_decorators(context, d);
-
 				return;
 			}
 
