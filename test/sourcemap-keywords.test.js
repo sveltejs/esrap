@@ -140,6 +140,11 @@ test.each([
 	}
 );
 
+/**
+ * @param {string} code
+ * @param {string} needle
+ * @param {[number, number, number, number][][]} mappings
+ */
 function mappingsAtSubstring(code, needle, mappings) {
 	const index = code.indexOf(needle);
 	expect(index >= 0, `needle not in output: ${JSON.stringify(needle)}`).toBe(true);
