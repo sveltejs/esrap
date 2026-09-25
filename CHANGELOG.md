@@ -1,5 +1,13 @@
 # esrap changelog
 
+## 2.3.14
+
+### Patch Changes
+
+- abf8872: fix: support the canonical TSImportType source field with an argument fallback
+- c87ccde: fix: parenthesize decorator expressions that are not an identifier, a member chain or a call
+- 5321c28: fix: avoid accumulating parentheses around explicitly parenthesized sequence expressions
+
 ## 2.3.13
 
 ### Patch Changes
