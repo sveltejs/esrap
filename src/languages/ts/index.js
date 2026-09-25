@@ -26,9 +26,9 @@ export const EXPRESSIONS_PRECEDENCE = {
 	ChainExpression: 19,
 	ImportExpression: 19,
 	NewExpression: 19,
+	TSNonNullExpression: 19,
 	Literal: 18,
 	TSInstantiationExpression: 18,
-	TSNonNullExpression: 18,
 	TSTypeAssertion: 18,
 	AwaitExpression: 17,
 	ClassExpression: 17,
@@ -2349,6 +2349,7 @@ export default (options = {}) => {
 		TSNonNullExpression(node, context) {
 			// operator expressions can't take a postfix `!` directly: `(0 as number)!`, `(await x)!`
 			const wrap =
+				node.expression.type === 'ChainExpression' ||
 				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.TSNonNullExpression;
 			maybe_wrap(context, node.expression, wrap);
 			context.write('!');
