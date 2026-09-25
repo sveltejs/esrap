@@ -151,6 +151,16 @@ const bar = /** @type {number} */ (/** @type {number} */ (1));`;
 	expect(print(ast, tsx({ comments })).code).toBe(source);
 });
 
+test('preserves comments inside parenthesized sequence expressions', () => {
+	const source = '(/* marker */ 0, f)();';
+	const { ast, comments } = acornParse(source, {
+		fileExtension: 'js',
+		preserveParens: true
+	});
+
+	expect(print(ast, ts({ comments })).code).toBe(source);
+});
+
 for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 	if (dir.includes('large-file')) continue;
 
