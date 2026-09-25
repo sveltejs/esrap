@@ -1882,10 +1882,10 @@ export default (options = {}) => {
 			token(context, 'catch', node);
 
 			if (node.param) {
-				context.write('(');
+				write_at(context, '(', locate(node, '(', node.loc?.start, 'after'));
 				track_binding(node.param);
 				context.visit(node.param);
-				context.write(')');
+				write_at(context, ')', locate(node, ')', node.body.loc?.start, 'before'));
 			}
 
 			context.write(' ');

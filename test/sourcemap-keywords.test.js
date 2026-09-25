@@ -299,6 +299,7 @@ test.each([
 	['do-while statement', `do {} while /* before */ (condition /* after */);`, {}],
 	['with statement', `with /* before */ (object /* after */) {}`, { sourceType: 'script' }],
 	['switch statement', `switch /* before */ (value /* after */) { default: break; }`, {}],
+	['catch clause', `try {} catch /* before */ (error /* after */) {}`, {}],
 	['import expression', `const module = import( /* before */ 'module' /* after */ );`, {}],
 	['external module reference', `import Alias = require( /* before */ 'module' /* after */ );`, {}],
 	['import type', `type Value = import( /* before */ 'module' /* after */ ).Value;`, {}]
