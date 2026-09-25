@@ -482,7 +482,7 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'ArrayExpression|ArrayPattern': (node, context) => {
-			if ('decorators' in node) write_parameter_decorators(context, node.decorators);
+			if ('decorators' in node) inline_decorators(context, node);
 			context.write('[');
 			sequence(
 				context,
@@ -629,11 +629,7 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'ClassDeclaration|ClassExpression': (node, context) => {
-			if (node.decorators) {
-				for (const decorator of node.decorators) {
-					context.visit(decorator);
-				}
-			}
+			block_decorators(context, node);
 
 			if (node.declare) context.write('declare ');
 			if (node.abstract) context.write('abstract ');
@@ -731,11 +727,7 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'MethodDefinition|TSAbstractMethodDefinition': (node, context) => {
-			if (node.decorators) {
-				for (const decorator of node.decorators) {
-					context.visit(decorator);
-				}
-			}
+			block_decorators(context, node);
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			if (node.abstract || node.type === 'TSAbstractMethodDefinition') {
@@ -803,11 +795,7 @@ export default (options = {}) => {
 			node,
 			context
 		) => {
-			if (node.decorators) {
-				for (const decorator of node.decorators) {
-					context.visit(decorator);
-				}
-			}
+			block_decorators(context, node);
 
 			if (node.declare) context.write('declare ');
 
@@ -966,8 +954,9 @@ export default (options = {}) => {
 					node.type in EXPRESSIONS_PRECEDENCE && !BINDINGS.has(node)
 				);
 
-				const start = printed_start(node);
-				context.location(start.line, start.column);
+				if (!has_preceding_decorator(node)) {
+					context.location(node.loc.start.line, node.loc.start.column);
+				}
 			}
 
 			visit(node);
@@ -1026,7 +1015,7 @@ export default (options = {}) => {
 		},
 
 		AssignmentPattern(node, context) {
-			write_parameter_decorators(context, node.decorators);
+			inline_decorators(context, node);
 			context.visit(node.left);
 			context.write(' = ');
 			context.visit(node.right);
@@ -1126,8 +1115,13 @@ export default (options = {}) => {
 		},
 
 		Decorator(node, context) {
-			write_decorator(context, node);
-			context.newline();
+			context.write('@');
+			// a decorator must be an identifier/member/call (or parenthesized); anything
+			// else (ternary, logical, assignment, unary, `as`, optional chain…) needs wrapping
+			const wrap =
+				/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
+				EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
+			maybe_wrap(context, node.expression, wrap);
 		},
 
 		DoWhileStatement(node, context) {
@@ -1160,10 +1154,25 @@ export default (options = {}) => {
 		},
 
 		ExportDefaultDeclaration(node, context) {
+			const d = node.declaration;
+
+			// ClassDeclaration/ClassExpression decorators should be printed before `export`
+			if ('decorators' in d) {
+				block_decorators(context, {
+					...d,
+					// @ts-expect-error we need to prevent a mapping being added for the end of the declaration
+					loc: null
+				});
+			}
+
 			token(context, 'export', node);
 			context.write(' default ');
 
-			context.visit(node.declaration);
+			if (d.loc) {
+				flush_comments_until(context, null, d.loc.start, true, false);
+			}
+
+			visit_without_decorators(context, d);
 
 			if (node.declaration.type !== 'FunctionDeclaration') {
 				context.write(';');
@@ -1171,25 +1180,26 @@ export default (options = {}) => {
 		},
 
 		ExportNamedDeclaration(node, context) {
-			if (node.declaration) {
-				// Check if declaration has decorators (ClassDeclaration, ClassExpression can have them)
-				const decl = /** @type {any} */ (node.declaration);
-				if (decl.decorators && decl.decorators.length > 0) {
-					for (const decorator of decl.decorators) {
-						context.visit(decorator);
-					}
-					token(context, 'export', node);
-					context.write(' ');
-					// Temporarily remove decorators so ClassDeclaration doesn't print them again
-					const savedDecorators = decl.decorators;
-					decl.decorators = [];
-					context.visit(node.declaration);
-					decl.decorators = savedDecorators;
-				} else {
-					token(context, 'export', node);
-					context.write(' ');
-					context.visit(node.declaration);
+			const d = node.declaration;
+
+			if (d) {
+				// ClassDeclaration/ClassExpression decorators should be printed before `export`
+				if ('decorators' in d) {
+					block_decorators(context, {
+						...d,
+						// @ts-expect-error we need to prevent a mapping being added for the end of the declaration
+						loc: null
+					});
 				}
+
+				token(context, 'export', node);
+				context.write(' ');
+
+				if (d.loc) {
+					flush_comments_until(context, null, d.loc.start, true, false);
+				}
+
+				visit_without_decorators(context, d);
 				return;
 			}
 
@@ -1261,7 +1271,7 @@ export default (options = {}) => {
 		FunctionExpression: shared['FunctionDeclaration|FunctionExpression'],
 
 		Identifier(node, context) {
-			write_parameter_decorators(context, node.decorators);
+			inline_decorators(context, node);
 			let name = node.name;
 
 			// a typed, optional or definite name's `loc` runs to the end of its
@@ -1460,7 +1470,7 @@ export default (options = {}) => {
 		},
 
 		ObjectPattern(node, context) {
-			write_parameter_decorators(context, node.decorators);
+			inline_decorators(context, node);
 			context.write('{');
 			sequence(context, node.properties, node.loc?.end ?? null, true);
 			context.write('}');
@@ -1948,8 +1958,11 @@ export default (options = {}) => {
 			// property, Acorn to its parameter. Either way they precede the modifiers
 			const parameter = node.parameter;
 			const parameter_decorators = parameter.decorators;
-			write_parameter_decorators(context, node.decorators);
-			write_parameter_decorators(context, parameter_decorators);
+
+			inline_decorators(
+				context,
+				parameter.decorators ? { ...node, decorators: parameter.decorators } : node
+			);
 
 			if (node.accessibility) {
 				context.write(node.accessibility + ' ');
@@ -2525,33 +2538,59 @@ function maybe_wrap(context, node, wrap) {
 
 /**
  * @param {Context} context
- * @param {TSESTree.Decorator} node
+ * @param {TSESTree.Node & { decorators: TSESTree.Decorator[] | undefined }} node
  */
-function write_decorator(context, node) {
-	context.write('@');
-	// a decorator must be an identifier/member/call (or parenthesized); anything
-	// else (ternary, logical, assignment, unary, `as`, optional chain…) needs wrapping
-	const wrap =
-		/** @type {string} */ (node.expression.type) === 'ChainExpression' ||
-		EXPRESSIONS_PRECEDENCE[node.expression.type] < EXPRESSIONS_PRECEDENCE.CallExpression;
-	maybe_wrap(context, node.expression, wrap);
+function block_decorators(context, node) {
+	if (!node.decorators) return;
+
+	for (const decorator of node.decorators) {
+		context.visit(decorator);
+		context.newline();
+	}
+
+	if (node.loc && has_preceding_decorator(node)) {
+		context.location(node.loc.start.line, node.loc.start.column);
+	}
 }
 
 /**
- * Parameter decorators (`@dec x`) stay on the parameter's line, unlike class
- * and member decorators, which the `Decorator` visitor puts on their own line
  * @param {Context} context
- * @param {TSESTree.Decorator[] | undefined} decorators
+ * @param {TSESTree.Node & { decorators: TSESTree.Decorator[] | undefined }} node
  */
-function write_parameter_decorators(context, decorators) {
-	if (!decorators) return;
+function inline_decorators(context, node) {
+	if (!node.decorators) return;
 
-	for (const decorator of decorators) {
-		// not visited through the root visitor, so map the node's span here
-		if (decorator.loc) context.location(decorator.loc.start.line, decorator.loc.start.column);
-		write_decorator(context, decorator);
-		if (decorator.loc) context.location(decorator.loc.end.line, decorator.loc.end.column);
+	for (const decorator of node.decorators) {
+		context.visit(decorator);
 		context.write(' ');
+	}
+
+	if (node.loc && has_preceding_decorator(node)) {
+		context.location(node.loc.start.line, node.loc.start.column);
+	}
+}
+
+/**
+ * Visit an exported declaration minus its decorators, which have already been printed
+ * @param {Context} context
+ * @param {TSESTree.Node} node
+ */
+function visit_without_decorators(context, node) {
+	if ('decorators' in node && node.decorators && node.decorators.length > 0) {
+		const { decorators, loc } = node;
+
+		// Temporarily remove decorators so ClassDeclaration doesn't print them again
+		node.decorators = [];
+		// @ts-expect-error
+		node.loc = null;
+
+		context.visit(node);
+		node.decorators = decorators;
+		node.loc = loc;
+
+		if (loc) context.location(loc.end.line, loc.end.column);
+	} else {
+		context.visit(node);
 	}
 }
 
@@ -2681,24 +2720,55 @@ function statement_ends_with_unmatched_if(node) {
 }
 
 /**
- * `in` expressions are forbidden by the `ExpressionNoIn` grammar used for
- * classic `for` initializers unless a containing expression is parenthesized.
- * @param {any} value
- * @param {WeakSet<object>} [seen]
+ * Whether an expression exposes an `in` to the `Expression[~In]` grammar used
+ * for classic `for` initializers. Stop where the grammar allows `in` or the
+ * printer already adds parentheses.
+ * @see https://tc39.es/ecma262/#sec-for-statement
+ * @param {TSESTree.Node} node
+ * @returns {boolean}
  */
-function contains_in_operator(value, seen = new WeakSet()) {
-	if (!value || typeof value !== 'object') return false;
-	if (seen.has(value)) return false;
-	seen.add(value);
+function contains_in_operator(node) {
+	switch (node.type) {
+		case 'BinaryExpression':
+		case 'LogicalExpression':
+			return (
+				node.operator === 'in' ||
+				(!operand_needs_wrap(node.left, node, false) && contains_in_operator(node.left)) ||
+				(!operand_needs_wrap(node.right, node, true) && contains_in_operator(node.right))
+			);
 
-	if (value.type === 'BinaryExpression' && value.operator === 'in') return true;
+		case 'ConditionalExpression':
+			// The middle operand allows `in`, even in an Expression[~In].
+			return (
+				(EXPRESSIONS_PRECEDENCE[node.test.type] > EXPRESSIONS_PRECEDENCE.ConditionalExpression &&
+					contains_in_operator(node.test)) ||
+				contains_in_operator(node.alternate)
+			);
 
-	for (const key in value) {
-		if (key === 'loc') continue;
-		if (contains_in_operator(value[key], seen)) return true;
+		case 'AssignmentExpression':
+			return contains_in_operator(node.right);
+
+		case 'ArrowFunctionExpression':
+			return !arrow_concise_body_needs_wrap(node.body) && contains_in_operator(node.body);
+
+		case 'YieldExpression':
+			return !!node.argument && contains_in_operator(node.argument);
+
+		case 'TSAsExpression':
+		case 'TSSatisfiesExpression':
+			return (
+				EXPRESSIONS_PRECEDENCE[node.expression.type] >= EXPRESSIONS_PRECEDENCE[node.type] &&
+				contains_in_operator(node.expression)
+			);
+
+		case 'TSInstantiationExpression':
+			return contains_in_operator(node.expression);
+
+		default:
+			// Other expressions either allow `in` in their children (calls, arrays,
+			// functions, etc.) or already parenthesize it (unary, sequence, etc.).
+			return false;
 	}
-
-	return false;
 }
 
 /**
@@ -2732,14 +2802,26 @@ function handle_var_declarator(node, context, no_in) {
 }
 
 /**
- * Where a node's printed output starts. A parameter's `loc` starts after its
- * decorators (Acorn, typescript-estree), but they are printed first.
+ * Whether a node has a decorator whose `start` location precedes that of
+ * the node itself, in which case we should not emit a mapping yet
  * @param {TSESTree.Node} node
  */
-function printed_start(node) {
-	const start = /** @type {TSESTree.SourceLocation} */ (node.loc).start;
-	const first = 'decorators' in node ? node.decorators?.[0]?.loc?.start : undefined;
-	return first && before(first, start) ? first : start;
+function has_preceding_decorator(node) {
+	let n =
+		((node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration') &&
+			node.declaration) ||
+		node;
+
+	if ('parameter' in n && 'decorators' in n.parameter) {
+		n = n.parameter;
+	}
+
+	if ('decorators' in n) {
+		const loc = n.decorators?.[0]?.loc;
+		return loc ? before(loc.start, node.loc.start) : false;
+	}
+
+	return false;
 }
 
 /**
