@@ -2544,6 +2544,10 @@ function block_decorators(context, node) {
 		context.visit(decorator);
 		context.newline();
 	}
+
+	if (has_preceding_decorator(node) && node.loc) {
+		context.location(node.loc.start.line, node.loc.start.column);
+	}
 }
 
 /**
@@ -2556,6 +2560,10 @@ function inline_decorators(context, node) {
 	for (const decorator of node.decorators) {
 		context.visit(decorator);
 		context.write(' ');
+	}
+
+	if (has_preceding_decorator(node) && node.loc) {
+		context.location(node.loc.start.line, node.loc.start.column);
 	}
 }
 
