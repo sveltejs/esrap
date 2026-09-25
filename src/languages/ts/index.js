@@ -168,6 +168,7 @@ export default (options = {}) => {
 	const quote_char = options.quotes === 'double' ? '"' : "'";
 
 	const comments = options.comments ?? [];
+	const parenthesized_sequences = new Set();
 
 	let comment_index = 0;
 
@@ -1476,7 +1477,16 @@ export default (options = {}) => {
 
 		// @ts-expect-error this isn't a real node type, but Acorn produces it
 		ParenthesizedExpression(node, context) {
-			if (node.loc) {
+			if (node.expression.type === 'SequenceExpression') {
+				// Emit the opening parenthesis before the child visitor flushes comments.
+				if (node.expression.loc) {
+					context.location(node.expression.loc.start.line, node.expression.loc.start.column);
+				}
+				context.write('(');
+				parenthesized_sequences.add(node.expression);
+				context.visit(node.expression);
+				parenthesized_sequences.delete(node.expression);
+			} else if (node.loc) {
 				context.write('(');
 				context.visit(node.expression);
 				context.write(')');
@@ -1577,7 +1587,8 @@ export default (options = {}) => {
 		},
 
 		SequenceExpression(node, context) {
-			context.write('(');
+			const wrap = !parenthesized_sequences.has(node);
+			if (wrap) context.write('(');
 			sequence(context, node.expressions, node.loc?.end ?? null, false);
 			context.write(')');
 		},

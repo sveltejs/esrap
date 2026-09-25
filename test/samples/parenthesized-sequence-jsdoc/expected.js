@@ -1,0 +1,1 @@
+const x = /** @type {number} */ (0, value);
