@@ -1,4 +1,3 @@
 {
-	"preserveParens": true,
 	"snapshotParsers": ["oxc"]
 }

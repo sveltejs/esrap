@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "(0, f)(\"x\");\n((0, f))(\"x\");\n(0, object).property;\nnew (0, Constructor)();\n!(0, value);\n(0, value) + (1, other);\n(a + b) * c;\n"
+  ],
+  "mappings": "AAAA,AAAC,CAAA,CAAC,EAAE,CAAC,CAAA,AAAC,CAAC,GAAG,CAAC,CAAC;AACZ,CAAC,AAAC,CAAA,CAAC,EAAE,CAAC,CAAA,AAAC,CAAC,CAAC,GAAG,CAAC,CAAC;AACd,AAAC,CAAA,CAAC,EAAE,MAAM,CAAA,AAAC,CAAC,QAAQ,CAAC;AACrB,GAAG,CAAC,AAAC,CAAA,CAAC,EAAE,WAAW,CAAA,AAAC,EAAE,CAAC;AACvB,CAAC,AAAC,CAAA,CAAC,EAAE,KAAK,CAAA,AAAC,CAAC;AACZ,AAAC,CAAA,CAAC,EAAE,KAAK,CAAA,AAAC,GAAG,AAAC,CAAA,CAAC,EAAE,KAAK,CAAA,AAAC,CAAC;AACxB,CAAC,CAAC,GAAG,CAAC,CAAC,GAAG,CAAC,CAAC,AACZ"
+}
