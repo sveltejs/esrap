@@ -2741,7 +2741,11 @@ function handle_var_declarator(node, context, no_in) {
  * @param {TSESTree.Node} node
  */
 function has_preceding_decorator(node) {
-	const n = (node.type === 'ExportNamedDeclaration' && node.declaration) || node;
+	let n = (node.type === 'ExportNamedDeclaration' && node.declaration) || node;
+
+	if ('parameter' in n && 'decorators' in n.parameter) {
+		n = n.parameter;
+	}
 
 	if ('decorators' in n) {
 		const loc = n.decorators?.[0]?.loc;
