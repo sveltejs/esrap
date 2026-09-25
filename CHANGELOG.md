@@ -1,5 +1,15 @@
 # esrap changelog
 
+## 2.3.12
+
+### Patch Changes
+
+- 88c6da5: fix: add sourcemap mappings for switch cases, catch clauses, `for` head declarations and parameter decorators
+- 0da46a4: fix: more conservative wrapping of `in` expressions in for loop heads
+- a0c2db4: fix: map parentheses and braces added by the printer to the expression or statement they wrap
+- 5d836e1: fix: prevent out-of-order mappings with decorators
+- c4110b0: fix: map the end of a typed, optional or definite identifier to the end of its name rather than the end of its annotation
+
 ## 2.3.11
 
 ### Patch Changes
