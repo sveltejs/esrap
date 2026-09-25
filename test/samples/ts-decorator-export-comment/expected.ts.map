@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "@dec /* c */\nexport declare class X {}\n"
+  ],
+  "mappings": "AAAA;AAAA,CAAC,GAAG;MACE,eAAe,CAAC,CAAC,CAAC,CAAC,AACzB"
+}

@@ -1157,10 +1157,14 @@ export default (options = {}) => {
 			const d = node.declaration;
 
 			// ClassDeclaration/ClassExpression decorators should be printed before `export`
-			if ('decorators' in d) block_decorators(context, d);
+			if ('decorators' in d) block_decorators(context, { ...d, loc: null });
 
 			token(context, 'export', node);
 			context.write(' default ');
+
+			if (d.loc) {
+				flush_comments_until(context, null, d.loc.start, true, false);
+			}
 
 			visit_without_decorators(context, d);
 
@@ -1174,10 +1178,14 @@ export default (options = {}) => {
 
 			if (d) {
 				// ClassDeclaration/ClassExpression decorators should be printed before `export`
-				if ('decorators' in d) block_decorators(context, d);
+				if ('decorators' in d) block_decorators(context, { ...d, loc: null });
 
 				token(context, 'export', node);
 				context.write(' ');
+
+				if (d.loc) {
+					flush_comments_until(context, null, d.loc.start, true, false);
+				}
 
 				visit_without_decorators(context, d);
 				return;
@@ -2518,7 +2526,7 @@ function block_decorators(context, node) {
 		context.newline();
 	}
 
-	if (has_preceding_decorator(node) && node.loc) {
+	if (node.loc && has_preceding_decorator(node)) {
 		context.location(node.loc.start.line, node.loc.start.column);
 	}
 }
@@ -2535,7 +2543,7 @@ function inline_decorators(context, node) {
 		context.write(' ');
 	}
 
-	if (has_preceding_decorator(node) && node.loc) {
+	if (node.loc && has_preceding_decorator(node)) {
 		context.location(node.loc.start.line, node.loc.start.column);
 	}
 }
@@ -2553,6 +2561,7 @@ function visit_without_decorators(context, node) {
 		node.decorators = [];
 		// @ts-expect-error
 		node.loc = null;
+
 		context.visit(node);
 		node.decorators = decorators;
 		node.loc = loc;
@@ -2745,7 +2754,10 @@ function handle_var_declarator(node, context, no_in) {
  * @param {TSESTree.Node} node
  */
 function has_preceding_decorator(node) {
-	let n = (node.type === 'ExportNamedDeclaration' && node.declaration) || node;
+	let n =
+		((node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration') &&
+			node.declaration) ||
+		node;
 
 	if ('parameter' in n && 'decorators' in n.parameter) {
 		n = n.parameter;
