@@ -231,11 +231,9 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 						`${__dirname}/samples/${dir}/expected.${fileExtension}`
 					);
 
-					if (config.reprint) {
-						expect(print(parsedAst, (jsxMode ? tsx : ts)({ comments: parsedComments })).code).toBe(
-							code
-						);
-					}
+					expect(print(parsedAst, (jsxMode ? tsx : ts)({ comments: parsedComments })).code).toBe(
+						code
+					);
 				}
 
 				if (!skipMap) {
