@@ -482,7 +482,7 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'ArrayExpression|ArrayPattern': (node, context) => {
-			if ('decorators' in node) inline_decorators(context, node.decorators);
+			if ('decorators' in node) inline_decorators(context, node);
 			context.write('[');
 			sequence(
 				context,
@@ -629,7 +629,7 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'ClassDeclaration|ClassExpression': (node, context) => {
-			block_decorators(context, node.decorators);
+			block_decorators(context, node);
 
 			if (node.declare) context.write('declare ');
 			if (node.abstract) context.write('abstract ');
@@ -727,7 +727,7 @@ export default (options = {}) => {
 		 * @param {Context} context
 		 */
 		'MethodDefinition|TSAbstractMethodDefinition': (node, context) => {
-			block_decorators(context, node.decorators);
+			block_decorators(context, node);
 
 			// @ts-expect-error `acorn-typescript` and `@typescript-eslint/types` have slightly different type definitions
 			if (node.abstract || node.type === 'TSAbstractMethodDefinition') {
@@ -795,7 +795,7 @@ export default (options = {}) => {
 			node,
 			context
 		) => {
-			block_decorators(context, node.decorators);
+			block_decorators(context, node);
 
 			if (node.declare) context.write('declare ');
 
@@ -1015,7 +1015,7 @@ export default (options = {}) => {
 		},
 
 		AssignmentPattern(node, context) {
-			inline_decorators(context, node.decorators);
+			inline_decorators(context, node);
 			context.visit(node.left);
 			context.write(' = ');
 			context.visit(node.right);
@@ -1155,18 +1155,19 @@ export default (options = {}) => {
 
 		ExportDefaultDeclaration(node, context) {
 			// Check if declaration has decorators (ClassDeclaration, ClassExpression can have them)
-			const d = /** @type {any} */ (node.declaration);
+			const d = node.declaration;
 
-			block_decorators(context, d.decorators);
+			if ('decorators' in d) block_decorators(context, d);
 
 			token(context, 'export', node);
 			context.write(' default ');
 
-			if (d.decorators && d.decorators.length > 0) {
+			if ('decorators' in d && d.decorators && d.decorators.length > 0) {
 				const { decorators, loc } = d;
 
 				// Temporarily remove decorators so ClassDeclaration doesn't print them again
 				d.decorators = [];
+				// @ts-expect-error
 				d.loc = null;
 				context.visit(d);
 				d.decorators = decorators;
@@ -1183,20 +1184,22 @@ export default (options = {}) => {
 		},
 
 		ExportNamedDeclaration(node, context) {
-			if (node.declaration) {
-				// Check if declaration has decorators (ClassDeclaration, ClassExpression can have them)
-				const d = /** @type {any} */ (node.declaration);
+			const d = node.declaration;
 
-				block_decorators(context, d.decorators);
+			if (d) {
+				// Check if declaration has decorators (ClassDeclaration, ClassExpression can have them)
+
+				if ('decorators' in d) block_decorators(context, d);
 
 				token(context, 'export', node);
 				context.write(' ');
 
-				if (d.decorators && d.decorators.length > 0) {
+				if ('decorators' in d && d.decorators && d.decorators.length > 0) {
 					const { decorators, loc } = d;
 
 					// Temporarily remove decorators so ClassDeclaration doesn't print them again
 					d.decorators = [];
+					// @ts-expect-error
 					d.loc = null;
 					context.visit(d);
 					d.decorators = decorators;
@@ -1278,7 +1281,7 @@ export default (options = {}) => {
 		FunctionExpression: shared['FunctionDeclaration|FunctionExpression'],
 
 		Identifier(node, context) {
-			inline_decorators(context, node.decorators);
+			inline_decorators(context, node);
 			let name = node.name;
 			context.write(name, node);
 
@@ -1467,7 +1470,7 @@ export default (options = {}) => {
 		},
 
 		ObjectPattern(node, context) {
-			inline_decorators(context, node.decorators);
+			inline_decorators(context, node);
 			context.write('{');
 			sequence(context, node.properties, node.loc?.end ?? null, true);
 			context.write('}');
@@ -1955,8 +1958,8 @@ export default (options = {}) => {
 			// property, Acorn to its parameter. Either way they precede the modifiers
 			const parameter = node.parameter;
 			const parameter_decorators = parameter.decorators;
-			inline_decorators(context, node.decorators);
-			inline_decorators(context, parameter_decorators);
+			inline_decorators(context, node);
+			inline_decorators(context, parameter);
 
 			if (node.accessibility) {
 				context.write(node.accessibility + ' ');
@@ -2532,12 +2535,12 @@ function maybe_wrap(context, node, wrap) {
 
 /**
  * @param {Context} context
- * @param {TSESTree.Decorator[] | undefined} decorators
+ * @param {TSESTree.Node & { decorators: TSESTree.Decorator[] | undefined }} node
  */
-function block_decorators(context, decorators) {
-	if (!decorators) return;
+function block_decorators(context, node) {
+	if (!node.decorators) return;
 
-	for (const decorator of decorators) {
+	for (const decorator of node.decorators) {
 		context.visit(decorator);
 		context.newline();
 	}
@@ -2545,12 +2548,12 @@ function block_decorators(context, decorators) {
 
 /**
  * @param {Context} context
- * @param {TSESTree.Decorator[] | undefined} decorators
+ * @param {TSESTree.Node & { decorators: TSESTree.Decorator[] | undefined }} node
  */
-function inline_decorators(context, decorators) {
-	if (!decorators) return;
+function inline_decorators(context, node) {
+	if (!node.decorators) return;
 
-	for (const decorator of decorators) {
+	for (const decorator of node.decorators) {
 		context.visit(decorator);
 		context.write(' ');
 	}
