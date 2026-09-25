@@ -1272,18 +1272,7 @@ export default (options = {}) => {
 
 		Identifier(node, context) {
 			inline_decorators(context, node);
-			let name = node.name;
-
-			// a typed, optional or definite name's `loc` runs to the end of its
-			// annotation, so map the name's own end from its length
-			const loc =
-				node.loc && (node.typeAnnotation || node.optional || /** @type {any} */ (node).definite)
-					? {
-							start: node.loc.start,
-							end: { line: node.loc.start.line, column: node.loc.start.column + node.name.length }
-						}
-					: node.loc;
-			context.write(name, /** @type {TSESTree.Node} */ ({ loc }));
+			token(context, node.name, node);
 
 			// optional parameters (`a?: T`) carry `optional` on the identifier
 			if (node.optional) context.write('?');
