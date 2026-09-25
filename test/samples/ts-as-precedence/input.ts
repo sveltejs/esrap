@@ -18,6 +18,21 @@ a && (b as C);
 1 ** (0n satisfies any);
 1 + (0 satisfies number);
 (0 satisfies number)!;
+(w as any) = [1];
+(w satisfies any) += 1;
+(<any>w) = 1;
+(Map as any)++;
+++(Map as any);
+(w satisfies any)--;
+--(w satisfies any);
+(<any>w)++;
+++(<any>w);
+((M.g as any)<any>)([1]);
+((fn?.method)<T>)();
+const f1 = (M.g satisfies any)<any>;
+const f2 = (<any>M.g)<any>;
+const f3 = (a ? b : c)<any>;
+const f4 = (a || b)<any>;
 // prettier-ignore
 const asserted = (<T>x) ** y;
 

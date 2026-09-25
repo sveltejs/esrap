@@ -1010,7 +1010,12 @@ export default (options = {}) => {
 		},
 
 		AssignmentExpression(node, context) {
-			context.visit(node.left);
+			// TypeScript casts are only valid assignment targets inside parentheses.
+			const wrap =
+				node.left.type === 'TSAsExpression' ||
+				node.left.type === 'TSSatisfiesExpression' ||
+				node.left.type === 'TSTypeAssertion';
+			maybe_wrap(context, node.left, wrap);
 			context.write(` ${node.operator} `);
 			context.visit(node.right);
 		},
@@ -1736,13 +1741,12 @@ export default (options = {}) => {
 		},
 
 		UpdateExpression(node, context) {
-			if (node.prefix) {
-				context.write(node.operator);
-				context.visit(node.argument);
-			} else {
-				context.visit(node.argument);
-				context.write(node.operator);
-			}
+			const wrap =
+				node.argument.type === 'TSTypeAssertion' ||
+				EXPRESSIONS_PRECEDENCE[node.argument.type] < EXPRESSIONS_PRECEDENCE.UpdateExpression;
+			if (node.prefix) context.write(node.operator);
+			maybe_wrap(context, node.argument, wrap);
+			if (!node.prefix) context.write(node.operator);
 		},
 
 		VariableDeclaration(node, context) {
@@ -2376,7 +2380,12 @@ export default (options = {}) => {
 		},
 
 		TSInstantiationExpression(node, context) {
-			context.visit(node.expression);
+			const wrap =
+				node.expression.type === 'ChainExpression' ||
+				node.expression.type === 'TSTypeAssertion' ||
+				EXPRESSIONS_PRECEDENCE[node.expression.type] <
+					EXPRESSIONS_PRECEDENCE.TSInstantiationExpression;
+			maybe_wrap(context, node.expression, wrap);
 			context.visit(node.typeArguments);
 		},
 
