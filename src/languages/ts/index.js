@@ -1162,21 +1162,7 @@ export default (options = {}) => {
 			token(context, 'export', node);
 			context.write(' default ');
 
-			if ('decorators' in d && d.decorators && d.decorators.length > 0) {
-				const { decorators, loc } = d;
-
-				// Temporarily remove decorators so ClassDeclaration doesn't print them again
-				d.decorators = [];
-				// @ts-expect-error
-				d.loc = null;
-				context.visit(d);
-				d.decorators = decorators;
-				d.loc = loc;
-
-				if (loc) context.location(loc.end.line, loc.end.column);
-			} else {
-				context.visit(d);
-			}
+			visit_without_decorators(context, d);
 
 			if (node.declaration.type !== 'FunctionDeclaration') {
 				context.write(';');
@@ -1194,21 +1180,7 @@ export default (options = {}) => {
 				token(context, 'export', node);
 				context.write(' ');
 
-				if ('decorators' in d && d.decorators && d.decorators.length > 0) {
-					const { decorators, loc } = d;
-
-					// Temporarily remove decorators so ClassDeclaration doesn't print them again
-					d.decorators = [];
-					// @ts-expect-error
-					d.loc = null;
-					context.visit(d);
-					d.decorators = decorators;
-					d.loc = loc;
-
-					if (loc) context.location(loc.end.line, loc.end.column);
-				} else {
-					context.visit(d);
-				}
+				visit_without_decorators(context, d);
 
 				return;
 			}
@@ -2564,6 +2536,29 @@ function inline_decorators(context, node) {
 
 	if (has_preceding_decorator(node) && node.loc) {
 		context.location(node.loc.start.line, node.loc.start.column);
+	}
+}
+
+/**
+ * Visit an exported declaration minus its decorators, which have already been printed
+ * @param {Context} context
+ * @param {TSESTree.Node} node
+ */
+function visit_without_decorators(context, node) {
+	if ('decorators' in node && node.decorators && node.decorators.length > 0) {
+		const { decorators, loc } = node;
+
+		// Temporarily remove decorators so ClassDeclaration doesn't print them again
+		node.decorators = [];
+		// @ts-expect-error
+		node.loc = null;
+		context.visit(node);
+		node.decorators = decorators;
+		node.loc = loc;
+
+		if (loc) context.location(loc.end.line, loc.end.column);
+	} else {
+		context.visit(node);
 	}
 }
 
