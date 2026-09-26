@@ -109,7 +109,7 @@ code; // `[[foo][bar]]`
 
 The `context` API has several methods:
 
-- `context.write(data: string, node?: BaseNode)` — add a string. If `node` is provided and has a standard `loc` property (with `start` and `end` properties each with a `line` and `column`), a sourcemap mapping will be created
+- `context.write(data: string, node?: BaseNode)` — add a string. If `node` is provided and has a standard `loc` property (with `start` and `end` properties each with a `line` and `column`), a sourcemap mapping will be created. Otherwise, if `tokens` were passed to `print` and `data` (ignoring surrounding whitespace) is the next token in the source, it will be mapped to that token — so write tokens individually (e.g. `')'` then `' {'` rather than `') {'`)
 - `context.indent()` — increase the indentation level, typically before adding a newline
 - `context.newline()` — self-explanatory
 - `context.space()` — adds a space character, if it doesn't immediately follow a newline
@@ -142,6 +142,13 @@ const { code, map } = print(ast, ts(), {
   // Whether to encode the `mappings` field of the resulting sourcemap
   // as a VLQ string, rather than an unencoded array. Defaults to `true`
   sourceMapEncodeMappings: false,
+
+  // The parser's tokens, if `ast` came from parsing source code. Used to
+  // create accurate mappings for punctuation and keywords. Tokens must have
+  // `loc` properties — e.g. Acorn's `onToken` array (with `locations: true`),
+  // or `ast.tokens` from espree/@typescript-eslint/parser (with
+  // `tokens: true, loc: true`)
+  tokens,
 
   // String to use for indentation — defaults to '\t'
   indent: '  '
