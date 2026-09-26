@@ -217,6 +217,16 @@ export class Tokens {
 	}
 
 	/**
+	 * The token starting at exactly `position`, if any, regardless of what has been written
+	 * @param {Position} position
+	 * @returns {Entry | undefined}
+	 */
+	at(position) {
+		const entry = this.#entries[this.#search(position)];
+		if (entry && compare(entry.start, position) === 0) return entry;
+	}
+
+	/**
 	 * The index of the first token starting at or after `position`
 	 * @param {Position} position
 	 */
