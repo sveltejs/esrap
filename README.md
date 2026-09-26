@@ -116,7 +116,7 @@ The `context` API has several methods:
 - `context.margin()` — causes the next newline to be repeated (consecutive newlines are otherwise merged into one)
 - `context.dedent()` — decrease the indentation level (again, typically before adding a newline)
 - `context.visit(node: BaseNode)` — calls the visitor corresponding to `node.type`
-- `context.location(line: number, column: number)` — insert a sourcemap mapping _without_ calling `context.write(...)`
+- `context.location(line: number, column: number, name?: boolean)` — insert a sourcemap mapping _without_ calling `context.write(...)`. If `name` is `true` and `tokens` were passed to `print`, the token that starts at this location in the source is added to the sourcemap's `names` (typically used for identifiers)
 - `context.measure()` — returns the number of characters contained in `context`
 - `context.empty()` — returns true if the context has no content
 - `context.new()` — creates a child context
@@ -144,7 +144,8 @@ const { code, map } = print(ast, ts(), {
   sourceMapEncodeMappings: false,
 
   // The parser's tokens, if `ast` came from parsing source code. Used to
-  // create accurate mappings for punctuation and keywords. Tokens must have
+  // create accurate mappings for punctuation and keywords, and to populate
+  // the `names` field of the resulting sourcemap. Tokens must have
   // `loc` properties — e.g. Acorn's `onToken` array (with `locations: true`),
   // or `ast.tokens` from espree/@typescript-eslint/parser (with
   // `tokens: true, loc: true`)

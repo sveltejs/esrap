@@ -14,17 +14,25 @@ if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
 	btoa = (str) => Buffer.from(str, 'utf-8').toString('base64');
 }
 
+/**
+ * @typedef {[generatedColumn: number, sourceIndex: number, originalLine: number, originalColumn: number]
+ *   | [generatedColumn: number, sourceIndex: number, originalLine: number, originalColumn: number, nameIndex: number]
+ * } Segment
+ */
+
 class SourceMap {
 	version = 3;
 
 	/** @type {string[]} */
-	names = [];
+	names;
 
 	/**
-	 * @param {[number, number, number, number][][]} mappings
+	 * @param {Segment[][]} mappings
+	 * @param {string[]} names
 	 * @param {PrintOptions} opts
 	 */
-	constructor(mappings, opts) {
+	constructor(mappings, names, opts) {
+		this.names = names;
 		this.sources = [opts.sourceMapSource || null];
 		this.sourcesContent = [opts.sourceMapContent || null];
 		this.mappings = opts.sourceMapEncodeMappings === false ? mappings : encode(mappings);
@@ -63,8 +71,6 @@ export function print(node, visitors, opts = {}) {
 
 	context.visit(node);
 
-	/** @typedef {[generatedColumn: number, sourceIndex: number, originalLine: number, originalColumn: number]} Segment */
-
 	let code = '';
 	let current_column = 0;
 
@@ -99,21 +105,53 @@ export function print(node, visitors, opts = {}) {
 	/** @type {Location[]} */
 	const pending_locations = [];
 
+	/** @type {string[]} */
+	const names = [];
+
+	/** @type {Map<string, number>} */
+	const name_indices = new Map();
+
+	/** @param {string} name */
+	function get_name_index(name) {
+		let index = name_indices.get(name);
+
+		if (index === undefined) {
+			index = names.push(name) - 1;
+			name_indices.set(name, index);
+		}
+
+		return index;
+	}
+
 	/** @param {Location} location */
 	function add_location(location) {
 		const prev = current_line[current_line.length - 1];
+		const line = location.line - 1;
+		const column = location.column;
+
+		if (prev && prev[0] === current_column && prev[2] === line && prev[3] === column) {
+			// the same location can be mapped more than once (e.g. an identifier's start is mapped
+			// by the root visitor, then again with its name) — keep the first name we're given
+			if (location.name !== undefined && prev.length === 4) {
+				prev.push(get_name_index(location.name));
+			}
+
+			return;
+		}
 
 		/** @type {Segment} */
 		const segment = [
 			current_column,
 			0, // source index is always zero
-			location.line - 1,
-			location.column
+			line,
+			column
 		];
 
-		if (!prev || prev[0] !== segment[0] || prev[2] !== segment[2] || prev[3] !== segment[3]) {
-			current_line.push(segment);
+		if (location.name !== undefined) {
+			segment.push(get_name_index(location.name));
 		}
+
+		current_line.push(segment);
 	}
 
 	function flush_locations() {
@@ -189,7 +227,7 @@ export function print(node, visitors, opts = {}) {
 		code,
 		// create sourcemap lazily in case we don't need it
 		get map() {
-			return (map ??= new SourceMap(mappings, opts));
+			return (map ??= new SourceMap(mappings, names, opts));
 		}
 	};
 }
