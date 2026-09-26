@@ -1,6 +1,7 @@
 /** @import { BaseNode, Command, Location, Visitors, PrintOptions } from './types.js' */
 import { encode } from '@jridgewell/sourcemap-codec';
 import { Context, dedent, indent, margin, newline, space } from './context.js';
+import { Tokens } from './tokens.js';
 
 /** @type {(str: string) => string} str */
 let btoa = () => {
@@ -55,8 +56,10 @@ export function print(node, visitors, opts = {}) {
 	/** @type {Command[]} */
 	const commands = [];
 
+	const tokens = opts.tokens ? new Tokens(opts.tokens) : null;
+
 	// @ts-ignore some nonsense I don't understand
-	const context = new Context(visitors, commands);
+	const context = new Context(visitors, commands, tokens);
 
 	context.visit(node);
 

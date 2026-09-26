@@ -133,15 +133,16 @@ function write_comment(comment, context) {
 	if (comment.type === 'Line') {
 		context.write(`//${comment.value}`);
 	} else {
-		context.write('/*');
 		const lines = comment.value.split('\n');
 
+		// write the delimiters with the first and last lines, so that the content
+		// of a one-line comment can't be mistaken for a source token (e.g. `/* ( */`)
 		for (let i = 0; i < lines.length; i += 1) {
 			if (i > 0) context.newline();
-			context.write(lines[i]);
+			const line = (i === 0 ? '/*' : '') + lines[i] + (i === lines.length - 1 ? '*/' : '');
+			context.write(line);
 		}
 
-		context.write('*/');
 		if (lines.length > 1) context.newline();
 	}
 }
@@ -335,7 +336,8 @@ export default (options = {}) => {
 		const attributes = node.attributes ?? node.assertions;
 		if (!attributes || attributes.length === 0) return;
 
-		context.write(node.attributes ? ' with { ' : ' assert { ');
+		context.write(node.attributes ? ' with ' : ' assert ');
+		context.write('{ ');
 
 		for (let i = 0; i < attributes.length; i += 1) {
 			const { key, value } = attributes[i];
@@ -701,7 +703,8 @@ export default (options = {}) => {
 		 */
 		'FunctionDeclaration|FunctionExpression': (node, context) => {
 			if (node.async) context.write('async ');
-			context.write(node.generator ? 'function* ' : 'function ');
+			context.write('function');
+			context.write(node.generator ? '* ' : ' ');
 
 			if (node.id) track_binding(node.id);
 
@@ -956,7 +959,11 @@ export default (options = {}) => {
 					node.type in EXPRESSIONS_PRECEDENCE && !BINDINGS.has(node)
 				);
 
-				if (!has_preceding_decorator(node)) {
+				// the node starts here unless its decorators are printed later (they
+				// precede `loc.start`) or were printed already and `loc.start` is
+				// one of them (Acorn ranges a class from decorators written before
+				// its `export`; typescript-estree from `class`, which then starts here)
+				if (has_preceding_decorator(node) === printed_decorators.has(node)) {
 					context.location(node.loc.start.line, node.loc.start.column);
 				}
 			}
@@ -1130,9 +1137,11 @@ export default (options = {}) => {
 			token(context, 'do', node);
 			context.write(' ');
 			context.visit(node.body);
-			context.write(' while (');
+			context.write(' while ');
+			context.write('(');
 			context.visit(node.test);
-			context.write(');');
+			context.write(')');
+			context.write(';');
 		},
 
 		EmptyStatement(node, context) {
@@ -1142,7 +1151,8 @@ export default (options = {}) => {
 		ExportAllDeclaration(node, context) {
 			token(context, 'export', node);
 
-			context.write(node.exportKind === 'type' ? ' type * ' : ' * ');
+			if (node.exportKind === 'type') context.write(' type');
+			context.write(' * ');
 
 			if (node.exported) {
 				context.write('as ');
@@ -1167,6 +1177,8 @@ export default (options = {}) => {
 				});
 			}
 
+			// the declaration's decorators came first, so the node's start is written here
+			if (node.loc) context.location(node.loc.start.line, node.loc.start.column);
 			token(context, 'export', node);
 			context.write(' default ');
 
@@ -1194,6 +1206,8 @@ export default (options = {}) => {
 					});
 				}
 
+				// the declaration's decorators came first, so the node's start is written here
+				if (node.loc) context.location(node.loc.start.line, node.loc.start.column);
 				token(context, 'export', node);
 				context.write(' ');
 
@@ -1591,7 +1605,8 @@ export default (options = {}) => {
 		SpreadElement: shared['RestElement|SpreadElement'],
 
 		StaticBlock(node, context) {
-			context.write('static {');
+			context.write('static ');
+			context.write('{');
 			context.indent();
 			context.newline();
 
@@ -1632,7 +1647,8 @@ export default (options = {}) => {
 
 			context.write(' (');
 			context.visit(node.discriminant);
-			context.write(') {');
+			context.write(') ');
+			context.write('{');
 			context.indent();
 
 			let first = true;
@@ -1672,7 +1688,8 @@ export default (options = {}) => {
 			for (let i = 0; i < expressions.length; i++) {
 				const raw = quasis[i].value.raw;
 
-				context.write(raw + '${');
+				context.write(raw);
+				context.write('${');
 				context.visit(expressions[i]);
 				context.write('}');
 
@@ -1681,7 +1698,8 @@ export default (options = {}) => {
 
 			const raw = quasis[quasis.length - 1].value.raw;
 
-			context.write(raw + '`');
+			context.write(raw);
+			context.write('`');
 			if (/\n/.test(raw)) context.multiline = true;
 		},
 
@@ -1892,7 +1910,8 @@ export default (options = {}) => {
 
 		TSArrayType(node, context) {
 			context.visit(node.elementType);
-			context.write('[]');
+			context.write('[');
+			context.write(']');
 		},
 
 		TSTypeAnnotation(node, context) {
@@ -1936,14 +1955,16 @@ export default (options = {}) => {
 			for (let i = 0; i < types.length; i++) {
 				const raw = quasis[i].value.raw;
 
-				context.write(raw + '${');
+				context.write(raw);
+				context.write('${');
 				context.visit(types[i]);
 				context.write('}');
 
 				if (/\n/.test(raw)) context.multiline = true;
 			}
 			const raw = quasis[quasis.length - 1].value.raw;
-			context.write(raw + '`');
+			context.write(raw);
+			context.write('`');
 			if (/\n/.test(raw)) context.multiline = true;
 		},
 
@@ -1988,14 +2009,16 @@ export default (options = {}) => {
 		},
 
 		TSExportAssignment(node, context) {
-			context.write('export = ');
+			context.write('export ');
+			context.write('= ');
 			context.visit(node.expression);
 			context.write(';');
 		},
 
 		TSNamespaceExportDeclaration(node, context) {
 			token(context, 'export', node);
-			context.write(' as namespace ');
+			context.write(' as ');
+			context.write('namespace ');
 			context.visit(node.id);
 			context.write(';');
 		},
@@ -2118,9 +2141,8 @@ export default (options = {}) => {
 
 			// `readonly` / `+readonly` / `-readonly` modifier
 			if (node.readonly) {
-				context.write(
-					node.readonly === '-' ? '-readonly ' : node.readonly === '+' ? '+readonly ' : 'readonly '
-				);
+				if (node.readonly === '-' || node.readonly === '+') context.write(node.readonly);
+				context.write('readonly ');
 			}
 
 			context.write('[');
@@ -2248,9 +2270,11 @@ export default (options = {}) => {
 		TSConstructorType: shared['TSFunctionType|TSConstructorType'],
 
 		TSExternalModuleReference(node, context) {
-			context.write('require(');
+			context.write('require');
+			context.write('(');
 			context.visit(node.expression);
-			context.write(');');
+			context.write(')');
+			context.write(';');
 		},
 
 		TSIndexedAccessType(node, context) {
@@ -2569,7 +2593,7 @@ function is_decorator_expression(node) {
  * @param {TSESTree.Node & { decorators: TSESTree.Decorator[] | undefined }} node
  */
 function block_decorators(context, node) {
-	if (!node.decorators) return;
+	if (!node.decorators || printed_decorators.has(node)) return;
 
 	for (const decorator of node.decorators) {
 		context.visit(decorator);
@@ -2599,24 +2623,21 @@ function inline_decorators(context, node) {
 }
 
 /**
+ * Declarations whose decorators an export visitor has already printed
+ * @type {WeakSet<TSESTree.Node>}
+ */
+const printed_decorators = new WeakSet();
+
+/**
  * Visit an exported declaration minus its decorators, which have already been printed
  * @param {Context} context
  * @param {TSESTree.Node} node
  */
 function visit_without_decorators(context, node) {
 	if ('decorators' in node && node.decorators && node.decorators.length > 0) {
-		const { decorators, loc } = node;
-
-		// Temporarily remove decorators so ClassDeclaration doesn't print them again
-		node.decorators = [];
-		// @ts-expect-error
-		node.loc = null;
-
+		printed_decorators.add(node);
 		context.visit(node);
-		node.decorators = decorators;
-		node.loc = loc;
-
-		if (loc) context.location(loc.end.line, loc.end.column);
+		printed_decorators.delete(node);
 	} else {
 		context.visit(node);
 	}
@@ -2835,10 +2856,14 @@ function handle_var_declarator(node, context, no_in) {
  * @param {TSESTree.Node} node
  */
 function has_preceding_decorator(node) {
-	let n =
-		((node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration') &&
-			node.declaration) ||
-		node;
+	if (node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration') {
+		// the declaration's decorators are printed before `export`, whichever
+		// side of it they were written on
+		const d = node.declaration;
+		return !!(d && 'decorators' in d && d.decorators && d.decorators.length > 0);
+	}
+
+	let n = node;
 
 	if ('parameter' in n && 'decorators' in n.parameter) {
 		n = n.parameter;
@@ -2878,7 +2903,13 @@ function handle_var_declaration(node, context, no_in = false) {
 
 	context.append(child_context);
 
-	token(child_context, node.declare ? `declare ${node.kind}` : node.kind, node);
+	if (node.declare) {
+		token(child_context, 'declare', node);
+		child_context.write(' ');
+		child_context.write(node.kind);
+	} else {
+		token(child_context, node.kind, node);
+	}
 	child_context.write(' ');
 
 	child_context.append(open);

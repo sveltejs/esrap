@@ -1,4 +1,5 @@
 /** @import { BaseNode, Command, Visitors } from './types.js' */
+/** @import { Tokens } from './tokens.js' */
 
 export const margin = 0;
 export const newline = 1;
@@ -9,6 +10,7 @@ export const space = 4;
 export class Context {
 	#visitors;
 	#commands;
+	#tokens;
 	#has_newline = false;
 
 	multiline = false;
@@ -17,10 +19,12 @@ export class Context {
 	 *
 	 * @param {Visitors} visitors
 	 * @param {Command[]} commands
+	 * @param {Tokens | null} tokens
 	 */
-	constructor(visitors, commands = []) {
+	constructor(visitors, commands = [], tokens = null) {
 		this.#visitors = visitors;
 		this.#commands = commands;
+		this.#tokens = tokens;
 	}
 
 	indent() {
@@ -56,15 +60,31 @@ export class Context {
 	}
 
 	/**
-	 *
+	 * Write `content`. If `node` is provided, `content` is mapped to its location. Otherwise, if `tokens`
+	 * were passed to `print` and `content` (ignoring surrounding whitespace) is the next token
+	 * in the source, it is mapped to that token's location.
 	 * @param {string} content
 	 * @param {BaseNode} [node]
 	 */
 	write(content, node) {
+		const value = this.#tokens && content.trim();
+		const token = value
+			? this.#tokens?.consume(value, node?.loc?.start, node?.loc?.end)
+			: undefined;
+
 		if (node?.loc) {
 			this.location(node.loc.start.line, node.loc.start.column);
 			this.#commands.push(content);
 			this.location(node.loc.end.line, node.loc.end.column);
+		} else if (token && value) {
+			const start = content.indexOf(value);
+			const end = start + value.length;
+
+			if (start > 0) this.#commands.push(content.slice(0, start));
+			this.location(token.start.line, token.start.column);
+			this.#commands.push(value);
+			this.location(token.end.line, token.end.column);
+			if (end < content.length) this.#commands.push(content.slice(end));
 		} else {
 			this.#commands.push(content);
 		}
@@ -103,6 +123,9 @@ export class Context {
 			throw new Error(message);
 		}
 
+		const tokens = this.#tokens;
+		const previous = tokens?.enter(node);
+
 		if (this.#visitors._) {
 			// @ts-ignore
 			this.#visitors._(node, this, (node) => visitor(node, this));
@@ -110,6 +133,8 @@ export class Context {
 			// @ts-ignore
 			visitor(node, this);
 		}
+
+		if (previous) tokens?.exit(node, previous);
 	}
 
 	empty() {
@@ -121,7 +146,7 @@ export class Context {
 	}
 
 	new() {
-		return new Context(this.#visitors);
+		return new Context(this.#visitors, [], this.#tokens);
 	}
 }
 
