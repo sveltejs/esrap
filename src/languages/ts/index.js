@@ -1333,7 +1333,13 @@ export default (options = {}) => {
 			context.write(' ');
 
 			if (node.specifiers.length === 0) {
-				if (node.importKind === 'type') context.write('type {} from ');
+				if (node.importKind === 'type') {
+					// one token per write, so that each maps to its own source token
+					context.write('type ');
+					context.write('{');
+					context.write('}');
+					context.write(' from ');
+				}
 				context.visit(node.source);
 				write_import_attributes(context, node);
 				context.write(';');
