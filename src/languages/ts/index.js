@@ -2298,6 +2298,13 @@ export default (options = {}) => {
 			context.write('(');
 			// @ts-expect-error Newer TS-ESTree versions use `source` instead of `argument`
 			context.visit(node.source ?? node.argument);
+
+			// import attributes, e.g. `import("foo", { with: { type: "json" } })`
+			if (node.options) {
+				context.write(', ');
+				context.visit(node.options);
+			}
+
 			context.write(')');
 
 			if (node.qualifier) {
