@@ -31,6 +31,8 @@ export interface Location {
 	type: 'Location';
 	line: number;
 	column: number;
+	/** The original name at this location, to be added to the sourcemap's `names` */
+	name?: string;
 }
 
 export interface IndentChange {

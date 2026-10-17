@@ -1,4 +1,4 @@
-/** @import { BaseNode, Command, Visitors } from './types.js' */
+/** @import { BaseNode, Command, Location, Visitors } from './types.js' */
 /** @import { Tokens } from './tokens.js' */
 
 export const margin = 0;
@@ -95,12 +95,22 @@ export class Context {
 	}
 
 	/**
-	 *
+	 * Insert a sourcemap mapping. If `name` is `true` and `tokens` were passed to `print`,
+	 * the token at this location in the source is added to the sourcemap's `names`
 	 * @param {number} line
 	 * @param {number} column
+	 * @param {boolean} [name]
 	 */
-	location(line, column) {
-		this.#commands.push({ type: 'Location', line, column });
+	location(line, column, name = false) {
+		/** @type {Location} */
+		const location = { type: 'Location', line, column };
+
+		if (name) {
+			const token = this.#tokens?.at({ line, column });
+			if (token) location.name = token.value;
+		}
+
+		this.#commands.push(location);
 	}
 
 	/**

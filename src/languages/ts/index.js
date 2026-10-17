@@ -1288,6 +1288,12 @@ export default (options = {}) => {
 
 		Identifier(node, context) {
 			inline_decorators(context, node);
+
+			// `loc.start` is the name, unless the parser ranges the identifier from its decorators
+			if (node.loc && (!node.decorators?.length || has_preceding_decorator(node))) {
+				context.location(node.loc.start.line, node.loc.start.column, true);
+			}
+
 			token(context, node.name, node);
 
 			// optional parameters (`a?: T`) carry `optional` on the identifier
@@ -1362,12 +1368,20 @@ export default (options = {}) => {
 			if (node.importKind == 'type') context.write('type ');
 
 			if (default_specifier) {
+				const loc = default_specifier.local.loc;
+				if (loc) context.location(loc.start.line, loc.start.column, true);
 				context.write(default_specifier.local.name, default_specifier);
 				if (namespace_specifier || named_specifiers.length > 0) context.write(', ');
 			}
 
 			if (namespace_specifier) {
-				context.write('* as ' + namespace_specifier.local.name, namespace_specifier);
+				const { loc, local } = namespace_specifier;
+				if (loc) context.location(loc.start.line, loc.start.column);
+				context.write('*');
+				context.write(' as ');
+				if (local.loc) context.location(local.loc.start.line, local.loc.start.column, true);
+				context.write(local.name);
+				if (loc) context.location(loc.end.line, loc.end.column);
 			}
 
 			if (named_specifiers.length > 0) {
