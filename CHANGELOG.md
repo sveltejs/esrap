@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.4.1
+
+### Patch Changes
+
+- 6c01c1a: perf: skip location flush when nothing is pending
+
 ## 2.4.0
 
 ### Minor Changes
