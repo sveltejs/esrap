@@ -1018,19 +1018,14 @@ export default (options = {}) => {
 		},
 
 		AssignmentExpression(node, context) {
-			// TypeScript casts are only valid assignment targets inside parentheses.
-			const wrap =
-				node.left.type === 'TSAsExpression' ||
-				node.left.type === 'TSSatisfiesExpression' ||
-				node.left.type === 'TSTypeAssertion';
-			maybe_wrap(context, node.left, wrap);
+			maybe_wrap(context, node.left, is_cast(node.left));
 			context.write(` ${node.operator} `);
 			context.visit(node.right);
 		},
 
 		AssignmentPattern(node, context) {
 			inline_decorators(context, node);
-			context.visit(node.left);
+			maybe_wrap(context, node.left, is_cast(node.left));
 			context.write(' = ');
 			context.visit(node.right);
 		},
@@ -2495,6 +2490,19 @@ function arrow_concise_body_needs_wrap(body) {
 		default:
 			return false;
 	}
+}
+
+/**
+ * TypeScript casts are only valid assignment targets inside parentheses.
+ * @param {TSESTree.Node} node
+ * @returns {boolean}
+ */
+function is_cast(node) {
+	return (
+		node.type === 'TSAsExpression' ||
+		node.type === 'TSSatisfiesExpression' ||
+		node.type === 'TSTypeAssertion'
+	);
 }
 
 /**
