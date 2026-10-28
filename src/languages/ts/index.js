@@ -1515,8 +1515,12 @@ export default (options = {}) => {
 
 		Property(node, context) {
 			const value = node.value.type === 'AssignmentPattern' ? node.value.left : node.value;
+			const comment = comments[comment_index];
+			const has_value_comment =
+				comment?.loc && value.loc && before(comment.loc.start, value.loc.start);
 
 			const shorthand =
+				!has_value_comment &&
 				!node.computed &&
 				node.kind === 'init' &&
 				node.key.type === 'Identifier' &&
