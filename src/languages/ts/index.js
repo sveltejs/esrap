@@ -1362,12 +1362,12 @@ export default (options = {}) => {
 			if (node.importKind == 'type') context.write('type ');
 
 			if (default_specifier) {
-				context.write(default_specifier.local.name, default_specifier);
+				context.visit(default_specifier);
 				if (namespace_specifier || named_specifiers.length > 0) context.write(', ');
 			}
 
 			if (namespace_specifier) {
-				context.write('* as ' + namespace_specifier.local.name, namespace_specifier);
+				context.visit(namespace_specifier);
 			}
 
 			if (named_specifiers.length > 0) {
@@ -1380,6 +1380,17 @@ export default (options = {}) => {
 			context.visit(node.source);
 			write_import_attributes(context, node);
 			context.write(';');
+		},
+
+		ImportDefaultSpecifier(node, context) {
+			track_binding(node.local);
+			context.visit(node.local);
+		},
+
+		ImportNamespaceSpecifier(node, context) {
+			context.write('* as ');
+			track_binding(node.local);
+			context.visit(node.local);
 		},
 
 		ImportExpression(node, context) {
