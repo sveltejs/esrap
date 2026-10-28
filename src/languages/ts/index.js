@@ -1251,8 +1251,12 @@ export default (options = {}) => {
 		},
 
 		ExpressionStatement(node, context) {
-			// would otherwise be parsed as a block / function / class declaration
-			const wrap = leads_with_curly_or_keyword(node.expression);
+			// Avoid turning expressions into declarations or directives.
+			const wrap =
+				leads_with_curly_or_keyword(node.expression) ||
+				(node.expression.type === 'Literal' &&
+					typeof node.expression.value === 'string' &&
+					(!('directive' in node) || typeof node.directive !== 'string'));
 			maybe_wrap(context, node.expression, wrap);
 			context.write(';');
 		},
