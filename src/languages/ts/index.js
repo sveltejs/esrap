@@ -1331,6 +1331,13 @@ export default (options = {}) => {
 		ImportDeclaration(node, context) {
 			token(context, 'import', node);
 			context.write(' ');
+			const phase =
+				/** @type {TSESTree.ImportDeclaration & { phase?: 'defer' | 'source' | null }} */ (node)
+					.phase;
+			if (phase) {
+				context.write(phase);
+				context.write(' ');
+			}
 
 			if (node.specifiers.length === 0) {
 				if (node.importKind === 'type') context.write('type {} from ');
@@ -1384,6 +1391,13 @@ export default (options = {}) => {
 
 		ImportExpression(node, context) {
 			token(context, 'import', node);
+			const phase =
+				/** @type {TSESTree.ImportExpression & { phase?: 'defer' | 'source' | null }} */ (node)
+					.phase;
+			if (phase) {
+				context.write('.');
+				context.write(phase);
+			}
 			context.write('(');
 			context.visit(node.source);
 			//@ts-expect-error for some reason the types haven't been updated
