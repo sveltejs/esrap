@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "{\n\tenum E { Value = /** @type {any} */ (value) }\n}\n\n{\n\tconst x = <any>/** @type {any} */ (value);\n}\n\n{\n\tinterface I { [/** @type {any} */ (key)]: string }\n}\n"
+  ],
+  "mappings": "AAAA,CAAC;CACA,KAAK,CAAC;EAAG,KAAK,uBAAuB,KAAK,CAAC;EAAE;AAC9C,CAAC;;AAED,CAAC;CACA,KAAK,CAAC,CAAC,GAAG,CAAC,GAAG,qBAAqB,KAAK,CAAC,CAAC;AAC3C,CAAC;;AAED,CAAC;CACA,UAAU,CAAC,EAAC,CAAE,qBAAqB,GAAG,EAAE,EAAE,MAAM,CAAE,CAAA;AACnD,CAAC,AACD"
+}

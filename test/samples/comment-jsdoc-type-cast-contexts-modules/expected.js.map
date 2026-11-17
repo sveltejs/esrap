@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "import /** @type {any} */ \"mod\";\nimport importedValue from /** @type {any} */ \"mod\";\nimport { value as /** @type {any} */ local } from \"mod\";\nconst value = 1;\nexport { value as /** @type {any} */ renamed };\nexport { value } from /** @type {any} */ \"mod\";\nexport * as /** @type {any} */ ns from \"mod\";\nimport \"mod\" with { type: /** @type {any} */ \"json\" };\n"
+  ],
+  "mappings": "AAAA,MAAM,oBAAoB,KAAK,CAAC;AAChC,MAAM,CAAC,aAAa,yBAAyB,KAAK,CAAC;AACnD,MAAM,GAAG,KAAK,uBAAuB,KAAK,QAAQ,KAAK,CAAC;;AACxD,KAAK,CAAC,KAAK,GAAG,CAAC,CAAC;;AAChB,MAAM,GAAG,KAAK,uBAAuB,OAAO,GAAG;AAC/C,MAAM,GAAG,KAAK,2BAA2B,KAAK,CAAC;;AAC/C,MAAM,yBAAyB,EAAE,MAAM,KAAK,CAAC;;AAC7C,MAAM,CAAC,KAAK,QAAQ,IAAI,qBAAqB,MAAM,GAAG,AACtD"
+}

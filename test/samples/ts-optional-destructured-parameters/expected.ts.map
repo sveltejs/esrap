@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "declare function optionalArray([x]?: number[]): void;\ndeclare function optionalObject({ x }?: { x: number }): void;\ntype OptionalArray = ([x]?: number[]) => void;\ntype OptionalObject = ({ x }?: { x: number }) => void;\ndeclare function requiredArray([x]: number[]): void;\ndeclare function requiredObject({ x }: { x: number }): void;\ndeclare function optionalIdentifier(x?: number): void;\n"
+  ],
+  "mappings": "AAAA,iBAAiB,aAAa,CAAC,CAAC,CAAC,EAAE,EAAE,MAAM,EAAE,CAAC,EAAE,IAAI,CAAC;AACrD,iBAAiB,cAAc,CAAC,EAAE,CAAC,GAAG,EAAE,EAAE,CAAC,EAAE,MAAM,EAAE,CAAC,EAAE,IAAI,CAAC;;AAC7D,KAAK,aAAa,GAAG,CAAC,CAAC,CAAC,EAAE,EAAE,MAAM,EAAE,KAAK,IAAI,CAAC;AAC9C,KAAK,cAAc,GAAG,CAAC,EAAE,CAAC,GAAG,EAAE,EAAE,CAAC,EAAE,MAAM,EAAE,KAAK,IAAI,CAAC;;AACtD,iBAAiB,aAAa,CAAC,CAAC,CAAC,CAAC,EAAE,MAAM,EAAE,CAAC,EAAE,IAAI,CAAC;AACpD,iBAAiB,cAAc,CAAC,EAAE,CAAC,EAAE,EAAE,EAAE,CAAC,EAAE,MAAM,EAAE,CAAC,EAAE,IAAI,CAAC;AAC5D,iBAAiB,kBAAkB,CAAC,CAAC,CAAC,EAAE,MAAM,CAAC,EAAE,IAAI,CAAC,AACtD"
+}

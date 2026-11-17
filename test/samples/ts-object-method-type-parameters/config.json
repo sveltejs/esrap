@@ -1,0 +1,4 @@
+{
+	"skipParsers": ["acorn"],
+	"snapshotParsers": ["oxc"]
+}

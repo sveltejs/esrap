@@ -1,4 +1,9 @@
 const identity = <T,>(value: T): T => value;
+const asyncIdentity = async <T,>(value: T) => value;
+const asyncConstant = async <const T,>(value: T) => value;
+const constrained = <T extends object,>(value: T) => value;
+const defaulted = <T = string,>(value: T) => value;
+const constrainedDefault = <T extends object = object,>(value: T) => value;
 const pair = <T, U>(a: T, b: U): [T, U] => [a, b];
 const constant = <const T,>(value: T) => value;
 const nested = <T,>(value: T) => <U,>(other: U) => [value, other];

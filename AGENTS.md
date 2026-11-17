@@ -1,0 +1,1 @@
+When writing tests, prefer creating them (or enhancing existing ones) in test/samples. If a test only succeeds in one parser but not the other, you can use skipParsers and snapshotParsers options in a config.json file in a sample to restrict for which parsers to run the test.
