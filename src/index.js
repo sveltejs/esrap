@@ -117,6 +117,8 @@ export function print(node, visitors, opts = {}) {
 	}
 
 	function flush_locations() {
+		if (pending_locations.length === 0) return;
+
 		for (const location of pending_locations) {
 			add_location(location);
 		}
