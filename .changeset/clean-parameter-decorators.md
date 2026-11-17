@@ -2,4 +2,4 @@
 'esrap': patch
 ---
 
-Preserve parameter property decorators when the inner decorator list is empty
+fix: preserve parameter property decorators when the inner decorator list is empty
