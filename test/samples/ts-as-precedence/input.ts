@@ -33,6 +33,10 @@ const f1 = (M.g satisfies any)<any>;
 const f2 = (<any>M.g)<any>;
 const f3 = (a ? b : c)<any>;
 const f4 = (a || b)<any>;
+({ a: (w as any) = 1 } = {});
+[(w satisfies any) = 1] = [];
+({ a: (<any>w) = 1 } = {});
+({ a: (M.g as any) = 1 } = {});
 // prettier-ignore
 const asserted = (<T>x) ** y;
 
