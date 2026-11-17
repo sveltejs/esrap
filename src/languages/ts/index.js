@@ -168,6 +168,8 @@ function can_have_jsdoc_type_cast(node, parent) {
 
 		case 'MetaProperty':
 		case 'ImportDeclaration':
+		case 'ImportDefaultSpecifier':
+		case 'ImportNamespaceSpecifier':
 		case 'ImportSpecifier':
 		case 'ImportAttribute':
 		case 'ExportAllDeclaration':
@@ -307,12 +309,10 @@ export default (options = {}) => {
 
 			write_comment(comment, context);
 
-			if (position === 'leading') {
-				if (comment.type === 'Line') {
-					context.newline();
-				} else if (comment.type === 'Block' && !comment.value.includes('\n')) {
-					context.write(' ');
-				}
+			if (comment.type === 'Line') {
+				context.newline();
+			} else if (position === 'leading' && !comment.value.includes('\n')) {
+				context.write(' ');
 			}
 		}
 	}
@@ -1515,13 +1515,11 @@ export default (options = {}) => {
 		},
 
 		ImportDefaultSpecifier(node, context) {
-			track_binding(node.local);
 			context.visit(node.local);
 		},
 
 		ImportNamespaceSpecifier(node, context) {
 			context.write('* as ');
-			track_binding(node.local);
 			context.visit(node.local);
 		},
 
