@@ -91,6 +91,21 @@ test('only trailing comments are inserted when specified', () => {
 	expect(code).not.toContain('//');
 });
 
+test('an additional trailing line comment does not swallow the next comment or closing brace', () => {
+	const { ast } = acornParse('function test() { return 42; }');
+	const statement = get_return_statement(ast);
+	const { code } = print(
+		ast,
+		ts({
+			getTrailingComments: (node) =>
+				node === statement ? [line(' First'), block(' Second ')] : undefined
+		})
+	);
+
+	expect(code).toMatch(/\/\/ First\n\s*\/\* Second \*\//);
+	expect(() => new Function(code)).not.toThrow();
+});
+
 test('additional comments multi-line comments have new line', () => {
 	const input = `function example() {
 	const x = 1;
