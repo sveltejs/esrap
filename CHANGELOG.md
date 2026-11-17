@@ -1,5 +1,11 @@
 # esrap changelog
 
+## 2.4.2
+
+### Patch Changes
+
+- 48608ce: fix: use original location of regular identifiers to preserve mappings even with renames
+
 ## 2.4.1
 
 ### Patch Changes
