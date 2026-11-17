@@ -1425,7 +1425,14 @@ export default (options = {}) => {
 
 		Identifier(node, context) {
 			inline_decorators(context, node);
-			token(context, node.name, node);
+
+			if (node.typeAnnotation || node.optional || /** @type {any} */ (node).definite) {
+				// These identifiers include their annotation or marker in their location.
+				token(context, node.name, node);
+			} else {
+				// Preserve the original span for renamed identifiers and Unicode escapes.
+				context.write(node.name, node);
+			}
 
 			// optional parameters (`a?: T`) carry `optional` on the identifier
 			if (node.optional) context.write('?');
