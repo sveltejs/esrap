@@ -1,5 +1,7 @@
 // @ts-check
+/** @import { TSESTree } from '@typescript-eslint/types' */
 import { expect, test } from 'vitest';
+import { walk } from 'zimmerframe';
 import ts from '../src/languages/ts/index.js';
 import { print } from '../src/index.js';
 import { acornParse } from './common.js';
@@ -85,6 +87,29 @@ test.each([
 	const at_end = (mappings[gen_line] ?? []).filter((s) => s[0] === gen_col).map((s) => s.slice(2));
 	expect(at_end).toContainEqual([0, source.indexOf(name) + name.length]);
 	expect(at_end).not.toContainEqual([0, source.indexOf(name) + name.length + 1]);
+});
+
+test('renamed identifiers map to their original source spans', () => {
+	const { ast } = acornParse('fooooo(fooooo);', { fileExtension: 'js' });
+	const renamed = walk(/** @type {TSESTree.Node} */ (ast), null, {
+		Identifier(node) {
+			return { ...node, name: 'bar' };
+		}
+	});
+	const { code, map } = print(renamed, ts(), { sourceMapEncodeMappings: false });
+
+	expect(code).toBe('bar(bar);');
+	expect(map.mappings).toEqual([
+		[
+			// [generated column, source index, original line, original column]
+			[0, 0, 0, 0],
+			[3, 0, 0, 6],
+			[4, 0, 0, 7],
+			[7, 0, 0, 13],
+			[8, 0, 0, 14],
+			[9, 0, 0, 15]
+		]
+	]);
 });
 
 test.each([
