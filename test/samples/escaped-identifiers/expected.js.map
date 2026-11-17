@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const \\u0061 = 1;\nconst \\u{62} = \\u0061;\n\\u{62};\n"
+  ],
+  "mappings": "AAAA,KAAK,CAAC,CAAM,GAAG,CAAC,CAAC;AACjB,KAAK,CAAC,CAAM,GAAG,CAAM,CAAC;;AACtB,CAAM,CAAC,AACP"
+}

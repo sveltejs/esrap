@@ -1,0 +1,44 @@
+{
+	"type": "Program",
+	"sourceType": "script",
+	"body": [
+		{
+			"type": "ExpressionStatement",
+			"expression": {
+				"type": "CallExpression",
+				"callee": {
+					"type": "Identifier",
+					"name": "foo_renamed",
+					"loc": { "start": { "line": 1, "column": 0 }, "end": { "line": 1, "column": 3 } }
+				},
+				"arguments": [
+					{
+						"type": "Identifier",
+						"name": "b",
+						"loc": { "start": { "line": 1, "column": 4 }, "end": { "line": 1, "column": 7 } }
+					}
+				],
+				"optional": false
+			}
+		},
+		{
+			"type": "ExpressionStatement",
+			"expression": {
+				"type": "CallExpression",
+				"callee": {
+					"type": "Identifier",
+					"name": "l",
+					"loc": { "start": { "line": 2, "column": 0 }, "end": { "line": 2, "column": 6 } }
+				},
+				"arguments": [
+					{
+						"type": "Identifier",
+						"name": "expanded",
+						"loc": { "start": { "line": 2, "column": 7 }, "end": { "line": 2, "column": 8 } }
+					}
+				],
+				"optional": false
+			}
+		}
+	]
+}
