@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "{\n\tfunction f(.../** @type {any} */ rest) {}\n}\n\n{\n\tfunction f({ key: [/** @type {any} */ value] = [] } = {}) {}\n}\n\n{\n\tlet [/** @type {any} */ value] = values;\n}\n\n{\n\ttry {} catch ({ key: /** @type {any} */ value }) {}\n}\n"
+  ],
+  "mappings": "AAAA,CAAC;CACA,SAAS,CAAC,CAAC,sBAAsB,IAAI,EAAE,CAAC,CAAC;AAC1C,CAAC;;AAED,CAAC;CACA,SAAS,CAAC,CAAC,EAAE,GAAG,EAAE,oBAAoB,KAAK,CAAC,GAAG,EAAE,EAAE,GAAG,EAAE,EAAE,CAAC,CAAC;AAC7D,CAAC;;AAED,CAAC;CACA,GAAG,CAAC,oBAAoB,KAAK,CAAC,GAAG,MAAM,CAAC;AACzC,CAAC;;AAED,CAAC;CACA,GAAG,CAAC,CAAC,CAAC,CAAC,KAAK,CAAE,EAAE,GAAG,qBAAqB,KAAK,EAAE,EAAE,CAAC,CAAC;AACpD,CAAC,AACD"
+}

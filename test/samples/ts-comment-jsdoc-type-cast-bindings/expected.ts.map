@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "{\n\tclass C { constructor(public /** @type {any} */ value) {} }\n}\n\ndeclare function /** @type {any} */ f(): void;\n\n{\n\tinterface X { [/** @type {any} */ key: string]: unknown }\n}\n"
+  ],
+  "mappings": "AAAA,CAAC;CACA,MAAM,CAAC,CAAC,CAAC;EAAC,WAAW,CAAC,0BAA0B,KAAK,EAAE,CAAC,CAAC;CAAC,CAAC;AAC5D,CAAC;;AAED,oCAAoC,CAAC,EAAE,EAAE,IAAI,CAAC;;AAE9C,CAAC;CACA,UAAU,CAAC,EAAC,CAAE,oBAAoB,GAAG,EAAE,MAAM,CAAC,EAAE,OAAO,CAAE,CAAA;AAC1D,CAAC,AACD"
+}

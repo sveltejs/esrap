@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "// Exposed in through TypeScript expressions.\nfor ((key in object as boolean);;);\nfor (let value = (key in object as boolean);;);\nfor ((key in object satisfies boolean);;);\nfor (let value = (key in object satisfies boolean);;);\nfor ((key in object as boolean === true);;);\nfor (let value = (key in object as boolean === true);;);\n\n// Protected in through TypeScript expressions.\nfor (((enabled && key in object) as boolean);;);\nfor (let value = ((enabled && key in object) as boolean);;);\nfor (((enabled && key in object) satisfies boolean);;);\nfor (let value = ((enabled && key in object) satisfies boolean);;);\nfor (((key in object as number) | mask);;);\nfor (let value = ((key in object as number) | mask);;);\nfor (((key in object)!);;);\nfor (let value = ((key in object)!);;);\nfor ((<boolean>(key in object));;);\nfor (let value = (<boolean>(key in object));;);\n"
+  ],
+  "mappings": "AAAA;AACA,GAAG,EAAG,CAAA,GAAG,IAAI,MAAM,IAAI,OAAO,CAAA,MAAI,CAAC;;AACnC,GAAG,EAAE,GAAG,CAAC,KAAK,GAAI,CAAA,GAAG,IAAI,MAAM,IAAI,OAAO,CAAA,AAAC,MAAG,CAAC;AAC/C,GAAG,EAAG,CAAA,GAAG,IAAI,MAAM,WAAW,OAAO,CAAA,MAAI,CAAC;AAC1C,GAAG,EAAE,GAAG,CAAC,KAAK,GAAI,CAAA,GAAG,IAAI,MAAM,WAAW,OAAO,CAAA,AAAC,MAAG,CAAC;AACtD,GAAG,EAAG,CAAA,GAAG,IAAI,MAAM,IAAI,OAAO,KAAK,IAAI,CAAA,MAAI,CAAC;AAC5C,GAAG,EAAE,GAAG,CAAC,KAAK,GAAI,CAAA,GAAG,IAAI,MAAM,IAAI,OAAO,KAAK,IAAI,CAAA,AAAC,MAAG,CAAC;;;AAGxD,GAAG,EAAG,AAAC,CAAA,OAAO,IAAI,GAAG,IAAI,MAAM,CAAA,IAAK,OAAO,MAAI,CAAC;;AAChD,GAAG,EAAE,GAAG,CAAC,KAAK,GAAI,AAAC,CAAA,OAAO,IAAI,GAAG,IAAI,MAAM,CAAA,IAAK,OAAO,AAAC,MAAG,CAAC;AAC5D,GAAG,EAAG,AAAC,CAAA,OAAO,IAAI,GAAG,IAAI,MAAM,CAAA,WAAY,OAAO,MAAI,CAAC;AACvD,GAAG,EAAE,GAAG,CAAC,KAAK,GAAI,AAAC,CAAA,OAAO,IAAI,GAAG,IAAI,MAAM,CAAA,WAAY,OAAO,AAAC,MAAG,CAAC;AACnE,GAAG,EAAG,AAAC,CAAA,GAAG,IAAI,MAAM,IAAI,MAAM,CAAA,GAAI,IAAI,MAAI,CAAC;AAC3C,GAAG,EAAE,GAAG,CAAC,KAAK,GAAI,AAAC,CAAA,GAAG,IAAI,MAAM,IAAI,MAAM,CAAA,GAAI,IAAI,AAAC,MAAG,CAAC;AACvD,GAAG,EAAG,AAAC,CAAA,GAAG,IAAI,MAAM,CAAA,CAAE,MAAI,CAAC;AAC3B,GAAG,EAAE,GAAG,CAAC,KAAK,GAAI,AAAC,CAAA,GAAG,IAAI,MAAM,CAAA,CAAE,AAAC,MAAG,CAAC;AACvC,GAAG,EAAG,CAAC,OAAO,CAAE,CAAA,GAAG,IAAI,MAAM,CAAA,AAAC,MAAI,CAAC;AACnC,GAAG,EAAE,GAAG,CAAC,KAAK,GAAI,CAAC,OAAO,CAAE,CAAA,GAAG,IAAI,MAAM,CAAA,AAAC,AAAC,MAAG,CAAC,AAC/C"
+}

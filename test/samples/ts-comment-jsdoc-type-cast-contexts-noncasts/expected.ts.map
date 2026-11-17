@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "{\n\ttype /** @type {any} */ T = string;\n}\n\n{\n\ttype T = typeof /** @type {any} */ value;\n}\n\n{\n\ttype T = ns./** @type {any} */ Value;\n}\n\n{\n\ttype T = import(/** @type {any} */ \"mod\").Value;\n}\n\n{\n\tenum /** @type {any} */ E { Value }\n}\n\n{\n\tenum E { /** @type {any} */ Value }\n}\n\nnamespace /** @type {any} */ N {}\n\n{\n\tinterface /** @type {any} */ I {}\n}\n\n{\n\tinterface I extends /** @type {any} */ Base {}\n}\n\n{\n\tclass C implements /** @type {any} */ Base {}\n}\n\n{\n\tfunction f(x: unknown): x is /** @type {any} */ Value {}\n}\n\n{\n\ttype T = [/** @type {any} */ label: string];\n}\n\n{\n\ttype T = [/** @type {any} */ label?: string];\n}\n\n{\n\tinterface I { readonly /** @type {any} */ value: string }\n}\n"
+  ],
+  "mappings": "AAAA,CAAC;CACA,wBAAwB,CAAC,GAAG,MAAM,CAAC;AACpC,CAAC;;AAED,CAAC;CACA,KAAK,CAAC,GAAG,0BAA0B,KAAK,CAAC;AAC1C,CAAC;;AAED,CAAC;CACA,KAAK,CAAC,GAAG,EAAE,oBAAoB,KAAK,CAAC;AACtC,CAAC;;AAED,CAAC;CACA,KAAK,CAAC,GAAG,MAAM,oBAAoB,KAAK,EAAE,KAAK,CAAC;AACjD,CAAC;;AAED,CAAC;CACA,wBAAwB,CAAC;EAAG,KAAK;EAAE;AACpC,CAAC;;AAED,CAAC;CACA,KAAK,CAAC;qBAAsB,KAAK;EAAE;AACpC,CAAC;;AAED,6BAA6B,CAAC,AAAC;CAAE;;AAEjC,CAAC;CACA,6BAA6B,CAAC,EAAC,AAAE,CAAA;AAClC,CAAC;;AAED,CAAC;CACA,UAAU,CAAC,4BAA4B,IAAI,EAAC,AAAE,CAAA;AAC/C,CAAC;;AAED,CAAC;CACA,MAAM,CAAC,+BAA+B,IAAI,CAAC,CAAC,CAAC;AAC9C,CAAC;;AAED,CAAC;CACA,SAAS,CAAC,CAAC,CAAC,EAAE,OAAO,CAAC,EAAE,CAAC,uBAAuB,KAAK,CAAC,CAAC,CAAC;AACzD,CAAC;;AAED,CAAC;CACA,KAAK,CAAC,GAAG,oBAAoB,KAAK,EAAE,MAAM,CAAC,CAAC;AAC7C,CAAC;;AAED,CAAC;CACA,KAAK,CAAC,GAAG,oBAAoB,KAAK,GAAG,MAAM,CAAC,CAAC;AAC9C,CAAC;;AAED,CAAC;CACA,UAAU,CAAC,EAAC,CAAE,4BAA4B,KAAK,EAAE,MAAM,CAAE,CAAA;AAC1D,CAAC,AACD"
+}

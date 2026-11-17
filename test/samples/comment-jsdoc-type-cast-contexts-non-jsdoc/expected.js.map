@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "{\n\tconst x = /* * @type {any} */ value;\n}\n\n{\n\tconst x = /*\n\t * @type {any}\n\t */ value;\n}\n"
+  ],
+  "mappings": "AAAA,CAAC;CACA,KAAK,CAAC,CAAC,uBAAuB,KAAK,CAAC;AACrC,CAAC;;AAED,CAAC;CACA,KAAK,CAAC,CAAC;;;CAEH,KAAK,CAAC;AACX,CAAC,AACD"
+}
