@@ -202,7 +202,9 @@ for (const dir of fs.readdirSync(`${__dirname}/samples`)) {
 		for (const [parserName, { skip, parse, isBaseline, skipSnapshot, skipMap }] of Object.entries(
 			parsers
 		)) {
-			test.skipIf(skip)(`test: ${dir}, parser: ${parserName}`, () => {
+			const skip_parser = skip || config.skipParsers?.includes(parserName);
+
+			test.skipIf(skip_parser)(`test: ${dir}, parser: ${parserName}`, () => {
 				/** @type {TSESTree.Program} */
 				let ast;
 
