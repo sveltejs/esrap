@@ -82,6 +82,7 @@ export default (options) => {
 		},
 
 		JSXIdentifier(node, context) {
+			if (node.loc) context.location(node.loc.start.line, node.loc.start.column, true);
 			context.write(node.name, node);
 		},
 
