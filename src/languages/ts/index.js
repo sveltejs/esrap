@@ -168,6 +168,8 @@ function can_have_jsdoc_type_cast(node, parent) {
 
 		case 'MetaProperty':
 		case 'ImportDeclaration':
+		case 'ImportDefaultSpecifier':
+		case 'ImportNamespaceSpecifier':
 		case 'ImportSpecifier':
 		case 'ImportAttribute':
 		case 'ExportAllDeclaration':
@@ -307,12 +309,10 @@ export default (options = {}) => {
 
 			write_comment(comment, context);
 
-			if (position === 'leading') {
-				if (comment.type === 'Line') {
-					context.newline();
-				} else if (comment.type === 'Block' && !comment.value.includes('\n')) {
-					context.write(' ');
-				}
+			if (comment.type === 'Line') {
+				context.newline();
+			} else if (position === 'leading' && !comment.value.includes('\n')) {
+				context.write(' ');
 			}
 		}
 	}
@@ -1498,12 +1498,12 @@ export default (options = {}) => {
 			if (node.importKind == 'type') context.write('type ');
 
 			if (default_specifier) {
-				context.write(default_specifier.local.name, default_specifier);
+				context.visit(default_specifier);
 				if (namespace_specifier || named_specifiers.length > 0) context.write(', ');
 			}
 
 			if (namespace_specifier) {
-				context.write('* as ' + namespace_specifier.local.name, namespace_specifier);
+				context.visit(namespace_specifier);
 			}
 
 			if (named_specifiers.length > 0) {
@@ -1516,6 +1516,15 @@ export default (options = {}) => {
 			context.visit(node.source);
 			write_import_attributes(context, node);
 			context.write(';');
+		},
+
+		ImportDefaultSpecifier(node, context) {
+			context.visit(node.local);
+		},
+
+		ImportNamespaceSpecifier(node, context) {
+			context.write('* as ');
+			context.visit(node.local);
 		},
 
 		ImportExpression(node, context) {
