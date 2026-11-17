@@ -2,6 +2,7 @@
 import { expect, test } from 'vitest';
 import { print } from '../src/index.js';
 import ts from '../src/languages/ts/index.js';
+import tsx from '../src/languages/tsx/index.js';
 import { acornParse } from './common.js';
 
 /** @param {unknown} ast */
@@ -100,6 +101,19 @@ test.each([
 	'({ value: /** @type {any} */ (value) } = obj);'
 ])('does not turn a cast property value into shorthand: %s', (input) => {
 	expect(roundtrip(input)).toBe(input);
+});
+
+test.each([
+	{ name: 'ts', language: ts },
+	{ name: 'tsx', language: tsx }
+])('preserves the key for a cast on a destructuring default target ($name)', ({ language }) => {
+	const input = '({ x: (/** @type {number} */ (x)) = 1 } = source);';
+	const { ast, comments } = acornParse(input, { fileExtension: 'js' });
+	const { code } = print(ast, language({ comments }));
+
+	expect(code).toBe('({ x: /** @type {number} */ (x) = 1 } = source);');
+	const { ast: reparsed } = acornParse(code, { fileExtension: 'js' });
+	expect(without_locations(reparsed)).toEqual(without_locations(ast));
 });
 
 // Regressions for the workarounds in

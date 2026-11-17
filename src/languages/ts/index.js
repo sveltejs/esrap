@@ -1659,7 +1659,7 @@ export default (options = {}) => {
 				// An explicit `__proto__: value` sets the prototype, unlike shorthand.
 				(!is_proto || node.shorthand) &&
 				// Only casts require expansion; ordinary comments can stay in shorthand.
-				!has_leading_type_cast(node.value);
+				!has_leading_type_cast(value);
 
 			if (shorthand) {
 				context.visit(node.value);
