@@ -1,5 +1,21 @@
 # esrap changelog
 
+## 2.4.1
+
+### Patch Changes
+
+- 35a9b0d: fix: parenthesize TypeScript casts used as destructuring default targets
+- 7b29000: fix: preserve parameter property decorators when the inner decorator list is empty
+- d0fb4be: fix: preserve parentheses around arrow bodies that start with an object expression
+- fdae437: fix: map the `type` keyword and braces of an empty type-only import when `tokens` are passed
+- 1712810: fix: keep the import attributes when printing a `TSImportType`
+- 679c5ef: fix: preserve optional markers on destructured parameters
+- 6c01c1a: perf: skip location flush when nothing is pending
+- 836005f: fix: preserve `defer` and `source` keywords in static and dynamic imports
+- ab01594: fix: preserve non-directive string expression statements
+- 2658a8b: fix: prevent jsdoc type casts in more invalid positions
+- f1183ad: fix: preserve leading comments on default and namespace import bindings and map namespace binding identifiers
+
 ## 2.4.0
 
 ### Minor Changes
