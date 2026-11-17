@@ -624,6 +624,7 @@ export default (options = {}) => {
 				false
 			);
 			context.write(']');
+			if ('optional' in node && node.optional) context.write('?');
 			if ('typeAnnotation' in node && node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
 
@@ -1626,6 +1627,7 @@ export default (options = {}) => {
 			sequence(context, node.properties, node.loc?.end ?? null, true);
 			context.write('}');
 
+			if (node.optional) context.write('?');
 			if (node.typeAnnotation) context.visit(node.typeAnnotation);
 		},
 
