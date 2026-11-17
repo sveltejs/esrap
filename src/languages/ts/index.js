@@ -2161,7 +2161,7 @@ export default (options = {}) => {
 
 			inline_decorators(
 				context,
-				parameter.decorators ? { ...node, decorators: parameter.decorators } : node
+				parameter.decorators?.length ? { ...node, decorators: parameter.decorators } : node
 			);
 
 			if (node.accessibility) {
