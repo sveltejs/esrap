@@ -2,4 +2,4 @@
 'esrap': patch
 ---
 
-Preserve deferred and source phases in static and dynamic imports
+fix: preserve `defer` and `source` keywords in static and dynamic imports
