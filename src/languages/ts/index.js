@@ -458,6 +458,12 @@ export default (options = {}) => {
 		return value?.type === 'ObjectExpression' || value?.type === 'ArrayExpression';
 	}
 
+	/** @param {TSESTree.Node} argument */
+	function has_leading_operand_comment(argument) {
+		const comment = comments[comment_index];
+		return !!(comment?.loc && argument.loc && before(comment.loc.start, argument.loc.start));
+	}
+
 	/**
 	 * @param {Context} context
 	 * @param {{ attributes?: TSESTree.ImportAttribute[], assertions?: TSESTree.ImportAttribute[] }} node
@@ -1772,11 +1778,7 @@ export default (options = {}) => {
 			token(context, 'return', node);
 
 			if (node.argument) {
-				const contains_comment =
-					comments[comment_index] &&
-					comments[comment_index].loc &&
-					node.argument.loc &&
-					before(comments[comment_index].loc.start, node.argument.loc.start);
+				const contains_comment = has_leading_operand_comment(node.argument);
 
 				context.write(contains_comment ? ' (' : ' ');
 				context.visit(node.argument);
@@ -1900,9 +1902,10 @@ export default (options = {}) => {
 
 		ThrowStatement(node, context) {
 			token(context, 'throw', node);
-			context.write(' ');
+			const wrap = node.argument && has_leading_operand_comment(node.argument);
+			context.write(wrap ? ' (' : ' ');
 			if (node.argument) context.visit(node.argument);
-			context.write(';');
+			context.write(wrap ? ');' : ';');
 		},
 
 		CatchClause(node, context) {
@@ -1993,8 +1996,10 @@ export default (options = {}) => {
 			token(context, node.delegate ? 'yield*' : 'yield', node);
 
 			if (node.argument) {
-				context.write(' ');
+				const wrap = !node.delegate && has_leading_operand_comment(node.argument);
+				context.write(wrap ? ' (' : ' ');
 				context.visit(node.argument);
+				if (wrap) context.write(')');
 			}
 		},
 
