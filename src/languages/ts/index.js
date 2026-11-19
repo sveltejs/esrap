@@ -1285,10 +1285,10 @@ export default (options = {}) => {
 			token(context, 'export', node);
 
 			if (node.exportKind === 'type') context.write(' type');
-			context.write(' * ');
+			context.write(' *');
 
 			if (node.exported) {
-				context.write('as ');
+				context.write(' as ');
 				context.visit(node.exported);
 			}
 
