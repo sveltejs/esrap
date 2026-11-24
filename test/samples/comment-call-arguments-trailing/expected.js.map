@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "f(\n\t1,\n\t// 2,\n);\ng();\nh(/* inside */);\nnew C(\n\t1,\n\t// trailing\n);\nk(1 /* stays */);\nm(1, /* second */ 2);\nimport('module' /* c */);\nimport(\n\t'module'\n\t// c\n);\n"
+  ],
+  "mappings": "AAAA,CAAC;CACA,CAAC;;CAED,CAAC;;AACF,CAAC,EAAE,CAAC;AACJ,CAAC,cAAc,CAAC;;AAChB,GAAG,CAAC,CAAC;CACJ,CAAC;;CAED,CAAC;;AACF,CAAC,CAAC,CAAC,aAAa,CAAC;AACjB,CAAC,CAAC,CAAC,eAAe,CAAC,CAAC,CAAC;AACrB,MAAM,CAAC,QAAQ,SAAS,CAAC;;AACzB,MAAM;CACL,QAAQ;;CAER,CAAC,AACF"
+}
