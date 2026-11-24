@@ -449,6 +449,46 @@ export default (options = {}) => {
 	}
 
 	/**
+	 * Writes the comments still pending before a closing `)` (after the last argument, or in an
+	 * empty argument list) so they stay inside the parentheses. Left pending, they would be
+	 * printed after the `)`, by whatever comes next.
+	 * Returns true when a comment needs the argument list to be multiline.
+	 * @param {Context} context
+	 * @param {boolean} has_args
+	 * @param {{ line: number, column: number } | null} from the last argument's end, or the callee's end for an empty list
+	 * @param {{ line: number, column: number } | null} to the end of the node, after the `)`
+	 * @returns {boolean}
+	 */
+	function flush_comments_before_close(context, has_args, from, to) {
+		const inside = /** @type {typeof comments} */ ([]);
+
+		for (let i = comment_index; i < comments.length; i += 1) {
+			const comment = comments[i];
+			if (!comment?.loc || !to || !before(comment.loc.start, to)) break;
+			inside.push(comment);
+		}
+
+		// a Line comment must end its line, and a comment on a later line than the
+		// previous token would otherwise be printed on the same line as it
+		const multiline = inside.some(
+			(comment) => comment.type === 'Line' || (from !== null && comment.loc.start.line > from.line)
+		);
+
+		inside.forEach((comment, index) => {
+			if (multiline && (has_args || index > 0)) {
+				context.newline();
+			} else if (index > 0 || has_args) {
+				context.space();
+			}
+
+			write_comment(comment, context);
+			comment_index += 1;
+		});
+
+		return multiline;
+	}
+
+	/**
 	 * @param {TSESTree.Node} node
 	 * @returns {boolean}
 	 */
@@ -741,6 +781,22 @@ export default (options = {}) => {
 				flush_trailing_comments(context, arg.loc?.end ?? null, next);
 
 				if (!is_last) context.append(join);
+			}
+
+			// Comments after the last argument (or in an empty list) would otherwise be printed
+			// after the `)`, so they are written inside the parentheses first.
+			if (
+				flush_comments_before_close(
+					final_context,
+					node.arguments.length > 0,
+					node.arguments[node.arguments.length - 1]?.loc?.end ??
+						node.typeArguments?.loc?.end ??
+						node.callee.loc?.end ??
+						null,
+					node.loc?.end ?? null
+				)
+			) {
+				child_context.multiline = true;
 			}
 
 			context.multiline ||= child_context.multiline || final_context.multiline;
@@ -1558,20 +1614,59 @@ export default (options = {}) => {
 				context.write(phase);
 			}
 			context.write('(');
-			context.visit(node.source);
-			//@ts-expect-error for some reason the types haven't been updated
-			if (node.arguments) {
-				//@ts-expect-error
-				for (let index = 0; index < node.arguments.length; index++) {
-					context.write(', ');
-					//@ts-expect-error
-					context.visit(node.arguments[index]);
-				}
+
+			// the types haven't been updated for arguments and options yet
+			const import_node = /** @type {any} */ (node);
+			const parts = [
+				import_node.source,
+				...(import_node.arguments ?? []),
+				...(import_node.options ? [import_node.options] : [])
+			];
+
+			const open = context.new();
+			const join = context.new();
+			const child_context = context.new();
+
+			context.append(open);
+			context.append(child_context);
+
+			for (let i = 0; i < parts.length; i += 1) {
+				const is_last = i === parts.length - 1;
+				const part = parts[i];
+
+				child_context.visit(part);
+				if (!is_last) child_context.write(',');
+
+				const next = is_last ? (node.loc?.end ?? null) : (parts[i + 1]?.loc?.start ?? null);
+				flush_trailing_comments(child_context, part.loc?.end ?? null, next);
+
+				if (!is_last) child_context.append(join);
 			}
-			if (node.options) {
-				context.write(', ');
-				context.visit(node.options);
+
+			// comments after the last part, e.g. `import(\n'module'\n// c\n)`, stay inside the parentheses
+			if (
+				flush_comments_before_close(
+					child_context,
+					true,
+					parts[parts.length - 1]?.loc?.end ?? null,
+					node.loc?.end ?? null
+				)
+			) {
+				child_context.multiline = true;
 			}
+
+			context.multiline ||= child_context.multiline;
+
+			if (child_context.multiline) {
+				open.indent();
+				open.newline();
+				join.newline();
+				context.dedent();
+				context.newline();
+			} else {
+				join.write(' ');
+			}
+
 			context.write(')');
 		},
 
