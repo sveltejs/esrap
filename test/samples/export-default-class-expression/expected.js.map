@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const Inner = 42;\n\nexport default (class Inner {\n\tstatic self() {\n\t\treturn Inner;\n\t}\n});\n"
+  ],
+  "mappings": "AAAA,KAAK,CAAC,KAAK,GAAG,EAAE,CAAC;;AAEjB,MAAM,SAAU,CAAA,MAAM,KAAK,CAAC,CAAC;CAC5B,OAAO,IAAI,GAAG,CAAC;EACd,MAAM,CAAC,KAAK,CAAC;CACd,CAAC;AACF,CAAC,CAAA,CAAE,AACH"
+}
