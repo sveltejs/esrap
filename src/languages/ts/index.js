@@ -1606,7 +1606,9 @@ export default (options = {}) => {
 						? `${bigint}n`
 						: typeof node.value === 'string'
 							? quote(node.value, quote_char)
-							: String(node.value));
+							: Object.is(node.value, -0)
+								? '-0'
+								: String(node.value));
 
 			context.write(value, node);
 		},
@@ -1945,7 +1947,8 @@ export default (options = {}) => {
 				((node.argument.type === 'UnaryExpression' && node.argument.operator === node.operator) ||
 					(node.argument.type === 'UpdateExpression' &&
 						node.argument.prefix &&
-						node.argument.operator[0] === node.operator))
+						node.argument.operator[0] === node.operator) ||
+					(node.operator === '-' && is_negative_literal(node.argument)))
 			) {
 				context.write(' ');
 			}
@@ -2715,6 +2718,19 @@ function is_cast(node) {
 }
 
 /**
+ * Generated literals can include the sign instead of a separate UnaryExpression.
+ * @param {TSESTree.Node} node
+ */
+function is_negative_literal(node) {
+	return (
+		node.type === 'Literal' &&
+		(((typeof node.value === 'number' || typeof node.value === 'bigint') &&
+			(node.value < 0 || Object.is(node.value, -0))) ||
+			('bigint' in node && node.bigint?.[0] === '-'))
+	);
+}
+
+/**
  *
  * @param {TSESTree.Expression | TSESTree.PrivateIdentifier} node
  * @param {TSESTree.BinaryExpression | TSESTree.LogicalExpression} parent
@@ -2747,7 +2763,8 @@ function operand_needs_wrap(node, parent, is_right) {
 		parent.operator === '**' &&
 		(node.type === 'UnaryExpression' ||
 			node.type === 'AwaitExpression' ||
-			node.type === 'TSTypeAssertion');
+			node.type === 'TSTypeAssertion' ||
+			is_negative_literal(node));
 	if (unary_base_of_pow) return true;
 
 	const precedence = EXPRESSIONS_PRECEDENCE[node.type];
