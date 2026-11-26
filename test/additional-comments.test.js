@@ -5,6 +5,7 @@ import { expect, test } from 'vitest';
 import { print } from '../src/index.js';
 import { acornParse } from './common.js';
 import ts from '../src/languages/ts/index.js';
+import tsx from '../src/languages/tsx/index.js';
 
 /**
  * @param {string} value
@@ -131,7 +132,58 @@ test('additional comments multi-line comments have new line', () => {
 			/**
 			 * This is a leading comment
 			 */
-			return x;
+			return (x);
 		}"
 	`);
 });
+
+for (const [name, language] of Object.entries({ ts, tsx })) {
+	for (const with_tokens of [false, true]) {
+		for (const expression of ['value', 'value + 1', 'value?.property']) {
+			for (const comment of [line(' note'), block(' note\n continued '), block(' inline ')]) {
+				test(`${name}: callback comments preserve ${expression}, ${JSON.stringify(comment)}, tokens ${with_tokens}`, () => {
+					const source = `const value = 42;
+function returning() { return ${expression}; }
+function throwing() { throw ${expression}; }
+function* yielding() { yield ${expression}; yield* [${expression}]; }`;
+					const tokens = with_tokens ? [] : undefined;
+					const { ast } = acornParse(source, { fileExtension: 'js', tokens });
+					const calls = new Map();
+					const { code } = print(
+						ast,
+						language({
+							getLeadingComments(node) {
+								calls.set(node, (calls.get(node) ?? 0) + 1);
+								return node.type === 'Identifier' && 'name' in node && node.name === 'value'
+									? [comment]
+									: undefined;
+							}
+						}),
+						{ tokens }
+					);
+					const observe = `
+let thrown;
+try { throwing(); } catch (value) { thrown = value; }
+return [returning(), thrown, [...yielding()]];`;
+					expect(new Function(code + observe)()).toEqual(new Function(source + observe)());
+					expect([...calls.values()].every((count) => count === 1)).toBe(true);
+				});
+			}
+		}
+	}
+
+	test(`${name}: a callback comment does not defer a yielded side effect`, () => {
+		const { ast } = acornParse('let seen = 0; function* f() { yield seen++; }', {
+			fileExtension: 'js'
+		});
+		const { code } = print(
+			ast,
+			language({
+				getLeadingComments: (node) => (node.type === 'Identifier' ? [line(' note')] : undefined)
+			})
+		);
+		expect(
+			new Function(`${code}\nconst first = f().next(); return [first.value, seen];`)()
+		).toEqual([0, 1]);
+	});
+}
