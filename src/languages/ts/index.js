@@ -354,17 +354,6 @@ export default (options = {}) => {
 		return !!(comment?.loc && node.loc && before(comment.loc.start, node.loc.start));
 	}
 
-	/** @param {TSESTree.Node} argument */
-	function has_operand_comment(argument) {
-		const comment = comments[comment_index];
-		// Removed parentheses can expose comments inside the operand's source range.
-		// Conservatively wrap any operand with pending comments, including callbacks.
-		return (
-			!!options.getLeadingComments ||
-			!!(comment?.loc && (!argument.loc || before(comment.loc.start, argument.loc.end)))
-		);
-	}
-
 	/** @param {TSESTree.Node} node */
 	function has_leading_type_cast(node) {
 		if (!node.loc || !can_have_jsdoc_type_cast(node, parent)) return false;
@@ -1622,9 +1611,7 @@ export default (options = {}) => {
 						? `${bigint}n`
 						: typeof node.value === 'string'
 							? quote(node.value, quote_char)
-							: Object.is(node.value, -0)
-								? '-0'
-								: String(node.value));
+							: String(node.value));
 
 			context.write(value, node);
 		},
@@ -1790,7 +1777,12 @@ export default (options = {}) => {
 			token(context, 'return', node);
 
 			if (node.argument) {
-				const contains_comment = has_operand_comment(node.argument);
+				const contains_comment =
+					comments[comment_index] &&
+					comments[comment_index].loc &&
+					node.argument.loc &&
+					before(comments[comment_index].loc.start, node.argument.loc.start);
+
 				context.write(contains_comment ? ' (' : ' ');
 				context.visit(node.argument);
 				context.write(contains_comment ? ');' : ';');
@@ -1914,7 +1906,7 @@ export default (options = {}) => {
 		ThrowStatement(node, context) {
 			token(context, 'throw', node);
 			context.write(' ');
-			if (node.argument) maybe_wrap(context, node.argument, has_operand_comment(node.argument));
+			if (node.argument) context.visit(node.argument);
 			context.write(';');
 		},
 
@@ -1958,8 +1950,7 @@ export default (options = {}) => {
 				((node.argument.type === 'UnaryExpression' && node.argument.operator === node.operator) ||
 					(node.argument.type === 'UpdateExpression' &&
 						node.argument.prefix &&
-						node.argument.operator[0] === node.operator) ||
-					(node.operator === '-' && is_negative_literal(node.argument)))
+						node.argument.operator[0] === node.operator))
 			) {
 				context.write(' ');
 			}
@@ -2008,7 +1999,7 @@ export default (options = {}) => {
 
 			if (node.argument) {
 				context.write(' ');
-				maybe_wrap(context, node.argument, !node.delegate && has_operand_comment(node.argument));
+				context.visit(node.argument);
 			}
 		},
 
@@ -2729,19 +2720,6 @@ function is_cast(node) {
 }
 
 /**
- * Generated literals can include the sign instead of a separate UnaryExpression.
- * @param {TSESTree.Node} node
- */
-function is_negative_literal(node) {
-	return (
-		node.type === 'Literal' &&
-		(((typeof node.value === 'number' || typeof node.value === 'bigint') &&
-			(node.value < 0 || Object.is(node.value, -0))) ||
-			('bigint' in node && node.bigint?.[0] === '-'))
-	);
-}
-
-/**
  *
  * @param {TSESTree.Expression | TSESTree.PrivateIdentifier} node
  * @param {TSESTree.BinaryExpression | TSESTree.LogicalExpression} parent
@@ -2752,18 +2730,8 @@ function operand_needs_wrap(node, parent, is_right) {
 	if (node.type === 'PrivateIdentifier') return false;
 
 	if (!is_right && (node.type === 'TSAsExpression' || node.type === 'TSSatisfiesExpression')) {
-		// `**` is invalid here; `&`/`|` extend the type. Keep `<` tokens out of type arguments.
-		return (
-			parent.operator === '**' ||
-			parent.operator === '&' ||
-			parent.operator === '|' ||
-			parent.operator[0] === '<'
-		);
-	}
-
-	if (!is_right && node.type === 'TSInstantiationExpression') {
-		// Keep relational/shift tokens separate from the preceding type arguments.
-		return parent.operator[0] === '<' || parent.operator[0] === '>';
+		// `**` would be invalid, `&`/`|` would be swallowed into the trailing type
+		return parent.operator === '**' || parent.operator === '&' || parent.operator === '|';
 	}
 
 	// special case where logical expressions and coalesce expressions cannot be mixed,
@@ -2784,8 +2752,7 @@ function operand_needs_wrap(node, parent, is_right) {
 		parent.operator === '**' &&
 		(node.type === 'UnaryExpression' ||
 			node.type === 'AwaitExpression' ||
-			node.type === 'TSTypeAssertion' ||
-			is_negative_literal(node));
+			node.type === 'TSTypeAssertion');
 	if (unary_base_of_pow) return true;
 
 	const precedence = EXPRESSIONS_PRECEDENCE[node.type];
