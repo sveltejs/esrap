@@ -354,6 +354,17 @@ export default (options = {}) => {
 		return !!(comment?.loc && node.loc && before(comment.loc.start, node.loc.start));
 	}
 
+	/** @param {TSESTree.Node} argument */
+	function has_operand_comment(argument) {
+		const comment = comments[comment_index];
+		// Removed parentheses can expose comments inside the operand's source range.
+		// Conservatively wrap any operand with pending comments, including callbacks.
+		return (
+			!!options.getLeadingComments ||
+			!!(comment?.loc && (!argument.loc || before(comment.loc.start, argument.loc.end)))
+		);
+	}
+
 	/** @param {TSESTree.Node} node */
 	function has_leading_type_cast(node) {
 		if (!node.loc || !can_have_jsdoc_type_cast(node, parent)) return false;
@@ -1772,12 +1783,7 @@ export default (options = {}) => {
 			token(context, 'return', node);
 
 			if (node.argument) {
-				const contains_comment =
-					comments[comment_index] &&
-					comments[comment_index].loc &&
-					node.argument.loc &&
-					before(comments[comment_index].loc.start, node.argument.loc.start);
-
+				const contains_comment = has_operand_comment(node.argument);
 				context.write(contains_comment ? ' (' : ' ');
 				context.visit(node.argument);
 				context.write(contains_comment ? ');' : ';');
@@ -1901,7 +1907,7 @@ export default (options = {}) => {
 		ThrowStatement(node, context) {
 			token(context, 'throw', node);
 			context.write(' ');
-			if (node.argument) context.visit(node.argument);
+			if (node.argument) maybe_wrap(context, node.argument, has_operand_comment(node.argument));
 			context.write(';');
 		},
 
@@ -1994,7 +2000,7 @@ export default (options = {}) => {
 
 			if (node.argument) {
 				context.write(' ');
-				context.visit(node.argument);
+				maybe_wrap(context, node.argument, !node.delegate && has_operand_comment(node.argument));
 			}
 		},
 
