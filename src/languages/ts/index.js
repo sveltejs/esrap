@@ -1300,9 +1300,10 @@ export default (options = {}) => {
 
 		ExportDefaultDeclaration(node, context) {
 			const d = node.declaration;
+			const is_expression = d.type in EXPRESSIONS_PRECEDENCE;
 
-			// ClassDeclaration/ClassExpression decorators should be printed before `export`
-			if ('decorators' in d) {
+			// Declaration decorators precede `export`; expression decorators stay inside the parens.
+			if (!is_expression && 'decorators' in d) {
 				block_decorators(context, {
 					...d,
 					// @ts-expect-error we need to prevent a mapping being added for the end of the declaration
@@ -1319,7 +1320,11 @@ export default (options = {}) => {
 				flush_comments_until(context, null, d.loc.start, true, false);
 			}
 
-			visit_without_decorators(context, d);
+			if (is_expression) {
+				maybe_wrap(context, d, leads_with_curly_or_keyword(d, true));
+			} else {
+				visit_without_decorators(context, d);
+			}
 
 			if (node.declaration.type !== 'FunctionDeclaration') {
 				context.write(';');
@@ -1772,11 +1777,13 @@ export default (options = {}) => {
 			token(context, 'return', node);
 
 			if (node.argument) {
+				// A callback can add a newline even on a nested argument's leading node.
 				const contains_comment =
-					comments[comment_index] &&
-					comments[comment_index].loc &&
-					node.argument.loc &&
-					before(comments[comment_index].loc.start, node.argument.loc.start);
+					options.getLeadingComments ||
+					(comments[comment_index] &&
+						comments[comment_index].loc &&
+						node.argument.loc &&
+						before(comments[comment_index].loc.start, node.argument.loc.start));
 
 				context.write(contains_comment ? ' (' : ' ');
 				context.visit(node.argument);
@@ -1901,7 +1908,7 @@ export default (options = {}) => {
 		ThrowStatement(node, context) {
 			token(context, 'throw', node);
 			context.write(' ');
-			if (node.argument) context.visit(node.argument);
+			if (node.argument) maybe_wrap(context, node.argument, !!options.getLeadingComments);
 			context.write(';');
 		},
 
@@ -1994,7 +2001,7 @@ export default (options = {}) => {
 
 			if (node.argument) {
 				context.write(' ');
-				context.visit(node.argument);
+				maybe_wrap(context, node.argument, !node.delegate && !!options.getLeadingComments);
 			}
 		},
 
@@ -2881,13 +2888,15 @@ function has_call_expression(node) {
  * parenthesization the visitors apply, so it stops as soon as a child position
  * would already be wrapped.
  * @param {TSESTree.Node} node
+ * @param {boolean} allow_object An object can start a default export, but not an expression statement.
  * @returns {boolean}
  */
-function leads_with_curly_or_keyword(node) {
+function leads_with_curly_or_keyword(node, allow_object = false) {
 	while (node) {
 		switch (node.type) {
 			case 'ObjectExpression':
 			case 'ObjectPattern':
+				return !allow_object;
 			case 'FunctionExpression':
 			case 'ClassExpression':
 				return true;

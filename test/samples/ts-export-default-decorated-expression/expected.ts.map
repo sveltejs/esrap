@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const Inner = 42;\n\nexport default (@decorate class Inner {});\n"
+  ],
+  "mappings": "AAAA,KAAK,CAAC,KAAK,GAAG,EAAE,CAAC;;AAEjB,MAAM,SAAU,CAAA,CAAC,QAAQ;MAAO,KAAK,CAAC,CAAC,CAAC,CAAA,CAAE,AAC1C"
+}

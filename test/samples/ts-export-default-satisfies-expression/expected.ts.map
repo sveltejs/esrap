@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "export default (class {} satisfies Function);\n"
+  ],
+  "mappings": "AAAA,MAAM,SAAU,CAAA,MAAM,CAAC,CAAC,WAAW,QAAQ,CAAA,CAAE,AAC7C"
+}

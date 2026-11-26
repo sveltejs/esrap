@@ -1,0 +1,11 @@
+{
+  "version": 3,
+  "names": [],
+  "sources": [
+    "input.js"
+  ],
+  "sourcesContent": [
+    "const inner = 42;\n\nexport default (async function* inner() {\n\tyield inner;\n});\n"
+  ],
+  "mappings": "AAAA,KAAK,CAAC,KAAK,GAAG,EAAE,CAAC;;AAEjB,MAAM,SAAU,CAAA,gBAAgB,KAAK,GAAG,CAAC;CACxC,KAAK,CAAC,KAAK,CAAC;AACb,CAAC,CAAA,CAAE,AACH"
+}
