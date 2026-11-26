@@ -2725,8 +2725,18 @@ function operand_needs_wrap(node, parent, is_right) {
 	if (node.type === 'PrivateIdentifier') return false;
 
 	if (!is_right && (node.type === 'TSAsExpression' || node.type === 'TSSatisfiesExpression')) {
-		// `**` would be invalid, `&`/`|` would be swallowed into the trailing type
-		return parent.operator === '**' || parent.operator === '&' || parent.operator === '|';
+		// `**` is invalid here; `&`/`|` extend the type. Keep `<` tokens out of type arguments.
+		return (
+			parent.operator === '**' ||
+			parent.operator === '&' ||
+			parent.operator === '|' ||
+			parent.operator[0] === '<'
+		);
+	}
+
+	if (!is_right && node.type === 'TSInstantiationExpression') {
+		// Keep relational/shift tokens separate from the preceding type arguments.
+		return parent.operator[0] === '<' || parent.operator[0] === '>';
 	}
 
 	// special case where logical expressions and coalesce expressions cannot be mixed,
